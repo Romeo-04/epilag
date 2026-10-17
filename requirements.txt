@@ -9,3 +9,4 @@ statsmodels
 shap
 streamlit>=1.40
 plotly
+pytest
