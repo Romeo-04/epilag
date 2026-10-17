@@ -1,0 +1,11 @@
+pandas>=2.2
+numpy>=2.0
+pyarrow
+openpyxl
+requests
+lightgbm>=4.0
+scikit-learn
+statsmodels
+shap
+streamlit>=1.40
+plotly
