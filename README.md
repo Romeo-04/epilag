@@ -6,6 +6,9 @@ and show where a limited budget prevents the most cases.**
 Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
+**Try it:** [romeo-04.github.io/epilag/web](https://romeo-04.github.io/epilag/web/) (runs in your browser; first load takes about a minute) ·
+[Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) · [Demo video](docs/demo.webm)
+
 ![Replay of the forecast made on 2 June 2019](docs/screenshots/map_replay_2019.png)
 
 ## The problem
@@ -45,6 +48,7 @@ average for regions, about 0% for provinces). See `reports/` and the app's *Did 
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
 streamlit run app/streamlit_app.py                 # the app runs from committed files in app/data
+python scripts/build_web.py                        # rebuild the in-browser version in docs/web
 pytest tests                                       # 54 tests
 ```
 
