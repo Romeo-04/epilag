@@ -5,7 +5,6 @@ openpyxl
 requests
 lightgbm>=4.0
 scikit-learn
-statsmodels
 shap
 streamlit>=1.40
 plotly
