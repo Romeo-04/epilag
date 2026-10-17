@@ -9,7 +9,7 @@ import pandas as pd  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 REP, APP, OUT = ROOT / "reports", ROOT / "app" / "data", ROOT / "docs" / "figures"
-INK, MUTED, GRID, ACCENT, RED, AMBER = "#1F2933", "#7B8794", "#E4E7EB", "#0F766E", "#C8372D", "#F0A04B"
+INK, MUTED, GRID, ACCENT, RED, AMBER = "#14211B", "#7E8C85", "#E2E8E4", "#12804A", "#D23B30", "#EE8A2A"
 
 plt.rcParams.update({
     "font.family": "sans-serif", "font.sans-serif": ["Segoe UI", "Arial", "DejaVu Sans"], "font.size": 13,
