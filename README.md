@@ -7,7 +7,7 @@ Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
 **Try it:** [romeo-04.github.io/epilag/web](https://romeo-04.github.io/epilag/web/) (runs in your browser; first load takes about a minute) ·
-[Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) · [Demo video](docs/demo.webm)
+[Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) · [Film (1:48)](docs/demo.mp4)
 
 ![Replay of the forecast made on 2 June 2019](docs/screenshots/map_replay_2019.png)
 
@@ -23,6 +23,13 @@ higher than reported.
    *outbreak warning*. It also explains each forecast (recent cases, season, rain, heat, humidity).
 3. **Plans** a budget: it ranks where clean-up drives and fogging avert the most forecast cases per peso,
    with low/central/high estimates.
+4. **Turns alerts into actions:** each area gets a week-by-week checklist (what to do today, in weeks 1–2
+   and in weeks 2–4) next to what EpiLag-PH contributes to each step, downloadable as an action brief.
+
+The app opens on an **Overview** that explains every tool (what it does, why it matters, what you can do
+with it) and lists this week's priority areas.
+
+![Overview: what each tool does, and this week's action brief](docs/screenshots/home.png)
 
 ## Results (out of sample: each test year forecast only from earlier years)
 | | Provinces (86 units) | Regions + Quezon City |
@@ -49,7 +56,7 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
 streamlit run app/streamlit_app.py                 # the app runs from committed files in app/data
 python scripts/build_web.py                        # rebuild the in-browser version in docs/web
-pytest tests                                       # 54 tests
+pytest tests                                       # 63 tests
 ```
 
 Rebuild everything from the raw data:
@@ -102,8 +109,8 @@ app/            Streamlit app and its small data files
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
 tests/          unit tests (allocation) and app smoke tests
 reports/        backtest, early-warning, ablation and SHAP results (CSV)
-docs/           deck, figures, screenshots, video script
-scripts/        figure and screenshot generators
+docs/           landing page, in-browser app (web/), film (film/, demo.mp4), deck, figures, screenshots
+scripts/        figures, screenshots, film recording (record_film.py), in-browser build
 ```
 
 ## References

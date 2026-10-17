@@ -1,19 +1,25 @@
-# EpiLag-PH: 3-minute video script
+# EpiLag-PH: the film
 
-Target length: 2:50. Record the voice-over over the screen demo (`docs/demo.webm`, silent, with captions)
-or record your own screen while running the app. Speak slowly; about 130 words per minute.
+`docs/demo.mp4` (1:48, 1920×1080, H.264 + AAC) is a motion-graphics film with an original synthesised music
+bed. The on-screen text tells the story, so it works without a voice-over. The source is
+`docs/film/index.html` (HTML/CSS animation), recorded with `python scripts/record_film.py`.
 
-| Time | Screen | Voice-over |
-| --- | --- | --- |
-| 0:00–0:20 | Deck slide 2 (national weekly chart) | "In 2019 the Philippines reported almost 442,000 dengue cases. Every year, most LGUs only start clean-ups and fogging when hospitals are already full. Surveillance sees dengue a month too late." |
-| 0:20–0:35 | Deck slide 4 (forecast, flag, plan) | "EpiLag-PH changes that. It forecasts dengue cases two to eight weeks ahead for every province, region and Quezon City, flags areas heading for an outbreak, and shows where a limited budget prevents the most cases." |
-| 0:35–1:20 | App: Forecast map → sidebar "Replay a past week" (2 Jun 2019) | "Here is what EpiLag-PH would have said on the second of June 2019, using models trained only on earlier years. Red is an outbreak warning, orange is watch. Four weeks later, thirty-two provinces crossed the epidemic threshold. Thirty of them were already flagged on this map." |
-| 1:20–1:50 | App: Area detail (Region IX) | "For each area, a health officer sees the forecast with its range, the epidemic threshold, and why the model expects a rise: here, cases climbing for three weeks at the start of the rainy season. The alert comes in English and Filipino." |
-| 1:50–2:15 | App: Budget plan | "Then EpiLag-PH plans. With a five-million-peso budget, it ranks where clean-up drives avert the most cases per peso. Effects are cautious ranges from published trials, and every LGU can enter its own costs." |
-| 2:15–2:35 | App: Did it work? | "We tested it honestly: every year was forecast only from earlier years. It beat simple rules in five of six tests, and caught most outbreak starts four weeks ahead. We also found that weather adds little beyond case trends, so it works with data every LGU already has." |
-| 2:35–2:50 | Deck slide 20 | "Hospitals see dengue a month too late. EpiLag-PH sees it in the data, and tells LGUs where to act first. The code, data and app are open on GitHub." |
+Optional voice-over (about 130 words per minute), timed to the scenes:
 
-## Recording checklist
-- 1920×1080, browser zoom 100%, sidebar open.
-- Close other tabs and notifications.
-- Export MP4 (H.264) under 3:00; check audio levels.
+| Time | Scene | On screen | Voice-over |
+| --- | --- | --- | --- |
+| 0:00–0:07 | The rains | Rain, "The rains arrive." | "June 2019. The rains arrive. Standing water, warm nights, and mosquitoes breed." |
+| 0:07–0:16 | The surge | Provinces turn red | "Four weeks later, dengue surges. In a single week, thirty-two provinces cross the epidemic threshold." |
+| 0:16–0:25 | Why late | Rain → mosquitoes → sick → hospital reports | "Why do we always act late? Because the cases we count are reported weeks after the rain that caused them." |
+| 0:25–0:31 | Brand | EpiLag-PH logo | "EpiLag-PH. See dengue coming. Act weeks earlier." |
+| 0:31–0:43 | Replay | EpiLag's 2 June forecast map, "30 of 32" | "Here is what EpiLag-PH said on the second of June, using models trained only on earlier years. Of the thirty-two provinces that crossed the threshold, thirty were already flagged, four weeks ahead." |
+| 0:43–0:52 | Overview | App overview | "The app starts with one screen that explains every tool and lists this week's priority areas." |
+| 0:52–1:01 | Forecast | Forecast map | "It forecasts every province, region and Quezon City, two to eight weeks ahead, with a likely range." |
+| 1:01–1:10 | Explain & act | Area checklist | "For each area, a checklist: what to do today, in two weeks, in four, and what EpiLag-PH gives you to do it." |
+| 1:10–1:19 | Plan | Budget plan | "Enter a budget, and it puts each peso where it averts the most cases." |
+| 1:19–1:27 | Target | QC barangays | "In Quezon City, it names the barangays to visit first." |
+| 1:27–1:38 | Proof | Three stat cards | "We tested it honestly. It beat simple rules in five of six tests and caught most outbreak starts four weeks ahead, with false alarms we report openly." |
+| 1:38–1:48 | Close | "EpiLag-PH sees it now." | "Hospitals see dengue a month late. EpiLag-PH sees it now." |
+
+To re-record after changing the app: run the app on port 8599, then `python scripts/screenshots.py` and
+`python scripts/record_film.py` (needs Chrome and `pip install imageio-ffmpeg`).
