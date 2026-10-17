@@ -1,8 +1,6 @@
 """Alert levels and the early-warning test.
 
-Thresholds per unit and week of year, from earlier years only (no peeking at the test year):
-  alert     = mean of the same weeks (+-2) in earlier years      (cases above usual)
-  epidemic  = mean + 2 SD of the same weeks in earlier years     (common surveillance rule)
+Thresholds (src/thresholds.py) come from earlier years only (no peeking at the test year).
 
 Early-warning test on the backtest forecasts:
   An outbreak onset is the first week of a run of >= 2 weeks above the epidemic threshold.
@@ -18,21 +16,7 @@ import pandas as pd
 
 from features import PROC
 from backtest import REPORTS
-
-WINDOW = 2  # +-weeks around the week of year
-
-
-def thresholds(history: pd.DataFrame) -> pd.DataFrame:
-    """history: unit_id, week, cases (earlier years only) -> unit_id, woy, alert, epidemic."""
-    h = history.dropna(subset=["cases"]).assign(woy=lambda d: d.week.dt.isocalendar().week.astype(int).clip(upper=52))
-    rows = []
-    for shift in range(-WINDOW, WINDOW + 1):
-        rows.append(h.assign(woy=((h.woy - 1 + shift) % 52) + 1))
-    s = pd.concat(rows).groupby(["unit_id", "woy"]).cases.agg(["mean", "std", "count"]).reset_index()
-    s["alert"] = s["mean"]
-    s["epidemic"] = s["mean"] + 2 * s["std"].fillna(0)
-    return s[["unit_id", "woy", "alert", "epidemic", "count"]]
-
+from thresholds import thresholds
 
 def onsets(actual: pd.DataFrame) -> pd.DataFrame:
     """First week of each run of >= 2 consecutive weeks above the epidemic threshold."""

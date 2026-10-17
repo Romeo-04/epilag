@@ -11,6 +11,7 @@ APP = Path(__file__).resolve().parent
 DATA = APP / "data"
 sys.path.insert(0, str(APP.parent / "src"))
 from allocate import Action, allocate  # noqa: E402
+from thresholds import thresholds  # noqa: E402
 
 st.set_page_config(page_title="EpiLag-PH", layout="wide")
 
@@ -98,9 +99,20 @@ ALERT_TEXT = {
 
 # ------------------------------------------------------------------ data
 
+def read_table(stem: Path) -> pd.DataFrame:
+    """Parquet locally; CSV in the in-browser (stlite) build, which has no pyarrow."""
+    if stem.with_suffix(".parquet").exists():
+        return pd.read_parquet(stem.with_suffix(".parquet"))
+    df = pd.read_csv(stem.with_suffix(".csv"))
+    for col in ("week", "target_week"):
+        if col in df:
+            df[col] = pd.to_datetime(df[col])
+    return df
+
+
 @st.cache_data
 def load(panel: str) -> dict:
-    d = {name: pd.read_parquet(DATA / f"{panel}_{name}.parquet")
+    d = {name: read_table(DATA / f"{panel}_{name}")
          for name in ("forecast", "drivers", "thresholds", "history", "backtest")}
     d["geo"] = json.loads((DATA / PANELS[panel]["geo"]).read_text())
     return d
@@ -156,7 +168,6 @@ def replay_forecast(panel: str, origin: pd.Timestamp) -> pd.DataFrame:
 
 
 def _thresholds(history: pd.DataFrame) -> pd.DataFrame:
-    from alerts import thresholds
     return thresholds(history)
 
 

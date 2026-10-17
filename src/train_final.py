@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import shap
 
-from alerts import thresholds
+from thresholds import thresholds
 from backtest import conformal_margin, fit_quantiles, predict_log
 from features import HORIZONS, PROC, feature_columns
 

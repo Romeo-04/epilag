@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · dengue early warning for Philippine LGUs</title>
+  <style>
+    :root { --ink: #1F2933; --muted: #52606D; --line: #E4E7EB; --accent: #0F766E; --accent-hover: #0B5D57; }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; color: var(--ink); line-height: 1.5;
+           padding-inline: clamp(16px, 4vw, 56px); }
+    main { max-width: 960px; margin: 64px auto; display: flex; flex-direction: column; gap: 32px; }
+    .kicker { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+    h1 { font-size: 40px; line-height: 1.15; }
+    p { font-size: 18px; color: var(--muted); max-width: 68ch; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    a.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 20px; border-radius: 8px;
+            font-size: 16px; font-weight: 600; text-decoration: none; transition: background-color .15s ease-out; }
+    a.primary { background: var(--accent); color: #fff; }
+    a.primary:hover { background: var(--accent-hover); }
+    a.secondary { border: 1px solid var(--line); color: var(--ink); }
+    a.secondary:hover { background: #F4F6F8; }
+    a:focus-visible { outline: 3px solid rgba(15,118,110,.4); outline-offset: 2px; }
+    img { width: 100%; border: 1px solid var(--line); border-radius: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .stat { border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+    .stat b { display: block; font-size: 28px; }
+    .stat span { font-size: 15px; color: var(--muted); }
+    footer { font-size: 14px; color: var(--muted); }
+    @media (prefers-reduced-motion: reduce) { a.btn { transition: none; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="kicker">PJDSC 2026 · Trace the Pattern, Target the Cure</div>
+  <h1>EpiLag-PH: dengue early warning for Philippine LGUs</h1>
+  <p>Forecasts dengue cases 2–8 weeks ahead for every province, region and Quezon City, flags areas heading for an
+     outbreak, and shows where a limited budget prevents the most cases.</p>
+  <div class="actions">
+    <a class="btn primary" href="web/">Open the app</a>
+    <a class="btn secondary" href="deck/EpiLag-PH_deck.pdf">Slides (PDF)</a>
+    <a class="btn secondary" href="demo.webm">Demo video</a>
+    <a class="btn secondary" href="https://github.com/Romeo-04/epilag">Code on GitHub</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>30 of 32</b><span>provinces that crossed the epidemic threshold were flagged 4 weeks ahead (replay, 2 Jun 2019)</span></div>
+    <div class="stat"><b>79–100%</b><span>of outbreak starts caught 4 weeks ahead by the watch level in out-of-sample tests</span></div>
+    <div class="stat"><b>5 of 6</b><span>test sets where it beat both simple baselines 4 weeks ahead</span></div>
+  </div>
+  <img src="screenshots/map_replay_2019.png" alt="EpiLag-PH map replaying the forecast made on 2 June 2019, with regions in outbreak warning and watch">
+  <footer>The app runs in your browser (stlite); the first load takes about a minute. Data: DOH via HDX, UPRI-NOAH, ERA5 via Open-Meteo, OCHA.</footer>
+</main>
+</body>
+</html>
