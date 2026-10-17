@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EpiLag-PH · PJDSC 2026</title>
+<style>
+  :root {
+    --ink: #1F2933; --muted: #52606D; --faint: #9AA5B1; --line: #E4E7EB; --surface: #F4F6F8;
+    --accent: #0F766E; --accent-soft: rgba(15,118,110,.10); --red: #C8372D; --amber: #F0A04B; --sand: #F5D78E;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; color: var(--ink); background: #fff; }
+  .slide { width: 1920px; height: 1080px; padding: 96px 128px; position: relative; overflow: hidden;
+           page-break-after: always; display: flex; flex-direction: column; gap: 32px; }
+  .slide:last-child { page-break-after: auto; }
+  .kicker { font-size: 24px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 88px; line-height: 1.05; font-weight: 700; letter-spacing: -.01em; }
+  h2 { font-size: 60px; line-height: 1.1; font-weight: 700; max-width: 1500px; }
+  p, li { font-size: 32px; line-height: 1.45; color: var(--muted); max-width: 1400px; }
+  ul { padding-left: 36px; display: flex; flex-direction: column; gap: 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  .foot { position: absolute; left: 128px; right: 128px; bottom: 48px; display: flex; justify-content: space-between;
+          font-size: 18px; color: var(--faint); }
+  .row { display: flex; gap: 48px; align-items: stretch; flex: 1; min-height: 0; }
+  .col { flex: 1; display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+  .stats { display: flex; gap: 32px; }
+  .stat { flex: 1; border: 1px solid var(--line); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 8px; }
+  .stat b { font-size: 72px; line-height: 1; color: var(--ink); font-weight: 700; }
+  .stat span { font-size: 24px; color: var(--muted); line-height: 1.35; }
+  .stat.accent b { color: var(--accent); }
+  .stat.red b { color: var(--red); }
+  .shot { border: 1px solid var(--line); border-radius: 12px; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+  .fig { width: 100%; max-height: 560px; object-fit: contain; }
+  .src { font-size: 18px; color: var(--faint); max-width: none; }
+  .steps { display: flex; gap: 32px; }
+  .step { flex: 1; background: var(--surface); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 16px; }
+  .step .n { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .step h3 { font-size: 40px; }
+  .step p { font-size: 26px; }
+  table { border-collapse: collapse; font-size: 26px; width: 100%; }
+  th, td { text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 22px; text-transform: uppercase; letter-spacing: .05em; }
+  .pill { display: inline-block; padding: 4px 16px; border-radius: 999px; font-size: 22px; font-weight: 600; }
+  .lv0 { background: #E4E7EB; } .lv1 { background: var(--sand); } .lv2 { background: var(--amber); } .lv3 { background: var(--red); color: #fff; }
+  .quote { font-size: 56px; line-height: 1.2; font-weight: 600; color: var(--ink); max-width: 1500px; }
+  .cover { background: var(--ink); color: #fff; justify-content: center; }
+  .cover h1 { color: #fff; font-size: 120px; }
+  .cover p { color: #CBD2D9; font-size: 40px; }
+  .cover .kicker { color: #5EEAD4; }
+  .cover .foot { color: #7B8794; }
+  .note { background: var(--accent-soft); border-radius: 12px; padding: 24px 32px; font-size: 28px; color: var(--ink); }
+  .refs li { font-size: 20px; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide cover">
+  <div class="kicker">PJDSC 2026 · Trace the Pattern, Target the Cure</div>
+  <h1>EpiLag-PH</h1>
+  <p>Dengue early warning for Philippine LGUs: see the outbreak in the data weeks before the hospitals fill.</p>
+  <p style="font-size:30px">[Team name] · [Member 1] · [Member 2] · [Member 3] · [Member 4] · [Member 5]</p>
+  <div class="foot"><span>github.com/Romeo-04/epilag</span><span>1</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h2>Dengue keeps coming back, and we keep responding late.</h2>
+  <div class="stats">
+    <div class="stat red"><b>441,902</b><span>reported cases in 2019, the worst epidemic in recent years (DOH via HDX)</span></div>
+    <div class="stat"><b>340,860</b><span>reported cases in 2024 by 16 November (DOH)</span></div>
+    <div class="stat"><b>~4.7×</b><span>true symptomatic cases vs reported, in a Cebu City study (Undurraga et al., 2017)</span></div>
+  </div>
+  <img class="fig" src="../figures/national_weekly.svg" style="max-height:440px">
+  <div class="foot"><span>Weekly reported cases, all regions (UPRI-NOAH / HDX)</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">Why we respond late</div>
+  <h2>Surveillance sees dengue only after people are sick enough to be counted.</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li>Mosquitoes breed in standing water; people get sick <strong>weeks later</strong>.</li>
+        <li>Cases are reported after they reach clinics and hospitals, then aggregated by week.</li>
+        <li>Clean-up drives and fogging start when counts are <strong>already high</strong>, often near the peak.</li>
+        <li>LGUs have limited money and staff, and no simple way to decide <strong>where to go first</strong>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">Question we asked: can open data tell a health office, 4–8 weeks ahead, which areas are heading for an outbreak, and where each peso helps most?</div>
+  <div class="foot"><span>EpiLag-PH</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Our solution</div>
+  <h2>EpiLag-PH: forecast, flag, and plan.</h2>
+  <div class="steps">
+    <div class="step"><div class="n">1 · FORECAST</div><h3>Cases 2–8 weeks ahead</h3><p>For every province, region and Quezon City, with a likely range, from recent cases, season, rain, heat and humidity.</p></div>
+    <div class="step"><div class="n">2 · FLAG</div><h3>Four alert levels</h3><p><span class="pill lv0">normal</span> <span class="pill lv1">above usual</span> <span class="pill lv2">watch</span> <span class="pill lv3">outbreak warning</span><br>Each forecast is explained, in English and Filipino.</p></div>
+    <div class="step"><div class="n">3 · PLAN</div><h3>Where each peso helps most</h3><p>Ranks clean-up drives and fogging by cases averted per peso, with low / central / high estimates.</p></div>
+  </div>
+  <p>Built for City and Provincial Epidemiology and Surveillance Units and health offices. It runs on data DOH already collects.</p>
+  <div class="foot"><span>EpiLag-PH</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">How it is used</div>
+  <h2>A Monday morning at a provincial health office.</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><strong>Monday:</strong> the surveillance officer opens EpiLag-PH. Her province is on <span class="pill lv2">watch</span> for 4 weeks from now; two neighbours are <span class="pill lv1">above usual</span>.</li>
+        <li><strong>Why?</strong> The app shows the drivers: cases rising for 3 weeks, the rainy season starting.</li>
+        <li><strong>Plan:</strong> with a ₱5M budget, the app ranks clean-up drives in the areas with the most cases averted per peso.</li>
+        <li><strong>Act early:</strong> barangay health workers start clean-ups; clinics get test kits before the patients arrive.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Illustrative scenario</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Data</div>
+  <h2>Built on the official catalogue, extended with open data.</h2>
+  <table>
+    <tr><th>Source</th><th>What</th><th>Coverage</th></tr>
+    <tr><td><strong>DOH Epidemiology Bureau via HDX</strong> (PJDSC catalogue)</td><td>Weekly dengue cases and deaths</td><td>126 provinces and cities, Jan 2016 – Jan 2021</td></tr>
+    <tr><td><strong>UPRI-NOAH Dengue–Rainfall Dataset</strong> (Zenodo)</td><td>Weekly cases + rainfall</td><td>17 regions 2016–2019, 2022–2025; Quezon City 2010–2025</td></tr>
+    <tr><td><strong>ERA5 reanalysis</strong> (Open-Meteo)</td><td>Daily rain, temperature, humidity</td><td>Every province, 2015–2021</td></tr>
+    <tr><td><strong>PSA-based population, PSGC codes</strong> (OCHA)</td><td>Rates and joins</td><td>86 province-level units</td></tr>
+  </table>
+  <p class="src">Licences: HDX public; ODC-ODbL (UPRI-NOAH); CC BY 4.0 (ERA5 via Open-Meteo); MIT (map boundaries).</p>
+  <div class="foot"><span>EpiLag-PH</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Data quality</div>
+  <h2>We checked the data before trusting it.</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><strong>Names fixed and coded:</strong> 126 locations mapped to 86 PSGC units. Typos such as NUEVA VISCAYA, SISQUIJOR and BASILIG (Bislig) were fixed.</li>
+        <li><strong>Cities folded</strong> into their provinces; NCR into its 4 districts; Maguindanao kept whole for 2016–2020.</li>
+        <li><strong>Deaths are unreliable for 2016–2017:</strong> 586 weeks show more deaths than cases. We do not use them.</li>
+        <li><strong>The HDX file ends in January 2021</strong>, not "present". Newer data came from UPRI-NOAH at region level.</li>
+        <li><strong>Missing reports stay missing</strong>, not zero.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Yearly totals after cleaning match the raw file exactly (2019: 441,902)</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Method</div>
+  <h2>Simple, explainable models, tested honestly.</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><strong>Features:</strong> cases in recent weeks and the same week last year; rain for each of the past 12 weeks; heavy-rain days; humidity; temperature; season; population.</li>
+        <li><strong>Model:</strong> LightGBM quantile regression (10th, 50th, 90th percentile), one per horizon (2, 4, 6, 8 weeks).</li>
+        <li><strong>Calibrated ranges:</strong> conformalized quantile regression, so "80% likely" really covers about 80%.</li>
+        <li><strong>Thresholds:</strong> per area and week of year, from earlier years only: usual = mean; epidemic = mean + 2 SD.</li>
+        <li><strong>Explanations:</strong> SHAP values for every forecast.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>EpiLag-PH</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">How we tested</div>
+  <h2>No peeking: every test year was forecast from earlier years only.</h2>
+  <div class="steps">
+    <div class="step"><div class="n">TRAIN</div><h3>Years before Y</h3><p>Models and thresholds use only data before the test year.</p></div>
+    <div class="step"><div class="n">FORECAST</div><h3>Every week of Y</h3><p>2, 4, 6 and 8 weeks ahead, for every area.</p></div>
+    <div class="step"><div class="n">COMPARE</div><h3>Against simple rules</h3><p>"Same week last year" and "same as this week". A model must beat both to be useful.</p></div>
+  </div>
+  <p>Test years: <strong>2019</strong> (epidemic) and <strong>2020</strong> (COVID-19 reporting dip) for provinces; <strong>2019, 2023, 2024, 2025</strong> for regions and Quezon City.</p>
+  <div class="foot"><span>EpiLag-PH</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">Result 1 · Accuracy</div>
+  <h2>EpiLag-PH beats both simple rules 4 weeks ahead in 5 of 6 test sets.</h2>
+  <img class="fig" src="../figures/skill_h4.svg">
+  <p class="src">Error = mean absolute error in weekly cases, relative to "same week last year". Exception: regions in quiet 2023, where "same as this week" was 4% better. Ranges covered 70–92% of outcomes (target 80%).</p>
+  <div class="foot"><span>reports/backtest_*.csv</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">Result 2 · Early warning</div>
+  <h2>The watch level caught 79–100% of outbreak starts 4 weeks ahead.</h2>
+  <img class="fig" src="../figures/early_warning_h4.svg">
+  <p class="src">Outbreak start = first of 2+ weeks above the epidemic threshold. Trade-off: 42–63% of watch alerts were false alarms (provinces 2019: 46%; 87% in 2020, when COVID-19 cut reported cases). The stricter warning level caught fewer starts with fewer false alarms.</p>
+  <div class="foot"><span>reports/alerts_*.csv</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">Replay · 2 June 2019</div>
+  <h2>A month before the 2019 epidemic peak, the map was already lit up.</h2>
+  <div class="row">
+    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/map_replay_2019.png"></div>
+    <div class="col">
+      <div class="stat red"><b>30 of 32</b><span>provinces that crossed the epidemic threshold 4 weeks later were already flagged</span></div>
+      <div class="stat red"><b>11 of 11</b><span>regions and Quezon City</span></div>
+      <p class="src">Forecasts from models trained only on 2016–2018.</p>
+    </div>
+  </div>
+  <div class="foot"><span>App: Replay a past week</span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">Replay · Quezon City, 2025</div>
+  <h2>Quezon City's record outbreak started in January, an unusual time. EpiLag-PH saw it coming.</h2>
+  <div class="stats">
+    <div class="stat red"><b>622</b><span>cases in the week ending 23 Feb 2025, the city's highest in the data (2010–2025)</span></div>
+    <div class="stat accent"><b>8 Dec 2024</b><span>the 4-week-ahead forecast issued that week put the week of 5 Jan 2025 on watch</span></div>
+    <div class="stat accent"><b>18 of 18</b><span>weeks above the epidemic threshold in 2025 were flagged 4 weeks ahead</span></div>
+  </div>
+  <p>Honest trade-off: the watch level was on for 31 of 52 weeks in 2025. In calmer 2024 it was on for 13 weeks and caught all 10 weeks above the threshold.</p>
+  <div class="foot"><span>Quezon City Epidemiology and Surveillance Division data via UPRI-NOAH</span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">Trace the pattern</div>
+  <h2>What drives the forecast, and an honest look at weather.</h2>
+  <div class="row">
+    <div class="col"><img class="fig" src="../figures/drivers_province_h4.svg"><p class="src">Recent cases and season carry most of the signal.</p></div>
+    <div class="col"><img class="fig" src="../figures/weather_ablation.svg"><p class="src">Removing all weather features changes error by −12% to +11%; about 0% on average for provinces, +2% for regions.</p></div>
+  </div>
+  <div class="note">We tested our own assumption. At province and region scale, weather adds little beyond case trends. That is a finding, not a failure: the early warning works from data every LGU already has.</div>
+  <div class="foot"><span>reports/shap_*.csv · reports/backtest_*_noweather.csv</span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="kicker">The app</div>
+  <h2>One screen tells a health office where to look this week.</h2>
+  <div class="row">
+    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/unit_replay_2019.png"></div>
+    <div class="col">
+      <ul>
+        <li>Map and ranked list of alert levels</li>
+        <li>Forecast with range, threshold and history</li>
+        <li>Why: the drivers of each forecast</li>
+        <li>Alert text in English and Filipino</li>
+        <li>Replay any past week</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Streamlit · runs from committed files · [app link]</span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="kicker">Target the cure</div>
+  <h2>Where does each peso prevent the most cases?</h2>
+  <div class="row">
+    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/budget_replay_2019.png"></div>
+    <div class="col">
+      <ul>
+        <li>Expected cases averted = forecast × share covered × effect.</li>
+        <li>Funds the best cases-averted-per-peso first, up to each action's reach.</li>
+        <li>Effects are cautious ranges: community clean-up with container covers, OR 0.22 in a meta-analysis (Bowman et al., 2016); fogging, little evidence.</li>
+        <li>Costs are editable: each LGU enters its own.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>src/allocate.py</span><span>16</span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="kicker">Local focus · Quezon City</div>
+  <h2>From a city forecast to a barangay shortlist.</h2>
+  <div class="row">
+    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/qc.png"></div>
+    <div class="col">
+      <ul>
+        <li>Weekly forecast for the whole city (data 2010–2025).</li>
+        <li>Shared out by each barangay's share of cases in 2022–2025.</li>
+        <li>Gives BHW teams a ranked list of where to start clean-ups.</li>
+      </ul>
+      <p class="src">Barangay data is yearly, so this is a ranking, not a weekly barangay forecast.</p>
+    </div>
+  </div>
+  <div class="foot"><span>EpiLag-PH</span><span>17</span></div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="kicker">Impact</div>
+  <h2>Weeks of lead time, with data the system already has.</h2>
+  <div class="stats">
+    <div class="stat accent"><b>4–8 wks</b><span>lead time for watch alerts on most outbreak starts in the tests</span></div>
+    <div class="stat accent"><b>₱0</b><span>data cost: open data only; runs on a laptop or free hosting</span></div>
+    <div class="stat accent"><b>Any LGU</b><span>needs only weekly case counts and free weather data</span></div>
+  </div>
+  <ul>
+    <li><strong>Earlier action:</strong> clean-ups and test kits before the peak, not after.</li>
+    <li><strong>Smarter spending:</strong> money goes where it averts the most cases.</li>
+    <li><strong>Fits UHC and devolved health:</strong> CESUs and provincial health boards can use it now.</li>
+  </ul>
+  <div class="foot"><span>EpiLag-PH</span><span>18</span></div>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <div class="kicker">Limits and next steps</div>
+  <h2>What EpiLag-PH cannot do yet.</h2>
+  <div class="row">
+    <div class="col">
+      <p><strong>Limits</strong></p>
+      <ul>
+        <li>Province data ends Jan 2021; the province view is a replay.</li>
+        <li>Watch alerts have many false alarms.</li>
+        <li>Reported cases undercount infections.</li>
+        <li>One weather point per area.</li>
+        <li>Budget effects and costs are assumptions.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p><strong>Next steps</strong></p>
+      <ul>
+        <li>Connect to current weekly PIDSR data through DOH or an LGU partner.</li>
+        <li>Barangay-level weekly data with a city CESU.</li>
+        <li>Pilot one rainy season; measure lead time and costs.</li>
+        <li>SMS alerts in Filipino to BHWs.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>EpiLag-PH</span><span>19</span></div>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <div class="kicker">Thank you</div>
+  <div class="quote">"Hospitals see dengue a month too late. EpiLag-PH sees it in the data, and tells LGUs where to act first."</div>
+  <p>Code, data pipeline, results and app: <strong>github.com/Romeo-04/epilag</strong> · App: <strong>[app link]</strong></p>
+  <ul class="refs">
+    <li>Bowman, L. R., Donegan, S., &amp; McCall, P. J. (2016). Is dengue vector control deficient in effectiveness or evidence? <i>PLOS Neglected Tropical Diseases, 10</i>(3), e0004551.</li>
+    <li>Undurraga, E. A., et al. (2017). Disease burden of dengue in the Philippines: Adjusting for underreporting. <i>Am. J. Trop. Med. Hyg., 96</i>(4), 887–898.</li>
+    <li>Olana, K. O. A., et al. (2025). Spatial distribution analysis and comparative forecasting of dengue resurgence in the Philippines (2025–2027). <i>Transboundary and Emerging Diseases</i>, 7480710.</li>
+    <li>Romano, Y., Patterson, E., &amp; Candès, E. (2019). Conformalized quantile regression. <i>NeurIPS 32</i>.</li>
+    <li>Pelitro, K. J., et al. (2026). Weekly dengue incidence linked to satellite rainfall (v1.0.0). Zenodo 19448695. · DOH Epidemiology Bureau dengue data via HDX. · ERA5 via Open-Meteo. · OCHA COD-AB/COD-PS.</li>
+  </ul>
+  <div class="foot"><span>EpiLag-PH · PJDSC 2026</span><span>20</span></div>
+</section>
+
+</body>
+</html>
