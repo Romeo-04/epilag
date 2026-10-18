@@ -8,6 +8,7 @@ const here = import.meta.dirname;
 
 // Pages move here one by one as they are rebuilt (REDESIGN_PLAN.md, section 14).
 const PAGES = {
+  index: "index.html",
   kit: "kit.html",
 };
 
