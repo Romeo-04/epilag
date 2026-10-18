@@ -7,7 +7,7 @@ Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
 **Try it:** [romeo-04.github.io/epilag/web](https://romeo-04.github.io/epilag/web/) (runs in your browser; first load takes about a minute) ·
-[Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) · [Film (1:48)](docs/demo.mp4)
+[Methodology](https://romeo-04.github.io/epilag/methodology.html) · [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) · [Film (1:48)](docs/demo.mp4)
 
 ![Replay of the forecast made on 2 June 2019](docs/screenshots/map_replay_2019.png)
 
