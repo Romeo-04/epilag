@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dengue Drill · EpiLag-PH</title>
+  <meta name="description" content="Play the 2019 dengue outbreak as a health officer. Then play it again with EpiLag-PH's forecasts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ECEFED; --surface: #FFFFFF; --surface-2: #F3F6F4; --line: #E2E8E4; --ink: #14211B; --muted: #5B6B63; --soft: #8A9891;
+      --accent: #12804A; --accent-dark: #0B5E36; --accent-soft: #E2F2E9; --deep: #062417;
+      --warn: #D23B30; --watch: #EE8A2A; --above: #F2C14E; --normal: #D3DBD6; --ease: cubic-bezier(.2, .7, .2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.5; min-height: 100vh; }
+    button { font: inherit; cursor: pointer; border: 0; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid rgba(18, 128, 74, .45); outline-offset: 2px; border-radius: 10px; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 16px clamp(16px, 4vw, 40px) 64px; }
+    .top { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 10px 12px 10px 18px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; text-decoration: none; margin-right: auto; letter-spacing: -.02em; }
+    .brand small { font-weight: 600; color: var(--soft); font-size: 14px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 22px; border-radius: 999px; font-size: 15px; font-weight: 700;
+      text-decoration: none; transition: transform .2s var(--ease), background .2s, box-shadow .2s; }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 12px 24px -14px rgba(20, 33, 27, .5); }
+    .btn.ghost { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+    .btn.ghost:hover { transform: translateY(-2px); }
+    .btn.white { background: #fff; color: var(--accent-dark); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .screen { display: none; animation: rise .6s var(--ease) both; }
+    .screen.on { display: block; }
+    h1 { font-size: clamp(42px, 6.5vw, 80px); line-height: 1; letter-spacing: -.05em; font-weight: 800; }
+    h1 span, h2 span { color: var(--soft); font-weight: 600; }
+    h2 { font-size: clamp(28px, 3.6vw, 42px); letter-spacing: -.035em; line-height: 1.08; }
+    .lead { font-size: 19px; color: var(--muted); max-width: 60ch; margin-top: 16px; }
+    .kicker { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+
+    /* intro */
+    .intro { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; padding: 56px 0 24px; }
+    .how { display: grid; gap: 12px; }
+    .how div { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; }
+    .how b { flex: none; width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-dark); }
+    .how p { font-size: 14.5px; color: var(--muted); }
+    .how p strong { color: var(--ink); display: block; font-size: 15.5px; }
+    .pick { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 28px; }
+    label.field { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    select { font: inherit; font-size: 15px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--ink); padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); min-width: 300px; }
+
+    /* receipt */
+    .receipt-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 40px 0; }
+    .receipt { background: #FFFDF7; color: #2A2A22; font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; padding: 28px 28px 36px; border-radius: 6px;
+      box-shadow: 0 30px 60px -30px rgba(20, 33, 27, .45); position: relative; max-width: 440px; justify-self: center; width: 100%;
+      transform-origin: top; animation: print 1.6s steps(24, end) both; clip-path: inset(0 0 0 0); }
+    .receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px;
+      background: linear-gradient(135deg, #FFFDF7 6px, transparent 0) 0 0 / 12px 12px, linear-gradient(-135deg, #FFFDF7 6px, transparent 0) 0 0 / 12px 12px; }
+    .receipt h3 { text-align: center; font-size: 16px; letter-spacing: .12em; }
+    .receipt .c { text-align: center; color: #6B6B5E; font-size: 12.5px; }
+    .receipt hr { border: 0; border-top: 1.5px dashed #BDBBA8; margin: 14px 0; }
+    .receipt .ln { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+    .receipt .ln span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .receipt .tot { font-size: 18px; font-weight: 700; }
+    .receipt .stamp { margin-top: 16px; text-align: center; color: var(--warn); border: 2px solid var(--warn); border-radius: 8px; padding: 6px; font-weight: 700;
+      letter-spacing: .1em; transform: rotate(-4deg); animation: stamp .5s var(--ease) 1.8s both; }
+    @keyframes print { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 -20px 0); } }
+    @keyframes stamp { from { opacity: 0; transform: rotate(-4deg) scale(1.6); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
+
+    /* game */
+    .hud { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 12px; margin: 20px 0 16px; }
+    .hud > div { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 14px 18px; }
+    .hud .lab { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .hud .val { font-size: 24px; font-weight: 800; letter-spacing: -.03em; }
+    .hud .round { color: #fff; border: 0; background: radial-gradient(120% 140% at 100% 0%, #1FA463 0%, var(--accent) 45%, #0A4F2E 100%); }
+    .hud .round.r1 { background: var(--ink); }
+    .hud .round .lab { color: rgba(255, 255, 255, .7); }
+    .kits { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+    .kits i { width: 16px; height: 16px; border-radius: 5px; background: var(--accent); transition: transform .3s var(--ease), opacity .3s; }
+    .kits i.used { opacity: .18; transform: scale(.8); }
+    .progress { height: 6px; border-radius: 6px; background: var(--surface-2); margin-top: 10px; overflow: hidden; }
+    .progress i { display: block; height: 100%; background: var(--accent); border-radius: 6px; transition: width .6s var(--ease); }
+    .hint { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); margin-bottom: 14px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+      transition: box-shadow .3s var(--ease), transform .3s var(--ease), border-color .3s; animation: rise .5s var(--ease) both; }
+    .card.has-kit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+    .card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .card h3 { font-size: 17px; letter-spacing: -.02em; }
+    .card .sub { font-size: 12.5px; color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .pill.warning { background: var(--warn); color: #fff; } .pill.watch { background: var(--watch); color: #3A1E04; }
+    .pill.above { background: var(--above); color: #3D2F05; } .pill.normal { background: var(--normal); color: #2B3A33; }
+    .pill.reported { background: var(--surface-2); color: var(--muted); }
+    svg.spark { width: 100%; height: 92px; display: block; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+    .row b { color: var(--ink); font-size: 15px; }
+    .fc { font-size: 13px; background: var(--accent-soft); color: var(--accent-dark); border-radius: 12px; padding: 8px 12px; }
+    .stepper { display: flex; align-items: center; gap: 8px; }
+    .stepper button { width: 38px; height: 38px; border-radius: 12px; background: var(--surface-2); font-size: 20px; font-weight: 700; color: var(--ink); transition: background .2s; }
+    .stepper button:hover:not(:disabled) { background: var(--accent-soft); }
+    .stepper button:disabled { opacity: .35; cursor: not-allowed; }
+    .stepper .n { min-width: 70px; text-align: center; font-weight: 800; font-size: 14px; }
+    .bar { position: sticky; bottom: 16px; z-index: 5; margin-top: 18px; display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      background: rgba(255, 255, 255, .92); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 999px; padding: 10px 10px 10px 22px; }
+    .bar span { font-size: 14px; color: var(--muted); }
+    .toast { position: fixed; left: 50%; top: 24px; transform: translate(-50%, -20px); opacity: 0; background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px;
+      font-size: 14px; font-weight: 600; z-index: 30; transition: opacity .3s, transform .3s var(--ease); pointer-events: none; }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+    /* results */
+    .score { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 24px 0 18px; }
+    .score > div { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 20px; }
+    .score .big { font-size: 42px; font-weight: 800; letter-spacing: -.045em; line-height: 1; }
+    .score .big small { font-size: 18px; color: var(--soft); font-weight: 700; margin-left: .15em; }
+    .score p { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+    .score .hero { color: #fff; border: 0; background: radial-gradient(120% 140% at 100% 0%, #1FA463 0%, var(--accent) 45%, #0A4F2E 100%); }
+    .score .hero p { color: rgba(255, 255, 255, .85); }
+    .compare { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 26px; margin-top: 8px; }
+    .bars { display: grid; gap: 14px; margin-top: 18px; }
+    .bars .b { display: grid; grid-template-columns: 220px 1fr 120px; gap: 14px; align-items: center; font-size: 14.5px; }
+    .bars .track { height: 26px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+    .bars .fill { height: 100%; border-radius: 999px; transform-origin: left; animation: grow 1.2s var(--ease) both; }
+    .bars .num { text-align: right; font-weight: 800; }
+    .verdict { margin-top: 20px; padding: 16px 20px; border-radius: 18px; background: var(--accent-soft); color: var(--accent-dark); font-size: 15px; }
+    .honest { margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.5px; color: var(--muted); margin: 6px 0 14px; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @media (max-width: 900px) { .intro, .receipt-stage { grid-template-columns: 1fr; } .hud, .score { grid-template-columns: 1fr 1fr; } .bars .b { grid-template-columns: 1fr; gap: 6px; } .bars .num { text-align: left; } select { min-width: 0; width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="../"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#12804A"/><path d="M7 22h6l3-8 5 14 4-10 2 4h6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>EpiLag-PH <small>Dengue Drill</small></a>
+    <a class="btn ghost" href="../web/" style="min-height:40px;padding:8px 16px">Open the app</a>
+  </div>
+
+  <!-- 1 · intro -->
+  <section class="screen on" id="s-intro">
+    <div class="intro">
+      <div>
+        <div class="kicker">A drill for dengue season</div>
+        <h1 style="margin-top:14px">Play the 2019 outbreak. <span>Then play it again with EpiLag-PH.</span></h1>
+        <p class="lead">You are the provincial health officer. It is 5 May 2019 and you have ₱5 million for clean-up drives. Every two weeks you decide where to send them. The real 2019 cases decide how you did.</p>
+        <div class="pick">
+          <label class="field">Your region<select id="region"></select></label>
+          <button class="btn primary" id="go-receipt">Start the drill →</button>
+        </div>
+      </div>
+      <div class="how">
+        <div><b>1</b><p><strong>Round 1: without EpiLag</strong>You see what health offices see: cases reported so far and this week's rain.</p></div>
+        <div><b>2</b><p><strong>Round 2: with EpiLag</strong>Same season, plus the forecast EpiLag-PH made at the time, 4 weeks ahead, from earlier years only.</p></div>
+        <div><b>3</b><p><strong>The scorecard</strong>Cases averted, kits that arrived in time to bend an outbreak's peak, and kits spent where no outbreak came.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · rain receipt -->
+  <section class="screen" id="s-receipt">
+    <div class="receipt-stage">
+      <div class="receipt" id="receipt"></div>
+      <div>
+        <div class="kicker">The bill for the season</div>
+        <h2 style="margin-top:12px">The rain is free. <span>The dengue bill comes weeks later.</span></h2>
+        <p class="lead">This is what the 2019 rainy season charged your region in reported dengue cases. Clean-up drives lower the bill, but only if they arrive before the cases do.</p>
+        <div class="actions"><button class="btn primary" id="go-r1">Play round 1: without EpiLag →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · a round -->
+  <section class="screen" id="s-game">
+    <div class="hud">
+      <div class="round" id="hud-round"><div class="lab" id="hud-round-lab">Round 1</div><div class="val" id="hud-round-val">Without EpiLag</div></div>
+      <div><div class="lab">Week ending</div><div class="val" id="hud-week">5 May 2019</div><div class="progress"><i id="hud-prog" style="width:0"></i></div></div>
+      <div><div class="lab">Budget left</div><div class="val" id="hud-budget">₱5,000,000</div><div class="kits" id="hud-kits"></div></div>
+      <div><div class="lab">Rain this week</div><div class="val" id="hud-rain">0 mm</div><div class="sub" style="font-size:12.5px;color:var(--muted)">average across the region</div></div>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div class="legend" id="legend"></div>
+    <div class="cards" id="cards"></div>
+    <div class="bar"><span id="bar-text">Each kit is ₱500,000 of clean-up drives and container covers, reaching about 33,000 people.</span>
+      <button class="btn primary" id="next">Next 2 weeks →</button></div>
+  </section>
+
+  <!-- 4 · round result -->
+  <section class="screen" id="s-result">
+    <div style="padding-top:36px"><div class="kicker" id="res-kicker">Round 1 · results</div><h2 style="margin-top:10px" id="res-title"></h2></div>
+    <div class="score" id="res-score"></div>
+    <div class="legend" id="res-legend"></div>
+    <div class="cards" id="res-cards"></div>
+    <div class="actions" id="res-actions"></div>
+  </section>
+
+  <!-- 5 · final comparison -->
+  <section class="screen" id="s-final">
+    <div style="padding-top:36px"><div class="kicker">Your drill, side by side</div><h2 style="margin-top:10px" id="fin-title"></h2></div>
+    <div class="compare">
+      <div class="kicker" style="color:var(--muted)">Estimated cases averted, central estimate</div>
+      <div class="bars" id="fin-bars"></div>
+      <div class="verdict" id="fin-verdict"></div>
+      <p class="honest" id="fin-honest"></p>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="again">Try another region</button>
+      <a class="btn ghost" href="../web/">Open the EpiLag-PH app</a>
+      <a class="btn ghost" href="../methodology.html">How the forecasts work</a>
+    </div>
+  </section>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+  const D = window.DRILL, K = D.kit, WEEKS = D.weeks, TURNS = D.turns;
+  const PEOPLE_PER_KIT = K.pesos / K.per_person;
+  const LEVEL_NAME = { warning: "Outbreak warning", watch: "Watch", above: "Above usual", normal: "Normal" };
+  const $ = id => document.getElementById(id);
+  const fmt = n => Math.round(n).toLocaleString("en");
+  const day = s => { const d = new Date(s + "T00:00:00Z"); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }); };
+  const year = s => day(s) + " 2019";
+  const idx = w => WEEKS.indexOf(w);
+  const FIRST = idx(TURNS[0]);
+  let region, round, turn, kits, plan, results = {};
+
+  // ---------------------------------------------------------------- scoring (same rules as scripts/drill_data.py)
+  function peak(p) {  // the season's peak week, if it rose above the epidemic threshold (an outbreak); else null
+    let best = null;
+    for (let i = FIRST; i < WEEKS.length; i++) if (p.cases[i] != null && (best == null || p.cases[i] > p.cases[best])) best = i;
+    return best != null && p.epi[best] != null && p.cases[best] > p.epi[best] ? best : null;
+  }
+  function score(planned) {  // planned: {provIndex: {turnIndex: kits}}
+    let lo = 0, mid = 0, hi = 0, onTime = 0, late = 0, noOutbreak = 0, used = 0;
+    region.provinces.forEach((p, k) => {
+      const pk = peak(p);
+      Object.entries(planned[k] || {}).forEach(([t, n]) => {
+        if (!n) return;
+        const i = idx(TURNS[t]);
+        const window = p.cases.slice(i + 2, i + 10).reduce((s, c) => s + (c || 0), 0);
+        const share = Math.min(n * PEOPLE_PER_KIT / p.pop, K.max_share);
+        lo += window * share * K.effect[0]; mid += window * share * K.effect[1]; hi += window * share * K.effect[2];
+        used += n;
+        if (pk == null) noOutbreak += n; else if (i <= pk - 4) onTime += n; else late += n;
+      });
+    });
+    return { lo, mid, hi, onTime, late, noOutbreak, used };
+  }
+  function autopilot(rule) {  // two kits a turn, by a fixed rule
+    const planned = {}; let left = K.kits;
+    TURNS.forEach((tw, t) => {
+      const i = idx(tw);
+      let picks = region.provinces.map((p, k) => ({ p, k }));
+      if (rule === "epilag") picks = picks.filter(({ p }) => p.fc[tw] && ["watch", "warning"].includes(p.fc[tw][0])).sort((a, b) => b.p.fc[tw][2] / b.p.pop - a.p.fc[tw][2] / a.p.pop);
+      else picks = picks.filter(({ p }) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]);
+      picks.slice(0, Math.min(2, left)).forEach(({ k }) => { (planned[k] ||= {})[t] = 1; left--; });
+    });
+    return score(planned);
+  }
+
+  // ---------------------------------------------------------------- drawing
+  function spark(p, upto, opts = {}) {
+    const W = 320, H = 92, n = WEEKS.length, pad = 4;
+    const seen = p.cases.slice(0, upto + 1).map(c => c || 0), f = opts.forecast ? p.fc[TURNS[turn]] : null;
+    const maxv = Math.max(1, ...seen, ...p.epi.map(e => e || 0), f ? f[3] : 0) * 1.1;
+    const X = i => pad + i / (n - 1) * (W - 2 * pad), Y = v => H - 14 - v / maxv * (H - 24);
+    const line = (arr, end) => arr.slice(0, end + 1).map((v, i) => v == null ? null : `${X(i)},${Y(v)}`).filter(Boolean).join(" ");
+    let s = `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Weekly cases in ${p.name}">`;
+    s += `<rect x="${X(upto)}" y="0" width="${W - X(upto)}" height="${H - 12}" fill="#F3F6F4"/>`;
+    s += `<polyline points="${line(p.epi, n - 1)}" fill="none" stroke="#D23B30" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
+    s += `<polyline points="${line(p.cases, upto)}" fill="none" stroke="#14211B" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    if (f) {
+      const i = upto + 4;
+      s += `<line x1="${X(i)}" x2="${X(i)}" y1="${Y(f[1])}" y2="${Y(f[3])}" stroke="#12804A" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+      s += `<circle cx="${X(i)}" cy="${Y(f[2])}" r="4.5" fill="#12804A" stroke="#fff" stroke-width="1.5"/>`;
+    }
+    (opts.kits || []).forEach(t => { const x = X(idx(TURNS[t])); s += `<path d="M${x - 5} ${H - 2}L${x} ${H - 10}L${x + 5} ${H - 2}Z" fill="#12804A"/>`; });
+    if (opts.onset != null) s += `<line x1="${X(opts.onset)}" x2="${X(opts.onset)}" y1="0" y2="${H - 12}" stroke="#D23B30" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    return s + `</svg>`;
+  }
+  function legend(el, withFc, withKits) {
+    el.innerHTML = `<span><i style="background:#14211B"></i>Reported cases</span><span><i style="background:repeating-linear-gradient(90deg,#D23B30 0 4px,transparent 4px 7px)"></i>Epidemic threshold</span>`
+      + (withFc ? `<span><i style="background:#12804A;width:8px;height:8px;border-radius:50%"></i>EpiLag forecast, 4 weeks ahead (range)</span>` : "")
+      + (withKits ? `<span><i style="background:#12804A;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #12804A;border-radius:0"></i>Your kits</span><span><i style="background:#D23B30;width:2px;height:12px"></i>Outbreak peak</span>` : "");
+  }
+
+  // ---------------------------------------------------------------- screens
+  function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id)); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2400); }
+
+  function receipt() {
+    const i0 = FIRST, i1 = Math.min(WEEKS.length - 1, FIRST + 20);
+    const rain = region.provinces.map(p => p.rain.slice(i0, i1 + 1).reduce((s, r) => s + (r || 0), 0));
+    const items = region.provinces.map((p, k) => ({ name: p.name, cases: p.cases.slice(i0, i1 + 1).reduce((s, c) => s + (c || 0), 0), crossed: peak(p) != null }));
+    const total = items.reduce((s, x) => s + x.cases, 0), avgRain = rain.reduce((a, b) => a + b, 0) / rain.length;
+    $("receipt").innerHTML = `<h3>RAIN RECEIPT</h3><p class="c">${region.name}</p><p class="c">${year(WEEKS[i0])} – ${year(WEEKS[i1])}</p><hr>`
+      + `<div class="ln"><span>Rain (avg per province)</span><span>${fmt(avgRain)} mm</span></div><div class="ln"><span>Price of rain</span><span>₱0.00</span></div><hr>`
+      + `<p class="c" style="text-align:left;margin-bottom:6px">DENGUE CASES CHARGED</p>`
+      + items.map(x => `<div class="ln"><span>${x.name}${x.crossed ? " *" : ""}</span><span>${fmt(x.cases)}</span></div>`).join("")
+      + `<hr><div class="ln tot"><span>TOTAL DUE</span><span>${fmt(total)} cases</span></div>`
+      + `<p class="c" style="margin-top:8px">* peaked above the epidemic threshold</p><p class="c">Due date: 4–8 weeks after the rain</p>`
+      + `<div class="stamp">UNPAID · ACT EARLIER</div>`;
+    const el = $("receipt"); el.style.animation = "none"; el.offsetHeight; el.style.animation = "";
+  }
+
+  function startRound(r) {
+    round = r; turn = 0; kits = K.kits; plan = {};
+    $("hud-round").className = "round" + (r === 1 ? " r1" : "");
+    $("hud-round-lab").textContent = "Round " + r;
+    $("hud-round-val").textContent = r === 1 ? "Without EpiLag" : "With EpiLag";
+    $("hint").innerHTML = r === 1
+      ? "You see what health offices see today: reported cases so far (the shaded area is the future) and this week's rain."
+      : "Now you also see EpiLag-PH's forecast for 4 weeks from now, with its likely range and alert level. It was made from earlier years only.";
+    legend($("legend"), r === 2, false);
+    renderTurn();
+    show("s-game");
+  }
+
+  function renderTurn() {
+    const tw = TURNS[turn], i = idx(tw);
+    $("hud-week").textContent = year(tw);
+    $("hud-prog").style.width = (turn / TURNS.length * 100) + "%";
+    $("hud-budget").textContent = "₱" + fmt(kits * K.pesos);
+    $("hud-kits").innerHTML = Array.from({ length: K.kits }, (_, k) => `<i class="${k >= kits ? "used" : ""}"></i>`).join("");
+    const rains = region.provinces.map(p => p.rain[i] || 0);
+    $("hud-rain").textContent = fmt(rains.reduce((a, b) => a + b, 0) / rains.length) + " mm";
+    $("next").textContent = turn === TURNS.length - 1 ? "Finish the season →" : "Next 2 weeks →";
+    $("cards").innerHTML = region.provinces.map((p, k) => {
+      const now = (plan[k] || {})[turn] || 0, last = p.cases[i], prev = p.cases[i - 2];
+      const trend = last != null && prev != null ? (last > prev * 1.15 ? "rising" : last < prev * 0.85 ? "falling" : "steady") : "";
+      const f = p.fc[tw];
+      const people = Object.values(plan[k] || {}).reduce((a, b) => a + b, 0) * PEOPLE_PER_KIT;
+      const capped = (people + PEOPLE_PER_KIT) / p.pop > K.max_share + 1e-9;
+      return `<div class="card${now ? " has-kit" : ""}" style="animation-delay:${k * 40}ms">
+        <div class="head"><div><h3>${p.name}</h3><div class="sub">${fmt(p.pop)} people</div></div>
+          ${round === 2 && f ? `<span class="pill ${f[0]}">${LEVEL_NAME[f[0]]}</span>` : `<span class="pill reported">Reports only</span>`}</div>
+        ${spark(p, i, { forecast: round === 2 })}
+        <div class="row"><span>Reported this week</span><b>${last == null ? "–" : fmt(last)} <span style="font-weight:600;color:var(--muted);font-size:12.5px">${trend}</span></b></div>
+        <div class="row"><span>Rain this week</span><b>${p.rain[i] == null ? "–" : fmt(p.rain[i]) + " mm"}</b></div>
+        ${round === 2 && f ? `<div class="fc">EpiLag: about <b>${fmt(f[2])}</b> cases in the week ending ${day(WEEKS[i + 4])} (likely ${fmt(f[1])}–${fmt(f[3])})</div>` : ""}
+        <div class="row"><span>Kits this turn</span><div class="stepper">
+          <button aria-label="Remove a kit from ${p.name}" data-k="${k}" data-d="-1" ${now ? "" : "disabled"}>−</button>
+          <span class="n">${now} kit${now === 1 ? "" : "s"}</span>
+          <button aria-label="Send a kit to ${p.name}" data-k="${k}" data-d="1" ${kits && !capped ? "" : "disabled"}>+</button></div></div>
+      </div>`;
+    }).join("");
+  }
+
+  $("cards").addEventListener("click", e => {
+    const b = e.target.closest("button[data-k]"); if (!b) return;
+    const k = +b.dataset.k, d = +b.dataset.d, cur = (plan[k] || {})[turn] || 0;
+    if (d > 0 && !kits) return; if (d < 0 && !cur) return;
+    (plan[k] ||= {})[turn] = cur + d; kits -= d;
+    renderTurn();
+  });
+
+  $("next").addEventListener("click", () => {
+    const sent = region.provinces.filter((p, k) => (plan[k] || {})[turn]).map(p => p.name);
+    toast(sent.length ? "Teams sent to " + sent.join(", ") : "No teams sent this time");
+    if (turn < TURNS.length - 1) { turn++; renderTurn(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else endRound();
+  });
+
+  function endRound() {
+    const s = score(plan); results[round] = { ...s, plan };
+    $("res-kicker").textContent = `Round ${round} · ${round === 1 ? "without EpiLag" : "with EpiLag"} · results`;
+    $("res-title").innerHTML = `You averted about <span style="color:var(--accent)">${fmt(s.mid)}</span> cases. <span>Here is how the season actually went.</span>`;
+    $("res-score").innerHTML = `
+      <div class="hero"><div class="big">${fmt(s.mid)}</div><p>cases averted, central estimate (range ${fmt(s.lo)}–${fmt(s.hi)})</p></div>
+      <div><div class="big">${s.onTime}<small>of ${s.used}</small></div><p>kits that arrived 4+ weeks before the outbreak's peak, in time to bend it</p></div>
+      <div><div class="big">${s.late}<small>of ${s.used}</small></div><p>kits that arrived too close to the peak, or after it</p></div>
+      <div><div class="big">${s.noOutbreak}<small>of ${s.used}</small></div><p>kits sent where no outbreak came (still prevent some cases)</p></div>`;
+    legend($("res-legend"), false, true);
+    $("res-cards").innerHTML = region.provinces.map((p, k) => {
+      const on = peak(p), ks = [];
+      Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ks.push(+t); });
+      return `<div class="card"><div class="head"><div><h3>${p.name}</h3><div class="sub">${on == null ? "No outbreak this season" : "Outbreak peaked week ending " + day(WEEKS[on])}</div></div>
+        <span class="pill ${on == null ? "normal" : "warning"}">${ks.length} kit${ks.length === 1 ? "" : "s"}</span></div>${spark(p, WEEKS.length - 1, { kits: ks, onset: on })}</div>`;
+    }).join("");
+    $("res-actions").innerHTML = round === 1
+      ? `<button class="btn primary" id="go-r2">Play round 2: with EpiLag →</button>`
+      : `<button class="btn primary" id="go-final">See the comparison →</button>`;
+    show("s-result");
+    const btn = $("go-r2") || $("go-final");
+    btn.addEventListener("click", () => round === 1 ? startRound(2) : final());
+  }
+
+  function final() {
+    const auto = autopilot("epilag"), react = autopilot("react");
+    const rows = [["Round 1: you, without EpiLag", results[1].mid, "#8A9891"], ["Round 2: you, with EpiLag", results[2].mid, "#12804A"],
+                  ["Rule: react to reported outbreaks", react.mid, "#C5CFC9"], ["Rule: follow EpiLag's alerts", auto.mid, "#0B5E36"]];
+    const max = Math.max(1, ...rows.map(r => r[1]));
+    $("fin-title").innerHTML = `${region.name}: <span>${results[2].mid > results[1].mid * 1.02 ? "the forecast helped you." : results[2].mid < results[1].mid * 0.98 ? "this time your instincts won." : "a tie between you and you."}</span>`;
+    $("fin-bars").innerHTML = rows.map(([name, v, c], k) => `<div class="b"><span>${name}</span><div class="track"><div class="fill" style="width:${v / max * 100}%;background:${c};animation-delay:${k * .12}s"></div></div><span class="num">${fmt(v)} cases</span></div>`).join("");
+    const gain = results[2].mid - results[1].mid;
+    $("fin-verdict").innerHTML = gain >= 0
+      ? `With EpiLag-PH you averted about <b>${fmt(gain)}</b> more cases, and ${results[2].onTime} of your kits arrived 4+ weeks before a peak (${results[1].onTime} without it).`
+      : `Without EpiLag-PH you averted about <b>${fmt(-gain)}</b> more cases this time. The forecast is a guide, not a guarantee; compare the two rules below.`;
+    // across every region, with the same two fixed rules
+    let better = 0, tie = 0, worse = 0; const keep = region;
+    D.regions.forEach(r => { region = r; const a = autopilot("epilag").mid, b = autopilot("react").mid;
+      if (Math.abs(a - b) <= 0.05 * Math.max(a, b, 1)) tie++; else if (a > b) better++; else worse++; });
+    region = keep;
+    $("fin-honest").textContent = `Across all ${D.regions.length} regions, following EpiLag's alerts averted more cases than reacting to reports in ${better}, about the same in ${tie}, and fewer in ${worse}. `
+      + `How scoring works: a kit covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016), so treat the numbers as estimates.`;
+    show("s-final");
+  }
+
+  // ---------------------------------------------------------------- start
+  const sel = $("region");
+  sel.innerHTML = D.regions.map((r, k) => `<option value="${k}" ${r.name.includes("Western Visayas") ? "selected" : ""}>${r.name}</option>`).join("");
+  $("go-receipt").addEventListener("click", () => { region = D.regions[+sel.value]; results = {}; receipt(); show("s-receipt"); });
+  $("go-r1").addEventListener("click", () => startRound(1));
+  $("again").addEventListener("click", () => show("s-intro"));
+</script>
+</body>
+</html>

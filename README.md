@@ -26,6 +26,13 @@ higher than reported.
 4. **Turns alerts into actions:** each area gets a week-by-week checklist (what to do today, in weeks 1–2
    and in weeks 2–4) next to what EpiLag-PH contributes to each step, downloadable as an action brief.
 
+5. **Speaks to residents:** a *For residents* page gives a plain-language outlook in Filipino or English,
+   the DOH 4S steps, dengue warning signs, and a message ready to share in a barangay group chat.
+6. **Trains people:** [Dengue Drill](https://romeo-04.github.io/epilag/drill/) lets anyone play the 2019 outbreak
+   as a health officer, first with case reports only, then with EpiLag-PH's forecasts. Following EpiLag's alerts
+   averted more cases than reacting to reports in 11 of 17 regions (about the same in 1, fewer in 5).
+7. **Shares open data:** the latest forecasts as [CSV and JSON](https://romeo-04.github.io/epilag/data/).
+
 The app opens on an **Overview** that explains every tool (what it does, why it matters, what you can do
 with it) and lists this week's priority areas.
 
@@ -56,7 +63,7 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
 streamlit run app/streamlit_app.py                 # the app runs from committed files in app/data
 python scripts/build_web.py                        # rebuild the in-browser version in docs/web
-pytest tests                                       # 63 tests
+pytest tests                                       # 71 tests
 ```
 
 Rebuild everything from the raw data:
@@ -71,6 +78,8 @@ python src/alerts.py province && python src/alerts.py region_qc
 python src/train_final.py province && python src/train_final.py region_qc
 python src/export_app_data.py
 python scripts/make_figures.py
+python scripts/drill_data.py         # Dengue Drill season data (docs/drill/data.js)
+python scripts/export_open_data.py   # open forecast files (docs/data/)
 ```
 
 ## Method
@@ -109,7 +118,8 @@ app/            Streamlit app and its small data files
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
 tests/          unit tests (allocation) and app smoke tests
 reports/        backtest, early-warning, ablation and SHAP results (CSV)
-docs/           landing page, in-browser app (web/), film (film/, demo.mp4), deck, figures, screenshots
+docs/           landing page, in-browser app (web/), Dengue Drill (drill/), open data (data/), methodology,
+                film (film/, demo.mp4), deck, figures, screenshots
 scripts/        figures, screenshots, film recording (record_film.py), in-browser build
 ```
 

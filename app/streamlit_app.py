@@ -34,7 +34,7 @@ T = {
     "en": {
         "tagline": "Dengue early warning from rain, heat and recent cases. Act weeks before hospitals fill.",
         "nav_home": "Overview", "nav_map": "Forecast map", "nav_unit": "Area detail", "nav_proof": "Did it work?",
-        "nav_budget": "Action plan", "nav_qc": "QC barangays", "nav_about": "Data & limits",
+        "nav_budget": "Action plan", "nav_qc": "QC barangays", "nav_about": "Data & limits", "nav_public": "For residents",
         "dataset": "Data", "horizon": "Weeks ahead", "lang": "Language",
         "mode": "Forecast", "mode_latest": "Latest", "mode_replay": "Replay a past week",
         "origin": "Forecast made in the week ending", "actual_col": "What happened",
@@ -96,11 +96,16 @@ T = {
         "city_fc": "City-wide forecast, next 8 weeks", "brgy_chart": "Expected cases in the next 8 weeks, top 20 barangays",
         "switch_qc": "This view uses the 'Regions + Quezon City' data.", "switch_btn": "Switch to Regions + Quezon City",
         "about_head": "Data & limits", "about_muted": "read before use",
+        "drill_head": "Play the 2019 outbreak, then play it again with EpiLag-PH.",
+        "drill_sub": "A 5-minute drill: you are the health officer, the real 2019 cases keep score.",
+        "drill_btn": "Play the drill",
+        "download_all": "Download all forecasts (CSV)",
+        "open_data": "Open data: the latest forecasts are also published as CSV and JSON at romeo-04.github.io/epilag/data/",
     },
     "fil": {
         "tagline": "Maagang babala sa dengue mula sa ulan, init at mga bagong kaso. Kumilos bago mapuno ang ospital.",
         "nav_home": "Buod", "nav_map": "Mapa ng forecast", "nav_unit": "Detalye ng lugar", "nav_proof": "Gumana ba?",
-        "nav_budget": "Plano ng aksyon", "nav_qc": "Barangay ng QC", "nav_about": "Datos at limitasyon",
+        "nav_budget": "Plano ng aksyon", "nav_qc": "Barangay ng QC", "nav_about": "Datos at limitasyon", "nav_public": "Para sa publiko",
         "dataset": "Datos", "horizon": "Ilang linggo pa", "lang": "Wika",
         "mode": "Forecast", "mode_latest": "Pinakabago", "mode_replay": "Balikan ang nakaraang linggo",
         "origin": "Forecast na ginawa sa linggong nagtapos noong", "actual_col": "Ang nangyari",
@@ -162,6 +167,11 @@ T = {
         "city_fc": "Forecast sa buong lungsod, susunod na 8 linggo", "brgy_chart": "Inaasahang kaso sa susunod na 8 linggo, nangungunang 20 barangay",
         "switch_qc": "Ginagamit ng view na ito ang datos na 'Mga rehiyon + Quezon City'.", "switch_btn": "Lumipat sa Mga rehiyon + Quezon City",
         "about_head": "Datos at limitasyon", "about_muted": "basahin bago gamitin",
+        "drill_head": "Laruin ang outbreak ng 2019, saka ulitin kasama ang EpiLag-PH.",
+        "drill_sub": "Limang minutong drill: ikaw ang health officer, ang totoong kaso ng 2019 ang magbibigay ng iskor.",
+        "drill_btn": "Laruin ang drill",
+        "download_all": "I-download ang lahat ng forecast (CSV)",
+        "open_data": "Bukas na datos: nakalathala rin ang pinakabagong forecast bilang CSV at JSON sa romeo-04.github.io/epilag/data/",
     },
 }
 
@@ -260,6 +270,9 @@ FEATURES = {
         "proof": ("Forecasts past years using only earlier years, against simple rules.",
                   "Trust is earned with honest tests, including what did not work.",
                   "Check hit rates and false alarms before relying on it."),
+        "public": ("Tells residents, in plain English or Filipino, whether dengue is rising where they live.",
+                   "Households remove most breeding sites; they act sooner when warned in words they understand.",
+                   "Share a ready-made advisory with your barangay group chat."),
         "about": ("Lists every data source, the method and the known limits.",
                   "Decisions need to know what the numbers can and cannot say.",
                   "Cite the sources and explain the caveats."),
@@ -280,6 +293,9 @@ FEATURES = {
         "proof": ("Hinuhulaan ang mga nakaraang taon gamit lamang ang mga naunang taon, laban sa simpleng tuntunin.",
                   "Nakukuha ang tiwala sa tapat na pagsubok, kasama ang hindi gumana.",
                   "Tingnan ang tama at maling babala bago umasa rito."),
+        "public": ("Sinasabi sa mga residente, sa simpleng Filipino o Ingles, kung tumataas ang dengue sa kanilang lugar.",
+                   "Ang mga tahanan ang nag-aalis ng karamihan ng pinamumugaran; mas maagang kumikilos kapag binalaan sa salitang naiintindihan.",
+                   "Ibahagi ang handang abiso sa group chat ng barangay."),
         "about": ("Nakalista ang bawat pinagkunan ng datos, ang pamamaraan at ang mga limitasyon.",
                   "Kailangang alam ng nagpapasya kung ano ang kaya at hindi kayang sabihin ng numero.",
                   "Banggitin ang pinagkunan at ipaliwanag ang mga paalala."),
@@ -301,8 +317,11 @@ ICON = {
     "bell": '<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/>',
     "check": '<path d="M20 6 9 17l-5-5"/>',
     "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "public": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    "drop": '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    "shirt": '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>',
 }
-PAGE_ICON = {"home": ":material/space_dashboard:", "map": ":material/map:", "unit": ":material/monitoring:",
+PAGE_ICON = {"public": ":material/groups:", "home": ":material/space_dashboard:", "map": ":material/map:", "unit": ":material/monitoring:",
              "budget": ":material/payments:", "qc": ":material/location_city:", "proof": ":material/verified:",
              "about": ":material/info:"}
 
@@ -358,10 +377,10 @@ div[class*="st-key-hero"]::before, div[class*="st-key-hero"]::after {
 div[class*="st-key-hero"]::before { width: 340px; height: 340px; right: -120px; top: -150px; animation: spin 24s linear infinite; }
 div[class*="st-key-hero"]::after { width: 220px; height: 220px; right: -40px; top: -60px; border-style: dashed; animation: spin 18s linear infinite reverse; }
 div[class*="st-key-hero"] p, div[class*="st-key-hero"] span, div[class*="st-key-hero"] div { color: #fff; }
-div[class*="st-key-hero"] [data-testid="stPageLink"] a, div[class*="st-key-hero"] button {
+div[class*="st-key-hero"] [data-testid="stPageLink"] a, div[class*="st-key-hero"] button, div[class*="st-key-hero"] [data-testid="stLinkButton"] a {
   background: #fff !important; border-radius: 999px; padding: 6px 16px; border: 0; width: fit-content;
 }
-div[class*="st-key-hero"] [data-testid="stPageLink"] a *, div[class*="st-key-hero"] button * { color: var(--accent-dark) !important; font-weight: 700; }
+div[class*="st-key-hero"] [data-testid="stPageLink"] a *, div[class*="st-key-hero"] button *, div[class*="st-key-hero"] [data-testid="stLinkButton"] a * { color: var(--accent-dark) !important; font-weight: 700; }
 
 /* top bar + pill navigation */
 div.st-key-topbar { background: var(--surface); border-radius: 999px; padding: 10px 14px 10px 18px; border: 1px solid var(--line);
@@ -369,9 +388,10 @@ div.st-key-topbar { background: var(--surface); border-radius: 999px; padding: 1
 div.st-key-topbar [data-testid="stHorizontalBlock"] { align-items: center; }
 div.st-key-topnav { background: var(--surface-2); border-radius: 999px; padding: 4px; }
 div.st-key-topnav [data-testid="stHorizontalBlock"] { gap: 2px; flex-wrap: nowrap; }
-div.st-key-topnav [data-testid="stPageLink"] a { border-radius: 999px; padding: 7px 10px; justify-content: center;
+div.st-key-topnav [data-testid="stPageLink"] a { border-radius: 999px; padding: 7px 9px; justify-content: center;
   transition: background .2s var(--ease), box-shadow .2s var(--ease); white-space: nowrap; }
 div.st-key-topnav [data-testid="stPageLink"] a:hover { background: rgba(255, 255, 255, .7); }
+div.st-key-topnav [data-testid="stIconMaterial"], div.st-key-topnav [data-testid="stPageLink"] a > span:first-child:not(:only-child) { display: none; }
 div.st-key-topnav [data-testid="stPageLink"] a p { font-size: 13.5px; font-weight: 500; color: var(--muted); }
 div[class*="st-key-navon"] [data-testid="stPageLink"] a { background: var(--surface); box-shadow: 0 2px 8px rgba(16, 24, 20, .08); }
 div[class*="st-key-navon"] [data-testid="stPageLink"] a p, div[class*="st-key-navon"] [data-testid="stPageLink"] a span { color: var(--ink); font-weight: 700; }
@@ -669,7 +689,7 @@ def page_home():
         html(f'<div class="story">{steps}</div><div class="warn-here">{icon("bell", 16)}{t["story_note"]}</div>')
 
     html(f'<div class="hero-title" style="font-size:28px;margin-top:28px">{t["features_head"]} <span>{t["features_sub"]}</span></div>')
-    keys = ["map", "unit", "budget", "qc", "proof", "about"]
+    keys = ["map", "unit", "budget", "public", "qc", "proof"]
     for row in (keys[:3], keys[3:]):
         for col, key in zip(st.columns(3, gap="medium"), row):
             does, why, you = FEATURES[lang][key]
@@ -678,6 +698,12 @@ def page_home():
                      f'<dl><dt>{t["does"]}</dt><dd>{does}</dd><dt>{t["why_h"]}</dt><dd>{why}</dd>'
                      f'<dt>{t["you"]}</dt><dd class="you">{you}</dd></dl></div>')
                 st.page_link(PAGES[key], label=t["open"], icon=":material/arrow_outward:")
+
+    with st.container(key="hero_drill"):
+        html(f'<div class="kicker" style="color:rgba(255,255,255,.75)">Dengue Drill</div>'
+             f'<div style="font-size:24px;font-weight:700;margin:6px 0 4px">{t["drill_head"]}</div>'
+             f'<div style="font-size:14px;opacity:.88;margin-bottom:12px">{t["drill_sub"]}</div>')
+        st.link_button(t["drill_btn"], "https://romeo-04.github.io/epilag/drill/", icon=":material/sports_esports:")
 
     rows = brief_table(fc, fc_h)
     act = rows[rows.level.isin(LEVELS[2:])].head(6)
@@ -765,6 +791,9 @@ def page_map():
         if mode == "replay":
             view[t["actual_col"]] = table.actual.round(0).astype("Int64").astype(str) + " · " + table.actual_level
         st.dataframe(view, hide_index=True, width="stretch")
+        st.download_button(t["download_all"], fc.to_csv(index=False), file_name=f"epilag_forecast_{panel}_{mode}.csv",
+                           mime="text/csv", icon=":material/download:", key="dl_all")
+        st.caption(t["open_data"])
 
 
 def threshold_series(unit_id: str, weeks: pd.Series) -> pd.Series:
@@ -1019,6 +1048,90 @@ def page_qc():
                      hide_index=True, width="stretch")
 
 
+
+PUBLIC = {
+    "en": {
+        "head": "Dengue in your area", "muted": "for residents",
+        "sub": "A plain-language outlook from EpiLag-PH, with what your household can do this week.",
+        "pick": "Your province, region or city",
+        "status": {
+            "outbreak warning": "Dengue is likely to rise sharply in {area} in the next {h} weeks.",
+            "watch": "Dengue may rise in {area} in the next {h} weeks.",
+            "above usual": "Dengue cases in {area} are a little higher than usual for this time of year.",
+            "normal": "No unusual rise in dengue is expected in {area} in the next {h} weeks.",
+        },
+        "do_head": "What your household can do this week (DOH 4S)",
+        "do": [("drop", "Search and destroy breeding sites",
+                "Cover water drums and pails. Empty and scrub vases, plant saucers and old tires every week. Clear roof gutters."),
+               ("shirt", "Secure self-protection",
+                "Wear long sleeves and pants, use mosquito repellent, and sleep under a net or behind screens, especially at dawn and dusk."),
+               ("hospital", "Seek early consultation", "Fever for 2 days? Go to your health center. Do not wait for a rash."),
+               ("bug", "Support fogging only in hotspots", "Fogging does little on its own. Removing breeding sites matters more.")],
+        "signs_head": "Go to the hospital now if someone with dengue has:",
+        "signs": ["Severe stomach pain", "Vomiting that will not stop", "Bleeding from the gums or nose",
+                  "Blood in vomit or stool", "Unusual sleepiness or restlessness", "Difficulty breathing"],
+        "share_head": "Share with your barangay group chat",
+        "msg": ("Dengue outlook for {area} (EpiLag-PH, forecast for the week ending {week}): {status} "
+                "This week: cover water containers, empty vases and old tires, use repellent, and see a doctor after 2 days of fever. "
+                "romeo-04.github.io/epilag"),
+        "note": "Forecasts can be wrong; they show what is likely, not certain. For medical advice, ask your health center.",
+    },
+    "fil": {
+        "head": "Dengue sa inyong lugar", "muted": "para sa publiko",
+        "sub": "Simpleng pananaw mula sa EpiLag-PH, at ang magagawa ng inyong pamilya ngayong linggo.",
+        "pick": "Inyong lalawigan, rehiyon o lungsod",
+        "status": {
+            "outbreak warning": "Malamang na tumaas nang malaki ang dengue sa {area} sa susunod na {h} linggo.",
+            "watch": "Maaaring tumaas ang dengue sa {area} sa susunod na {h} linggo.",
+            "above usual": "Medyo mas mataas kaysa karaniwan ang kaso ng dengue sa {area} sa panahong ito.",
+            "normal": "Walang inaasahang di-pangkaraniwang pagtaas ng dengue sa {area} sa susunod na {h} linggo.",
+        },
+        "do_head": "Ang magagawa ng inyong pamilya ngayong linggo (4S ng DOH)",
+        "do": [("drop", "Hanapin at sirain ang pinamumugaran",
+                "Takpan ang mga drum at timba. Linggo-linggong alisan ng laman at kuskusin ang mga plorera, platito ng halaman at lumang gulong. Linisin ang alulod."),
+               ("shirt", "Protektahan ang sarili",
+                "Magsuot ng mahabang manggas at pantalon, gumamit ng mosquito repellent, at matulog sa kulambo o may screen, lalo na sa madaling-araw at dapit-hapon."),
+               ("hospital", "Magpakonsulta agad", "Dalawang araw nang may lagnat? Pumunta sa health center. Huwag hintayin ang pantal."),
+               ("bug", "Fogging sa hotspot lamang", "Kaunti lang ang naitutulong ng fogging. Mas mahalaga ang pag-alis ng pinamumugaran.")],
+        "signs_head": "Dalhin agad sa ospital kung ang may dengue ay may:",
+        "signs": ["Matinding pananakit ng tiyan", "Walang tigil na pagsusuka", "Pagdurugo ng gilagid o ilong",
+                  "Dugo sa suka o dumi", "Di-pangkaraniwang antok o pagkabalisa", "Hirap sa paghinga"],
+        "share_head": "Ibahagi sa group chat ng barangay",
+        "msg": ("Lagay ng dengue sa {area} (EpiLag-PH, forecast para sa linggong magtatapos sa {week}): {status} "
+                "Ngayong linggo: takpan ang mga lalagyan ng tubig, alisan ng laman ang mga plorera at lumang gulong, gumamit ng repellent, "
+                "at magpakonsulta pagkatapos ng 2 araw na lagnat. romeo-04.github.io/epilag"),
+        "note": "Maaaring magkamali ang forecast; ipinapakita nito ang malamang, hindi ang tiyak. Para sa payong medikal, magtanong sa health center.",
+    },
+}
+
+
+def page_public():
+    P = PUBLIC[lang]
+    hero(P["head"], P["muted"], P["sub"])
+    names = fc_h.sort_values("unit_name")
+    area = st.selectbox(P["pick"], names.unit_name, key="public_area")
+    row = fc_h[fc_h.unit_id == names[names.unit_name == area].unit_id.iloc[0]].iloc[0]
+    status = P["status"][row.level].format(area=area, h=horizon)
+    left, right = st.columns([1.2, 1], gap="medium")
+    with left, st.container(key="hero_public"):
+        html(f'<div class="kicker" style="color:rgba(255,255,255,.75)">{area} · {t["for_week"]} {row.target_week:%d %b %Y}</div>'
+             f'<div style="margin:12px 0 10px">{pill(row.level)}</div>'
+             f'<div style="font-size:28px;font-weight:700;line-height:1.2;letter-spacing:-.02em">{status}</div>')
+    with right, st.container(key="card_signs"):
+        card_title("hospital", P["signs_head"])
+        html('<div class="why-list">' + "".join(
+            f'<div><span class="dot" style="background:{LEVEL_COLOR["outbreak warning"]}"></span>{x}</div>' for x in P["signs"])
+             + "</div>")
+    html(f'<div class="hero-title" style="font-size:26px;margin-top:22px">{P["do_head"]}</div>')
+    for col, (ic, head, body) in zip(st.columns(4, gap="medium"), P["do"]):
+        with col, st.container(key=f"feat_public_{ic}"):
+            html(f'<div class="feat"><div class="feat-ic">{icon(ic, 24)}</div><div class="feat-name">{head}</div>'
+                 f'<div style="font-size:14px;line-height:1.5">{body}</div></div>')
+    with st.container(key="card_share"):
+        card_title("public", P["share_head"], P["note"])
+        st.code(P["msg"].format(area=area, week=f"{row.target_week:%d %b %Y}", status=status), language=None, wrap_lines=True)
+
+
 def page_about():
     hero(t["about_head"], t["about_muted"])
     blocks = [
@@ -1059,7 +1172,7 @@ def go_replay_story():
 
 lang = st.session_state.get("lang", "en")
 t = T[lang]
-PAGE_FNS = {"home": page_home, "map": page_map, "unit": page_unit, "budget": page_budget, "qc": page_qc,
+PAGE_FNS = {"home": page_home, "map": page_map, "unit": page_unit, "budget": page_budget, "public": page_public, "qc": page_qc,
             "proof": page_proof, "about": page_about}
 start = st.query_params.get("page")  # optional deep link, e.g. ?page=budget
 PAGES = {key: st.Page(fn, title=t[f"nav_{key}"], icon=PAGE_ICON[key], url_path=key,

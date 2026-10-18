@@ -11,7 +11,7 @@ SHOTS = [("home", "home", False, False, True), ("home_replay_2019", "home", True
          ("map_latest", "map", False, False, False), ("map_replay_2019", "map", True, True, True),
          ("unit_replay_2019", "unit", True, True, True), ("unit_latest", "unit", False, False, True),
          ("proof", "proof", False, False, True), ("budget_replay_2019", "budget", True, True, True),
-         ("qc", "qc", False, False, True)]
+         ("qc", "qc", False, False, True), ("public", "public", True, True, True)]
 
 
 def open_app(page, path, replay, provinces):

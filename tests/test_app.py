@@ -6,7 +6,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 APP = str(Path(__file__).resolve().parents[1] / "app" / "streamlit_app.py")
-PAGES = ["home", "map", "unit", "proof", "budget", "qc", "about"]
+PAGES = ["home", "map", "unit", "proof", "budget", "public", "qc", "about"]
 
 
 @pytest.mark.parametrize("mode", ["latest", "replay"])
