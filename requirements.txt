@@ -11,3 +11,4 @@ plotly
 pytest
 imageio-ffmpeg  # only for scripts/record_film.py
 qrcode  # only for the deck QR code
+pillow  # only for scripts/sprites.py

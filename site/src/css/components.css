@@ -183,3 +183,7 @@
 /* trust row under hero CTAs */
 .trust { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
 .trust span { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ------------------------------------------------------------------ mascot target halo (set by mascot.js) */
+[data-halo] { box-shadow: 0 0 0 3px var(--amber), 0 0 0 7px color-mix(in srgb, var(--amber) 30%, transparent); animation: halo 0.36s var(--ease-in-out) 4 alternate; }
+@keyframes halo { to { box-shadow: 0 0 0 3px var(--amber), 0 0 0 12px color-mix(in srgb, var(--amber) 0%, transparent); } }
