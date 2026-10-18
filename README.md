@@ -159,6 +159,14 @@ python scripts/build_web.py                        # rebuild the in-browser vers
 pytest tests                                       # 71 tests
 ```
 
+The redesigned site (in progress, see [REDESIGN_PLAN.md](REDESIGN_PLAN.md)) is built with Vite from `site/` into `docs/`:
+```bash
+cd site
+npm ci
+npm run dev        # http://localhost:5173/epilag/
+npm run build      # writes the pages into ../docs
+```
+
 <details>
 <summary>Rebuild everything from the raw data</summary>
 
@@ -187,6 +195,7 @@ reports/        backtest, early-warning, ablation and SHAP results (CSV)
 docs/           landing page, in-browser app (web/), Dengue Drill (drill/), open data (data/), methodology,
                 film (film/, demo.mp4), deck, figures, screenshots
 scripts/        figures, screenshots, film recording (record_film.py), in-browser build
+site/           source of the redesigned site (Vite); `npm run build` writes into docs/
 ```
 
 ## References

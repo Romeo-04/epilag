@@ -6,3 +6,5 @@ data/processed/
 reports_weather_log.txt
 reports/log_*.txt
 reports_streamlit.log
+site/node_modules/
+site/.vite/
