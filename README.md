@@ -25,6 +25,28 @@ The live app runs fully in your browser, with no install or account. The first l
 - **Proof:** in a replay of 2019 using only data available on 2 June, **30 of the 32 provinces** that later
   crossed the epidemic threshold were flagged 4 weeks ahead.
 
+## Play it: Dengue Drill
+**[▶ Play Dengue Drill in your browser](https://romeo-04.github.io/epilag/drill/)**. No install needed.
+
+Forecasts are easy to ignore until you feel what they are worth. Dengue Drill makes you the health officer for one of 17
+regions during the real 2019 outbreak, the year the Philippines declared a national dengue epidemic.
+
+| | |
+| --- | --- |
+| ![Dengue Drill title screen: choose one of 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the map](docs/screenshots/drill_round2.png) |
+
+1. **Pick a region.** You get ₱5 million in response teams and 8 turns starting in May 2019. Each turn is 2 weeks.
+2. **Read the rain receipt.** Before you start, a receipt lists the season's rain and the cases it brought, province by province.
+3. **Round 1: react.** You see only case reports, just as most health offices do today. Deploy teams to provinces, then end the turn.
+4. **Round 2: forecast.** Same region, same budget, now with EpiLag-PH alerts and forecast ranges on the map.
+5. **Get scored on real data.** Each team prevents a share of the cases reported 2–9 weeks after it is deployed. After
+   each round you get a mission report and a grade based on the real 2019 cases. At the end, your two rounds are
+   compared with two computer players: one that reacts to reports and one that follows EpiLag-PH.
+
+In test runs, the computer player that follows EpiLag-PH's alerts averted more cases than the one reacting to reports in
+**11 of 17 regions** (about the same in 1, fewer in 5). The game shows this result honestly, including the regions where
+early action did not pay off.
+
 ## How it works
 ```mermaid
 flowchart LR
@@ -67,12 +89,12 @@ factors behind the forecast (recent cases, season, rain, heat, humidity).
 
 ![Budget plan for the 2019 replay](docs/screenshots/budget_replay_2019.png)
 
-**Dengue Drill: feel why weeks matter.** Command your region's response with ₱5 million over 8 turns of the real
-2019 season. In round 1 you see only case reports. In round 2 you get EpiLag-PH forecasts. The real 2019 cases
-keep score. In computer test runs, following EpiLag's alerts averted more cases than reacting to reports in
-**11 of 17 regions** (about the same in 1, fewer in 5).
+**For residents: a plain-language outlook.** This week's dengue level in Filipino or English, the DOH 4S steps,
+warning signs, and a message ready to share.
 
-![Dengue Drill, round 2 with EpiLag-PH intel](docs/screenshots/drill_round2.png)
+![For residents page](docs/screenshots/public.png)
+
+**Dengue Drill:** see [Play it](#play-it-dengue-drill) above.
 
 ## Does it work?
 Every result is out of sample: each test year is forecast only from earlier years.
