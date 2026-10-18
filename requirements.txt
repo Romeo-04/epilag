@@ -10,3 +10,4 @@ streamlit>=1.40
 plotly
 pytest
 imageio-ffmpeg  # only for scripts/record_film.py
+qrcode  # only for the deck QR code

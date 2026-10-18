@@ -94,6 +94,21 @@
     .verdict div.good { background: #fff; color: var(--muted); }
     .verdict div.good b { color: var(--accent-dark); }
 
+    /* drill */
+    .drill { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; border-radius: 40px; padding: 56px clamp(24px, 5vw, 56px); color: #fff;
+      background: radial-gradient(120% 120% at 100% 0%, #0E3A26 0%, var(--deep) 60%, #03140C 100%); overflow: hidden; }
+    .drill h2 span { color: rgba(255, 255, 255, .55); }
+    .drill p { color: rgba(255, 255, 255, .8); font-size: 17px; margin-top: 14px; }
+    .drill-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
+    .drill-stats div { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); border-radius: 20px; padding: 16px 18px; }
+    .drill-stats b { display: block; font-size: 30px; letter-spacing: -.03em; }
+    .drill-stats span { font-size: 13.5px; color: rgba(255, 255, 255, .7); }
+    .drill-shot { display: block; border-radius: 24px; overflow: hidden; transform: rotate(1.5deg); transition: transform .4s var(--ease);
+      box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .6); }
+    .drill-shot:hover { transform: rotate(0) scale(1.02); }
+    .drill-shot img { display: block; width: 100%; }
+    @media (max-width: 900px) { .drill, .drill-stats { grid-template-columns: 1fr; } }
+
     /* feature cards */
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 14px;
@@ -178,7 +193,7 @@
   <header>
     <nav aria-label="Main">
       <a class="brand" href="#top"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#12804A"/><path d="M7 22h6l3-8 5 14 4-10 2 4h6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>EpiLag-PH</a>
-      <div class="links"><a href="#story">Story</a><a href="#features">Features</a><a href="#act">Action</a><a href="#proof">Proof</a><a href="#film">Film</a><a href="methodology.html">Methodology</a></div>
+      <div class="links"><a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#act">Action</a><a href="#proof">Proof</a><a href="#film">Film</a><a href="methodology.html">Methodology</a></div>
       <a class="btn primary" href="web/">Open the app
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
     </nav>
@@ -226,10 +241,26 @@
       </div>
     </section>
 
+    <section id="drill">
+      <div class="drill reveal">
+        <div>
+          <div class="kicker" style="color:#7FD9A8">Dengue Drill</div>
+          <h2>Play the 2019 outbreak. <span>Then play it again with EpiLag-PH.</span></h2>
+          <p>You are the health officer, with ₱5 million and eight turns. Round 1 shows only case reports, like today. Round 2 adds the forecasts EpiLag-PH made at the time. The real 2019 cases keep score.</p>
+          <div class="drill-stats"><div><b>11 of 17</b><span>regions where following EpiLag's alerts averted more cases than reacting to reports</span></div>
+            <div><b>8 turns</b><span>about 5 minutes; a drill for health offices and students before the rainy season</span></div></div>
+          <a class="btn primary" style="background:#fff;color:var(--accent-dark);margin-top:22px" href="drill/">Play the drill
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></a>
+        </div>
+        <a class="drill-shot" href="drill/"><img src="screenshots/drill_round2.png" alt="Dengue Drill round 2: province cards with reported cases, EpiLag forecasts and kit buttons" loading="lazy"></a>
+      </div>
+    </section>
+
     <section id="features">
       <div class="sec-head">
         <div><div class="kicker reveal">What you can do</div><h2 class="reveal" style="--d:.08s">Six tools. <span>Each one leads to an action.</span></h2></div>
-        <p class="reveal" style="--d:.15s">Every tool says what it does, why it matters, and what you can do with it. Click one to open it in the app.</p>
+        <p class="reveal" style="--d:.15s">Every tool says what it does, why it matters, and what you can do with it. Click one to open it in the app.
+          The latest forecasts are also <a href="data/">open data</a> (CSV and JSON).</p>
       </div>
       <div class="grid" id="feature-grid"></div>
     </section>
@@ -311,6 +342,7 @@
     qc: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
     proof: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
     about: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    public: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
   };
   const FEATURES = [
     ["map", "Forecast map", "Colours every area by alert level 2–8 weeks ahead, with a likely range.", "Dengue rises 4–8 weeks after the rains, and case reports arrive late.", "Pick the areas that need action first."],
@@ -318,7 +350,7 @@
     ["budget", "Action plan", "Splits your budget across areas and actions by cases averted per peso.", "Money is limited; acting where risk is highest prevents the most cases.", "Get a funded plan you can export and present."],
     ["qc", "QC barangays", "Turns the Quezon City forecast into a barangay shortlist.", "Clean-up teams work barangay by barangay.", "Send teams to the top barangays first."],
     ["proof", "Did it work?", "Forecasts past years using only earlier years, against simple rules.", "Trust is earned with honest tests, including what did not work.", "Check hit rates and false alarms before relying on it."],
-    ["about", "Data & limits", "Lists every data source, the method and the known limits.", "Decisions need to know what the numbers can and cannot say.", "Cite the sources and explain the caveats."],
+    ["public", "For residents", "Tells residents, in plain Filipino or English, whether dengue is rising where they live.", "Households remove most breeding sites; they act sooner when warned in words they understand.", "Share a ready-made advisory with your barangay group chat."],
   ];
   const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   document.getElementById("feature-grid").innerHTML = FEATURES.map(([key, name, does, why, you], i) => `

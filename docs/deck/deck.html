@@ -59,6 +59,11 @@
   .cover .foot { color: rgba(255,255,255,.7); }
   .note { background: var(--accent-soft); border-radius: 24px; padding: 24px 32px; font-size: 28px; color: var(--accent-dark); }
   .refs li { font-size: 20px; line-height: 1.4; }
+  .qr { position: absolute; right: 128px; background: #fff; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        box-shadow: 0 30px 60px -30px rgba(20, 33, 27, .45); }
+  .qr img { width: 210px; height: 210px; display: block; }
+  .qr span { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .qr small { font-size: 16px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -69,6 +74,7 @@
   <h1>EpiLag-PH</h1>
   <p>Dengue early warning for Philippine LGUs: see the outbreak in the data weeks before the hospitals fill.</p>
   <p style="font-size:30px">[Team name] · [Member 1] · [Member 2] · [Member 3] · [Member 4] · [Member 5]</p>
+  <div class="qr" style="top:50%;transform:translateY(-50%)"><img src="qr.svg" alt="QR code to romeo-04.github.io/epilag"><span>Scan to try it</span><small>romeo-04.github.io/epilag</small></div>
   <div class="foot"><span>github.com/Romeo-04/epilag</span><span>1</span></div>
 </section>
 
@@ -294,17 +300,18 @@
 
 <!-- 17 -->
 <section class="slide">
-  <div class="kicker">Local focus · Quezon City</div>
-  <h2>From a city forecast to a barangay shortlist.</h2>
+  <div class="kicker">Dengue Drill · romeo-04.github.io/epilag/drill</div>
+  <h2>Play the 2019 outbreak. Then play it again with EpiLag-PH.</h2>
   <div class="row">
-    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/qc.png"></div>
+    <div class="col" style="flex:1.6"><img class="shot" src="../screenshots/drill_round2.png"></div>
     <div class="col">
       <ul>
-        <li>Weekly forecast for the whole city (data 2010–2025).</li>
-        <li>Shared out by each barangay's share of cases in 2022–2025.</li>
-        <li>Gives BHW teams a ranked list of where to start clean-ups.</li>
+        <li>You are the health officer: ₱5 million, 8 turns, the real 2019 cases decide the score.</li>
+        <li><strong>Round 1:</strong> reports only. <strong>Round 2:</strong> plus EpiLag's forecasts, made at the time.</li>
+        <li>Following EpiLag's alerts averted more cases than reacting to reports in <strong>11 of 17 regions</strong>.</li>
+        <li>A drill for health offices and students before each rainy season.</li>
       </ul>
-      <p class="src">Barangay data is yearly, so this is a ranking, not a weekly barangay forecast.</p>
+      <p class="src">About the same in 1 region, fewer in 5. Cases averted use cautious effect ranges (Bowman et al. 2016).</p>
     </div>
   </div>
   <div class="foot"><span>EpiLag-PH</span><span>17</span></div>
@@ -323,6 +330,8 @@
     <li><strong>Earlier action:</strong> clean-ups and test kits before the peak, not after.</li>
     <li><strong>Smarter spending:</strong> money goes where it averts the most cases.</li>
     <li><strong>Fits UHC and devolved health:</strong> CESUs and provincial health boards can use it now.</li>
+    <li><strong>For residents:</strong> a plain-language outlook with the DOH 4S steps, in Filipino and English, ready to share.</li>
+    <li><strong>Open data:</strong> every forecast as CSV and JSON for researchers, newsrooms and other apps.</li>
   </ul>
   <div class="foot"><span>EpiLag-PH</span><span>18</span></div>
 </section>
@@ -358,15 +367,16 @@
 <!-- 20 -->
 <section class="slide">
   <div class="kicker">Thank you</div>
-  <div class="quote">"Hospitals see dengue a month too late. EpiLag-PH sees it in the data, and tells LGUs where to act first."</div>
+  <div class="quote" style="max-width:1300px">"Hospitals see dengue a month too late. EpiLag-PH sees it in the data, and tells LGUs where to act first."</div>
   <p>Code, data pipeline, results and app: <strong>github.com/Romeo-04/epilag</strong> · App: <strong>romeo-04.github.io/epilag/web</strong></p>
-  <ul class="refs">
+  <ul class="refs" style="max-width:1300px">
     <li>Bowman, L. R., Donegan, S., &amp; McCall, P. J. (2016). Is dengue vector control deficient in effectiveness or evidence? <i>PLOS Neglected Tropical Diseases, 10</i>(3), e0004551.</li>
     <li>Undurraga, E. A., et al. (2017). Disease burden of dengue in the Philippines: Adjusting for underreporting. <i>Am. J. Trop. Med. Hyg., 96</i>(4), 887–898.</li>
     <li>Olana, K. O. A., et al. (2025). Spatial distribution analysis and comparative forecasting of dengue resurgence in the Philippines (2025–2027). <i>Transboundary and Emerging Diseases</i>, 7480710.</li>
     <li>Romano, Y., Patterson, E., &amp; Candès, E. (2019). Conformalized quantile regression. <i>NeurIPS 32</i>.</li>
     <li>Pelitro, K. J., et al. (2026). Weekly dengue incidence linked to satellite rainfall (v1.0.0). Zenodo 19448695. · DOH Epidemiology Bureau dengue data via HDX. · ERA5 via Open-Meteo. · OCHA COD-AB/COD-PS.</li>
   </ul>
+  <div class="qr" style="bottom:96px"><img src="qr.svg" alt="QR code to romeo-04.github.io/epilag"><span>Scan to try it</span><small>app · drill · open data</small></div>
   <div class="foot"><span>EpiLag-PH · PJDSC 2026</span><span>20</span></div>
 </section>
 
