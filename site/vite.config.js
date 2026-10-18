@@ -19,6 +19,8 @@ export default defineConfig({
     outDir: resolve(here, "../docs"),
     emptyOutDir: false,
     assetsDir: "assets/build",
+    // three.js is one lazy chunk (~190 kB gzip) loaded only by pages with a 3D map
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       input: Object.fromEntries(Object.entries(PAGES).map(([name, file]) => [name, resolve(here, file)])),
     },

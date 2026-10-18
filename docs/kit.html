@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>.kit-sec{border-top:1px solid var(--line);padding:56px 0}.kit-sec>.wrap>.label{margin-bottom:18px}.row{flex-wrap:wrap;align-items:center;gap:16px;display:flex}.cols{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:start;gap:20px;display:grid}.sw{border-radius:var(--r-md);border:1px solid var(--line);flex-direction:column;justify-content:flex-end;min-height:104px;padding:16px;font-size:14px;display:flex}.sw b{font-size:16px}.tx-demo{border-radius:var(--r-md);border:1px solid var(--line);align-items:flex-end;height:160px;padding:12px;font-size:13px;font-weight:700;display:flex;overflow:hidden}.ic-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;display:grid}.ic-grid figure{border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--muted);justify-items:center;gap:8px;padding:14px 6px;font-size:12px;display:grid}</style>
-  <script type="module" crossorigin src="/epilag/assets/build/kit-Blso8tZa.js"></script>
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/kit-CjkZzdmK.css">
+  <style>.kit-sec{border-top:1px solid var(--line);padding:56px 0}.kit-sec>.wrap>.label{margin-bottom:18px}.row{flex-wrap:wrap;align-items:center;gap:16px;display:flex}.cols{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:start;gap:20px;display:grid}.sw{border-radius:var(--r-md);border:1px solid var(--line);flex-direction:column;justify-content:flex-end;min-height:104px;padding:16px;font-size:14px;display:flex}.sw b{font-size:16px}.tx-demo{border-radius:var(--r-md);border:1px solid var(--line);align-items:flex-end;height:160px;padding:12px;font-size:13px;font-weight:700;display:flex;overflow:hidden}.ic-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;display:grid}.sprite-gallery{flex-wrap:wrap;align-items:end;gap:12px;display:flex}.sprite-gallery figure{border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--muted);justify-items:center;gap:6px;padding:12px;font-size:12px;display:grid}.voxel-box{background:var(--sky-soft);height:640px;overflow:hidden}.voxel-box--sm{height:320px}.mascot-demo{border-top:1px dashed var(--line);grid-template-columns:1fr 1fr;align-items:center;gap:24px;min-height:80vh;display:grid}.mascot-demo .slot{height:260px}.ic-grid figure{border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--muted);justify-items:center;gap:8px;padding:14px 6px;font-size:12px;display:grid}</style>
+  <script type="module" crossorigin src="/epilag/assets/build/kit-BorSBPoI.js"></script>
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/kit-C7OUFxEw.css">
 </head>
 <body>
   <main id="kit">
@@ -168,6 +168,34 @@
       <div class="surface tone-soft edge-both" style="padding:48px 24px;margin-top:8px"><b>Section with stepped pixel edges</b></div>
       <div class="canopy" style="margin-top:24px"></div>
       <div class="town"></div>
+    </div></section>
+
+    <section class="kit-sec" id="sprites"><div class="wrap">
+      <div class="label">Sprites · every pose at 2×, 4× and 8× (from site/public/sprites/*.json)</div>
+      <div id="sprite-gallery" class="sprite-gallery"></div>
+      <p class="small muted" id="sprite-missing" hidden>No sprite JSON yet. Run <code>python scripts/sprites.py</code> after the sprite sheets are in <code>UI mockup/sprites/</code>.</p>
+    </div></section>
+
+    <section class="kit-sec" id="voxel"><div class="wrap">
+      <div class="label">Voxel map · provinces, forecast made 2 June 2019, 4 weeks ahead (height and colour = alert level)</div>
+      <div class="cols" style="margin-top:12px">
+        <div class="voxel-box card card--flat" id="voxel-ph" style="padding:0"></div>
+        <div style="display:grid;gap:16px;align-content:start">
+          <div class="voxel-box voxel-box--sm card card--flat" id="voxel-wv" style="padding:0"></div>
+          <p class="small muted" id="voxel-pick">Click a province.</p>
+          <ul class="legend">
+            <li data-lv="warning"><span class="sq"></span>Outbreak warning · 4 cubes</li><li data-lv="watch"><span class="sq"></span>Watch · 3</li>
+            <li data-lv="above"><span class="sq"></span>Above usual · 2</li><li data-lv="normal"><span class="sq"></span>Normal · 1</li><li data-lv="nodata"><span class="sq"></span>No forecast</li>
+          </ul>
+        </div>
+      </div>
+    </div></section>
+
+    <section class="kit-sec" aria-label="Mascot demo"><div class="wrap">
+      <div class="label">Mascot · scroll: the mosquito breaks into pixels and re-forms in each slot</div>
+      <div class="mascot-demo" id="demo-a"><div><h3>Slot A · flying</h3><p class="muted">Wing flap loop, blinks every few seconds.</p><span class="chip" id="target-a">Target A</span></div><div class="slot" id="slot-a"></div></div>
+      <div class="mascot-demo" id="demo-b"><div class="slot" id="slot-b" style="--cell:6"></div><div><h3>Slot B · pin, bigger</h3><p class="muted">Lands, then the halo pulses on its target.</p><span class="lv" data-lv="warning" id="target-b">Guimaras</span></div></div>
+      <div class="mascot-demo" id="demo-c"><div><h3>Slot C · clipboard</h3><p class="muted">Mirrored to face left.</p><span class="chip chip--soft" id="target-c">Action brief</span></div><div class="slot" id="slot-c"></div></div>
     </div></section>
 
     <footer class="wrap foot">

@@ -548,17 +548,24 @@ merged by PR).
 - **Done when** the kit page matches the mockup's component sheet and foundations sheet side by side.
 
 ### Phase 2: sprites and the mascot
-- [ ] `scripts/sprites.py` (slice, clean, grid, palette, export, preview)
-- [ ] `mosquito.json`, `frog.json`, hand-fixed
-- [ ] `pixel.js` (bake, element, cells, textures), `mascot.js` (slots, morph, scatter, flow, halo, blink)
-- [ ] `motion.js` tokens and helpers
+- [x] Sprite art from Codex (`site/briefs/sprites.md` → `UI mockup/sprites/`, 1 px = 1 art pixel, exact palette);
+      revision round requested for frog `happy`/`chew` and mosquito `sleepy`/`fly2`
+- [x] `scripts/sprites.py` (sheet → text-grid JSON, counts off-palette pixels; 0 on the first Codex set)
+- [x] `mosquito.json` (12 poses), `frog.json` (8 poses)
+- [x] `pixel.js` (load, mirror, blink, bake, cells, `<pixel-sprite>`), `mascot.js` (slots, morph, scatter, halo,
+      blink, reduced motion). Particle `flow()` into cards: add with the landing page (Phase 4)
+- [x] `motion.js` tokens and helpers
 - **Done when** the kit page shows every pose crisp at 2×/4×/8×, and a test page morphs the mosquito between 3 slots
   on scroll, including a reduced-motion version.
 
 ### Phase 3: voxel engine
-- [ ] `scripts/voxel_data.py` → `voxel_ph.json`, `voxel_regions.json`
-- [ ] `voxel.js` (instancing, pixel render target, iso camera, heights, colours, picking, rings, rain, swarm,
-      tokens, 2D fallback, pause)
+- [x] `scripts/voxel_data.py` → `site/public/geo/voxel_ph.json` (54 kB: provinces and regions at 0.05° and 0.08°,
+      QC marker) and `voxel_regions.json` (33 kB: one board per Dengue Drill region); 4 s, numpy only
+- [x] `voxel.js`: one InstancedMesh, low-resolution render scaled with `pixelated`, orthographic camera, level
+      heights with tweening, lit tops and shaded walls, picking, highlight, `project()` for HTML labels, render on
+      demand, 2D fallback without WebGL, full disposal
+- [ ] Rings, rain, swarms, tokens, drag-orbit: add with the 3D drill (Phase 6), where they are used
+- [ ] Pause when off screen: add with the landing page (Phase 4)
 - **Done when** a test page shows the 2 Jun 2019 province replay as voxels with the correct levels, picking works,
   and the 2D fallback works.
 

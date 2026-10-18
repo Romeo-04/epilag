@@ -5,6 +5,9 @@ import "./css/surfaces.css";
 import "./css/components.css";
 import { ICONS, hydrateIcons, icon } from "./lib/icons.js";
 import { TOOLS } from "./lib/content.js";
+import { loadSprite } from "./lib/pixel.js";
+import { Mascot } from "./lib/mascot.js";
+import { createVoxelMap, loadGrids } from "./lib/voxel.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -29,4 +32,36 @@ $("tools").innerHTML = TOOLS.map((t, i) => `<a class="card tool" href="#">
   <span class="go">${icon("arrowRight", { size: 24 })}</span></a>`).join("");
 
 hydrateIcons();
-document.getElementById("kit").dataset.ready = "1";
+
+// voxel maps: national provinces + Western Visayas board, coloured by the 2 Jun 2019 forecast (4 weeks ahead)
+const LV = { warning: ["#F04B2A", 4], watch: ["#F58220", 3], above: ["#F7C928", 2], normal: ["#0C7A55", 1] };
+const voxelDemo = (async () => {
+  const [grids, boards, drill] = await Promise.all([loadGrids("voxel_ph"), loadGrids("voxel_regions"),
+    fetch(`${import.meta.env.BASE_URL}drill/data.js`).then((r) => r.text())
+      .then((t) => JSON.parse(t.replace(/^window\.DRILL = /, "").trim().replace(/;$/, "")))]);
+  const values = {}, names = {};
+  drill.regions.forEach((r) => r.provinces.forEach((p) => {
+    names[p.id] = p.name;
+    const f = p.fc["2019-06-02"];
+    if (f) values[p.id] = { color: LV[f[0]][0], height: LV[f[0]][1] };
+  }));
+  const pick = (u) => { $("voxel-pick").textContent = u ? `${names[u] ?? u}: ${values[u] ? "forecast level shown" : "no forecast"}` : "Click a province."; };
+  const ph = await createVoxelMap($("voxel-ph"), { grid: grids.province, onPick: (u) => { ph.highlight(u); pick(u); } });
+  ph.setValues(values);
+  const wv = await createVoxelMap($("voxel-wv"), { grid: boards.PH06, pixel: 4, pitch: 48, onPick: (u) => { wv.highlight(u); pick(u); } });
+  wv.setValues(values);
+})().catch((e) => { $("voxel-pick").textContent = `Voxel demo failed: ${e.message}`; });
+
+// sprites: gallery of every pose, then the scroll demo
+const sheets = ["mosquito", "frog"];
+Promise.allSettled(sheets.map(loadSprite)).then(async (res) => {
+  const ok = res.map((r, i) => r.status === "fulfilled" && [sheets[i], r.value]).filter(Boolean);
+  if (!ok.length) { $("sprite-missing").hidden = false; return; }
+  $("sprite-gallery").innerHTML = ok.flatMap(([name, s]) => Object.keys(s.poses).map((pose) =>
+    `<figure>${[2, 4, 8].map((k) => `<pixel-sprite sprite="${name}" pose="${pose}" scale="${k}"></pixel-sprite>`).join("")}<figcaption>${name} · ${pose}</figcaption></figure>`)).join("");
+  if (!ok.some(([n]) => n === "mosquito")) return;
+  const m = await Mascot.create("mosquito");
+  m.register({ id: "a", section: $("demo-a"), slot: $("slot-a"), frames: ["fly1", "fly2"], target: $("target-a") });
+  m.register({ id: "b", section: $("demo-b"), slot: $("slot-b"), pose: "pin", target: $("target-b") });
+  m.register({ id: "c", section: $("demo-c"), slot: $("slot-c"), pose: "clipboard", flip: true, target: $("target-c") });
+}).finally(() => voxelDemo.finally(() => { $("kit").dataset.ready = "1"; }));
