@@ -5,9 +5,175 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>EpiLag-PH kit</title>
-  <script type="module" crossorigin src="/epilag/assets/build/kit-D2claz2r.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>.kit-sec{border-top:1px solid var(--line);padding:56px 0}.kit-sec>.wrap>.label{margin-bottom:18px}.row{flex-wrap:wrap;align-items:center;gap:16px;display:flex}.cols{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:start;gap:20px;display:grid}.sw{border-radius:var(--r-md);border:1px solid var(--line);flex-direction:column;justify-content:flex-end;min-height:104px;padding:16px;font-size:14px;display:flex}.sw b{font-size:16px}.tx-demo{border-radius:var(--r-md);border:1px solid var(--line);align-items:flex-end;height:160px;padding:12px;font-size:13px;font-weight:700;display:flex;overflow:hidden}.ic-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;display:grid}.ic-grid figure{border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--muted);justify-items:center;gap:8px;padding:14px 6px;font-size:12px;display:grid}</style>
+  <script type="module" crossorigin src="/epilag/assets/build/kit-Blso8tZa.js"></script>
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/kit-CjkZzdmK.css">
 </head>
 <body>
-  <main id="kit"><h1>EpiLag-PH component kit</h1></main>
+  <main id="kit">
+    <header class="wrap" style="padding-top:32px">
+      <nav class="nav" aria-label="Kit">
+        <a class="brand" href="#"><span class="lg"><i data-icon="logo" data-size="32"></i></span>EpiLag-PH</a>
+        <div class="nav__links"><a href="#foundations" aria-current="true">Foundations</a><a href="#icons">Icons</a><a href="#controls">Controls</a><a href="#data">Data</a><a href="#console">Console</a><a href="#surfaces">Surfaces</a></div>
+        <a class="btn btn--primary btn--sm" href="#">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+      </nav>
+      <div style="padding:56px 0 40px">
+        <div class="label">Component kit · not linked from the site</div>
+        <h1 style="margin-top:14px">Rain starts the clock.<br><span class="em">We read what comes next.</span></h1>
+        <p class="lead" style="margin-top:18px">Every token, icon, surface and component in one place, to check against <code>UI mockup/</code> before pages are built.</p>
+      </div>
+    </header>
+
+    <section class="kit-sec" id="foundations"><div class="wrap">
+      <div class="label">Colour · core brand</div>
+      <div class="cols" id="sw-core" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+      <div class="label" style="margin-top:32px">Colour · alert status</div>
+      <div class="cols" id="sw-level" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+      <div class="label" style="margin-top:32px">Type · Inter Tight (Nimbus Sans is AGPL on the web; see REDESIGN_PLAN.md D6)</div>
+      <div class="cols">
+        <div><div class="display">Display 800</div><p class="muted small" style="margin-top:6px">56–72 px · tight leading</p></div>
+        <div><h2>Heading 800</h2><h3 style="margin-top:12px">Title 700</h3><p class="lead" style="margin-top:12px">Lead. Dengue risk builds in the gap between changing weather and hospital reports.</p>
+          <p style="margin-top:12px">Body 17 px. EpiLag-PH forecasts dengue cases 2–8 weeks ahead from recent cases, the season and rain.</p>
+          <p class="label" style="margin-top:12px">Section label · tracked</p></div>
+      </div>
+    </div></section>
+
+    <section class="kit-sec" id="icons"><div class="wrap">
+      <div class="label">Icons · 12-grid UI (24 px), 16-grid art (48 px)</div>
+      <div class="ic-grid" id="ic-ui"></div>
+      <div class="ic-grid" id="ic-art" style="margin-top:12px"></div>
+    </div></section>
+
+    <section class="kit-sec" id="controls"><div class="wrap">
+      <div class="label">Buttons</div>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="#">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+        <a class="btn btn--ghost" href="#"><span class="disc"><i data-icon="play" data-size="12"></i></span>Watch the film</a>
+        <a class="btn btn--ghost btn--sm" href="#">Methodology</a>
+      </div>
+      <div class="label" style="margin-top:28px">Chips and levels</div>
+      <div class="row">
+        <span class="chip">Week 0</span><span class="chip chip--soft">With EpiLag-PH</span><span class="chip chip--amber">+2–4 weeks</span><span class="chip chip--dark">Today</span>
+        <span class="lv" data-lv="warning">Outbreak warning</span><span class="lv" data-lv="watch">Watch</span><span class="lv" data-lv="above">Above usual</span><span class="lv" data-lv="normal">Normal</span><span class="lv" data-lv="nodata">No data</span>
+      </div>
+      <div class="label" style="margin-top:28px">Trust row</div>
+      <div class="trust"><span><i data-icon="alert" data-size="24"></i>Early warning</span><span><i data-icon="residents" data-size="32"></i>Local action</span><span><i data-icon="areaDetail" data-size="32"></i>Healthier communities</span></div>
+    </div></section>
+
+    <section class="kit-sec" id="data"><div class="wrap">
+      <div class="cols">
+        <div class="card">
+          <div class="label">Forecast legend</div>
+          <ul class="legend" style="margin-top:12px">
+            <li data-lv="warning"><span class="sq"></span>Outbreak warning</li><li data-lv="watch"><span class="sq"></span>Watch</li>
+            <li data-lv="above"><span class="sq"></span>Above usual</li><li data-lv="normal"><span class="sq"></span>Normal</li><li data-lv="nodata"><span class="sq"></span>No data</li>
+          </ul>
+          <div style="margin-top:16px" class="strip"><span class="dots"><span class="sq sq--round" data-lv="warning"></span><span class="sq sq--round" data-lv="watch"></span><span class="sq sq--round" data-lv="above"></span><span class="sq sq--round" data-lv="normal"></span></span><b class="nums">16</b> Normal</div>
+        </div>
+        <div class="card">
+          <div class="label">Priority locations</div>
+          <div style="margin-top:6px">
+            <div class="prio" data-lv="warning"><span class="rank">1</span><div><div class="name">Guimaras</div><div class="fc nums">35 (15–65) · <span class="lv-text">Outbreak warning</span></div></div><span class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+            <div class="prio" data-lv="watch"><span class="rank">2</span><div><div class="name">Iloilo</div><div class="fc nums">62 (28–112) · <span class="lv-text">Watch</span></div></div><span class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+            <div class="prio" data-lv="above"><span class="rank">3</span><div><div class="name">Capiz</div><div class="fc nums">48 (20–90) · <span class="lv-text">Above usual</span></div></div><span class="bar"><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+          </div>
+        </div>
+        <div style="display:grid;gap:12px">
+          <div class="evidence evidence--alert"><span class="disc"><i data-icon="alert" data-size="24"></i></span><div><b class="nums">30 of 32</b><span>outbreaks flagged 4 weeks ahead</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="didItWork" data-size="32"></i></span><div><b class="nums">79–100%</b><span>outbreak starts caught at watch</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="areaDetail" data-size="32"></i></span><div><b class="nums">70–92%</b><span>likely-range coverage, target near 80%</span></div></div>
+          <div class="evidence evidence--note"><span class="disc"><i data-icon="info" data-size="24"></i></span><div><span>Weather adds modest value in some years and little or none in others.</span></div></div>
+        </div>
+      </div>
+
+      <div class="label" style="margin-top:40px">Six tools</div>
+      <div class="cols" id="tools"></div>
+
+      <div class="cols" style="margin-top:28px">
+        <div class="callout"><b>There's a gap between changing weather and hospital reports.</b> EpiLag-PH helps close it.</div>
+        <div class="data-badge"><i data-icon="database" data-size="32"></i><div class="lines"><i></i><i></i></div>
+          <span class="file-tag"><i data-icon="file" data-size="48"></i><span>CSV</span></span><span class="file-tag"><i data-icon="file" data-size="48"></i><span>JSON</span></span><i data-icon="downloadBox" data-size="32"></i></div>
+      </div>
+
+      <div class="label" style="margin-top:40px">Timeline rail</div>
+      <div class="rail rail--on" style="--n:4">
+        <div class="stop on"><span class="node"></span><b>Today</b><span>Detect early signals</span></div>
+        <div class="stop on"><span class="node"></span><b>Week 0</b><span>Alert on rising risk</span></div>
+        <div class="stop"><span class="node"></span><b>1–4 weeks</b><span>Guide local preparation</span></div>
+        <div class="stop"><span class="node"></span><b>4–8 weeks</b><span>Fewer cases, less strain</span></div>
+      </div>
+      <div class="row" style="margin-top:20px"><span class="bracket">+2–4 weeks</span><span class="arrow-dash" style="width:160px"></span></div>
+
+      <div class="cols" style="margin-top:40px">
+        <div class="brief brief--tilt">
+          <div class="brief__head"><span class="brand"><span class="lg" style="width:32px;height:32px;border-radius:9px"><i data-icon="logo" data-size="16"></i></span></span><div><div class="small muted">EpiLag-PH</div><h4>Guimaras Action Brief</h4></div></div>
+          <div class="meta nums">Forecast: 35 cases · Likely range: 15–65<br>Week ending 30 June 2019</div>
+          <div class="sec"><i data-icon="forecastMap" data-size="16"></i>Priority areas</div>
+          <ul><li>Rising risk in urban barangays</li><li>Higher risk near water containers</li></ul>
+          <div class="sec"><i data-icon="actionPlan" data-size="16"></i>Recommended actions</div>
+          <ul><li>Intensify clean-up drives in priority barangays</li><li>Distribute and promote container covers</li><li>Prepare supplies for the upper forecast (65 cases)</li></ul>
+        </div>
+        <div class="window">
+          <div class="window__bar"><span class="brand" style="font-size:14px"><span class="lg" style="width:24px;height:24px;border-radius:7px"><i data-icon="logo" data-size="16"></i></span>EpiLag-PH</span>
+            <div class="window__tabs"><span aria-current="page">Overview</span><span>Forecast Map</span><span>Area Detail</span><span>Action Plan</span></div></div>
+          <div class="window__body"><b>Dengue risk forecast</b><div class="small muted">Forecast made 2 June 2019 · 2–8 weeks ahead</div>
+            <div style="height:140px;margin-top:12px;border-radius:var(--r-md)" class="surface tone-sky tx-contour"></div></div>
+        </div>
+      </div>
+    </div></section>
+
+    <div class="dither" aria-hidden="true"></div>
+    <section class="surface tone-night tx-rain sf-subtle" id="console" style="padding:56px 0"><div class="wrap">
+      <div class="label">Console frame · dark</div>
+      <div class="cols" style="margin-top:16px">
+        <div class="console">
+          <div class="console__bar"><span>Dengue Drill · Western Visayas (2019)</span><span class="chip chip--intel">Round 2 · With EpiLag-PH</span></div>
+          <div class="console__grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="panel"><div class="k">Budget</div><div class="v nums">₱5M</div></div>
+            <div class="panel"><div class="k">Week</div><div class="v nums">6 of 8</div><div class="k">2 Jun – 29 Sep</div></div>
+            <div class="panel"><div class="k">Cases this week</div><div class="v nums">35</div><div class="d">▲ 25%</div></div>
+          </div>
+          <div class="chart-surface" style="height:90px;margin-top:12px"></div>
+        </div>
+        <div style="display:grid;gap:14px">
+          <div class="scenario" role="group" aria-label="Show level">
+            <button aria-pressed="true" data-lv="warning"><span class="sq sq--round"></span>Outbreak warning</button>
+            <button data-lv="watch"><span class="sq sq--round"></span>Watch</button>
+            <button data-lv="above"><span class="sq sq--round"></span>Above usual</button>
+            <button data-lv="normal"><span class="sq sq--round"></span>Normal</button>
+          </div>
+          <div class="actions">
+            <div class="action"><span class="tick"></span>Response team: clean-up, covers, info<b>₱500K</b></div>
+          </div>
+          <div class="status-tile" data-lv="warning"><span class="ring"></span>Outbreak warning</div>
+          <div class="row" style="gap:22px"><span class="token"><i data-icon="check" data-size="24"></i></span><span class="token token--amber"><i data-icon="alert" data-size="24"></i></span><span class="token token--red"><i data-icon="close" data-size="24"></i></span></div>
+          <div class="btn-row"><a class="btn btn--light" href="#">Play the drill <i data-icon="arrowRight" data-size="24"></i></a><a class="btn btn--dark-ghost" href="#"><span class="disc"><i data-icon="play" data-size="12"></i></span>See how it works</a></div>
+        </div>
+      </div>
+    </div></section>
+    <div class="dither dither--up" aria-hidden="true"></div>
+
+    <section class="kit-sec" id="surfaces"><div class="wrap">
+      <div class="label">Surfaces and textures</div>
+      <div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="tx-demo surface tone-paper tx-field sf-bold">field</div>
+        <div class="tx-demo surface tone-paper tx-tracks sf-bold">tracks</div>
+        <div class="tx-demo surface tone-paper tx-contour">contour</div>
+        <div class="tx-demo surface tone-sky tx-rain sf-bold">rain</div>
+      </div>
+      <div class="label" style="margin-top:32px">Edges and strips</div>
+      <div class="surface tone-soft edge-both" style="padding:48px 24px;margin-top:8px"><b>Section with stepped pixel edges</b></div>
+      <div class="canopy" style="margin-top:24px"></div>
+      <div class="town"></div>
+    </div></section>
+
+    <footer class="wrap foot">
+      <a class="brand" href="#"><span class="lg"><i data-icon="logo" data-size="32"></i></span>EpiLag-PH</a>
+      <a href="#"><i data-icon="file" data-size="32"></i>Methodology</a><a href="#"><i data-icon="database" data-size="32"></i>Open data</a><a href="#"><i data-icon="external" data-size="24"></i>Source code</a>
+    </footer>
+  </main>
 </body>
 </html>
