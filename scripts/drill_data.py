@@ -9,6 +9,8 @@ import json
 import sys
 from pathlib import Path
 
+import math
+
 import numpy as np
 import pandas as pd
 
@@ -23,6 +25,45 @@ KIT_PESOS, PESOS_PER_PERSON, KITS, MAX_SHARE = 500_000, 15.0, 10, 0.30
 EFFECT = (0.10, 0.30, 0.50)
 
 
+BOARD_W, BOARD_H = 1000, 760  # SVG board each region is fitted into
+
+
+def outlines(geo: dict, ids: list) -> dict:
+    """Province outlines as SVG paths, fitted into the board (equirectangular, longitude scaled by cos(lat))."""
+    feats = {f["id"]: f for f in geo["features"] if f["id"] in ids}
+    rings = {}
+    for k, f in feats.items():
+        g = f["geometry"]
+        polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
+        rings[k] = [poly[0] for poly in polys]
+    pts = [pt for rs in rings.values() for r in rs for pt in r]
+    if not pts:
+        return {}
+    lat0 = sum(p[1] for p in pts) / len(pts)
+    kx = math.cos(math.radians(lat0))
+    x0, x1 = min(p[0] for p in pts) * kx, max(p[0] for p in pts) * kx
+    y0, y1 = min(p[1] for p in pts), max(p[1] for p in pts)
+    scale = min((BOARD_W - 80) / (x1 - x0), (BOARD_H - 80) / (y1 - y0))
+    ox, oy = (BOARD_W - (x1 - x0) * scale) / 2, (BOARD_H - (y1 - y0) * scale) / 2
+    xy = lambda lon, lat: (ox + (lon * kx - x0) * scale, oy + (y1 - lat) * scale)
+    out = {}
+    for k, rs in rings.items():
+        d, big = "", max(rs, key=len)
+        for r in rs:
+            path, last = [], None
+            for lon, lat in r:
+                x, y = xy(lon, lat)
+                if last is None or abs(x - last[0]) + abs(y - last[1]) > 1.2:
+                    path.append((round(x, 1), round(y, 1)))
+                    last = (x, y)
+            if len(path) >= 3:
+                d += "M" + "L".join(f"{x:g},{y:g}" for x, y in path) + "Z"
+        cx = sum(xy(*q)[0] for q in big) / len(big)
+        cy = sum(xy(*q)[1] for q in big) / len(big)
+        out[k] = {"d": d, "cx": round(cx), "cy": round(cy)}
+    return out
+
+
 def level(q50, q90, alert, epidemic):
     return "warning" if q50 > epidemic else "watch" if q90 > epidemic else "above" if q50 > alert else "normal"
 
@@ -35,6 +76,7 @@ def main() -> None:
     bt = bt[bt.horizon == HORIZON].assign(origin=lambda d: d.target_week - pd.Timedelta(weeks=HORIZON))
 
     thr = thresholds(hist[hist.week < "2019-01-01"])
+    geo = json.loads((ROOT / "app" / "data" / "province.geojson").read_text())
     woy = pd.Series(SEASON.isocalendar().week.astype(int).clip(upper=52).values, index=SEASON)
     regions = []
     for (rid, rname), g in units.groupby(["region_id", "region_name"]):
@@ -61,6 +103,9 @@ def main() -> None:
                           "epi": [None if pd.isna(v) else round(float(v), 1) for v in epi],
                           "usual": [None if pd.isna(v) else round(float(v), 1) for v in usual], "fc": fc})
         if len(provs) >= 3:
+            shapes = outlines(geo, [q["id"] for q in provs])
+            for q in provs:
+                q.update(shapes.get(q["id"], {"d": "", "cx": BOARD_W // 2, "cy": BOARD_H // 2}))
             regions.append({"id": rid, "name": rname, "provinces": provs})
 
     data = {"weeks": [d.strftime("%Y-%m-%d") for d in SEASON], "turns": [d.strftime("%Y-%m-%d") for d in TURNS],
