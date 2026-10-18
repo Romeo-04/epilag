@@ -79,11 +79,11 @@
 /* evidence badge: icon disc, big number, caption */
 .evidence { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
 .evidence .disc { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; flex: none; background: var(--forest-soft); color: var(--forest); }
-.evidence b { display: block; font-size: 30px; line-height: 1; letter-spacing: -.03em; font-weight: 800; }
-.evidence span { font-size: 14px; color: var(--muted); }
+.evidence div > b { display: block; font-size: 30px; line-height: 1; letter-spacing: -.03em; font-weight: 800; }
+.evidence div > span { font-size: 14px; color: var(--muted); }
 .evidence--alert { background: #FDEAE5; border-color: transparent; }
 .evidence--alert .disc { background: var(--lv-warning); color: #fff; }
-.evidence--alert b { color: #B42A10; }
+.evidence--alert div > b { color: #B42A10; }
 .evidence--note { background: var(--amber-soft); border-color: transparent; }
 .evidence--note .disc { background: var(--amber); color: var(--ink); }
 

@@ -19,12 +19,16 @@ OUT = ROOT / "site" / "public" / "sprites"
 PALETTE = {
     "K": "#071711", "D": "#1F3320", "G": "#3D6B35", "H": "#6E9A4A", "B": "#F2E3B3", "A": "#F5A51C",
     "W": "#FFFFFF", "L": "#D5E3DA", "M": "#A8BFB2", "T": "#E5604F", "R": "#F04B2A",
+    # props only
+    "S": "#BFE2EC", "s": "#7FB9CB", "O": "#C8553D", "F": "#F3EEE0",
 }
 # name, frame size, anchor (x, y), pose names in sheet order, how to close the eyes for a blink
 SHEETS = {
     "mosquito": ((32, 32), (16, 18), ["fly1", "fly2", "turn", "dash", "pin", "alert", "clipboard", "search", "front",
                                       "happy", "check", "sleepy"], {"W": "D"}),
     "frog": ((48, 40), (24, 39), ["peek", "watch", "watchClose", "idle", "strike", "gulp", "chew", "happy"], {"W": "G"}),
+    "props": ((48, 48), (24, 47), ["cloud", "sun", "house", "container", "residents", "hospital", "ambulance", "tree",
+                                   "school", "broom", "clinicBag", "people"], {}),
 }
 
 RGB = {k: tuple(int(v[i:i + 2], 16) for i in (1, 3, 5)) for k, v in PALETTE.items()}

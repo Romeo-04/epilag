@@ -570,10 +570,16 @@ merged by PR).
   and the 2D fallback works.
 
 ### Phase 4: landing page
-- [ ] Sections 0–10 (section 8) with their motion and mascot slots
-- [ ] Hero loop and the live preview window (from `docs/web/data`)
-- [ ] Pinned problem section (desktop) and mobile version
-- [ ] Finale (frog catches the mosquito)
+- [x] Sections 0–10 (section 8) with their motion and mascot slots (`site/index.html`, `site/src/landing/`)
+- [x] Hero loop and the live preview window, from `scripts/landing_data.py` → `site/public/data/replay_2019-06-02.json`
+      (same method as the app's replay). The backtest has 4- and 8-week horizons only, so the timeline shows
+      +4 and +8 weeks (the mockup's +2 is not available). Priority list is computed (Guimaras, Capiz, Zamboanga del
+      Sur at 4 weeks), not the mockup's example. The "30 of 32" claim is recomputed from the data (30/32 at 4 weeks).
+- [x] Pinned problem section (desktop) and scrubbed mobile version
+- [x] Finale (frog catches the mosquito; "Again" replays; end pose under reduced motion)
+- [x] Props sheet from Codex (12 props, 48×48) for the problem chain, hero and action steps
+- [x] Checked at 1440 px and 390 px: no horizontal scroll, no console errors or failed requests; reduced motion
+      shows every section (only the finale's "Again" button stays hidden)
 - **Done when** it matches the final mockup at 1440 px, works at 390 px, the reduced-motion version reads fully, and
   every number matches the README.
 

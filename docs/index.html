@@ -3,375 +3,335 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EpiLag-PH · See dengue coming. Act weeks earlier.</title>
-  <meta name="description" content="Dengue early warning for Philippine LGUs: forecasts 2-8 weeks ahead, alert levels, action checklists and budget plans.">
+  <title>EpiLag-PH · Rain starts the clock</title>
+  <meta name="description" content="EpiLag-PH forecasts dengue cases 2–8 weeks ahead for every Philippine province, region and Quezon City, and turns each alert into a checklist and a budget plan.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/epilag/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #ECEFED; --surface: #FFFFFF; --surface-2: #F3F6F4; --line: #E2E8E4; --ink: #14211B; --muted: #5B6B63; --soft: #8A9891;
-      --accent: #12804A; --accent-dark: #0B5E36; --accent-soft: #E2F2E9; --deep: #062417;
-      --warn: #D23B30; --watch: #EE8A2A; --above: #F2C14E; --ease: cubic-bezier(.2, .7, .2, 1);
-    }
-    * { box-sizing: border-box; margin: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.5; }
-    a { color: inherit; }
-    a:focus-visible, button:focus-visible { outline: 3px solid rgba(18, 128, 74, .4); outline-offset: 3px; border-radius: 12px; }
-    .wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
-
-    /* nav */
-    header { position: sticky; top: 16px; z-index: 20; }
-    nav { display: flex; align-items: center; gap: 16px; background: rgba(255, 255, 255, .86); backdrop-filter: blur(14px); border: 1px solid var(--line);
-      border-radius: 999px; padding: 10px 10px 10px 18px; box-shadow: 0 1px 2px rgba(16, 24, 20, .05); animation: drop .6s var(--ease) both; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -.02em; text-decoration: none; margin-right: auto; }
-    .links { display: flex; gap: 2px; background: var(--surface-2); padding: 4px; border-radius: 999px; }
-    .links a { padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; transition: background .2s, color .2s; }
-    .links a:hover { background: var(--surface); color: var(--ink); }
-    .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 22px; border-radius: 999px; font-size: 15px; font-weight: 700;
-      text-decoration: none; transition: transform .2s var(--ease), box-shadow .2s var(--ease), background .2s; border: 0; cursor: pointer; }
-    .btn.primary { background: var(--accent); color: #fff; }
-    .btn.primary:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 12px 24px -12px rgba(20, 33, 27, .45); }
-    .btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-    .btn.ghost:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -14px rgba(20, 33, 27, .35); }
-    .btn svg { width: 18px; height: 18px; }
-
-    /* hero */
-    .hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: center; padding: 72px 0 64px; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line);
-      font-size: 13px; font-weight: 600; color: var(--muted); }
-    .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: pulse 1.8s ease-out infinite; }
-    h1 { font-size: clamp(44px, 6vw, 76px); line-height: 1.02; letter-spacing: -.045em; font-weight: 700; margin: 20px 0 18px; }
-    h1 span { color: var(--soft); font-weight: 600; }
-    .lead { font-size: 19px; color: var(--muted); max-width: 52ch; }
-    .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-    .stage { position: relative; }
-    .frame { border-radius: 24px; overflow: hidden; background: #fff; box-shadow: 0 50px 100px -40px rgba(20, 33, 27, .35), 0 0 0 1px rgba(20, 33, 27, .06);
-      animation: rise 1s var(--ease) .15s both; }
-    .frame .bar { height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
-    .frame .bar i { width: 10px; height: 10px; border-radius: 50%; background: #D3DBD6; }
-    .frame .bar span { margin-left: 12px; font-size: 12px; color: var(--muted); background: #fff; border-radius: 999px; padding: 3px 12px; }
-    .frame .shot { height: 440px; overflow: hidden; }
-    .frame img { width: 100%; display: block; animation: scrollshot 18s cubic-bezier(.45, 0, .25, 1) 1.2s infinite alternate; }
-    @keyframes scrollshot { 0%, 12% { transform: translateY(0); } 88%, 100% { transform: translateY(calc(-100% + 440px)); } }
-    .float { position: absolute; background: #fff; border-radius: 20px; padding: 14px 18px; box-shadow: 0 24px 48px -20px rgba(20, 33, 27, .3);
-      border: 1px solid var(--line); display: flex; gap: 12px; align-items: center; font-size: 14px; animation: rise .8s var(--ease) both, bob 6s ease-in-out infinite; }
-    .float b { display: block; font-size: 22px; letter-spacing: -.02em; }
-    .float small { color: var(--muted); }
-    .float .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none; }
-    .f1 { left: -36px; top: 70px; animation-delay: .7s, 0s; }
-    .f2 { right: -24px; bottom: 60px; animation-delay: .95s, 1.5s; }
-    .f3 { left: 30px; bottom: -26px; animation-delay: 1.2s, 3s; background: var(--accent); color: #fff; border: 0; }
-    .f3 small { color: rgba(255, 255, 255, .8); }
-
-    /* sections */
-    section { padding: 72px 0; }
-    .sec-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
-    h2 { font-size: clamp(32px, 4vw, 48px); letter-spacing: -.035em; line-height: 1.08; font-weight: 700; }
-    h2 span { color: var(--soft); font-weight: 600; }
-    .sec-head p { color: var(--muted); max-width: 46ch; font-size: 17px; }
-    .kicker { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-
-    /* story */
-    .story { background: radial-gradient(120% 120% at 80% 0%, #0E3A26 0%, var(--deep) 60%, #03140C 100%); color: #fff; border-radius: 40px; padding: 64px clamp(24px, 5vw, 64px); overflow: hidden; position: relative; }
-    .story h2 span { color: rgba(255, 255, 255, .55); }
-    .story .kicker { color: #7FD9A8; }
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 48px; position: relative; }
-    .steps::before { content: ""; position: absolute; left: 32px; right: 32px; top: 31px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .1); }
-    .steps::after { content: ""; position: absolute; left: 32px; right: 32px; top: 31px; height: 4px; border-radius: 4px; transform: scaleX(0); transform-origin: left;
-      background: linear-gradient(90deg, #1FA463, var(--above), var(--watch), var(--warn)); transition: transform 2.4s var(--ease) .2s; }
-    .steps.in::after { transform: scaleX(1); }
-    .step { position: relative; z-index: 1; }
-    .step .bub { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: #0B3321; border: 2px solid rgba(255, 255, 255, .18); }
-    .step:first-child .bub { background: var(--accent); border-color: var(--accent); }
-    .step:last-child .bub { border-color: var(--warn); }
-    .step svg { width: 28px; height: 28px; }
-    .step b { display: block; font-size: 19px; margin-top: 16px; }
-    .step span { font-size: 14px; color: rgba(255, 255, 255, .6); }
-    .verdict { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 44px; }
-    .verdict div { flex: 1 1 280px; border-radius: 22px; padding: 22px 24px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); font-size: 16px; color: rgba(255, 255, 255, .8); }
-    .verdict div b { display: block; color: #fff; font-size: 18px; margin-bottom: 4px; }
-    .verdict div.good { background: #fff; color: var(--muted); }
-    .verdict div.good b { color: var(--accent-dark); }
-
-    /* drill */
-    .drill { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; border-radius: 40px; padding: 56px clamp(24px, 5vw, 56px); color: #fff;
-      background: radial-gradient(120% 120% at 100% 0%, #0E3A26 0%, var(--deep) 60%, #03140C 100%); overflow: hidden; }
-    .drill h2 span { color: rgba(255, 255, 255, .55); }
-    .drill p { color: rgba(255, 255, 255, .8); font-size: 17px; margin-top: 14px; }
-    .drill-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
-    .drill-stats div { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); border-radius: 20px; padding: 16px 18px; }
-    .drill-stats b { display: block; font-size: 30px; letter-spacing: -.03em; }
-    .drill-stats span { font-size: 13.5px; color: rgba(255, 255, 255, .7); }
-    .drill-shot { display: block; border-radius: 24px; overflow: hidden; transform: rotate(1.5deg); transition: transform .4s var(--ease);
-      box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .6); }
-    .drill-shot:hover { transform: rotate(0) scale(1.02); }
-    .drill-shot img { display: block; width: 100%; }
-    @media (max-width: 900px) { .drill, .drill-stats { grid-template-columns: 1fr; } }
-
-    /* feature cards */
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 14px;
-      transition: transform .3s var(--ease), box-shadow .3s var(--ease); text-decoration: none; }
-    a.card:hover { transform: translateY(-6px); box-shadow: 0 28px 50px -28px rgba(20, 33, 27, .3); }
-    .card .ic { width: 52px; height: 52px; border-radius: 16px; background: var(--accent-soft); color: var(--accent-dark); display: grid; place-items: center; transition: transform .3s var(--ease); }
-    a.card:hover .ic { transform: rotate(-8deg) scale(1.08); }
-    .card .ic svg { width: 24px; height: 24px; }
-    .card h3 { font-size: 21px; letter-spacing: -.02em; }
-    .card dl { display: grid; gap: 6px; }
-    .card dt { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
-    .card dd { font-size: 15px; color: var(--ink); }
-    .card dd.you { color: var(--accent-dark); font-weight: 600; }
-    .card .go { margin-top: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--accent-dark); }
-    .card .go svg { width: 16px; height: 16px; transition: transform .25s var(--ease); }
-    a.card:hover .go svg { transform: translate(3px, -3px); }
-
-    /* action plan */
-    .plan { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; }
-    .plan .hero-card { border-radius: 28px; padding: 30px; color: #fff; position: relative; overflow: hidden;
-      background: radial-gradient(120% 120% at 100% 0%, #1FA463 0%, var(--accent) 45%, #0A4F2E 100%); }
-    .plan .hero-card::after { content: ""; position: absolute; width: 320px; height: 320px; right: -110px; top: -130px; border-radius: 50%; border: 1.5px dashed rgba(255, 255, 255, .2); animation: spin 26s linear infinite; }
-    .plan .hero-card .pill { display: inline-flex; gap: 6px; align-items: center; padding: 5px 12px; border-radius: 999px; background: var(--warn); font-size: 13px; font-weight: 700; }
-    .plan .hero-card h3 { font-size: 30px; letter-spacing: -.03em; margin: 16px 0 8px; }
-    .plan .hero-card p { color: rgba(255, 255, 255, .85); font-size: 15px; }
-    .rows { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 10px 26px; }
-    .rowx { display: grid; grid-template-columns: 110px 1.2fr 1fr; gap: 18px; padding: 18px 0; border-top: 1px solid var(--line); align-items: start; }
-    .rowx:first-child { border-top: 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-bottom: 8px; }
-    .rowx .when { font-weight: 700; font-size: 14px; }
-    .rowx .do { font-size: 15px; }
-    .rowx .gives { font-size: 14px; color: var(--accent-dark); background: var(--accent-soft); border-radius: 14px; padding: 9px 13px; }
-
-    /* proof */
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 28px; }
-    .stat.dark { background: var(--ink); color: #fff; border: 0; }
-    .stat b { display: block; font-size: 58px; letter-spacing: -.045em; line-height: 1; font-weight: 800; }
-    .stat b small { font-size: 26px; color: var(--soft); font-weight: 700; margin-left: .12em; }
-    .stat p { margin-top: 12px; color: var(--muted); font-size: 15px; }
-    .stat.dark p { color: rgba(255, 255, 255, .7); }
-    .honest { margin-top: 20px; display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; border-radius: 20px; background: #FFF6E5; color: #5C3D00; font-size: 15px; }
-
-    /* film + gallery */
-    .film { border-radius: 32px; overflow: hidden; background: var(--deep); box-shadow: 0 50px 100px -50px rgba(20, 33, 27, .45); }
-    .film video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--deep); }
-    .gallery { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(300px, 42%); gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
-    .gallery figure { scroll-snap-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; }
-    .gallery .imgbox { height: 300px; overflow: hidden; border-bottom: 1px solid var(--line); }
-    .gallery img { width: 100%; display: block; transition: transform 4s var(--ease); }
-    .gallery figure:hover img { transform: translateY(calc(-100% + 300px)); }
-    .gallery figcaption { padding: 16px 20px; font-size: 14px; color: var(--muted); }
-    .gallery figcaption b { color: var(--ink); display: block; font-size: 16px; }
-
-    footer { padding: 48px 0 64px; color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
-    .end { text-align: center; padding: 80px 24px; border-radius: 40px; color: #fff; position: relative; overflow: hidden;
-      background: radial-gradient(110% 130% at 85% 0%, #22B06B 0%, var(--accent) 45%, #0A4F2E 100%); }
-    .end h2 { font-size: clamp(36px, 5vw, 60px); }
-    .end h2 span { color: rgba(255, 255, 255, .7); }
-    .end .btn.primary { background: #fff; color: var(--accent-dark); margin-top: 28px; }
-
-    /* motion */
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: var(--d, 0s); }
-    .reveal.in { opacity: 1; transform: none; }
-    @keyframes rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
-    @keyframes drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
-    @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(210, 59, 48, .55); } 100% { box-shadow: 0 0 0 9px rgba(210, 59, 48, 0); } }
-    @media (max-width: 900px) {
-      .hero, .plan { grid-template-columns: 1fr; } .grid, .stats { grid-template-columns: 1fr; } .links { display: none; }
-      .steps { grid-template-columns: repeat(2, 1fr); } .steps::before, .steps::after { display: none; }
-      .rowx { grid-template-columns: 1fr; gap: 6px; } .f1 { left: 8px; } .f2 { right: 8px; } .gallery { grid-auto-columns: 85%; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-      .reveal { opacity: 1; transform: none; }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    // decide before first paint whether the pixel intro plays (once per session; ?intro forces it)
+    try {
+      var force = /[?&]intro\b/.test(location.search), still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!still && (force || !sessionStorage.getItem("el-intro"))) document.documentElement.classList.add("intro-pending");
+    } catch (e) {}
+  </script>
+  <script type="module" crossorigin src="/epilag/assets/build/index-Clav00Fo.js"></script>
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-CMSmMS4B.js">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/voxel-DKz1GV6B.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-BvGQPq15.css">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <nav aria-label="Main">
-      <a class="brand" href="#top"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#12804A"/><path d="M7 22h6l3-8 5 14 4-10 2 4h6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>EpiLag-PH</a>
-      <div class="links"><a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#act">Action</a><a href="#proof">Proof</a><a href="#film">Film</a><a href="methodology.html">Methodology</a></div>
-      <a class="btn primary" href="web/">Open the app
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="intro" aria-hidden="true">
+    <div class="intro__center">
+      <div class="intro__tile"><div class="intro__tile-bg"></div><i data-icon="logo" data-size="96"></i></div>
+      <div class="intro__word">EpiLag-PH</div>
+      <div class="intro__badge">Act weeks earlier.</div>
+    </div>
+    <button class="intro__skip" type="button" tabindex="-1">Skip intro</button>
+  </div>
+
+  <header class="top wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="#top" data-nav-mark><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span></a>
+      <div class="nav__links">
+        <a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#action">Action</a><a href="#proof">Proof</a><a href="#film">Film</a><a href="methodology.html">Methodology</a>
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
     </nav>
   </header>
 
-  <main id="top">
-    <div class="hero">
-      <div>
-        <span class="eyebrow"><i></i>PJDSC 2026 · Trace the Pattern, Target the Cure</span>
-        <h1>See dengue coming. <span>Act weeks earlier.</span></h1>
-        <p class="lead">EpiLag-PH forecasts dengue cases 2–8 weeks ahead for every province, region and Quezon City, flags areas heading
-          for an outbreak, and turns each alert into a checklist and a budget plan.</p>
-        <div class="cta">
-          <a class="btn primary" href="web/">Open the app
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
-          <a class="btn ghost" href="#film"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>Watch the film</a>
-          <a class="btn ghost" href="methodology.html">Methodology</a>
-          <a class="btn ghost" href="deck/EpiLag-PH_deck.pdf">Slides</a>
-          <a class="btn ghost" href="https://github.com/Romeo-04/epilag">Code</a>
+  <main id="main">
+    <!-- ============================================================ hero -->
+    <section class="hero surface tone-paper tx-field sf-subtle" id="top" aria-labelledby="hero-title">
+      <div class="wrap hero__grid">
+        <div class="hero__copy" data-hero-copy>
+          <div class="label">Dengue early warning · Philippines</div>
+          <h1 id="hero-title" class="hero__title">Rain starts the clock.<br><span class="em">We read what comes next.</span></h1>
+          <p class="lead">EpiLag-PH forecasts dengue cases 2–8 weeks ahead for every province, region and Quezon City, from recent cases, the season and rain, so health offices can act before hospitals fill up.</p>
+          <div class="btn-row">
+            <a class="btn btn--primary" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+            <a class="btn btn--ghost" href="#film"><span class="disc"><i data-icon="play" data-size="12"></i></span>Watch the film</a>
+          </div>
+          <div class="trust">
+            <span><i data-icon="alert" data-size="24"></i>Early warning</span>
+            <span><i data-icon="residents" data-size="32"></i>Local action</span>
+            <span><i data-icon="didItWork" data-size="32"></i>Tested on past outbreaks</span>
+          </div>
         </div>
-      </div>
-      <div class="stage">
-        <div class="frame"><div class="bar"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web</span></div>
-          <div class="shot"><img src="screenshots/map_replay_2019.png" alt="EpiLag-PH forecast map replaying 2 June 2019: provinces in outbreak warning and watch, with a priority list"></div></div>
-        <div class="float f1"><span class="ic" style="background:#FDE7E5;color:var(--warn)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/></svg></span><div><b><span data-count="30">30</span> of 32</b><small>outbreaks flagged 4 weeks ahead</small></div></div>
-        <div class="float f2"><span class="ic" style="background:var(--accent-soft);color:var(--accent-dark)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></span><div><b>₱5M plan</b><small>where each peso averts the most cases</small></div></div>
-        <div class="float f3"><div><b>Week 0</b><small>warns from this week's rain and cases</small></div></div>
-      </div>
-    </div>
 
-    <section id="story" style="padding-top:24px">
-      <div class="story">
-        <div class="kicker reveal">The problem</div>
-        <h2 class="reveal" style="--d:.08s">Dengue follows the rain. <span>Reports follow the hospitals.</span></h2>
-        <div class="steps reveal" id="steps" style="--d:.15s">
-          <div class="step"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/></svg></div><b>Rain and heat</b><span>week 0</span></div>
-          <div class="step"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9M9 7.13v-1a3 3 0 1 1 6 0v1M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg></div><b>Mosquitoes multiply</b><span>+1–2 weeks</span></div>
-          <div class="step"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div><b>People get sick</b><span>+2–4 weeks</span></div>
-          <div class="step"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6v4M14 14h-4M14 18h-4M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/></svg></div><b>Hospitals report</b><span>+4–8 weeks</span></div>
-        </div>
-        <div class="verdict">
-          <div class="reveal" style="--d:.1s"><b>Today</b>Clean-ups and fogging usually start when wards are already full.</div>
-          <div class="good reveal" style="--d:.2s"><b>With EpiLag-PH</b>The warning comes at week 0, from this week's rain and cases, so LGUs act before the peak.</div>
+        <div class="hero__stage">
+          <div class="mascot-slot hero__slot" id="slot-hero" style="--cell:5"></div>
+          <div class="window hero__window" data-hero-window>
+            <div class="window__bar">
+              <span class="brand brand--sm"><span class="lg"><i data-icon="logo" data-size="16"></i></span>EpiLag-PH</span>
+              <div class="window__tabs"><span aria-current="page">Overview</span><span>Forecast Map</span><span>Area Detail</span><span>Action Plan</span></div>
+            </div>
+            <div class="window__body hero__app">
+              <div class="hero__app-head">
+                <div><b>Dengue risk forecast</b><div class="small muted" id="hero-sub">Forecast made 2 June 2019 · 4 weeks ahead</div></div>
+                <ul class="legend legend--row" aria-label="Alert levels">
+                  <li data-lv="warning"><span class="sq"></span>Outbreak warning</li><li data-lv="watch"><span class="sq"></span>Watch</li>
+                  <li data-lv="above"><span class="sq"></span>Above usual</li><li data-lv="normal"><span class="sq"></span>Normal</li>
+                </ul>
+              </div>
+              <div class="hero__app-main">
+                <div class="hero__map" id="hero-map" role="img" aria-label="3D map of Philippine provinces coloured by dengue alert level, forecast made 2 June 2019"></div>
+                <div class="hero__prio">
+                  <div class="label">Priority locations</div>
+                  <div id="hero-prio"></div>
+                  <p class="small muted hero__claim" id="hero-claim"></p>
+                </div>
+              </div>
+              <div class="hero__time" role="group" aria-label="Forecast horizon">
+                <button type="button" class="hero__step" data-h="0" disabled><span class="node"></span>2 Jun 2019<small>forecast made</small></button>
+                <button type="button" class="hero__step" data-h="4" aria-pressed="true"><span class="node"></span>+4 weeks<small id="t4"></small></button>
+                <button type="button" class="hero__step" data-h="8" aria-pressed="false"><span class="node"></span>+8 weeks<small id="t8"></small></button>
+                <a class="btn btn--primary btn--sm hero__more" href="web/?page=map">View full map <i data-icon="arrowRight" data-size="24"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="hero__props" aria-hidden="true">
+            <pixel-sprite sprite="props" pose="tree" scale="3"></pixel-sprite>
+            <pixel-sprite sprite="props" pose="house" scale="3"></pixel-sprite>
+            <pixel-sprite sprite="props" pose="tree" scale="2"></pixel-sprite>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="drill">
-      <div class="drill reveal">
+    <!-- ============================================================ problem -->
+    <section class="problem surface tone-paper" id="story" aria-labelledby="story-title">
+      <div class="problem__pin">
+        <div class="wrap">
+          <div class="problem__head">
+            <div>
+              <div class="label">The problem</div>
+              <h2 id="story-title">Dengue follows the rain.<br><span class="em">Reports follow the hospitals.</span></h2>
+              <p class="lead">Rain and heat create mosquito breeding sites. People get sick weeks later. Cases are only reported when they reach hospitals, often 4–8 weeks after conditions have already worsened.</p>
+            </div>
+            <div class="problem__aside">
+              <div class="mascot-slot problem__slot" id="slot-problem" style="--cell:4"></div>
+              <div class="callout" id="problem-callout"><b>There's a gap between changing weather and hospital reports.</b> EpiLag-PH helps close it.</div>
+            </div>
+          </div>
+
+          <ol class="chain" aria-label="How dengue spreads after rain">
+            <li class="chain__step"><pixel-sprite sprite="props" pose="cloud" scale="2"></pixel-sprite><span class="chip chip--dark">Week 0</span><span>Rain and heat create breeding sites.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="house" scale="2"></pixel-sprite><span class="chip chip--amber">+1–2 weeks</span><span>Mosquito populations increase.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="container" scale="2"></pixel-sprite><span class="chip chip--amber">+2–4 weeks</span><span>People get sick with dengue.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="residents" scale="2"></pixel-sprite><span class="chip chip--amber">+4–8 weeks</span><span>Cases are reported as hospitals see more patients.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="hospital" scale="2"></pixel-sprite><span class="chip">Then</span><span>Hospital reports surge.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="ambulance" scale="2"></pixel-sprite><span class="chip">Then</span><span>More cases across the region.</span></li>
+          </ol>
+
+          <div class="helps">
+            <span class="chip chip--soft helps__label">Where EpiLag-PH helps</span>
+            <div class="rail" style="--n:4" id="helps-rail">
+              <div class="stop"><span class="node"></span><b>Today</b><span>Detect early signals in recent cases and rain.</span></div>
+              <div class="stop"><span class="node"></span><b>Week 0</b><span>Alert on rising risk, 2–8 weeks ahead.</span></div>
+              <div class="stop"><span class="node"></span><b>1–4 weeks</b><span>Guide local preparation and prevention.</span></div>
+              <div class="stop"><span class="node"></span><b>4–8 weeks</b><span>Fewer cases, less strain on hospitals.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ drill -->
+    <div class="dither" aria-hidden="true"></div>
+    <section class="drill surface tone-night tx-rain sf-subtle" id="drill" aria-labelledby="drill-title">
+      <div class="wrap drill__grid">
+        <div class="drill__copy">
+          <div class="label">Dengue Drill</div>
+          <h2 id="drill-title">Play the 2019 outbreak.<br><span class="em">Then play it again with EpiLag-PH.</span></h2>
+          <p class="lead">Step into the role of a health officer. You have ₱5 million, real case reports and 8 turns. Round 1 shows only the reports, like today. Round 2 adds the forecasts EpiLag-PH made at the time. The real 2019 cases keep score.</p>
+          <ul class="drill__how">
+            <li><i data-icon="forecastMap" data-size="32"></i>Pick one of 17 regions.</li>
+            <li><i data-icon="areaDetail" data-size="32"></i>Deploy response teams as cases rise.</li>
+            <li><i data-icon="didItWork" data-size="32"></i>Replay it with EpiLag-PH forecasts and compare.</li>
+          </ul>
+          <div class="drill__stats">
+            <div><b class="nums">~5</b><span>minutes to play</span></div>
+            <div><b class="nums">8</b><span>turns per round</span></div>
+            <div><b class="nums">11 of 17</b><span>regions where EpiLag's alerts beat reacting</span></div>
+          </div>
+          <div class="btn-row">
+            <a class="btn btn--light" href="drill/">Play the drill <i data-icon="arrowRight" data-size="24"></i></a>
+          </div>
+          <details class="drill__details">
+            <summary>How scoring works</summary>
+            <p>A team covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016). In 11 of 17 regions the computer player that follows EpiLag-PH averted more cases than the one that reacts to reports; about the same in 1, fewer in 5.</p>
+          </details>
+        </div>
+
+        <div class="drill__console-wrap">
+          <div class="mascot-slot drill__slot" id="slot-drill" style="--cell:4"></div>
+          <div class="console" id="drill-console">
+            <div class="console__bar"><span id="dc-title">Dengue Drill · Western Visayas (2019)</span><span class="chip chip--intel">Round 2 · With EpiLag-PH</span></div>
+            <div class="console__grid drill__panels">
+              <div class="panel"><div class="k">Budget</div><div class="v nums" id="dc-budget">₱5M</div></div>
+              <div class="panel"><div class="k">Turn</div><div class="v nums" id="dc-turn">3 of 8</div><div class="k">week ending 2 Jun</div></div>
+              <div class="panel"><div class="k">Cases this week</div><div class="v nums" id="dc-cases">–</div><div class="d" id="dc-change"></div></div>
+            </div>
+            <div class="drill__board">
+              <div class="drill__map" id="drill-map" role="img" aria-label="3D map of Western Visayas provinces coloured by the EpiLag-PH forecast for the week of 30 June 2019"></div>
+              <div class="drill__side">
+                <div class="scenario" aria-label="Forecast levels">
+                  <span data-lv="warning"><span class="sq sq--round"></span>Outbreak warning</span>
+                  <span data-lv="watch"><span class="sq sq--round"></span>Watch</span>
+                  <span data-lv="above"><span class="sq sq--round"></span>Above usual</span>
+                  <span data-lv="normal"><span class="sq sq--round"></span>Normal</span>
+                </div>
+                <div class="k drill__take">Take action</div>
+                <div class="action"><span class="tick"></span>Response team: clean-up, covers, info<b>₱500K</b></div>
+                <div class="status-tile" data-lv="warning" id="dc-status"><span class="ring"></span><span>Guimaras · Outbreak warning</span></div>
+              </div>
+            </div>
+          </div>
+          <pixel-sprite class="drill__frog" sprite="frog" frames="watch,watchClose,watch,idle" fps="1.5" scale="3" flip></pixel-sprite>
+        </div>
+      </div>
+    </section>
+    <div class="dither dither--up" aria-hidden="true"></div>
+
+    <!-- ============================================================ features -->
+    <section class="features surface tone-paper tx-tracks sf-subtle" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <div><div class="label">Features</div><h2 id="features-title">Six tools. <span class="em">Each one leads to an action.</span></h2></div>
+          <div class="mascot-slot features__slot" id="slot-features" style="--cell:3"></div>
+        </div>
+        <div class="tools" id="tools"></div>
+        <div class="opendata">
+          <div class="opendata__text"><i data-icon="database" data-size="32"></i><div><b>Open data for deeper analysis</b><span class="small muted">Every forecast as CSV and JSON, with column definitions.</span></div></div>
+          <div class="btn-row">
+            <a class="btn btn--ghost btn--sm" href="data/epilag_forecast_region_qc.csv">CSV</a>
+            <a class="btn btn--ghost btn--sm" href="data/epilag_forecast_region_qc.json">JSON</a>
+            <a class="btn btn--ghost btn--sm" href="data/">All files <i data-icon="downloadBox" data-size="32"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="town" aria-hidden="true"></div>
+    </section>
+
+    <!-- ============================================================ alert to action -->
+    <section class="alert-action surface tone-white" id="action" aria-labelledby="action-title">
+      <div class="wrap action__grid">
+        <div class="action__copy">
+          <div class="label">From alert to action</div>
+          <h2 id="action-title">Each alert comes<br><span class="em">with a plan.</span></h2>
+          <p class="lead">A forecast is just the beginning. EpiLag-PH turns each early warning into clear, practical steps for local action, and a one-page brief for the mayor.</p>
+          <div class="brief brief--tilt" id="brief">
+            <div class="brief__head"><span class="brand"><span class="lg brief__lg"><i data-icon="logo" data-size="16"></i></span></span><div><div class="small muted">EpiLag-PH</div><h4>Guimaras Action Brief</h4></div></div>
+            <div class="meta nums" id="brief-meta">Forecast: 35 cases · likely range 15–65<br>Week ending 30 June 2019</div>
+            <div class="sec"><i data-icon="forecastMap" data-size="16"></i>What to do</div>
+            <ul><li>Convene the dengue task force and barangay health teams</li><li>Issue a public advisory on the DOH 4S</li></ul>
+            <div class="sec"><i data-icon="actionPlan" data-size="16"></i>Plan for</div>
+            <ul><li>Clean-up drives and container covers in the top barangays</li><li>NS1 tests and IV fluids for the upper forecast</li></ul>
+          </div>
+        </div>
+        <div class="action__right">
+          <div class="action__case">
+            <div class="card action__card">
+              <div class="action__card-head"><b>Guimaras</b><span class="small muted">Forecast made 2 June 2019</span></div>
+              <div class="action__nums">
+                <div><b class="nums" id="g-q50">35</b><span>cases forecast for the week ending 30 June 2019</span></div>
+                <div><b class="nums" id="g-range">15–65</b><span>likely range</span></div>
+              </div>
+              <div class="action__actual"><b class="nums" id="g-actual">82</b><span>cases were reported that week</span></div>
+            </div>
+            <div class="action__map" id="action-map" role="img" aria-label="3D map of Western Visayas with Guimaras raised and highlighted"></div>
+          </div>
+          <ol class="steps">
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="people" scale="1"></pixel-sprite></span><div><b>Today</b><span>Convene the task force and issue an advisory to key barangays.</span></div></li>
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="broom" scale="1"></pixel-sprite></span><div><b>Weeks 1–2</b><span>Clean-up drives and container covers where the budget averts the most cases.</span></div></li>
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="hospital" scale="1"></pixel-sprite></span><div><b>Weeks 2–4</b><span>Stock NS1 tests and IV fluids for the upper forecast; open dengue fast lanes.</span></div></li>
+          </ol>
+          <div class="mascot-slot action__slot" id="slot-action" style="--cell:3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ film + inside the app -->
+    <section class="film surface tone-paper tx-rain sf-subtle" id="film" aria-labelledby="film-title">
+      <div class="wrap film__grid">
         <div>
-          <div class="kicker" style="color:#7FD9A8">Dengue Drill</div>
-          <h2>Play the 2019 outbreak. <span>Then play it again with EpiLag-PH.</span></h2>
-          <p>You are the health officer, with ₱5 million and eight turns. Round 1 shows only case reports, like today. Round 2 adds the forecasts EpiLag-PH made at the time. The real 2019 cases keep score.</p>
-          <div class="drill-stats"><div><b>11 of 17</b><span>regions where following EpiLag's alerts averted more cases than reacting to reports</span></div>
-            <div><b>8 turns</b><span>about 5 minutes; a drill for health offices and students before the rainy season</span></div></div>
-          <a class="btn primary" style="background:#fff;color:var(--accent-dark);margin-top:22px" href="drill/">Play the drill
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></a>
+          <div class="label">The film</div>
+          <h2 id="film-title">Can dengue be seen<br><span class="em">before hospitals fill up?</span></h2>
+          <p class="lead">Follow the signal from rain to forecast to local action, in 1:48.</p>
+          <div class="film__player"><video controls preload="none" poster="film/poster.jpg" src="demo.mp4" aria-label="EpiLag-PH film, 1 minute 48 seconds"></video></div>
         </div>
-        <a class="drill-shot" href="drill/"><img src="screenshots/drill_round2.png" alt="Dengue Drill round 2: province cards with reported cases, EpiLag forecasts and kit buttons" loading="lazy"></a>
-      </div>
-    </section>
-
-    <section id="features">
-      <div class="sec-head">
-        <div><div class="kicker reveal">What you can do</div><h2 class="reveal" style="--d:.08s">Six tools. <span>Each one leads to an action.</span></h2></div>
-        <p class="reveal" style="--d:.15s">Every tool says what it does, why it matters, and what you can do with it. Click one to open it in the app.
-          The latest forecasts are also <a href="data/">open data</a> (CSV and JSON).</p>
-      </div>
-      <div class="grid" id="feature-grid"></div>
-    </section>
-
-    <section id="act">
-      <div class="sec-head">
-        <div><div class="kicker reveal">From alert to action</div><h2 class="reveal" style="--d:.08s">Each alert comes <span>with a plan.</span></h2></div>
-        <p class="reveal" style="--d:.15s">Area detail turns an alert into a week-by-week checklist, and shows what EpiLag-PH contributes at each step. Download it as a brief for the mayor.</p>
-      </div>
-      <div class="plan">
-        <div class="hero-card reveal">
-          <span class="pill">Outbreak warning</span>
-          <h3>Guimaras, forecast made 2 June 2019</h3>
-          <p>35 cases forecast for the week ending 30 June (likely range 15–65), above the epidemic threshold. Four weeks later, 82 cases were reported.</p>
-        </div>
-        <div class="rows reveal" style="--d:.1s">
-          <div class="rowx"><span>When</span><span>Do this</span><span>EpiLag-PH gives you</span></div>
-          <div class="rowx"><span class="when">Today</span><span class="do">Convene the dengue task force and barangay health teams; issue a public advisory.</span><span class="gives">Which areas, how many cases (with a range), and the week of the peak.</span></div>
-          <div class="rowx"><span class="when">Weeks 1–2</span><span class="do">Clean-up drives and container covers in the top barangays.</span><span class="gives">The budget split by cases averted per peso, and the QC barangay shortlist.</span></div>
-          <div class="rowx"><span class="when">Weeks 2–4</span><span class="do">Stock NS1 rapid tests and IV fluids; ask hospitals to open dengue fast lanes.</span><span class="gives">The upper forecast, to size supplies for the high case.</span></div>
+        <div class="inside">
+          <div class="mascot-slot film__slot" id="slot-film" style="--cell:3"></div>
+          <div class="label">Inside the app</div>
+          <p class="small muted">Explore the tools when you're ready.</p>
+          <ul class="inside__list" id="inside"></ul>
         </div>
       </div>
     </section>
 
-    <section id="proof">
-      <div class="sec-head">
-        <div><div class="kicker reveal">Did it work?</div><h2 class="reveal" style="--d:.08s">Tested honestly. <span>No peeking at the future.</span></h2></div>
-        <p class="reveal" style="--d:.15s">Every test year was forecast only from earlier years, against two simple rules: "same week last year" and "same as this week".</p>
-      </div>
-      <div class="stats">
-        <div class="stat dark reveal"><b><span data-count="5">5</span> <small>of 6</small></b><p>test sets where it beat both simple rules, 4 weeks ahead</p></div>
-        <div class="stat reveal" style="--d:.1s"><b><span data-count="79">79</span><small>–100%</small></b><p>of outbreak starts caught 4 weeks ahead by the watch level</p></div>
-        <div class="stat reveal" style="--d:.2s"><b><span data-count="70">70</span><small>–92%</small></b><p>of real values inside the likely range (target 80%)</p></div>
-      </div>
-      <div class="honest reveal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span><b>Honest limits.</b> The watch level also raises false alarms (42–63% of warnings, 87% in one year); the stricter warning level has fewer. Weather adds little beyond recent cases and season, so EpiLag-PH runs on data LGUs already have. Province data ends in January 2021, so the province view is a replay.</span></div>
-    </section>
-
-    <section id="film">
-      <div class="sec-head">
-        <div><div class="kicker reveal">The film</div><h2 class="reveal" style="--d:.08s">The story <span>in under two minutes.</span></h2></div>
-      </div>
-      <div class="film reveal"><video controls preload="metadata" poster="film/poster.jpg" src="demo.mp4"></video></div>
-    </section>
-
-    <section>
-      <div class="sec-head"><div><div class="kicker reveal">Inside the app</div><h2 class="reveal" style="--d:.08s">Hover to scroll <span>each screen.</span></h2></div></div>
-      <div class="gallery reveal">
-        <figure><div class="imgbox"><img src="screenshots/home.png" alt="Overview page with feature cards and the action brief" loading="lazy"></div><figcaption><b>Overview</b>What each tool does and this week's action brief</figcaption></figure>
-        <figure><div class="imgbox"><img src="screenshots/map_replay_2019.png" alt="Forecast map in replay mode" loading="lazy"></div><figcaption><b>Forecast map</b>Alert levels and a priority list</figcaption></figure>
-        <figure><div class="imgbox"><img src="screenshots/unit_replay_2019.png" alt="Area detail with checklist and forecast chart" loading="lazy"></div><figcaption><b>Area detail</b>Checklist, forecast range and threshold</figcaption></figure>
-        <figure><div class="imgbox"><img src="screenshots/budget_replay_2019.png" alt="Action plan with budget split" loading="lazy"></div><figcaption><b>Action plan</b>Where each peso averts the most cases</figcaption></figure>
-        <figure><div class="imgbox"><img src="screenshots/proof.png" alt="Backtest results" loading="lazy"></div><figcaption><b>Did it work?</b>Errors, early warning and the weather test</figcaption></figure>
-        <figure><div class="imgbox"><img src="screenshots/qc.png" alt="Quezon City barangay shortlist" loading="lazy"></div><figcaption><b>QC barangays</b>From a city forecast to a shortlist</figcaption></figure>
+    <!-- ============================================================ proof -->
+    <section class="proof surface tone-white" id="proof" aria-labelledby="proof-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <div><div class="label">Evidence from real outbreaks</div><h2 id="proof-title" class="h2-sm">Tested honestly. <span class="em">No peeking at the future.</span></h2>
+            <p class="muted">Every test year was forecast only from earlier years.</p></div>
+          <div class="mascot-slot proof__slot" id="slot-proof" style="--cell:3"></div>
+        </div>
+        <div class="proof__grid">
+          <div class="evidence evidence--alert" id="proof-claim"><span class="disc"><i data-icon="alert" data-size="24"></i></span><div><b class="nums"><span data-count="30">30</span> of <span data-count="32">32</span></b><span>provinces that crossed the epidemic line were flagged 4 weeks ahead (2019 replay)</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="didItWork" data-size="32"></i></span><div><b class="nums"><span data-count="79">79</span>–100%</b><span>of outbreak starts caught at watch, 4 weeks ahead</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="areaDetail" data-size="32"></i></span><div><b class="nums"><span data-count="70">70</span>–92%</b><span>of real values inside the likely range (target 80%)</span></div></div>
+          <div class="evidence evidence--note"><span class="disc"><i data-icon="info" data-size="24"></i></span><div><span><b>Weather adds modest value</b> in some years and little or none in others. Watch also raises false alarms (42–63%).</span></div></div>
+        </div>
+        <p class="small muted proof__more"><a href="methodology.html">How it was tested</a> · <a href="web/?page=proof">See every result in the app</a></p>
       </div>
     </section>
 
-    <section>
-      <div class="end reveal">
-        <h2>Hospitals see dengue a month late. <span>EpiLag-PH sees it now.</span></h2>
-        <a class="btn primary" href="web/">Open the app
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
-        <p style="margin-top:16px;color:rgba(255,255,255,.8);font-size:14px">Runs in your browser. The first load takes about a minute.</p>
+    <!-- ============================================================ final call to action -->
+    <section class="cta surface tone-soft edge-top" aria-labelledby="cta-title">
+      <div class="wrap cta__grid">
+        <div>
+          <div class="label">Take action earlier</div>
+          <h2 id="cta-title">Hospitals see dengue a month late.<br><span class="em">EpiLag-PH sees it now.</span></h2>
+          <p class="lead">From early warning to focused action, EpiLag-PH helps communities prepare before dengue spreads.</p>
+          <div class="btn-row"><a class="btn btn--primary" href="web/">Open EpiLag-PH <i data-icon="arrowRight" data-size="24"></i></a></div>
+          <p class="small muted" style="margin-top:12px">Runs in your browser. No account needed.</p>
+          <div class="trust" style="margin-top:20px">
+            <span><i data-icon="areaDetail" data-size="32"></i>Data-driven</span><span><i data-icon="database" data-size="32"></i>Open access</span><span><i data-icon="forecastMap" data-size="32"></i>Built for the Philippines</span>
+          </div>
+        </div>
+        <div class="finale" id="finale" aria-hidden="true">
+          <pixel-sprite class="finale__mosq" sprite="mosquito" frames="fly1,fly2" fps="10" scale="3"></pixel-sprite>
+          <div class="finale__tongue"></div>
+          <pixel-sprite class="finale__frog" sprite="frog" pose="watch" scale="6"></pixel-sprite>
+          <pixel-sprite class="finale__tree" sprite="props" pose="tree" scale="3"></pixel-sprite>
+          <button type="button" class="finale__again small" tabindex="-1">Again</button>
+        </div>
       </div>
+      <div class="canopy" aria-hidden="true"></div>
     </section>
   </main>
 
-  <footer>
-    <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
-    <span><a href="https://github.com/Romeo-04/epilag">github.com/Romeo-04/epilag</a> · PJDSC 2026</span>
+  <footer class="footer">
+    <div class="wrap">
+      <div class="foot">
+        <a class="brand" href="#top"><span class="lg"><i data-icon="logo" data-size="32"></i></span>EpiLag-PH</a>
+        <a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#action">Action</a><a href="#proof">Proof</a><a href="#film">Film</a>
+      </div>
+      <div class="foot">
+        <a href="methodology.html"><i data-icon="file" data-size="32"></i>Methodology</a>
+        <a href="data/"><i data-icon="database" data-size="32"></i>Open data</a>
+        <a href="https://github.com/Romeo-04/epilag"><i data-icon="external" data-size="24"></i>Source code</a>
+        <a href="deck/EpiLag-PH_deck.pdf"><i data-icon="file" data-size="32"></i>Slides (PDF)</a>
+      </div>
+      <p class="small muted footer__credits">Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS. PJDSC 2026 · Trace the Pattern, Target the Cure.</p>
+    </div>
   </footer>
-</div>
-
-<script>
-  const ICONS = {
-    map: '<path d="M14.1 5.55a2 2 0 0 0 1.8 0l3.66-1.83A1 1 0 0 1 21 4.62v12.76a1 1 0 0 1-.55.9l-4.56 2.27a2 2 0 0 1-1.78 0l-4.22-2.1a2 2 0 0 0-1.78 0l-3.66 1.83A1 1 0 0 1 3 19.38V6.62a1 1 0 0 1 .55-.9l4.56-2.27a2 2 0 0 1 1.78 0z"/><path d="M15 5.76v15M9 3.24v15"/>',
-    unit: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
-    budget: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
-    qc: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
-    proof: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
-    about: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
-    public: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
-  };
-  const FEATURES = [
-    ["map", "Forecast map", "Colours every area by alert level 2–8 weeks ahead, with a likely range.", "Dengue rises 4–8 weeks after the rains, and case reports arrive late.", "Pick the areas that need action first."],
-    ["unit", "Area detail", "Shows the forecast against the epidemic threshold, the history, and the reasons.", "A clear reason makes an alert easier to trust and to defend to the mayor.", "Follow a week-by-week checklist and download a brief."],
-    ["budget", "Action plan", "Splits your budget across areas and actions by cases averted per peso.", "Money is limited; acting where risk is highest prevents the most cases.", "Get a funded plan you can export and present."],
-    ["qc", "QC barangays", "Turns the Quezon City forecast into a barangay shortlist.", "Clean-up teams work barangay by barangay.", "Send teams to the top barangays first."],
-    ["proof", "Did it work?", "Forecasts past years using only earlier years, against simple rules.", "Trust is earned with honest tests, including what did not work.", "Check hit rates and false alarms before relying on it."],
-    ["public", "For residents", "Tells residents, in plain Filipino or English, whether dengue is rising where they live.", "Households remove most breeding sites; they act sooner when warned in words they understand.", "Share a ready-made advisory with your barangay group chat."],
-  ];
-  const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-  document.getElementById("feature-grid").innerHTML = FEATURES.map(([key, name, does, why, you], i) => `
-    <a class="card reveal" style="--d:${(i % 3) * 0.08}s" href="web/?page=${key}">
-      <span class="ic">${svg(ICONS[key])}</span><h3>${name}</h3>
-      <dl><dt>What it does</dt><dd>${does}</dd><dt>Why it matters</dt><dd>${why}</dd><dt>You can</dt><dd class="you">${you}</dd></dl>
-      <span class="go">Open in the app ${svg('<path d="M7 7h10v10"/><path d="M7 17 17 7"/>')}</span></a>`).join("");
-
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function countUp(el) {
-    const to = +el.dataset.count, t0 = performance.now(), dur = 1300;
-    const step = now => { const k = Math.min(1, (now - t0) / dur); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
-    requestAnimationFrame(step);
-  }
-  const io = new IntersectionObserver(entries => entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    e.target.classList.add("in");
-    if (!reduce) e.target.querySelectorAll("[data-count]").forEach(countUp);
-    io.unobserve(e.target);
-  }), { threshold: 0.18 });
-  document.querySelectorAll(".reveal, #steps").forEach(el => io.observe(el));
-</script>
+
 </body>
 </html>

@@ -41,7 +41,8 @@ export class Mascot {
   /**
    * Register a slot. `section`: the element whose position decides when this slot is active. `slot`: where the
    * sprite stands (centred, feet on the slot's bottom edge; art-pixel size from the slot's --cell, default 4).
-   * `pose` or `frames` (+ `fps`): what it shows. `target`: element to halo after landing. Returns an unregister function.
+   * `pose` or `frames` (+ `fps`): what it shows. `target`: element (or function returning one) to halo after landing.
+   * Returns an unregister function.
    */
   register({ id, section, slot, pose, frames, fps = 8, flip = false, target = null }) {
     this.slots.set(id, { id, section, slot, pose, frames, fps, flip, target, cell: 0 });
@@ -156,7 +157,7 @@ export class Mascot {
     const busy = this.morphing || this.sparks.length > 0;
     const key = s ? `${s.id}|${g.x}|${g.y}|${g.cell}|${pose}|${blink}` : "none";
     if (!busy && key === this.sceneKey) {
-      if (s && t - this.landedAt > 80) this.setHalo(s.target);
+      if (s && t - this.landedAt > 80) this.setHalo(typeof s.target === "function" ? s.target() : s.target);
       return;
     }
     this.sceneKey = busy ? "" : key;
