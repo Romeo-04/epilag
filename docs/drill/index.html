@@ -44,7 +44,24 @@
     .tagline { font-size: 20px; color: var(--dim); margin: 22px 0 28px; max-width: 46ch; line-height: 1.45; }
     .tagline b { color: var(--text); }
     .label { font-family: var(--hud); letter-spacing: .14em; font-size: 12px; color: var(--faint); margin-bottom: 10px; text-transform: uppercase; }
-    .missions { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+    .mission-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .mission-head .label { margin: 0; }
+    .rail-ctl { display: flex; align-items: center; gap: 6px; font-family: var(--hud); font-size: 12px; letter-spacing: .12em; color: var(--dim); }
+    .rail-ctl output { min-width: 64px; text-align: right; margin-right: 6px; }
+    .rail-ctl output b { color: var(--go); font-weight: 700; }
+    .arrow { width: 34px; height: 34px; display: grid; place-items: center; border: 1.5px solid var(--edge-2); color: var(--text);
+      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: border-color .2s, color .2s, transform .15s var(--ease); }
+    .arrow:hover { border-color: var(--go); color: var(--go); }
+    .arrow:active { transform: scale(.92); }
+    .arrow:disabled { opacity: .35; cursor: not-allowed; border-color: var(--edge-2); color: var(--text); transform: none; }
+    .arrow:focus-visible, .mission:focus-visible { outline: 2px solid var(--go); outline-offset: 2px; }
+    .missions { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 6px; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
+      --fl: 0px; --fr: 48px; mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); }
+    .missions::-webkit-scrollbar { display: none; }
+    .missions.past-start { --fl: 48px; }
+    .missions.at-end { --fr: 0px; }
+    .m-track { position: relative; height: 3px; margin-top: 10px; background: var(--edge); overflow: hidden; }
+    .m-track i { position: absolute; inset: 0 auto 0 0; background: var(--go); transition: transform .25s var(--ease); }
     .mission { flex: none; width: 190px; scroll-snap-align: start; text-align: left; padding: 14px; background: var(--panel); border: 1.5px solid var(--edge);
       transition: border-color .2s, transform .2s var(--ease); }
     .mission:hover { transform: translateY(-3px); }
@@ -215,8 +232,14 @@
       <div class="logo-mark">Dengue<span>Drill</span></div>
       <p class="tagline">The rains are coming. You command the dengue response for your region with <b>₱5 million</b> and <b>8 turns</b>.
         Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real 2019 cases keep score.</p>
-      <div class="label">Choose your mission</div>
-      <div class="missions" id="missions" role="listbox" aria-label="Region"></div>
+      <div class="mission-head">
+        <div class="label">Choose your mission</div>
+        <div class="rail-ctl"><output id="m-count" aria-live="polite"></output>
+          <button class="arrow" id="m-prev" aria-label="Previous region"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="arrow" id="m-next" aria-label="Next region"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M9 5l7 7-7 7"/></svg></button></div>
+      </div>
+      <div class="missions" id="missions" role="listbox" aria-label="Region" tabindex="0"></div>
+      <div class="m-track" aria-hidden="true"><i id="m-thumb"></i></div>
       <div style="margin-top:22px"><button class="cta" id="start">Start mission ▸</button></div>
       <div class="how"><span><b>01</b>Click a province</span><span><b>02</b>Deploy response teams</span><span><b>03</b>End turn: 2 weeks pass</span></div>
     </div>
@@ -415,8 +438,30 @@
     const r = D.regions[regionIdx];
     $("title-map").innerHTML = r.provinces.map(p => `<path d="${p.d}"/>`).join("");
     setBugs(70, mapAnchors($("title-map"), r.provinces.map(p => [p.cx, p.cy])));
+    const n = D.regions.length, pad = v => String(v).padStart(2, "0");
+    $("m-count").innerHTML = `<b>${pad(regionIdx + 1)}</b> / ${pad(n)}`;
+    $("m-prev").disabled = regionIdx === 0; $("m-next").disabled = regionIdx === n - 1;
+    $("missions").querySelector(".sel").scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    railState();
   }
-  $("missions").addEventListener("click", e => { const b = e.target.closest(".mission"); if (!b) return; regionIdx = +b.dataset.k; sfx.click(); renderMissions(); });
+  // custom scroll indicator: thumb sized to the visible share, fades on the edges that have more cards
+  function railState() {
+    const m = $("missions"), share = m.clientWidth / m.scrollWidth, max = m.scrollWidth - m.clientWidth;
+    $("m-thumb").style.width = `${share * 100}%`;
+    $("m-thumb").style.transform = `translateX(${max > 0 ? m.scrollLeft / max * (1 / share - 1) * 100 : 0}%)`;
+    m.classList.toggle("past-start", m.scrollLeft > 4);
+    m.classList.toggle("at-end", m.scrollLeft >= max - 4);
+  }
+  function pickRegion(k) { if (k < 0 || k >= D.regions.length || k === regionIdx) return; regionIdx = k; sfx.click(); renderMissions(); }
+  $("missions").addEventListener("click", e => { const b = e.target.closest(".mission"); if (b) pickRegion(+b.dataset.k); });
+  $("missions").addEventListener("scroll", railState, { passive: true });
+  $("missions").addEventListener("keydown", e => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!step) return;
+    e.preventDefault(); pickRegion(regionIdx + step);
+  });
+  $("m-prev").addEventListener("click", () => pickRegion(regionIdx - 1));
+  $("m-next").addEventListener("click", () => pickRegion(regionIdx + 1));
+  addEventListener("resize", railState);
   renderMissions();
   document.fonts.ready.then(renderMissions);
 
