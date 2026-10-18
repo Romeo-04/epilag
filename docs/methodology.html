@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Methodology</title>
+  <meta name="description" content="How EpiLag-PH works: data engineering, features, LightGBM quantile models, honest backtests, and the step from forecast to action.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ECEFED; --surface: #FFFFFF; --surface-2: #F3F6F4; --line: #E2E8E4; --ink: #14211B; --muted: #5B6B63; --soft: #8A9891;
+      --accent: #12804A; --accent-dark: #0B5E36; --accent-soft: #E2F2E9; --deep: #062417;
+      --warn: #D23B30; --watch: #EE8A2A; --above: #F2C14E; --normal: #D3DBD6; --ease: cubic-bezier(.2, .7, .2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.55; }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid rgba(18, 128, 74, .4); outline-offset: 3px; border-radius: 10px; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+
+    header { position: sticky; top: 16px; z-index: 20; }
+    nav { display: flex; align-items: center; gap: 16px; background: rgba(255, 255, 255, .88); backdrop-filter: blur(14px); border: 1px solid var(--line);
+      border-radius: 999px; padding: 10px 10px 10px 18px; animation: drop .6s var(--ease) both; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -.02em; text-decoration: none; margin-right: auto; }
+    .brand small { font-weight: 500; font-size: 14px; color: var(--soft); }
+    .links { display: flex; gap: 2px; background: var(--surface-2); padding: 4px; border-radius: 999px; overflow-x: auto; }
+    .links a { padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; white-space: nowrap; transition: background .2s, color .2s; }
+    .links a:hover, .links a.on { background: var(--surface); color: var(--ink); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 20px; border-radius: 999px; font-size: 15px; font-weight: 700;
+      text-decoration: none; background: var(--accent); color: #fff; transition: transform .2s var(--ease), background .2s; white-space: nowrap; }
+    .btn:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    .btn svg { width: 18px; height: 18px; }
+
+    .hero { padding: 64px 0 32px; }
+    .eyebrow { display: inline-flex; padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--muted); }
+    h1 { font-size: clamp(42px, 6vw, 72px); line-height: 1.02; letter-spacing: -.045em; font-weight: 700; margin: 18px 0 16px; }
+    h1 span { color: var(--soft); font-weight: 600; }
+    .lead { font-size: 19px; color: var(--muted); max-width: 64ch; }
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .chip { padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+    .chip b { color: var(--accent-dark); }
+
+    /* pipeline */
+    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 40px; position: relative; }
+    .stage { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 20px; text-decoration: none;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+    .stage:hover { transform: translateY(-4px); box-shadow: 0 24px 44px -26px rgba(20, 33, 27, .35); }
+    .stage:not(:last-child)::after { content: ""; position: absolute; right: -12px; top: 50%; width: 10px; height: 10px; border-top: 2px solid var(--soft); border-right: 2px solid var(--soft);
+      transform: translateY(-50%) rotate(45deg); }
+    .stage .n { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-dark); font-weight: 800; }
+    .stage h3 { font-size: 18px; margin: 14px 0 8px; letter-spacing: -.02em; }
+    .stage p { font-size: 13.5px; color: var(--muted); }
+    .stage.final { color: #fff; border: 0; background: radial-gradient(120% 120% at 100% 0%, #1FA463 0%, var(--accent) 45%, #0A4F2E 100%); }
+    .stage.final .n { background: rgba(255, 255, 255, .18); color: #fff; }
+    .stage.final p { color: rgba(255, 255, 255, .85); }
+    .pipe-note { margin-top: 14px; font-size: 14px; color: var(--muted); }
+
+    /* sections */
+    section { padding: 56px 0; scroll-margin-top: 90px; }
+    .sec-head { display: grid; grid-template-columns: 1fr 1.1fr; gap: 32px; align-items: end; margin-bottom: 28px; }
+    .kicker { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    h2 { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -.035em; line-height: 1.08; font-weight: 700; }
+    h2 span { color: var(--soft); font-weight: 600; }
+    .sec-head p { color: var(--muted); font-size: 17px; }
+
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 8px 8px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th { text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 14px 18px; }
+    td { padding: 14px 18px; border-top: 1px solid var(--line); vertical-align: top; }
+    td:first-child { font-weight: 700; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    td.best { color: var(--accent-dark); font-weight: 800; }
+    td.best::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: middle; }
+    .caption { font-size: 13.5px; color: var(--muted); margin: 12px 4px 0; }
+
+    .grid { display: grid; gap: 16px; }
+    .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 22px; }
+    .card .ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-dark); margin-bottom: 14px; }
+    .card .ic svg { width: 22px; height: 22px; }
+    .card h3 { font-size: 18px; letter-spacing: -.02em; margin-bottom: 6px; }
+    .card p { font-size: 14.5px; color: var(--muted); }
+    .card .why { margin-top: 12px; font-size: 13.5px; color: var(--accent-dark); background: var(--accent-soft); border-radius: 12px; padding: 8px 12px; }
+    .list { display: grid; gap: 10px; margin-top: 16px; }
+    .list div { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; }
+    .list svg { flex: none; width: 20px; height: 20px; color: var(--accent); margin-top: 2px; }
+
+    /* lag strip */
+    .lag { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; margin-top: 14px; }
+    .lag i { height: 36px; border-radius: 8px; background: var(--accent); opacity: var(--o); transform-origin: bottom; }
+    .reveal.in .lag i { animation: grow-y .7s var(--ease) both; animation-delay: calc(var(--k) * 50ms); }
+    .lag-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 22px; }
+    .stat.dark { background: var(--ink); color: #fff; border: 0; }
+    .stat b { display: block; font-size: 44px; letter-spacing: -.045em; line-height: 1; font-weight: 800; }
+    .stat b small { font-size: 20px; color: var(--soft); margin-left: .12em; }
+    .stat p { margin-top: 10px; font-size: 14px; color: var(--muted); }
+    .stat.dark p { color: rgba(255, 255, 255, .7); }
+
+    /* alert ladder */
+    .ladder { display: grid; gap: 10px; }
+    .rung { display: grid; grid-template-columns: 200px 1fr 1.2fr; gap: 20px; align-items: center; background: var(--surface); border: 1px solid var(--line);
+      border-radius: 20px; padding: 16px 20px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; width: fit-content; }
+    .rung .rule { font-size: 14.5px; color: var(--muted); }
+    .rung .act { font-size: 14.5px; }
+    .pulse { animation: pulse 1.8s ease-out infinite; }
+
+    .note { display: flex; gap: 14px; padding: 18px 22px; border-radius: 20px; background: #FFF6E5; color: #5C3D00; font-size: 15px; margin-top: 16px; }
+    .note svg { flex: none; width: 22px; height: 22px; }
+    .end { text-align: center; padding: 64px 24px; border-radius: 36px; color: #fff; margin: 24px 0;
+      background: radial-gradient(110% 130% at 85% 0%, #22B06B 0%, var(--accent) 45%, #0A4F2E 100%); }
+    .end h2 span { color: rgba(255, 255, 255, .7); }
+    .end .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 24px; }
+    .end .btn { background: #fff; color: var(--accent-dark); }
+    .end .btn.ghost { background: rgba(255, 255, 255, .14); color: #fff; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; background: var(--surface-2); padding: 2px 6px; border-radius: 6px; }
+    footer { padding: 32px 0 56px; color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: var(--d, 0s); }
+    .reveal.in { opacity: 1; transform: none; }
+    @keyframes drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+    @keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(210, 59, 48, .5); } 100% { box-shadow: 0 0 0 9px rgba(210, 59, 48, 0); } }
+    @media (max-width: 960px) {
+      .pipeline { grid-template-columns: 1fr 1fr; } .stage::after { display: none; }
+      .sec-head, .g2, .g3, .g4, .stats { grid-template-columns: 1fr; } .rung { grid-template-columns: 1fr; gap: 8px; } .links { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <nav aria-label="Sections">
+      <a class="brand" href="./"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#12804A"/><path d="M7 22h6l3-8 5 14 4-10 2 4h6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>EpiLag-PH <small>Methodology</small></a>
+      <div class="links"><a href="#data">Data</a><a href="#features">Features</a><a href="#model">Model</a><a href="#evaluation">Evaluation</a><a href="#action">Action</a><a href="#why">Why</a></div>
+      <a class="btn" href="web/">Open the app <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <span class="eyebrow">Methodology · as of 18 Oct 2026</span>
+      <h1>How EpiLag-PH works. <span>From weekly data to a plan.</span></h1>
+      <p class="lead">EpiLag-PH forecasts weekly dengue cases 2–8 weeks ahead for 86 provinces, 17 regions and Quezon City, from recent cases and lagged rain,
+        heat and humidity. It flags areas heading for an outbreak and turns each alert into a checklist and a budget plan.</p>
+      <div class="chips"><span class="chip"><b>LightGBM</b> quantile regression</span><span class="chip"><b>Conformal</b> calibration</span><span class="chip"><b>SHAP</b> explanations</span><span class="chip"><b>No-peeking</b> backtests</span><span class="chip"><b>Knapsack</b> budget plan</span></div>
+
+      <div class="pipeline">
+        <a class="stage reveal" href="#data"><span class="n">1</span><h3>Data</h3><p>4 public sources: cases, rain, population. Cleaned and coded.</p></a>
+        <a class="stage reveal" style="--d:.08s" href="#features"><span class="n">2</span><h3>Features</h3><p>Recent cases, rain over 12 weekly lags, season, heat.</p></a>
+        <a class="stage reveal" style="--d:.16s" href="#model"><span class="n">3</span><h3>Model</h3><p>LightGBM ranges, calibrated to 80%, with SHAP reasons.</p></a>
+        <a class="stage reveal" style="--d:.24s" href="#evaluation"><span class="n">4</span><h3>Test</h3><p>Past years only, against 2 simple rules. Won 5 of 6.</p></a>
+        <a class="stage final reveal" style="--d:.32s" href="#action"><span class="n">5</span><h3>Action</h3><p>Alert levels, week-by-week checklists, budget plan.</p></a>
+      </div>
+      <p class="pipe-note">Each stage feeds the next; the test stage uses only years the model never saw.</p>
+    </div>
+
+    <section id="data">
+      <div class="sec-head">
+        <div><div class="kicker reveal">1 · Data engineering</div><h2 class="reveal">Four public sources, <span>one weekly panel.</span></h2></div>
+        <p class="reveal">Cleaned totals match the raw file exactly (2019: 441,902 cases).</p>
+      </div>
+      <div class="panel reveal">
+        <table>
+          <thead><tr><th>Source</th><th>What we use</th><th>Coverage</th></tr></thead>
+          <tbody>
+            <tr><td>DOH dengue cases via HDX (official PJDSC dataset)</td><td>Weekly cases by province</td><td>2016 – Jan 2021, 86 units</td></tr>
+            <tr><td>UPRI-NOAH Dengue–Rainfall Dataset (Zenodo 19448695)</td><td>Weekly cases and rain</td><td>17 regions (2016–2019, 2022–2025); Quezon City (2010–2025)</td></tr>
+            <tr><td>ERA5 reanalysis via Open-Meteo</td><td>Daily rain, temperature, humidity at each area's centre</td><td>Summed to weeks</td></tr>
+            <tr><td>OCHA COD-AB / COD-PS (PSA-based)</td><td>Area codes, boundaries, 2022 population</td><td>All areas</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid g4" style="margin-top:16px">
+        <div class="card reveal"><h3>Names to codes</h3><p>126 location names matched to 86 official PSGC units; typos fixed (NUEVA VISCAYA, SISQUIJOR, BASILIG).</p></div>
+        <div class="card reveal" style="--d:.06s"><h3>Consistent units</h3><p>Cities folded into provinces, NCR split into 4 districts, Maguindanao kept whole for 2016–2020.</p></div>
+        <div class="card reveal" style="--d:.12s"><h3>Bad values removed</h3><p>Deaths for 2016–2017 excluded: 586 weeks show more deaths than cases.</p></div>
+        <div class="card reveal" style="--d:.18s"><h3>Missing stays missing</h3><p>A week with no report is left empty, never set to zero.</p></div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="sec-head">
+        <div><div class="kicker reveal">2 · Feature engineering</div><h2 class="reveal">Rain turns into cases <span>4–8 weeks later.</span></h2></div>
+        <p class="reveal">So each week of rain enters the model separately, as its own lag. That lag is the "Lag" in EpiLag.</p>
+      </div>
+      <div class="grid g2">
+        <div class="card reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/></svg></div>
+          <h3>Rain, lagged week by week</h3><p>Rain in each of the last 12 weeks separately; 4-, 8- and 12-week totals; heavy-rain days.</p>
+          <div class="lag" aria-hidden="true"><i style="--o:.25;--k:0"></i><i style="--o:.3;--k:1"></i><i style="--o:.35;--k:2"></i><i style="--o:.45;--k:3"></i><i style="--o:.6;--k:4"></i><i style="--o:.75;--k:5"></i><i style="--o:.85;--k:6"></i><i style="--o:.9;--k:7"></i><i style="--o:.75;--k:8"></i><i style="--o:.55;--k:9"></i><i style="--o:.4;--k:10"></i><i style="--o:.3;--k:11"></i></div>
+          <div class="lag-axis"><span>this week</span><span>12 weeks ago</span></div>
+        </div>
+        <div class="grid" style="gap:16px">
+          <div class="card reveal" style="--d:.06s"><h3>Recent cases</h3><p>Each of the last 4 weeks; 4- and 12-week averages; trend; same week last year.</p></div>
+          <div class="card reveal" style="--d:.12s"><h3>Heat, humidity, season, population</h3><p>Lagged temperature and humidity; week of the year as a cycle, so late December sits next to early January; log population, so large and small areas share one model.</p></div>
+          <div class="card reveal" style="--d:.18s"><h3>Targets</h3><p>Cases 2, 4, 6 and 8 weeks ahead, on a log scale so large outbreaks do not dominate training.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="model">
+      <div class="sec-head">
+        <div><div class="kicker reveal">3 · Machine learning</div><h2 class="reveal">A likely range, <span>not a single number.</span></h2></div>
+        <p class="reveal">Gradient-boosted trees predict a low, middle and high case count; a calibration step makes that range honest.</p>
+      </div>
+      <div class="grid g4">
+        <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><h3>Model</h3><p>LightGBM quantile regression: one model per horizon (2/4/6/8 weeks), trained on all areas together.</p><div class="why">Fast, accurate on tables, explainable</div></div>
+        <div class="card reveal" style="--d:.06s"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18h16M7 14V9M12 16V5M17 13V8"/></svg></div><h3>Range</h3><p>10th, 50th and 90th percentiles of the coming weeks' cases, sorted so low ≤ middle ≤ high.</p><div class="why">Officers plan for the high case</div></div>
+        <div class="card reveal" style="--d:.12s"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Calibration</h3><p>Conformalized quantile regression (Romano et al. 2019): hold out the last training year, measure misses, widen the range to cover 80%.</p><div class="why">Raw ranges are too narrow on a new year</div></div>
+        <div class="card reveal" style="--d:.18s"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div><h3>Explanations</h3><p>SHAP values grouped into recent cases, season, rain by week, humidity and temperature.</p><div class="why">Shows why a forecast rose or fell</div></div>
+      </div>
+    </section>
+
+    <section id="evaluation">
+      <div class="sec-head">
+        <div><div class="kicker reveal">4 · Evaluation</div><h2 class="reveal">Tested honestly. <span>No peeking at the future.</span></h2></div>
+        <p class="reveal">Each test year is forecast by a model trained only on earlier years (2019 from 2016–2018), against two simple rules: "same week last year" and "same as this week".</p>
+      </div>
+      <div class="stats">
+        <div class="stat dark reveal"><b><span data-count="5">5</span> <small>of 6</small></b><p>test sets where it beat both rules, 4 weeks ahead</p></div>
+        <div class="stat reveal" style="--d:.06s"><b><span data-count="79">79</span><small>–100%</small></b><p>of outbreak starts caught 4 weeks ahead (watch level)</p></div>
+        <div class="stat reveal" style="--d:.12s"><b><span data-count="70">70</span><small>–92%</small></b><p>of real values inside the likely range (target 80%)</p></div>
+        <div class="stat reveal" style="--d:.18s"><b><span data-count="30">30</span> <small>of 32</small></b><p>provinces flagged 4 weeks before crossing the threshold (2 Jun 2019 replay)</p></div>
+      </div>
+      <div class="panel reveal">
+        <table>
+          <thead><tr><th>Test set</th><th class="num">EpiLag error</th><th class="num">Same week last year</th><th class="num">Same as this week</th><th class="num">Inside range</th><th class="num">Starts caught</th><th class="num">False alarms</th></tr></thead>
+          <tbody>
+            <tr><td>Provinces 2019</td><td class="num best">42</td><td class="num">64</td><td class="num">53</td><td class="num">77%</td><td class="num">87%</td><td class="num">46%</td></tr>
+            <tr><td>Provinces 2020</td><td class="num best">10</td><td class="num">86</td><td class="num">12</td><td class="num">79%</td><td class="num">83%</td><td class="num">87%</td></tr>
+            <tr><td>Regions + QC 2019</td><td class="num best">174</td><td class="num">255</td><td class="num">213</td><td class="num">70%</td><td class="num">79%</td><td class="num">42%</td></tr>
+            <tr><td>Regions + QC 2023</td><td class="num">58</td><td class="num">158</td><td class="num best">56</td><td class="num">92%</td><td class="num">100%</td><td class="num">63%</td></tr>
+            <tr><td>Regions + QC 2024</td><td class="num best">101</td><td class="num">229</td><td class="num">149</td><td class="num">80%</td><td class="num">80%</td><td class="num">42%</td></tr>
+            <tr><td>Regions + QC 2025</td><td class="num best">86</td><td class="num">283</td><td class="num">108</td><td class="num">78%</td><td class="num">100%</td><td class="num">54%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">Error = mean absolute error in cases per area-week, 4 weeks ahead; the lowest in each row is marked. Caught and false alarms are for the watch level.</p>
+      <div class="note reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>
+        <span><b>Weather test.</b> Retraining without any weather inputs changed error by −12% to +11%: about +2% on average for regions, about 0% for provinces. Most of the skill comes from recent cases and season, and we report that openly.</span></div>
+    </section>
+
+    <section id="action">
+      <div class="sec-head">
+        <div><div class="kicker reveal">5 · From forecast to action</div><h2 class="reveal">Every alert comes <span>with a plan.</span></h2></div>
+        <p class="reveal">Thresholds per area and week of year, from earlier years only: <b>usual</b> = the average for that week (±2 weeks); <b>epidemic</b> = that average + 2 standard deviations.</p>
+      </div>
+      <div class="ladder">
+        <div class="rung reveal"><span class="pill" style="background:var(--warn);color:#fff"><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:#fff"></span>Outbreak warning</span><span class="rule">Middle forecast above the epidemic threshold</span><span class="act">Convene the task force; clean-ups in top barangays; prepare hospitals</span></div>
+        <div class="rung reveal" style="--d:.06s"><span class="pill" style="background:var(--watch);color:#3A1E04">Watch</span><span class="rule">High forecast above the epidemic threshold</span><span class="act">Inspect breeding sites; check test-kit and IV-fluid stocks</span></div>
+        <div class="rung reveal" style="--d:.12s"><span class="pill" style="background:var(--above);color:#3D2F05">Above usual</span><span class="rule">Middle forecast above usual</span><span class="act">Remind households of the DOH 4S</span></div>
+        <div class="rung reveal" style="--d:.18s"><span class="pill" style="background:var(--normal);color:#2B3A33">Normal</span><span class="rule">Middle forecast at or below usual</span><span class="act">Keep routine surveillance and clean-ups</span></div>
+      </div>
+      <div class="grid g3" style="margin-top:16px">
+        <div class="card reveal"><h3>Action checklist</h3><p>Week-by-week steps for each level (today, weeks 1–2, weeks 2–4) and what EpiLag-PH contributes to each, downloadable as an action brief.</p></div>
+        <div class="card reveal" style="--d:.06s"><h3>Budget allocation</h3><p>A fractional knapsack ranks area-and-action pairs by cases averted per peso. Effects from Bowman et al. (2016): 10–50% for clean-ups with container covers, 0–10% for fogging. Costs are editable.</p></div>
+        <div class="card reveal" style="--d:.12s"><h3>Quezon City barangays</h3><p>The city forecast is shared out by each barangay's share of cases in 2022–2025, because barangay data is yearly only.</p></div>
+      </div>
+    </section>
+
+    <section id="why">
+      <div class="sec-head">
+        <div><div class="kicker reveal">6 · Why these choices</div><h2 class="reveal">Simple, explainable, <span>honestly tested.</span></h2></div>
+        <p class="reveal">Past PJDSC champions won with models like XGBoost and K-means used well, not with deep learning.</p>
+      </div>
+      <div class="grid g3">
+        <div class="card reveal"><h3>Explainable over exotic</h3><p>LightGBM with SHAP can be defended in front of judges and health officers.</p></div>
+        <div class="card reveal" style="--d:.06s"><h3>Ranges over single numbers</h3><p>A health office stocks supplies for the high case.</p></div>
+        <div class="card reveal" style="--d:.12s"><h3>No peeking</h3><p>Every result comes from years the model never saw, compared with simple rules, with false alarms and the weak weather effect reported.</p></div>
+      </div>
+      <div class="end reveal">
+        <h2>All of it is open. <span>Check every number.</span></h2>
+        <p style="color:rgba(255,255,255,.85);margin-top:12px">Code for each stage in <code style="background:rgba(255,255,255,.15);color:#fff">src/</code>, every result as CSV in <code style="background:rgba(255,255,255,.15);color:#fff">reports/</code>, and the full write-up in the README.</p>
+        <div class="row"><a class="btn" href="web/">Open the app</a><a class="btn ghost" href="https://github.com/Romeo-04/epilag">Code on GitHub</a><a class="btn ghost" href="./">Back to overview</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
+    <span>EpiLag-PH · PJDSC 2026</span>
+  </footer>
+</div>
+
+<script>
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function countUp(el) {
+    const to = +el.dataset.count, t0 = performance.now(), dur = 1300;
+    const step = now => { const k = Math.min(1, (now - t0) / dur); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("in");
+    if (!reduce) e.target.querySelectorAll("[data-count]").forEach(countUp);
+    io.unobserve(e.target);
+  }), { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+  // highlight the section in view
+  const links = [...document.querySelectorAll(".links a")];
+  const spy = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+  }), { rootMargin: "-40% 0px -55% 0px" });
+  document.querySelectorAll("section[id]").forEach(s => spy.observe(s));
+</script>
+</body>
+</html>
