@@ -26,16 +26,17 @@
       if (!still && (force || !sessionStorage.getItem("el-intro"))) document.documentElement.classList.add("intro-pending");
     } catch (e) {}
   </script>
-  <script type="module" crossorigin src="/epilag/assets/build/index-HcHc68Vc.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/index-Dz6C8o73.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-BDKxYwEy.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/mascot-CiRxFV3F.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/motion-Cbmd2PWW.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
-  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-BfSZQAZg.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-CGR-sNJU.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/rules-V9QtZgne.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-CFvGQbnW.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-B7KwzOTG.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -64,9 +65,8 @@
     <section class="hero surface tone-paper tx-field sf-subtle" id="top" aria-labelledby="hero-title">
       <div class="wrap hero__grid">
         <div class="hero__copy" data-hero-copy>
-          <div class="label">PJDSC 2026 · Trace the Pattern, Target the Cure</div>
-          <h1 id="hero-title" class="hero__title">Rain starts the clock.<br><span class="em">We read what comes next.</span></h1>
-          <p class="lead">Dengue risk builds in the gap between changing weather and hospital reports. EpiLag-PH forecasts cases 2–8 weeks ahead, helping communities prepare before the surge becomes visible.</p>
+          <h1 id="hero-title" class="hero__title">Forecast dengue <span class="em">early.</span></h1>
+          <p class="lead">Dengue risk builds weeks before hospitals report it. EpiLag-PH forecasts cases 2–8 weeks ahead for every province, so communities can act before the surge.</p>
           <div class="hero__ctas">
             <a class="btn btn--primary" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
             <a class="hero__link" href="#film"><span class="disc"><i data-icon="play" data-size="12"></i></span>Watch the film</a>
@@ -122,30 +122,30 @@
             <div>
               <div class="label">The problem</div>
               <h2 id="story-title">Dengue follows the rain.<br><span class="em">Reports follow the hospitals.</span></h2>
-              <p class="lead">Rain and heat create mosquito breeding sites. People get sick weeks later. Cases are only reported when they reach hospitals, often 4–8 weeks after conditions have already worsened.</p>
+              <p class="lead">Rain breeds mosquitoes. People fall sick weeks later. Hospitals report it 4–8 weeks late.</p>
             </div>
             <div class="problem__aside">
-              <div class="callout" id="problem-callout"><b>There's a gap between changing weather and hospital reports.</b> EpiLag-PH helps close it.</div>
+              <div class="callout" id="problem-callout"><b>Weather changes weeks before reports do.</b> EpiLag-PH closes the gap.</div>
             </div>
           </div>
 
           <div class="mascot-slot problem__slot" id="slot-problem"></div>
           <ol class="chain" aria-label="How dengue spreads after rain">
-            <li class="chain__step"><pixel-sprite sprite="props" pose="cloud" scale="2"></pixel-sprite><span class="chip chip--dark">Week 0</span><span>Rain and heat create breeding sites.</span></li>
-            <li class="chain__step"><pixel-sprite sprite="props" pose="house" scale="2"></pixel-sprite><span class="chip chip--amber">+1–2 weeks</span><span>Mosquito populations increase.</span></li>
-            <li class="chain__step"><pixel-sprite sprite="props" pose="container" scale="2"></pixel-sprite><span class="chip chip--amber">+2–4 weeks</span><span>People get sick with dengue.</span></li>
-            <li class="chain__step"><pixel-sprite sprite="props" pose="residents" scale="2"></pixel-sprite><span class="chip chip--amber">+4–8 weeks</span><span>Cases are reported as hospitals see more patients.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="cloud" scale="2"></pixel-sprite><span class="chip chip--dark">Week 0</span><span>Rain and heat breed mosquitoes.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="house" scale="2"></pixel-sprite><span class="chip chip--amber">+1–2 weeks</span><span>Mosquitoes multiply.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="container" scale="2"></pixel-sprite><span class="chip chip--amber">+2–4 weeks</span><span>People get sick.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="residents" scale="2"></pixel-sprite><span class="chip chip--amber">+4–8 weeks</span><span>Hospitals report cases.</span></li>
             <li class="chain__step"><pixel-sprite sprite="props" pose="hospital" scale="2"></pixel-sprite><span class="chip">Then</span><span>Hospital reports surge.</span></li>
-            <li class="chain__step"><pixel-sprite sprite="props" pose="ambulance" scale="2"></pixel-sprite><span class="chip">Then</span><span>More cases across the region.</span></li>
+            <li class="chain__step"><pixel-sprite sprite="props" pose="ambulance" scale="2"></pixel-sprite><span class="chip">Then</span><span>Cases spread.</span></li>
           </ol>
 
           <div class="helps">
             <span class="chip chip--soft helps__label">Where EpiLag-PH helps</span>
             <div class="rail" style="--n:4" id="helps-rail">
-              <div class="stop"><span class="node"></span><b>Today</b><span>Detect early signals in recent cases and rain.</span></div>
-              <div class="stop"><span class="node"></span><b>Week 0</b><span>Alert on rising risk, 2–8 weeks ahead.</span></div>
-              <div class="stop"><span class="node"></span><b>1–4 weeks</b><span>Guide local preparation and prevention.</span></div>
-              <div class="stop"><span class="node"></span><b>4–8 weeks</b><span>Fewer cases, less strain on hospitals.</span></div>
+              <div class="stop"><span class="node"></span><b>Today</b><span>Spot early signs in cases and rain.</span></div>
+              <div class="stop"><span class="node"></span><b>Week 0</b><span>Flag risk 2–8 weeks ahead.</span></div>
+              <div class="stop"><span class="node"></span><b>1–4 weeks</b><span>Prepare and prevent.</span></div>
+              <div class="stop"><span class="node"></span><b>4–8 weeks</b><span>Fewer cases, calmer hospitals.</span></div>
             </div>
           </div>
         </div>
@@ -158,50 +158,50 @@
       <div class="wrap drill__grid">
         <div class="drill__copy">
           <div class="label">Dengue Drill</div>
-          <h2 id="drill-title">Play the 2019 outbreak.<br><span class="em">Then play it again with EpiLag-PH.</span></h2>
-          <p class="lead">Step into the role of a health officer. You have ₱5 million, real case reports and 8 turns. Round 1 shows only the reports, like today. Round 2 adds the forecasts EpiLag-PH made at the time. The real 2019 cases keep score.</p>
-          <ul class="drill__how">
-            <li><i data-icon="forecastMap" data-size="32"></i>Pick one of 17 regions.</li>
-            <li><i data-icon="areaDetail" data-size="32"></i>Deploy response teams as cases rise.</li>
-            <li><i data-icon="didItWork" data-size="32"></i>Replay it with EpiLag-PH forecasts and compare.</li>
-          </ul>
+          <h2 id="drill-title">Beat the 2019 <span class="em">outbreak.</span></h2>
+          <p class="lead">You are the health officer: ₱5 million, 8 turns. Real 2019 cases keep score.</p>
+          <ol class="drill__how" id="drill-how" aria-label="How the drill works">
+            <li class="dh-step"><span class="dh-ic"><i data-icon="forecastMap" data-size="32"></i></span><div><b>Pick</b><span>Choose one of 17 regions.</span></div></li>
+            <li class="dh-step"><span class="dh-ic"><i data-icon="areaDetail" data-size="32"></i></span><div><b>Deploy</b><span>Send response teams as reports rise.</span></div></li>
+            <li class="dh-step"><span class="dh-ic"><i data-icon="didItWork" data-size="32"></i></span><div><b>Replay</b><span>Play again with EpiLag-PH forecasts. Compare.</span></div></li>
+          </ol>
           <div class="drill__stats">
             <div><b class="nums">~5</b><span>minutes to play</span></div>
-            <div><b class="nums">8</b><span>turns per round</span></div>
-            <div><b class="nums">11 of 17</b><span>regions where EpiLag's alerts beat reacting</span></div>
+            <div><b class="nums">11 of 17</b><span>regions where forecasts beat reacting</span></div>
           </div>
           <div class="btn-row">
             <a class="btn btn--light" href="drill/">Play the drill <i data-icon="arrowRight" data-size="24"></i></a>
           </div>
           <details class="drill__details">
             <summary>How scoring works</summary>
-            <p>A team covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016). In 11 of 17 regions the computer player that follows EpiLag-PH averted more cases than the one that reacts to reports; about the same in 1, fewer in 5.</p>
+            <p>Each team covers about 33,000 people and prevents a share of cases reported 2–9 weeks later: 10–50%, central 30% (Bowman et al. 2016). Following EpiLag-PH beat reacting to reports in 11 of 17 regions, tied in 1, lost in 5.</p>
           </details>
         </div>
 
         <div class="drill__console-wrap">
           <div class="mascot-slot drill__slot" id="slot-drill"></div>
-          <div class="console" id="drill-console">
-            <div class="console__bar"><span id="dc-title">Dengue Drill · Western Visayas (2019)</span><span class="chip chip--intel">Round 2 · With EpiLag-PH</span></div>
-            <div class="console__grid drill__panels">
-              <div class="panel"><div class="k">Budget</div><div class="v nums" id="dc-budget">₱5M</div></div>
-              <div class="panel"><div class="k">Turn</div><div class="v nums" id="dc-turn">3 of 8</div><div class="k">week ending 2 Jun</div></div>
-              <div class="panel"><div class="k">Cases this week</div><div class="v nums" id="dc-cases">–</div><div class="d" id="dc-change"></div></div>
+          <!-- a still of the game screen (HUD, board, provinces, ticker); main.js plays pick, deploy, replay on it -->
+          <div class="dgame" id="drill-console">
+            <div class="dgame__hud">
+              <div class="dgame__who"><span class="chip" id="dc-round">Round 1 · No intel</span><b id="dc-region">Western Visayas</b></div>
+              <ol class="dgame__timeline" id="dc-timeline" aria-label="Turns"></ol>
+              <div class="dgame__budget"><span class="k">Budget</span><b class="nums" id="dc-budget">₱5.0M</b><span class="dgame__pips" id="dc-tokens"></span></div>
             </div>
-            <div class="drill__board">
-              <div class="drill__map" id="drill-map" role="img" aria-label="3D map of Western Visayas provinces coloured by the EpiLag-PH forecast for the week of 30 June 2019"></div>
-              <div class="drill__side">
-                <div class="scenario" aria-label="Forecast levels">
-                  <span data-lv="warning"><span class="sq sq--round"></span>Outbreak warning</span>
-                  <span data-lv="watch"><span class="sq sq--round"></span>Watch</span>
-                  <span data-lv="above"><span class="sq sq--round"></span>Above usual</span>
-                  <span data-lv="normal"><span class="sq sq--round"></span>Normal</span>
+            <div class="dgame__field">
+              <div class="dgame__board">
+                <div class="drill__map" id="drill-map" role="img" aria-label="3D map of the Western Visayas provinces"></div>
+                <div class="dgame__stats">
+                  <div class="dgame__stat"><span class="k">Cases this week</span><b class="nums" id="dc-cases">–</b><span class="d" id="dc-change"></span></div>
+                  <div class="dgame__stat"><span class="k">Outbreak pressure</span><b id="dc-press">–</b><span class="dgame__meter"><i id="dc-meter"></i></span></div>
                 </div>
-                <div class="k drill__take">Take action</div>
-                <div class="action"><span class="tick"></span>Response team: clean-up, covers, info<b>₱500K</b></div>
-                <div class="status-tile" data-lv="warning" id="dc-status"><span class="ring"></span><span>Guimaras · Outbreak warning</span></div>
+                <div class="dgame__legend" id="dc-legend"></div>
+              </div>
+              <div class="dgame__side">
+                <div class="dgame__head"><span class="k">Provinces</span><span class="k" id="dc-left"></span></div>
+                <div class="dgame__plist" id="dc-plist"></div>
               </div>
             </div>
+            <div class="dgame__bottom"><div class="dgame__ticker"><span class="live">Live</span><span id="dc-ticker"></span></div><span class="dgame__end" aria-hidden="true">End turn <i data-icon="play" data-size="24"></i></span></div>
           </div>
           <pixel-sprite class="drill__frog" sprite="frog" frames="watch,watchClose,watch,idle" fps="1.5" scale="3" flip></pixel-sprite>
         </div>
@@ -214,8 +214,7 @@
       <div class="features__pin">
       <div class="wrap">
         <div class="sec-head">
-          <div><div class="label">Features</div><h2 id="features-title">Six tools. <span class="em">Each one leads to an action.</span></h2></div>
-          <p class="lead features__lead">From the forecast to the barangay, every tool ends in something to do.</p>
+          <div><div class="label">Features</div><h2 id="features-title">Six tools. <span class="em">Each leads to action.</span></h2></div>
         </div>
       </div>
       <div class="tools-band surface tx-tracks" id="tools-band">
@@ -227,7 +226,7 @@
       </div>
       <div class="wrap">
         <div class="opendata">
-          <div class="opendata__text"><i data-icon="database" data-size="32"></i><div><b>Open data for deeper analysis</b><span class="small muted">Every forecast as CSV and JSON, with column definitions.</span></div></div>
+          <div class="opendata__text"><i data-icon="database" data-size="32"></i><div><b>Open data for deeper analysis</b><span class="small muted">Every forecast as CSV and JSON.</span></div></div>
           <div class="btn-row">
             <a class="btn btn--ghost btn--sm" href="data/epilag_forecast_region_qc.csv">CSV</a>
             <a class="btn btn--ghost btn--sm" href="data/epilag_forecast_region_qc.json">JSON</a>
@@ -244,7 +243,7 @@
         <div class="action__copy">
           <div class="label">From alert to action</div>
           <h2 id="action-title">Each alert comes<br><span class="em">with a plan.</span></h2>
-          <p class="lead">A forecast is just the beginning. EpiLag-PH turns each early warning into clear, practical steps for local action, and a one-page brief for the mayor.</p>
+          <p class="lead">Each warning becomes clear local steps and a one-page brief for the mayor.</p>
           <div class="mascot-slot action__slot" id="slot-action"></div>
           <div class="brief brief--tilt" id="brief">
             <div class="brief__head"><span class="brand"><span class="lg brief__lg"><i data-icon="logo" data-size="16"></i></span></span><div><div class="small muted">EpiLag-PH</div><h4>Guimaras Action Brief</h4></div></div>
@@ -268,9 +267,9 @@
             <div class="action__map" id="action-map" role="img" aria-label="3D map of Western Visayas with Guimaras raised and highlighted"></div>
           </div>
           <ol class="steps">
-            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="people" scale="1"></pixel-sprite></span><div><b>Today</b><span>Convene the task force and issue an advisory to key barangays.</span></div></li>
-            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="broom" scale="1"></pixel-sprite></span><div><b>Weeks 1–2</b><span>Clean-up drives and container covers where the budget averts the most cases.</span></div></li>
-            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="hospital" scale="1"></pixel-sprite></span><div><b>Weeks 2–4</b><span>Stock NS1 tests and IV fluids for the upper forecast; open dengue fast lanes.</span></div></li>
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="people" scale="1"></pixel-sprite></span><div><b>Today</b><span>Convene the task force. Alert key barangays.</span></div></li>
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="broom" scale="1"></pixel-sprite></span><div><b>Weeks 1–2</b><span>Clean-ups and container covers where they avert most cases.</span></div></li>
+            <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="hospital" scale="1"></pixel-sprite></span><div><b>Weeks 2–4</b><span>Stock NS1 tests and IV fluids. Open dengue fast lanes.</span></div></li>
           </ol>
         </div>
       </div>
@@ -282,13 +281,13 @@
         <div>
           <div class="label">The film</div>
           <h2 id="film-title">Can dengue be seen<br><span class="em">before hospitals fill up?</span></h2>
-          <p class="lead">Follow the signal from rain to forecast to local action, in 2:09.</p>
+          <p class="lead">Rain to forecast to action, in 2:09.</p>
           <div class="film__stage"><div class="mascot-slot film__slot" id="slot-film"></div>
-          <div class="film__player"><video controls preload="none" poster="film/poster.jpg" src="demo.mp4" aria-label="EpiLag-PH film, 2 minutes 9 seconds"></video></div></div>
+          <div class="film__player"><video controls muted playsinline preload="none" poster="film/poster.jpg" src="demo.mp4" aria-label="EpiLag-PH film, 2 minutes 9 seconds"></video></div></div>
         </div>
         <div class="inside">
           <div class="label">Inside the app</div>
-          <p class="small muted">Explore the tools when you're ready.</p>
+          <p class="small muted">Explore the tools.</p>
           <ul class="inside__list" id="inside"></ul>
         </div>
       </div>
@@ -299,14 +298,14 @@
       <div class="wrap">
         <div class="sec-head">
           <div><div class="label">Evidence from real outbreaks</div><h2 id="proof-title" class="h2-sm">Tested honestly. <span class="em">No peeking at the future.</span></h2>
-            <p class="muted">Every test year was forecast only from earlier years.</p></div>
+            <p class="muted">Each year forecast only from earlier years.</p></div>
           <div class="mascot-slot proof__slot" id="slot-proof"></div>
         </div>
         <div class="proof__grid">
-          <div class="evidence evidence--alert" id="proof-claim"><span class="disc"><i data-icon="alert" data-size="24"></i></span><div><b class="nums"><span data-count="30">30</span> of <span data-count="32">32</span></b><span>provinces that crossed the epidemic line were flagged 4 weeks ahead (2019 replay)</span></div></div>
-          <div class="evidence"><span class="disc"><i data-icon="didItWork" data-size="32"></i></span><div><b class="nums"><span data-count="79">79</span>–100%</b><span>of outbreak starts caught at watch, 4 weeks ahead</span></div></div>
-          <div class="evidence"><span class="disc"><i data-icon="areaDetail" data-size="32"></i></span><div><b class="nums"><span data-count="70">70</span>–92%</b><span>of real values inside the likely range (target 80%)</span></div></div>
-          <div class="evidence evidence--note"><span class="disc"><i data-icon="info" data-size="24"></i></span><div><span><b>Weather adds modest value</b> in some years and little or none in others. Watch also raises false alarms (42–63%).</span></div></div>
+          <div class="evidence evidence--alert" id="proof-claim"><span class="disc"><i data-icon="alert" data-size="24"></i></span><div><b class="nums"><span data-count="30">30</span> of <span data-count="32">32</span></b><span>epidemic provinces flagged 4 weeks ahead (2019)</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="didItWork" data-size="32"></i></span><div><b class="nums"><span data-count="79">79</span>–100%</b><span>of outbreak starts flagged Watch, 4 weeks ahead</span></div></div>
+          <div class="evidence"><span class="disc"><i data-icon="areaDetail" data-size="32"></i></span><div><b class="nums"><span data-count="70">70</span>–92%</b><span>of actual counts in the likely range (target 80%)</span></div></div>
+          <div class="evidence evidence--note"><span class="disc"><i data-icon="info" data-size="24"></i></span><div><span><b>Weather helps a little</b>, some years not at all. Watch also raises false alarms (42–63%).</span></div></div>
         </div>
         <p class="small muted proof__more"><a href="methodology.html">How it was tested</a> · <a href="web/?page=proof">See every result in the app</a></p>
       </div>
@@ -317,9 +316,9 @@
       <div class="wrap cta__grid">
         <div class="cta__copy">
           <h2 id="cta-title" class="cta__title">Hospitals see dengue a month late.<br><span class="em">EpiLag-PH sees it now</span><span class="cta__dot">.</span></h2>
-          <p class="lead">From early warning to focused action, EpiLag-PH helps communities prepare before dengue spreads.</p>
+          <p class="lead">Prepare before dengue spreads.</p>
           <div class="btn-row"><a class="btn btn--primary btn--lg" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a></div>
-          <p class="small muted cta__note">Runs in your browser. The first load takes about a minute.</p>
+          <p class="small muted cta__note">Runs in your browser. First load takes about a minute.</p>
           <footer class="cta__foot">
             <nav class="cta__links" aria-label="More">
               <a href="methodology.html">Methodology</a><a href="data/">Open data</a><a href="drill/">Dengue Drill</a>

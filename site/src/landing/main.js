@@ -13,6 +13,7 @@ import { gsap, ScrollTrigger, countUp, curtain, reduced, reveal } from "../lib/m
 import { createVoxelMap, loadGrids } from "../lib/voxel.js";
 import { playIntro } from "./intro.js";
 import { playFinale } from "./finale.js";
+import { rules } from "../drill/rules.js";
 
 const $ = (id) => document.getElementById(id);
 const BASE = import.meta.env.BASE_URL;
@@ -85,17 +86,59 @@ const g = H[4].units[gid];
 $("g-q50").textContent = fmt(g[2]); $("g-range").textContent = `${fmt(g[1])}–${fmt(g[3])}`; $("g-actual").textContent = fmt(g[4]);
 $("brief-meta").innerHTML = `Forecast: ${fmt(g[2])} cases · likely range ${fmt(g[1])}–${fmt(g[3])}<br>Week ending ${day(H[4].target)} 2019`;
 
-// drill console (Western Visayas, turn of 2 Jun 2019)
-const D = data.drill, provs = Object.entries(D.provinces);
-const now = provs.reduce((s, [, p]) => s + (p.cases || 0), 0), before = provs.reduce((s, [, p]) => s + (p.before || 0), 0);
-$("dc-title").textContent = `Dengue Drill · ${D.region.replace(/^Region VI \((.+)\)$/, "$1")} (2019)`;
-$("dc-turn").textContent = `${D.turn} of ${D.turns}`;
-$("dc-budget").textContent = `₱${D.budget / 1e6}M`;
+// drill console: a still of the game screen for Western Visayas on the turn of 2 Jun 2019, from the game's own data
+// and rules (heat ramp, epidemic lines, outbreak pressure) so it reads like the real thing
+const GAME = await fetch(`${BASE}drill/data.json`).then((r) => r.json());
+const RG = rules(GAME), DW = RG.idx("2019-06-02"), DT = GAME.turns.indexOf("2019-06-02"), KITS = GAME.kit.kits;
+const WV = GAME.regions.find((r) => r.id === "PH06"), regionName = WV.name.replace(/^Region VI \((.+)\)$/, "$1");
+const PRESS = { low: ["Low", "#34D27B"], rising: ["Rising", "#F7C928"], high: ["High", "#F58220"], critical: ["Critical", "#F04B2A"] };
+const casesAt = (j) => WV.provinces.reduce((s, p) => s + (p.cases[j] || 0), 0), now = casesAt(DW), before = casesAt(DW - 2);
+const fcOf = (p) => p.fc?.[GAME.turns[DT]];
+const pr = RG.pressure(WV, DW), [prLab, prCol] = PRESS[pr.level];
+$("dc-region").textContent = regionName;
 $("dc-cases").textContent = fmt(now);
 $("dc-change").textContent = `${now >= before ? "▲" : "▼"} ${Math.abs(Math.round((now / before - 1) * 100))}% in 2 weeks`;
-const warned = provs.filter(([, p]) => p.fc?.[0] === "warning").map(([, p]) => p.name);
-$("dc-status").lastElementChild.textContent = warned.length ? `${warned.join(", ")} · Outbreak warning` : "No outbreak warning";
-const drillValues = Object.fromEntries(provs.map(([u, p]) => [u, p.fc ? { color: LV[p.fc[0]][0], height: LV[p.fc[0]][1] } : NODATA]));
+$("dc-press").textContent = prLab; $("dc-press").style.color = prCol;
+$("dc-meter").style.transform = `scaleX(${Math.min(1, pr.value / 2)})`; $("dc-meter").style.background = prCol;
+$("dc-timeline").innerHTML = GAME.turns.map((w, t) => `<li class="${t < DT ? "done" : t === DT ? "now" : ""}"><i></i><span>${day(w)}</span></li>`).join("");
+// round 1 colours the board by cases against each epidemic line (the game's heat ramp); round 2 by EpiLag-PH's forecast
+const heatValues = Object.fromEntries(WV.provinces.map((p) => [p.id, { color: RG.heat(p, DW), height: Math.max(1, Math.min(4, Math.round((p.cases[DW] / p.epi[DW]) * 1.6))) }]));
+const intelValues = Object.fromEntries(WV.provinces.map((p) => { const f = fcOf(p); return [p.id, f ? { color: LV[f[0]][0], height: LV[f[0]][1] } : NODATA]; }));
+const busiest = WV.provinces.reduce((a, b) => (b.cases[DW] > a.cases[DW] ? b : a));
+const warned = WV.provinces.filter((p) => fcOf(p)?.[0] === "warning");
+// pick, deploy, replay: who holds teams, which row is selected, what the ticker says
+const STEPS = [
+  { teams: {}, on: null, ticker: `Mission: ${regionName}, 2019 rainy season. Select an area.` },
+  { teams: { [busiest.id]: 2 }, on: busiest.id,
+    ticker: `2 teams to ${busiest.name}: ${fmt(busiest.cases[DW])} cases, ${(busiest.cases[DW] / busiest.epi[DW]).toFixed(1)}× its epidemic line.` },
+  { teams: Object.fromEntries(warned.map((p) => [p.id, 1])), on: null,
+    ticker: `Intel: ${warned.map((p) => p.name).join(", ")} hit outbreak warning in 4 weeks.` },
+];
+let drillMap = null, drillOn = -1;
+function drillStep(i) {
+  if (i === drillOn) return;
+  drillOn = i;
+  const st = STEPS[i], intel = i === 2, used = Object.values(st.teams).reduce((a, b) => a + b, 0);
+  $("dc-round").textContent = intel ? "Round 2 · EpiLag intel" : "Round 1 · No intel";
+  $("dc-round").classList.toggle("chip--intel", intel);
+  $("dc-budget").textContent = `₱${((KITS - used) * GAME.kit.pesos / 1e6).toFixed(1)}M`;
+  $("dc-tokens").innerHTML = Array.from({ length: KITS }, (_, t) => `<i class="${t >= KITS - used ? "spent" : ""}"></i>`).join("");
+  $("dc-left").textContent = `${KITS - used} of ${KITS} teams left`;
+  $("dc-ticker").textContent = st.ticker;
+  $("dc-legend").innerHTML = intel
+    ? `<span class="intel">◯ EpiLag intel: forecast 4 weeks ahead</span>${["warning", "watch", "above", "normal"].map((l) => `<span class="dgame__lv" style="--c:${LV[l][0]}">${LV[l][2]}</span>`).join("")}`
+    : `<span>Cases vs epidemic line</span><span class="grad"></span>`;
+  $("dc-plist").innerHTML = WV.provinces.map((p) => {
+    const f = fcOf(p), n = st.teams[p.id];
+    return `<div class="dgame__row${st.on === p.id ? " on" : ""}"><span class="dgame__heat" style="background:${RG.heat(p, DW)}"></span><span class="dgame__nm">${p.name}</span>`
+      + (intel && f && f[0] !== "normal" ? `<span class="dgame__fc" data-lv="${f[0]}">▲${fmt(f[2])}</span>` : "<span></span>")
+      + `<span class="dgame__n nums">${fmt(p.cases[DW])}</span>${n ? `<span class="dgame__team">${n}</span>` : "<span></span>"}</div>`;
+  }).join("");
+  $("drill-map").setAttribute("aria-label", `3D map of the ${regionName} provinces coloured by ${intel ? "the EpiLag-PH forecast 4 weeks ahead" : "cases against each epidemic line"}, week ending ${day(GAME.turns[DT])} 2019`);
+  drillMap?.setValues(intel ? intelValues : heatValues, { duration: 600 });
+  drillMap?.highlight(st.on);
+}
+drillStep(2); // without motion the still shows round 2; the scroll timeline starts it at pick
 
 // ------------------------------------------------------------------ 3D maps (created when near the viewport)
 const grids = loadGrids("voxel_ph"), boards = loadGrids("voxel_regions");
@@ -122,8 +165,10 @@ whenNear($("hero-map"), async () => {
 
 whenNear($("drill-map"), async () => {
   const b = await boards;
-  const m = await createVoxelMap($("drill-map"), { grid: b.PH06, pixel: 3, pitch: 46 });
-  m.setValues(drillValues, { duration: 1200 });
+  const m = await createVoxelMap($("drill-map"), { grid: b.PH06, pixel: 3, pitch: 46, sea: "#1C4F6E" });
+  m.setValues(drillOn === 2 ? intelValues : heatValues, { duration: 1200 });
+  m.highlight(STEPS[drillOn]?.on ?? null);
+  drillMap = m;
 });
 whenNear($("action-map"), async () => {
   const b = await boards;
@@ -167,7 +212,7 @@ introFinished.then(() => Mascot.create("mosquito")).then((m) => {
   const slot = (id, section, pose, target, extra = {}) => m.register({ id, section: document.querySelector(section), slot: $(`slot-${id}`), target, ...pose, ...extra });
   slot("hero", ".hero", { frames: ["fly1", "fly2"], fps: 12 }, () => $("prio-first"), { flip: false });
   slot("problem", ".problem", { pose: "alert" }, $("problem-callout"), { flip: false });
-  slot("drill", ".drill", { pose: "dash" }, $("dc-status"));
+  slot("drill", ".drill", { pose: "dash" }, document.querySelector(".dgame__end"));
   slot("features", ".features", { pose: "search" }, () => toolSteps[toolHop.on].querySelector(".ts-icon"), { flip: true });
   slot("action", ".alert-action", { pose: "clipboard" }, $("brief"), { flip: true });
   slot("film", ".film", { pose: "front" }, null);
@@ -192,6 +237,18 @@ mm.add({ desk: "(min-width: 1100px) and (prefers-reduced-motion: no-preference)"
   steps.forEach((s, i) => tl.fromTo(s, { "--on": 0 }, { "--on": 1, duration: 0.4, ease: "steps(2)" }, i * 0.5));
   tl.fromTo("#helps-rail", { "--fill": 0 }, { "--fill": 1, duration: steps.length * 0.5 }, 0);
   tl.to({}, { duration: 0.4 });
+  // drill: pick, deploy, replay light up in turn (pinned on desktop) and the console plays each one.
+  // Pins must be made in page order: each one's start counts the scroll space added by the pins above it.
+  const how = gsap.utils.toArray(".dh-step");
+  drillStep(0);
+  const dt = gsap.timeline({ defaults: { ease: "none" },
+    scrollTrigger: ctx.conditions.desk
+      ? { trigger: ".drill__grid", start: "top 84px", end: "+=120%", scrub: 0.6, pin: true, anticipatePin: 1 }
+      : { trigger: "#drill-how", start: "top 75%", end: "bottom 40%", scrub: 0.6 },
+    onUpdate() { drillStep(lit(how)); } });
+  dt.fromTo("#drill-how", { "--fill": 0 }, { "--fill": 1, duration: how.length - 1 }, 0);
+  how.forEach((s, i) => dt.fromTo(s, { "--on": 0 }, { "--on": 1, duration: 0.3, ease: "steps(2)" }, i));
+  dt.to({}, { duration: 0.6 });
   // action steps: the timeline line fills as the steps scroll past
   // six tools: getcko's "How it works" band. On desktop the heading and band lock under the nav while each
   // step lights up, its name gets the highlighter, its icon pops in two steps, the dots to the next step pop,
@@ -214,3 +271,17 @@ mm.add({ desk: "(min-width: 1100px) and (prefers-reduced-motion: no-preference)"
   gsap.fromTo(".steps", { "--fill": 0 }, { "--fill": 1, ease: "none", scrollTrigger: { trigger: ".steps", start: "top 80%", end: "bottom 55%", scrub: 0.5 } });
 });
 
+
+// ------------------------------------------------------------------ the film plays, muted, while it is on screen
+// Browsers only autoplay muted video; the controls stay so a viewer can unmute. Once the viewer pauses it themselves,
+// scrolling no longer starts it. Under reduced motion it waits for a click.
+const film = document.querySelector(".film__player video");
+if (film && !reduced()) {
+  let auto = true, ours = false;
+  new IntersectionObserver(([e]) => {
+    if (!auto) return;
+    if (e.intersectionRatio >= 0.5) film.play().catch(() => {});
+    else if (!film.paused) { ours = true; film.pause(); }
+  }, { threshold: [0, 0.5] }).observe(film);
+  film.addEventListener("pause", () => { if (!ours && !film.ended) auto = false; ours = false; });
+}

@@ -118,10 +118,6 @@ function setTopDownload(label, handler) {
 }
 
 // ------------------------------------------------------------------ chrome
-function groupFor(page) {
-  return GROUPS.find(([, pages]) => pages.includes(page))?.[0] || "monitor";
-}
-
 function panelLabel(labels, panel) {
   return panel === "province" ? labels.provinces : labels.regions;
 }
@@ -187,9 +183,7 @@ function renderChrome(t, originList, m) {
   const provinceScope = state.panel === "province";
   const panelNote = i18n.PANELS[state.panel].note[state.lang];
   document.documentElement.lang = state.lang === "fil" ? "fil" : "en";
-  const group = groupFor(state.page);
   $("app-page-title").textContent = t[`nav_${state.page}`];
-  $("app-page-group").textContent = labels[group];
   $("app-page-note").textContent = panelNote;
   $("sidebar-title").textContent = labels.dashboard;
   $("sidebar").querySelector(".sidebar__language .ctx__label")?.replaceChildren(document.createTextNode(t.lang));
@@ -292,7 +286,7 @@ async function render() {
     if (id !== renderId) return;
     if (fc?.length) {
       const current = fc.filter((r) => r.horizon === state.h);
-      $("app-page-note").textContent = `${t.as_of} ${fmtDay(Math.max(...current.map((r) => r.week)))} · ${i18n.PANELS[state.panel].note[state.lang]}`;
+      $("app-page-note").textContent = `${LABELS[state.lang].data_to} ${fmtDay(Math.max(...current.map((r) => r.week)))} → ${fmtDay(Math.max(...current.map((r) => r.target_week)))}`;
     }
     const ctx = {
       ...state, horizon: state.h, origin, t, i18n, labels: LABELS[state.lang], lang: state.lang, meta: m.panels[state.panel], regionMeta: region,

@@ -57,12 +57,13 @@ function webgl() {
  *   markers     also make grid.markers point areas (Quezon City) their own units (see decode)
  *   sea         sea colour (default light blue); top: tallest height to frame, in levels (default 5)
  *   orbit       { yaw: [min, max], pitch: [min, max] }: drag to turn the camera within these bounds
+ *   framing     "grid" (default) frames the whole grid; "land" frames only the land cells, centring the islands
  *   onPick      called with (unitId | null) on click; enables hover too (onHover)
  * Returns { setValues, highlight, project, pickAt, render, dispose, units } plus, for scenes built on top (the Dengue
  * Drill board): three, scene, camera, toScreen(vec3), centreOf(u), heightOf(u), lift, addTicker(fn), setView().
  */
 export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -14, zoom = 1, lift = 2.5, markers = false, sea: seaColor = SEA,
-  top: topLevel = 5, orbit = null, onPick, onHover } = {}) {
+  top: topLevel = 5, orbit = null, framing = "grid", onPick, onHover } = {}) {
   const { cells, centre, units } = decode(grid, { markers });
   const yaw0 = yaw, pitch0 = pitch;
   const index = new Map(units.map((u, i) => [u, i]));
@@ -71,6 +72,11 @@ export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -1
 
   const THREE = await import("three");
   const W = grid.w, H = grid.h;
+  // ground points fit() frames: the grid's corners, or every land cell's corners, so neither sea margins nor the
+  // empty corners of the turned grid push the islands off-centre
+  const framePts = framing === "land" && cells.length
+    ? cells.flatMap((c) => [[c.x, c.y], [c.x + 1, c.y], [c.x, c.y + 1], [c.x + 1, c.y + 1]])
+    : [[0, 0], [W, 0], [0, H], [W, H]];
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "low-power" });
   renderer.setClearColor(0x000000, 0);
   const canvas = renderer.domElement;
@@ -118,7 +124,7 @@ export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -1
 
   // camera: orthographic, looking at the map centre from the south, tilted by `pitch`, turned by `yaw`
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -2000, 2000);
-  const target = new THREE.Vector3(W / 2, 0, H / 2);
+  const target = new THREE.Vector3(W / 2, 0, H / 2), tmp = new THREE.Vector3();
   function place() {
     const p = THREE.MathUtils.degToRad(pitch), y = THREE.MathUtils.degToRad(yaw);
     const dir = new THREE.Vector3(Math.sin(y) * Math.cos(p), Math.sin(p), Math.cos(y) * Math.cos(p));
@@ -129,13 +135,16 @@ export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -1
     const w = el.clientWidth || 1, h = el.clientHeight || 1;
     renderer.setPixelRatio(1 / pixel);
     renderer.setSize(w, h, false);
-    // frame the projected footprint of the grid
+    // frame the projected footprint (grid or land), up to the tallest column
     const top = lift * topLevel; // tallest column (by default level 4 plus the highlight step)
-    const corners = [[0, 0], [W, 0], [0, H], [W, H]].flatMap(([x, z]) => [0, top].map((y) => new THREE.Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse)));
-    const xs = corners.map((v) => v.x), ys = corners.map((v) => v.y);
-    const cw = Math.max(...xs) - Math.min(...xs), ch = Math.max(...ys) - Math.min(...ys);
+    let lx = Infinity, hx = -Infinity, ly = Infinity, hy = -Infinity;
+    for (const [x, z] of framePts) for (const y of [0, top]) {
+      tmp.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
+      lx = Math.min(lx, tmp.x); hx = Math.max(hx, tmp.x); ly = Math.min(ly, tmp.y); hy = Math.max(hy, tmp.y);
+    }
+    const cw = hx - lx, ch = hy - ly;
     // centre the frustum on that box (the camera looks at ground level, so tall columns would drift off-centre)
-    const midY = (Math.max(...ys) + Math.min(...ys)) / 2, midX = (Math.max(...xs) + Math.min(...xs)) / 2;
+    const midY = (hy + ly) / 2, midX = (hx + lx) / 2;
     const s = Math.max(cw / w, ch / h) / zoom;
     camera.left = midX - (w / 2) * s; camera.right = midX + (w / 2) * s; camera.top = midY + (h / 2) * s; camera.bottom = midY - (h / 2) * s;
     camera.updateProjectionMatrix();
