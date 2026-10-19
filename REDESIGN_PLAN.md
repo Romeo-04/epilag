@@ -614,9 +614,20 @@ merged by PR).
 - **Done when** every feature of the Streamlit app is present, parity tests are green, and the app is ready in under 3 s.
 
 ### Phase 6: 3D Dengue Drill
-- [ ] `rules.js` extracted; parity with `drill_data.py`
-- [ ] Voxel board, pick and list sync, intel rings, tokens, swarms, rain, turn transitions
-- [ ] Title, receipt, report and debrief restyle; frog reactions
+- [x] `site/src/drill/rules.js` extracted (peak, score, computer players, grade, heat, pressure); parity:
+      `tests/test_drill_rules.py` (bots for all 17 regions and one-team scores equal `scripts/drill_data.py`; the
+      11/1/5 summary holds) and a one-off check against the old page (102 random plans, every score identical)
+- [x] Data moved to `site/public/drill/data.json` (no SVG outlines, 80 kB instead of 255 kB); `drill_data.py`,
+      `voxel_data.py` and `landing_data.py` read or write it there
+- [x] Voxel board (`site/src/drill/board.js` on `voxel.js`): column height = cases ÷ epidemic line, heat colours,
+      bounded drag-orbit with reset, pick ↔ province list (keyboard and screen reader) in sync, intel rings pulsing
+      by level and a scan line (round 2), projected names, forecast tags and "+N cases" floaters, shield tokens that
+      drop with a bounce and dust, pixel mosquitoes swarming by rain, voxel rain on turn change
+- [x] `voxel.js` gained what the board needs: tickers (paused off screen), drag-orbit, `setView`, scene access
+- [x] Title (region rail + turning 3D preview + frog peeking), rain receipt, HUD from the mockup console (budget
+      tokens, week n of 8, cases with sparkline and change, rain, pressure meter), Take action panel (one team type,
+      D5, with its cost breakdown), reports and debrief restyled; the frog reacts to the grade
+- [x] Checked: full 2-round games at 1440 px and 390 px with no errors or horizontal scroll, and a keyboard-only round
 - **Done when** a full 2-round game plays on desktop and phone, the scores equal the current version for the same
   moves, and keyboard-only play works.
 

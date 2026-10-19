@@ -27,6 +27,7 @@ const PAGES = {
   index: "index.html",
   kit: "kit.html",
   web: "web/index.html",
+  drill: "drill/index.html",
 };
 
 export default defineConfig({

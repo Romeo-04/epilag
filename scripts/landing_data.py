@@ -58,8 +58,8 @@ def main():
     g4 = f[(f.horizon == 4) & f.level.isin(["watch", "warning"])].assign(per100k=lambda d: d.q50 / d.population * 1e5)
     out["priority"] = g4.sort_values("per100k", ascending=False).unit_id.head(5).tolist()
 
-    # Dengue Drill teaser: Western Visayas at the turn of 2 Jun 2019 (from docs/drill/data.js)
-    drill = json.loads((ROOT / "docs" / "drill" / "data.js").read_text().removeprefix("window.DRILL = ").rstrip().rstrip(";"))
+    # Dengue Drill teaser: Western Visayas at the turn of 2 Jun 2019 (from site/public/drill/data.json)
+    drill = json.loads((ROOT / "site" / "public" / "drill" / "data.json").read_text())
     i = drill["weeks"].index(out["origin"])
     wv = next(r for r in drill["regions"] if r["id"] == "PH06")
     out["drill"] = {

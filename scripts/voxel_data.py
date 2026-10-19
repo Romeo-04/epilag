@@ -114,8 +114,8 @@ def main():
         print(f"{key:16s} {g['w']}x{g['h']} cells, {land} land, smallest area {min(g['cells'])} cells")
     (OUT / "voxel_ph.json").write_text(json.dumps(national, separators=(",", ":")))
 
-    # one board per Dengue Drill region (its provinces, as listed in docs/drill/data.js), long side about 72 cells
-    drill = json.loads((ROOT / "docs" / "drill" / "data.js").read_text().removeprefix("window.DRILL = ").rstrip().rstrip(";"))
+    # one board per Dengue Drill region (its provinces, as listed in site/public/drill/data.json), long side about 72 cells
+    drill = json.loads((ROOT / "site" / "public" / "drill" / "data.json").read_text())
     by_id = {f["properties"]["unit_id"]: f for f in prov}
     boards = {}
     for region in drill["regions"]:
