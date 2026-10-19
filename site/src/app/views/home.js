@@ -1,101 +1,77 @@
-// Overview: a glanceable forecast, priority areas, action brief, tools, and the Dengue Drill.
+// Overview: a compact operations readout with status, map, priority areas, action brief, and the forecast clock.
 import { LEVELS, briefMarkdown, briefTable, fmt, fmtDay, replayClaim } from "../logic.js";
 import { loadGrids, createVoxelMap } from "../../lib/voxel.js";
-import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, download, downloadButton, esc, head, pill } from "../ui.js";
+import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, download, downloadButton, esc, head, infoDisclosure, pill } from "../ui.js";
 
-const TOOL_ICON = { map: "forecastMap", unit: "areaDetail", budget: "actionPlan", public: "residents", qc: "barangay", proof: "didItWork" };
 const STORY_ART = [["props", "cloud"], ["mosquito", "fly1"], ["props", "residents"], ["props", "hospital"]];
 
 export async function render(el, ctx) {
-  const { t, lang, i18n, fc, fcH, horizon, mode, panel } = ctx;
+  const { t, labels, lang, i18n, fc, fcH, horizon, mode, panel } = ctx;
   const asOf = Math.max(...fcH.map((r) => r.week));
   const target = Math.max(...fcH.map((r) => r.target_week));
   const n = (lv) => fcH.filter((r) => r.level === lv).length;
   const nWarn = n(LEVELS[3]), nWatch = n(LEVELS[2]), nAbove = n(LEVELS[1]);
   const rows = briefTable(fc, fcH);
-  const act = rows.filter((r) => r.level === LEVELS[2] || r.level === LEVELS[3]).slice(0, 6);
+  const act = rows.filter((r) => r.level === LEVELS[2] || r.level === LEVELS[3]).slice(0, 4);
   const shown = act.length ? act : rows.filter((r) => r.level === LEVELS[1]).slice(0, 3);
-  // the priority list ranks every area by forecast cases per 100,000 (as on the forecast map), so it is never empty
   const priority = [...rows].sort((a, b) => b.q50_per100k - a.q50_per100k).slice(0, 6);
   const status = mode === "replay" ? replayStatus(t, horizon, fcH) : nWarn + nWatch === 0 ? quietStatus(t) : "";
+  const saveBrief = () => download("epilag_action_brief.md", briefMarkdown(shown, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf }), "text/markdown");
 
   el.innerHTML = `
     ${head(t.hello, `${horizon} ${t.weeks_ahead}`, `${t.as_of} ${fmtDay(asOf)} · ${t.for_week} ${fmtDay(target)} · ${ctx.panelLabel}`)}
 
-    <section class="card home-counts" aria-labelledby="home-act-title">
-      <div class="home-counts__lead">
-        <span class="home-eyebrow" id="home-act-title">${esc(t.act_now)}</span>
-        <div class="home-counts__total">${count(nWarn + nWatch)}</div>
+    <section class="card status-strip" aria-labelledby="home-act-title">
+      <div class="status-strip__lead"><span class="home-eyebrow" id="home-act-title">${esc(t.act_now)}</span><div class="status-strip__total">${count(nWarn + nWatch)}<span>${esc(labels.top_areas)}</span></div></div>
+      <div class="status-strip__levels" aria-label="${esc(t.act_now)}">
+        ${levelStat(LEVELS[3], "warning", nWarn, t)}${levelStat(LEVELS[2], "watch", nWatch, t)}${levelStat(LEVELS[1], "above", nAbove, t)}
       </div>
-      <div class="home-counts__levels" aria-label="${esc(t.act_now)}">
-        ${levelStat(LEVELS[3], "warning", nWarn, t)}
-        ${levelStat(LEVELS[2], "watch", nWatch, t)}
-        ${levelStat(LEVELS[1], "above", nAbove, t)}
-      </div>
-      <div class="home-counts__state">${status}</div>
-      <a class="btn btn--primary btn--sm home-counts__map" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="24"></i></a>
+      <div class="status-strip__message">${status}</div>
+      <a class="btn btn--primary btn--sm status-strip__action" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="18"></i></a>
     </section>
 
-    <section class="home-forecast" aria-label="${esc(t.nav_map)}">
-      <section class="card home-map-card">
+    <div class="overview-grid" aria-label="${esc(t.nav_map)}">
+      <section class="card overview-map">
         ${cardTitle("forecastMap", t.nav_map, `${t.for_week} ${fmtDay(target)}`)}
-        <div class="home-map" id="home-map" role="img" aria-label="${esc(`${t.nav_map}, ${t.for_week} ${fmtDay(target)}`)}">
-          <div class="home-map__tip" id="home-map-tip" hidden></div>
-        </div>
-        <div class="home-map__footer">
-          <ul class="home-legend">${LEVELS.map((lv) => `<li data-lv="${LV[lv]}"><span class="sq sq--round"></span>${esc(ctx.levelName(lv))}</li>`).join("")}</ul>
-        </div>
+        <div class="home-map" id="home-map" role="img" aria-label="${esc(`${t.nav_map}, ${t.for_week} ${fmtDay(target)}`)}"><div class="home-map__tip" id="home-map-tip" hidden></div></div>
+        <div class="map-footer"><ul class="home-legend">${LEVELS.map((lv) => `<li data-lv="${LV[lv]}"><span class="sq sq--round"></span>${esc(ctx.levelName(lv))}</li>`).join("")}</ul>
+          <a class="inline-link" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </section>
 
-      <aside class="card home-priority">
+      <aside class="card overview-priority">
         ${cardTitle("alert", t.rank, t.rank_sub)}
-        ${priority.length ? `<ol class="home-priority__list" id="home-priority">${priority.map((r, i) => priorityRow(r, i, ctx)).join("")}</ol>` : `<div class="callout home-priority__empty"><i data-icon="check" data-size="24"></i>${esc(t.brief_empty)}</div>`}
-        <a class="home-priority__all" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="24"></i></a>
+        ${priority.length ? `<ol class="priority-list" id="home-priority">${priority.map((r, i) => priorityRow(r, i, ctx)).join("")}</ol>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(t.brief_empty)}</div></div>`}
+        <div class="priority-list__footer"><a class="inline-link" href="?page=map" data-go="map">${esc(labels.all_areas)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </aside>
-    </section>
+    </div>
 
-    <section class="card home-brief">
+    <section class="card brief-card">
       ${cardTitle("actionPlan", t.brief_head, t.brief_sub)}
-      ${act.length ? "" : `<div class="callout home-brief__empty"><i data-icon="check" data-size="24"></i>${esc(t.brief_empty)}</div>`}
-      <div class="briefs">${shown.map((r) => briefRow(r, ctx)).join("")}</div>
-      ${shown.length ? `<div class="home-brief__footer">${downloadButton("dl-brief", t.download_brief)}</div>` : ""}
+      ${act.length ? "" : `<div class="callout">${esc(t.brief_empty)}</div>`}
+      <div class="brief-list">${shown.map((r) => briefRow(r, ctx)).join("")}</div>
+      ${shown.length ? `<div class="brief-footer">${downloadButton("dl-brief", t.download_brief)}</div>` : ""}
     </section>
 
-    <section class="card home-story">
+    <section class="card weeks-card">
       ${cardTitle("alert", t.story_head)}
-      <ol class="home-story__rail">${t.story.map(([a, b], i) => `<li class="home-story__step${i === 0 ? " home-story__step--on" : ""}">
-        <span class="home-story__art"><pixel-sprite sprite="${STORY_ART[i][0]}" pose="${STORY_ART[i][1]}" scale="${STORY_ART[i][0] === "props" ? 1 : 2}"></pixel-sprite></span>
-        <span class="home-story__copy"><b>${esc(a)}</b><span>${esc(b)}</span></span></li>`).join("")}</ol>
-      <div class="callout home-story__note"><i data-icon="alert" data-size="24"></i>${esc(t.story_note)}</div>
+      <ol class="weeks-rail">${t.story.map(([a, b], i) => `<li class="weeks-step${i === 0 ? " weeks-step--on" : ""}"><span class="weeks-step__art"><pixel-sprite sprite="${STORY_ART[i][0]}" pose="${STORY_ART[i][1]}" scale="${STORY_ART[i][0] === "props" ? 1 : 2}"></pixel-sprite></span><span class="weeks-step__copy"><b>${esc(a)}</b><span>${esc(b)}</span></span></li>`).join("")}</ol>
+      ${infoDisclosure(labels.about_this, `<p>${esc(t.story_note)}</p>`)}
     </section>
 
-    <section class="home-tools" aria-labelledby="home-tools-title">
-      <div class="home-section-heading"><h2 id="home-tools-title">${esc(t.features_head)}</h2><p>${esc(t.features_sub)}</p></div>
-      <div class="home-tools__grid">${Object.keys(TOOL_ICON).map((k) => {
-        const [does, why, you] = i18n.FEATURES[lang][k];
-        return `<a class="card home-tool" href="?page=${k}" data-go="${k}">
-          <span class="home-tool__ic"><i data-icon="${TOOL_ICON[k]}" data-size="32"></i></span>
-          <div class="home-tool__body"><h3>${esc(t[`nav_${k}`])}</h3>
-            <dl><div><dt>${esc(t.does)}</dt><dd>${esc(does)}</dd></div><div><dt>${esc(t.why_h)}</dt><dd>${esc(why)}</dd></div><div><dt>${esc(t.you)}</dt><dd class="home-tool__you">${esc(you)}</dd></div></dl>
-            <span class="home-tool__open">${esc(t.open)} <i data-icon="arrowRight" data-size="24"></i></span>
-          </div>
-        </a>`;
-      }).join("")}</div>
-    </section>
-
-    <section class="drill-banner console home-drill">
-      <div><div class="kicker">Dengue Drill</div><h2>${esc(t.drill_head)}</h2><p>${esc(t.drill_sub)}</p>
-        <a class="btn btn--light btn--sm" href="../drill/"><i data-icon="play" data-size="24"></i>${esc(t.drill_btn)}</a></div>
-      <pixel-sprite sprite="frog" pose="watch" scale="3"></pixel-sprite>
+    <section class="card drill-card">
+      <div><div class="kicker">${esc(labels.drill)}</div><h2>${esc(t.drill_head)}</h2><p>${esc(t.drill_sub)}</p></div>
+      <a class="btn btn--light btn--sm" href="../drill/"><i data-icon="play" data-size="18"></i>${esc(t.drill_btn)}</a>
     </section>`;
 
-  el.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => { if (e.ctrlKey || e.metaKey) return; e.preventDefault(); ctx.go(a.dataset.go, a.dataset.u ? { area: a.dataset.u } : {}); }));
+  el.querySelectorAll("[data-go]").forEach((a) => a.addEventListener("click", (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault(); ctx.go(a.dataset.go, a.dataset.u ? { area: a.dataset.u } : {});
+  }));
   el.querySelector("#story-btn")?.addEventListener("click", () => ctx.set({ panel: "province", mode: "replay" }));
-  el.querySelector("#dl-brief")?.addEventListener("click", () =>
-    download("epilag_action_brief.md", briefMarkdown(shown, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf }), "text/markdown"));
+  el.querySelector("#dl-brief")?.addEventListener("click", saveBrief);
+  ctx.topDownload(t.download_brief, saveBrief);
 
-  const box = el.querySelector("#home-map");
-  const tip = el.querySelector("#home-map-tip");
+  const box = el.querySelector("#home-map"), tip = el.querySelector("#home-map-tip");
   const grids = await loadGrids("voxel_ph");
   const grid = panel === "province" ? grids.province : grids.region;
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
@@ -115,7 +91,7 @@ export async function render(el, ctx) {
   map.setValues(Object.fromEntries(map.units.map((u) => {
     const r = byId.get(u);
     return [u, r ? { color: LV_COLOR[r.level], height: LV_HEIGHT[r.level] } : { color: NODATA, height: 1 }];
-  })), { duration: 600 });
+  })), { duration: 520 });
   const onLeave = () => { tip.hidden = true; map.highlight(null); };
   box.addEventListener("pointerleave", onLeave);
   const priorityList = el.querySelector("#home-priority");
@@ -123,32 +99,33 @@ export async function render(el, ctx) {
   const onPriorityLeave = () => map.highlight(null);
   priorityList?.addEventListener("pointerover", onPriorityOver);
   priorityList?.addEventListener("pointerleave", onPriorityLeave);
-  return () => { box.removeEventListener("pointerleave", onLeave); priorityList?.removeEventListener("pointerover", onPriorityOver); priorityList?.removeEventListener("pointerleave", onPriorityLeave); map.dispose(); };
+  priorityList?.addEventListener("focusin", onPriorityOver);
+  priorityList?.addEventListener("focusout", onPriorityLeave);
+  return () => { box.removeEventListener("pointerleave", onLeave); priorityList?.removeEventListener("pointerover", onPriorityOver); priorityList?.removeEventListener("pointerleave", onPriorityLeave); priorityList?.removeEventListener("focusin", onPriorityOver); priorityList?.removeEventListener("focusout", onPriorityLeave); map.dispose(); };
 }
 
 function levelStat(level, key, value, t) {
-  return `<div class="home-counts__level" data-lv="${LV[level]}"><span class="sq sq--round"></span><div><b>${count(value)}</b><span>${esc(t[`${key}_n`])}</span></div></div>`;
+  return `<div class="status-level" data-lv="${LV[level]}"><span class="sq sq--round"></span><span class="status-level__copy"><b class="nums">${count(value)}</b><span>${esc(t[`${key}_n`])}</span></span></div>`;
 }
 
 function replayStatus(t, horizon, rows) {
   const c = replayClaim(rows);
-  return `<div class="home-state__eyebrow">${esc(t.then)}</div><p><b>${c.flagged} ${esc(t.of)} ${c.crossed}</b> ${esc(t.then_line.replace("{h}", horizon))}</p>`;
+  return `<div class="status-message__title">${esc(t.then)}</div><p><b>${c.flagged} ${esc(t.of)} ${c.crossed}</b> ${esc(t.then_line.replace("{h}", horizon))}</p>`;
 }
 
 function quietStatus(t) {
-  return `<div class="home-state__eyebrow">${esc(t.quiet)}</div><button type="button" class="btn btn--ghost btn--sm" id="story-btn">${esc(t.replay_story)}</button>`;
+  return `<div class="status-message__title">${esc(t.quiet)}</div><p>${esc(t.brief_empty)}</p><button type="button" class="btn btn--ghost btn--sm" id="story-btn">${esc(t.replay_story)}</button>`;
 }
 
 function priorityRow(r, i, ctx) {
-  return `<li><a class="home-priority__row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit">
-    <span class="home-priority__rank">${i + 1}</span><span class="home-priority__copy"><b>${esc(r.unit_name)}</b><small>${esc(ctx.t.cases)}: ${fmt(r.q50)} (${fmt(r.q10)}–${fmt(r.q90)})</small><small>${esc(ctx.t.peak)} ${fmtDay(r.peak_week, false)}</small></span>
-    <span class="home-priority__level">${pill(ctx, r.level)}<small>${r.q50_per100k.toFixed(1)} ${esc(ctx.t.per100k)}</small></span>
-  </a></li>`;
+  return `<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit" aria-label="${esc(`${r.unit_name}, ${ctx.levelName(r.level)}`)}">
+    <span class="priority-row__rank">${i + 1}</span><span class="priority-row__copy"><b>${esc(r.unit_name)}</b><small>${esc(ctx.t.cases)}: ${fmt(r.q50)} (${fmt(r.q10)}–${fmt(r.q90)})</small><small>${esc(ctx.t.peak)} ${fmtDay(r.peak_week, false)}</small></span>
+    <span class="priority-row__level">${pill(ctx, r.level)}<small>${r.q50_per100k.toFixed(1)} ${esc(ctx.t.per100k)}</small></span></a></li>`;
 }
 
 function briefRow(r, ctx) {
   const [when, d] = ctx.i18n.PLAYBOOK[ctx.lang][r.level][0];
-  return `<div class="brief-row home-brief-row" data-lv="${LV[r.level]}"><div class="home-brief-row__area"><div class="brief-row__nm">${esc(r.unit_name)} ${pill(ctx, r.level)}</div>
+  return `<div class="brief-row" data-lv="${LV[r.level]}"><div><div class="brief-row__name">${esc(r.unit_name)} ${pill(ctx, r.level)}</div>
     <div class="brief-row__meta">${esc(ctx.t.cases)}: <b>${fmt(r.q50)}</b> (${fmt(r.q10)}–${fmt(r.q90)}) · ${esc(ctx.t.peak)} ${fmtDay(r.peak_week, false)}</div></div>
     <div class="brief-row__next"><b>${esc(when)}:</b> ${esc(d)}<div class="brief-row__meta">${esc(ctx.t.prepare.replace("{n}", fmt(r.cases_high)))}</div></div></div>`;
 }

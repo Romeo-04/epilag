@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EpiLag-PH · Dengue early warning</title>
-  <meta name="description" content="EpiLag-PH: dengue forecasts 2–8 weeks ahead for Philippine provinces, regions and Quezon City, with checklists, a budget plan and plain-language advisories.">
+  <meta name="description" content="EpiLag-PH: dengue early warning and action planning for Philippine provinces, regions and Quezon City.">
   <meta name="theme-color" content="#FBFAF4">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,24 +13,49 @@
 </head>
 <body class="app">
   <a class="skip" href="#view">Skip to content</a>
+  <button type="button" class="mobile-menu" id="mobile-menu" aria-label="Open navigation" aria-expanded="false"><i data-icon="menu" data-size="24"></i></button>
+  <div class="nav-scrim" id="mobile-scrim" aria-hidden="true"></div>
 
-  <header class="app-top">
-    <div class="wrap app-top__in">
-      <nav class="nav app-nav" aria-label="App">
-        <a class="brand" href="../"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH<small>Dengue early warning</small></span></a>
-        <div class="app-tabs" id="tabs" role="list"></div>
-        <div class="seg seg--sm" id="lang" role="group" aria-label="Language"></div>
-      </nav>
-      <div class="ctx" id="ctx" aria-label="Forecast settings"></div>
+  <div class="app-shell">
+    <aside class="app-sidebar" id="sidebar" aria-label="Dashboard navigation">
+      <div class="sidebar__top">
+        <a class="sidebar__brand" href="../" aria-label="EpiLag-PH home">
+          <span class="sidebar__logo"><i data-icon="logo" data-size="30"></i></span>
+          <span class="sidebar__brand-copy"><b>EpiLag-PH</b><small id="sidebar-title">Public health dashboard</small></span>
+        </a>
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse navigation" aria-expanded="true"><i data-icon="chevronLeft" data-size="20"></i></button>
+        <button type="button" class="mobile-close" id="mobile-close" aria-label="Close navigation" aria-expanded="false"><i data-icon="close" data-size="20"></i></button>
+      </div>
+      <nav class="app-tabs" id="tabs"></nav>
+      <div class="sidebar__bottom">
+        <a class="sidebar__link" href="../drill/"><span class="nav-item__icon"><i data-icon="play" data-size="22"></i></span><span class="nav-item__text">Dengue Drill</span></a>
+        <div class="sidebar__language"><span class="ctx__label">Language</span><div class="seg seg--sm" id="lang" role="group" aria-label="Language"></div></div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-top">
+        <div class="topbar wrap">
+          <div class="topbar__title">
+            <span class="topbar__group" id="app-page-group">Monitor</span>
+            <h1 id="app-page-title">Overview</h1>
+            <span class="topbar__note" id="app-page-note"></span>
+          </div>
+          <div class="topbar__actions" id="top-actions"></div>
+        </div>
+        <div class="wrap">
+          <section class="ctx" id="ctx" aria-label="Forecast settings"></section>
+        </div>
+      </header>
+
+      <main id="view" class="wrap app-view" tabindex="-1" aria-live="polite"></main>
+
+      <footer class="wrap app-foot small muted">
+        <span>EpiLag-PH · PJDSC 2026</span>
+        <a href="../methodology.html">Methodology</a><a href="../data/">Open data</a><a href="../drill/">Dengue Drill</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </footer>
     </div>
-  </header>
-
-  <main id="view" class="wrap app-view" tabindex="-1" aria-live="polite"></main>
-
-  <footer class="wrap app-foot small muted">
-    <span>EpiLag-PH · PJDSC 2026</span>
-    <a href="../methodology.html">Methodology</a><a href="../data/">Open data</a><a href="../drill/">Dengue Drill</a><a href="https://github.com/Romeo-04/epilag">Code</a>
-  </footer>
+  </div>
 
   <script type="module" src="/src/app/main.js"></script>
 </body>

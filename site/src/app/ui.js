@@ -22,6 +22,10 @@ const ICON16 = new Set(["forecastMap", "areaDetail", "actionPlan", "residents", 
 export const cardTitle = (ic, title, sub = "") =>
   `<div class="ctitle"><span class="ctitle__ic">${icon(ic, { size: ICON16.has(ic) ? 32 : 24 })}</span><div><h2>${esc(title)}</h2>${sub ? `<p>${esc(sub)}</p>` : ""}</div></div>`;
 
+/** Short explanatory copy that stays available without competing with the data. */
+export const infoDisclosure = (summary, body, ic = "info") =>
+  `<details class="info-disclosure"><summary><span class="info-disclosure__icon">${icon(ic, { size: 18 })}</span><span>${esc(summary)}</span>${icon("chevronRight", { size: 18, className: "info-disclosure__chev" })}</summary><div class="info-disclosure__body">${body}</div></details>`;
+
 /** A number that counts up when it scrolls in (static under reduced motion). */
 export const count = (n, cls = "") => `<span class="nums ${cls}" data-count="${Math.round(n)}">${Math.round(n).toLocaleString("en-US")}</span>`;
 export function hydrateCounts(root) { root.querySelectorAll("[data-count]").forEach((el) => countUp(el)); }
