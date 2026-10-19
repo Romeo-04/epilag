@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EpiLag-PH · showreel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Brand tokens (site/src/css/tokens.css) and the Dengue Drill night palette, as in docs/film. */
+  :root {
+    --ink: #071711; --paper: #FBFAF4; --paper-2: #F3F2EA; --line: #E4E4D9; --muted: #4A5A51; --soft: #7D8A82;
+    --forest: #08754F; --forest-deep: #055C3E; --forest-soft: #E3F0E7; --amber: #F5A51C; --sky: #BFE2EC;
+    --warn: #F04B2A; --watch: #F58220; --above: #F7C928; --normal: #0C7A55;
+    --night: #0B1630; --night-2: #142250; --night-line: #2E3F7A; --night-text: #EEF2FF; --night-muted: #A3B0DB; --teal: #2FD6C3;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  body { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; color: var(--night-text); -webkit-font-smoothing: antialiased; transform-origin: 0 0; }
+  canvas.spr { display: block; image-rendering: pixelated; }
+  #stage { position: absolute; inset: 0; overflow: hidden; background: var(--night); }
+  .scene { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+  .cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .abs { position: absolute; }
+
+  .dark { background: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 4px, radial-gradient(120% 90% at 70% 0%, #1B2B63, var(--night) 62%); }
+  .black { background: radial-gradient(90% 80% at 50% 30%, #0E1A3A, #050A18 70%); }
+  .light { background: var(--paper); color: var(--ink); }
+  .light .cam::before { content: ""; position: absolute; inset: -200px; background: radial-gradient(rgba(7, 23, 17, .08) 1.5px, transparent 1.5px) 0 0 / 32px 32px; }
+  .green { background: linear-gradient(rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px, linear-gradient(90deg, rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px,
+    radial-gradient(110% 120% at 85% 10%, #0E8C5F 0%, var(--forest) 45%, var(--forest-deep) 100%); color: #fff; }
+
+  /* type */
+  .kicker { display: inline-flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); }
+  .kicker::before { content: ""; width: 12px; height: 12px; background: currentColor; flex: none; }
+  .light .kicker { color: var(--forest); }
+  .mega { font-size: 230px; font-weight: 900; letter-spacing: -.055em; line-height: .9; }
+  .h1 { font-size: 128px; font-weight: 900; letter-spacing: -.05em; line-height: 1; }
+  .h2 { font-size: 84px; font-weight: 800; letter-spacing: -.04em; line-height: 1.02; }
+  .h3 { font-size: 46px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15; }
+  .body { font-size: 30px; line-height: 1.45; color: rgba(238, 242, 255, .82); }
+  .light .body { color: var(--muted); }
+  .muted { color: var(--night-muted); }
+  .light .muted { color: var(--soft); }
+  .red { color: #FF7A5C; }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .02em .08em; margin: 0 -.02em -.08em; }
+  .c { display: inline-block; will-change: transform; }
+
+  /* rolling digits */
+  .odo { display: inline-flex; font-variant-numeric: tabular-nums; line-height: 1; height: 1em; overflow: hidden; vertical-align: bottom; }
+  .odo span { display: flex; flex-direction: column; }
+  .odo span b { height: 1em; font-weight: inherit; }
+  .stat { font-size: 170px; font-weight: 900; letter-spacing: -.05em; line-height: 1; display: flex; align-items: baseline; gap: 18px; }
+  .stat small { font-size: 56px; font-weight: 700; letter-spacing: -.03em; color: var(--night-muted); }
+  .light .stat small { color: var(--soft); }
+
+  /* HUD: the reel's own chrome */
+  #hud { position: absolute; inset: 0; pointer-events: none; z-index: 40; mix-blend-mode: difference; color: #fff; font-family: var(--mono); font-weight: 700; font-size: 17px; letter-spacing: .12em; }
+  #hud .tl { position: absolute; left: 56px; top: 44px; display: flex; gap: 14px; align-items: center; }
+  #hud .tl i { width: 10px; height: 10px; background: #fff; }
+  #hud .tr { position: absolute; right: 56px; top: 44px; text-align: right; }
+  #hud .tr b { display: block; font-size: 15px; opacity: .6; margin-top: 6px; }
+  #hud .corner { position: absolute; width: 26px; height: 26px; border: 3px solid #fff; opacity: .5; }
+  #progress { position: absolute; left: 0; bottom: 0; height: 5px; background: var(--amber); z-index: 41; width: 0; }
+  #cap { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); z-index: 39; max-width: 1500px; padding: 14px 26px 16px; text-align: center;
+    background: rgba(7, 23, 17, .78); box-shadow: 6px 6px 0 rgba(0, 0, 0, .25); font-size: 30px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: #fff; opacity: 0; }
+  #cap span { opacity: .34; transition: none; }
+  #cap span.on { opacity: 1; }
+  #cap span.now { color: var(--amber); opacity: 1; }
+  #fx, #grain { position: absolute; inset: 0; pointer-events: none; }
+  #fx { z-index: 30; }
+  #grain { z-index: 45; width: 1920px; height: 1080px; opacity: .07; mix-blend-mode: overlay; image-rendering: pixelated; }
+  #vignette { position: absolute; inset: 0; z-index: 44; pointer-events: none; background: radial-gradient(130% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, .35)); }
+  #slices { position: absolute; inset: 0; z-index: 31; pointer-events: none; }
+  #slices i { position: absolute; left: 0; right: 0; background: var(--ink); transform: scaleX(0); }
+  #fade { position: absolute; inset: 0; z-index: 50; background: #000; opacity: 0; pointer-events: none; }
+
+  /* browser frames around the live captures */
+  .browser { position: absolute; background: #fff; border: 3px solid var(--ink); border-radius: 14px; overflow: hidden;
+    box-shadow: 18px 18px 0 rgba(8, 117, 79, .22), 0 80px 140px -60px rgba(7, 23, 17, .55); }
+  .browser .bar { height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: var(--paper-2); border-bottom: 2px solid var(--line); }
+  .browser .bar i { width: 13px; height: 13px; flex: none; }
+  .browser .bar i:nth-child(1) { background: var(--warn); } .browser .bar i:nth-child(2) { background: var(--above); } .browser .bar i:nth-child(3) { background: var(--normal); }
+  .browser .bar span { margin-left: 18px; height: 30px; padding: 0 16px; display: flex; align-items: center; background: #fff; border: 2px solid var(--line); border-radius: 6px;
+    font-size: 15px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .browser .vp { position: relative; overflow: hidden; }
+  .browser .vp img, .full img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; transform-origin: 0 0; }
+  .persp { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 50% 40%; }
+  .persp > * { transform-style: preserve-3d; }
+  .pill { position: absolute; z-index: 5; display: inline-flex; align-items: center; gap: 14px; padding: 16px 24px; background: var(--ink); color: var(--paper);
+    font-size: 26px; font-weight: 800; letter-spacing: -.01em; box-shadow: 8px 8px 0 rgba(7, 23, 17, .22); white-space: nowrap; }
+  .pill i { width: 14px; height: 14px; flex: none; }
+  .pill.g { background: var(--forest); }
+  .pill.a { background: var(--amber); color: var(--ink); }
+
+  /* 1 · rains */
+  .cloud { position: absolute; filter: brightness(.6) saturate(.8); }
+  /* 2 · breed */
+  .village { position: absolute; left: 0; right: 0; bottom: 64px; display: flex; justify-content: space-around; align-items: flex-end; padding: 0 60px; filter: brightness(.45) saturate(.8); }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 66px; background: #070F22; border-top: 6px solid #16255A; }
+  .moon { position: absolute; right: 260px; top: 150px; width: 120px; height: 120px; background: #E8E3C8; box-shadow: 0 0 0 12px rgba(232, 227, 200, .08), 0 0 0 28px rgba(232, 227, 200, .04);
+    clip-path: polygon(30% 0, 70% 0, 70% 10%, 90% 10%, 90% 30%, 100% 30%, 100% 70%, 90% 70%, 90% 90%, 70% 90%, 70% 100%, 30% 100%, 30% 90%, 10% 90%, 10% 70%, 0 70%, 0 30%, 10% 30%, 10% 10%, 30% 10%); }
+  .phrase { position: absolute; left: 0; right: 0; top: 210px; text-align: center; }
+  .count { position: absolute; right: 110px; bottom: 120px; font-family: var(--mono); font-size: 34px; font-weight: 800; color: var(--amber); letter-spacing: .06em; }
+
+  /* charts */
+  .chart { position: absolute; left: 930px; top: 190px; width: 880px; height: 700px; image-rendering: pixelated; }
+  .note { position: absolute; font-size: 22px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
+  .legend { display: flex; gap: 28px; font-size: 22px; font-weight: 700; }
+  .legend span { display: inline-flex; gap: 10px; align-items: center; }
+  .legend i { width: 18px; height: 18px; }
+  .fine { font-size: 24px; line-height: 1.45; color: var(--soft); padding-left: 24px; border-left: 6px solid var(--amber); }
+
+  /* 4 · the lag */
+  .timeline { position: absolute; left: 160px; right: 160px; top: 380px; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .timeline::before, .timeline .bar { content: ""; position: absolute; left: 64px; right: 60px; top: 58px; height: 12px;
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 22px, transparent 22px 30px); mask: repeating-linear-gradient(90deg, #000 0 22px, transparent 22px 30px); }
+  .timeline::before { background: rgba(255, 255, 255, .1); }
+  .timeline .bar { transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--normal), var(--above), var(--watch), var(--warn)); }
+  .node { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+  .node .tile { width: 128px; height: 128px; display: grid; place-items: center; background: var(--night-2); border: 4px solid var(--night-line);
+    box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .08), inset -4px -4px 0 rgba(0, 0, 0, .3), 8px 8px 0 rgba(0, 0, 0, .3); }
+  .node .tile.first { border-color: var(--amber); background: #24305E; }
+  .node .tile.last { border-color: var(--warn); }
+  .node b { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .node span { font-size: 24px; color: var(--night-muted); font-weight: 600; }
+  .bracket { position: absolute; left: 160px; right: 160px; top: 700px; text-align: center; }
+  .bracket .line { height: 28px; margin: 0 60px 0 calc(25% + 64px); border: 4px solid var(--warn); border-top: 0; transform-origin: left; }
+  .bracket p { font-size: 42px; font-weight: 800; color: #FF7A5C; margin: 22px 0 0 25%; letter-spacing: -.02em; }
+
+  /* 5 · brand */
+  .asm { position: absolute; left: 800px; top: 150px; width: 320px; height: 320px; }
+  .asm .tile, .asm .frame { position: absolute; inset: 0; --c: 16px; clip-path: polygon(0 calc(var(--c) * 2), var(--c) calc(var(--c) * 2), var(--c) var(--c), calc(var(--c) * 2) var(--c), calc(var(--c) * 2) 0,
+      calc(100% - var(--c) * 2) 0, calc(100% - var(--c) * 2) var(--c), calc(100% - var(--c)) var(--c), calc(100% - var(--c)) calc(var(--c) * 2), 100% calc(var(--c) * 2),
+      100% calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c) * 2) calc(100% - var(--c)), calc(100% - var(--c) * 2) 100%,
+      calc(var(--c) * 2) 100%, calc(var(--c) * 2) calc(100% - var(--c)), var(--c) calc(100% - var(--c)), var(--c) calc(100% - var(--c) * 2), 0 calc(100% - var(--c) * 2)); }
+  .asm .frame { inset: -18px; background: var(--paper); }
+  .asm .tile { background: var(--forest); }
+  .asm i { position: absolute; width: 20px; height: 20px; }
+  .ring { position: absolute; border: 8px solid var(--amber); }
+  .twinkle i { position: absolute; display: block; }
+
+  /* VCR */
+  .osd { position: absolute; font-family: var(--mono); font-weight: 800; font-size: 44px; letter-spacing: .08em; color: #fff; text-shadow: 3px 0 0 rgba(240, 75, 42, .7), -3px 0 0 rgba(47, 214, 195, .7); }
+  .scan { position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0, 0, 0, .22) 0 2px, transparent 2px 5px); pointer-events: none; }
+
+  /* drill */
+  .full { position: absolute; inset: 0; overflow: hidden; }
+  .chip { position: absolute; z-index: 5; padding: 18px 28px; background: var(--night-2); border: 4px solid var(--amber); color: #fff; font-size: 40px; font-weight: 900; letter-spacing: -.02em;
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, .4); white-space: nowrap; }
+  .chip small { display: block; font-size: 18px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+
+  /* proof */
+  .cards { position: absolute; left: 110px; right: 110px; top: 360px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; perspective: 1800px; }
+  .card { padding: 44px 44px 48px; background: var(--night-2); border: 4px solid var(--night-line); transform-origin: 50% 0;
+    box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .07), inset -4px -4px 0 rgba(0, 0, 0, .3), 10px 10px 0 rgba(0, 0, 0, .3); }
+  .card::before { content: ""; display: block; width: 72px; height: 10px; margin-bottom: 30px; background: var(--teal);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 14px, transparent 14px 20px); mask: repeating-linear-gradient(90deg, #000 0 14px, transparent 14px 20px); }
+  .card .stat { font-size: 124px; }
+  .card p { font-size: 28px; line-height: 1.4; margin-top: 18px; color: rgba(238, 242, 255, .8); }
+  .card.hi { background: var(--paper); color: var(--ink); border-color: var(--paper); box-shadow: 12px 12px 0 var(--amber); }
+  .card.hi::before { background: var(--forest); }
+  .card.hi p { color: var(--muted); }
+  .card.hi .stat small { color: var(--soft); }
+  .foot { position: absolute; left: 110px; right: 110px; bottom: 150px; font-size: 25px; line-height: 1.45; color: var(--night-muted); padding-left: 30px; border-left: 6px solid var(--amber); }
+
+  /* close */
+  .url { display: inline-flex; gap: 20px; align-items: center; padding: 24px 40px; background: var(--paper); color: var(--forest); font-size: 40px; font-weight: 800; letter-spacing: -.02em; box-shadow: 10px 10px 0 var(--ink); }
+  .url svg { width: 30px; height: 30px; }
+  .credits { font-family: var(--mono); font-size: 19px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255, 255, 255, .72); text-align: center; line-height: 1.9; }
+
+  #play { position: fixed; inset: 0; z-index: 99; display: grid; place-items: center; background: rgba(5, 10, 24, .55); color: #fff; font: 800 40px "Inter Tight", sans-serif; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 · the rains -->
+<section class="scene black" id="s-rains"><div class="cam">
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="8" style="left:80px;top:-10px" data-drift="40"></canvas>
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="6" style="left:820px;top:-40px" data-drift="-30"></canvas>
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="8" data-flip style="left:1480px;top:20px" data-drift="50"></canvas>
+  <canvas class="abs" id="rain" width="1920" height="1080" style="left:0;top:0"></canvas>
+  <div class="abs" style="left:0;right:0;top:640px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:26px">
+    <div class="kicker" id="r-k">September 2024 · Week 0</div>
+    <div class="h2 split" id="r-h">The rains arrive.</div>
+  </div>
+</div></section>
+
+<!-- 2 · they breed -->
+<section class="scene dark" id="s-breed"><div class="cam">
+  <div class="moon"></div>
+  <div class="village"><canvas class="spr" data-s="props" data-f="tree" data-x="6"></canvas><canvas class="spr" data-s="props" data-f="house" data-x="6"></canvas><canvas class="spr" data-s="props" data-f="tree" data-x="5"></canvas><canvas class="spr" data-s="props" data-f="house" data-x="5" data-flip></canvas><canvas class="spr" data-s="props" data-f="tree" data-x="6"></canvas><canvas class="spr" data-s="props" data-f="house" data-x="6"></canvas><canvas class="spr" data-s="props" data-f="tree" data-x="5" data-flip></canvas></div>
+  <div class="ground"></div>
+  <canvas class="abs" id="swarm" width="1920" height="1080" style="left:0;top:0"></canvas>
+  <div class="phrase"><div class="h1 split" id="p0">Standing water.</div></div>
+  <div class="phrase"><div class="h1 split" id="p1">Warm nights.</div></div>
+  <div class="phrase"><div class="h1 split" id="p2">In the dark,</div></div>
+  <div class="phrase"><div class="h1 split" id="p3">the mosquitoes <span style="color:var(--amber)">breed.</span></div></div>
+  <div class="count" id="swarm-n"></div>
+</div></section>
+
+<!-- 3 · the surge -->
+<section class="scene dark" id="s-surge"><div class="cam">
+  <canvas class="chart" id="ch-surge"></canvas>
+  <div class="note" id="n-line" style="color:var(--night-muted)">Epidemic line</div>
+  <div class="note" id="n-peak" style="color:#FF7A5C"></div>
+  <div class="abs" style="left:110px;top:210px;width:800px;display:flex;flex-direction:column;gap:26px">
+    <div class="kicker" id="su-k">Quezon City · 2024–25</div>
+    <div class="h2 split" id="su-h">Dengue surges<br><span class="muted">for half a year.</span></div>
+    <div id="su-stat"><div class="stat"><span class="odo" id="odo-weeks"></span><small>weeks</small></div>
+      <div class="body" style="margin-top:10px">above the epidemic line, October 2024 to April 2025.</div></div>
+    <div class="legend" id="su-leg"><span><i style="background:var(--warn)"></i>Above the epidemic line</span><span><i style="background:#3A4C8C"></i>Below</span></div>
+  </div>
+</div></section>
+
+<!-- 4 · why late -->
+<section class="scene dark" id="s-late"><div class="cam">
+  <div class="abs h2 split" id="l-h" style="left:160px;top:170px">Why do we always act <span class="red" id="l-late">late?</span></div>
+  <div class="timeline">
+    <div class="bar" id="l-bar"></div>
+    <div class="node"><div class="tile first"><canvas class="spr" data-s="props" data-f="cloud" data-x="3"></canvas></div><b>Rain and heat</b><span>week 0</span></div>
+    <div class="node"><div class="tile"><canvas class="spr" data-s="mosquito" data-f="fly1,fly2" data-fps="10" data-x="3"></canvas></div><b>Mosquitoes multiply</b><span>+1–2 weeks</span></div>
+    <div class="node"><div class="tile"><canvas class="spr" data-s="props" data-f="people" data-x="2"></canvas></div><b>People get sick</b><span>+2–4 weeks</span></div>
+    <div class="node"><div class="tile last"><canvas class="spr" data-s="props" data-f="hospital" data-x="2"></canvas></div><b>Hospitals report</b><span>+4–8 weeks</span></div>
+  </div>
+  <div class="bracket" id="l-br"><div class="line"></div><p>Counted weeks after the rain that caused them.</p></div>
+</div></section>
+
+<!-- 5 · brand -->
+<section class="scene green" id="s-brand"><div class="cam">
+  <div class="twinkle" id="tw"></div>
+  <div class="ring" id="ring" style="left:782px;top:132px;width:356px;height:356px;opacity:0"></div>
+  <div class="asm" id="asm"><div class="frame"></div><div class="tile"></div></div>
+  <div class="abs" style="left:0;right:0;top:530px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:26px">
+    <div class="split" id="b-word" style="font-size:170px;font-weight:900;letter-spacing:-.05em;line-height:1">EpiLag-PH</div>
+    <div class="h3"><span class="split" id="b-t1">See dengue coming.</span> <span class="split" id="b-t2" style="color:rgba(255,255,255,.7)">Act weeks earlier.</span></div>
+  </div>
+  <canvas class="spr abs" id="b-frog" data-s="frog" data-f="peek" data-x="8" style="right:200px;bottom:0"></canvas>
+</div></section>
+
+<!-- 6 · rewind, then the replay -->
+<section class="scene dark" id="s-rewind"><div class="cam">
+  <div id="rw-a" class="abs" style="inset:0">
+    <canvas class="chart" id="ch-rewind"></canvas>
+    <div class="abs" style="left:110px;top:230px;width:760px;display:flex;flex-direction:column;gap:20px">
+      <div class="kicker">Quezon City · 2024–25</div>
+      <div class="h2">Dengue surges<br><span class="muted">for half a year.</span></div>
+    </div>
+    <div class="scan"></div>
+    <div class="osd" id="osd-rw" style="left:110px;top:110px">◀◀ REWIND</div>
+    <div class="osd" id="osd-date" style="right:110px;top:110px">23 FEB 2025</div>
+  </div>
+  <div id="rw-b" class="abs light" style="inset:0;visibility:hidden"><div class="cam">
+    <canvas class="chart" id="ch-replay"></canvas>
+    <div class="note" id="n-cross" style="color:var(--ink)"></div>
+    <div class="abs" style="left:110px;top:150px;width:800px;display:flex;flex-direction:column;gap:24px">
+      <div class="kicker" id="rp-k">Replay · forecasts made 4 weeks ahead</div>
+      <div class="h2 split" id="rp-h">What if you had<br>known <span style="color:var(--forest)">weeks earlier?</span></div>
+      <div class="legend" id="rp-leg" style="color:var(--muted)"><span><i style="background:var(--warn)"></i>Outbreak warning</span><span><i style="background:var(--watch)"></i>Watch</span><span><i style="background:#C9CCBF"></i>Reported</span></div>
+      <div id="rp-card" style="margin-top:14px;padding:38px 44px;background:var(--ink);color:var(--paper);box-shadow:14px 14px 0 var(--forest)">
+        <div class="stat"><span class="odo" id="odo-lead"></span><small style="color:#9DBDAC">weeks</small></div>
+        <div class="body" style="margin-top:12px;color:rgba(251,250,244,.8)">before Quezon City crossed its epidemic line, EpiLag-PH flagged it, and kept it flagged <b style="color:var(--amber)">every week to the February peak</b>.</div>
+      </div>
+    </div>
+    <div class="osd" id="osd-play" style="right:110px;top:100px;color:var(--ink);text-shadow:none">▶ PLAY</div>
+  </div></div>
+</div></section>
+
+<!-- 7 · the dashboard, replaying Quezon City -->
+<section class="scene light" id="s-overview"><div class="cam">
+  <div class="abs" style="left:110px;top:250px;width:560px;display:flex;flex-direction:column;gap:26px;z-index:2">
+    <div class="kicker" id="ov-k">The dashboard · live</div>
+    <div class="h2 split" id="ov-h">Replay the season, <span style="color:var(--forest)">week by week.</span></div>
+    <div class="body" id="ov-b">Drag the forecast week. Every province, region and Quezon City redraws, 2–8 weeks ahead.</div>
+  </div>
+  <div class="persp"><div class="browser" id="ov-br" style="left:700px;top:150px;width:1140px">
+    <div class="bar"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · Overview · replay</span></div>
+    <div class="vp" style="height:712px"><img data-clip="overview" alt=""></div></div></div>
+  <div class="pill" id="ov-p1" style="left:260px;top:700px"><i style="background:var(--warn)"></i>Quezon City · outbreak warning</div>
+  <div class="pill g" id="ov-p2" style="left:1290px;top:96px">Forecast made week by week</div>
+</div></section>
+
+<!-- 8 · area detail -->
+<section class="scene light" id="s-area"><div class="cam">
+  <div class="browser" id="ar-br" style="left:200px;top:64px;width:1520px">
+    <div class="bar"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · Area detail · Quezon City · 22 Sep 2024</span></div>
+    <div class="vp" style="height:860px"><div id="ar-zoom" style="position:absolute;inset:0;transform-origin:34.7% 37%"><img data-clip="area" alt=""></div></div></div>
+  <div class="abs" id="ar-stamp" style="left:1000px;top:250px;padding:18px 40px;border:10px solid var(--watch);color:var(--watch);font-size:140px;font-weight:900;letter-spacing:-.04em;line-height:1;background:rgba(251,250,244,.9);transform:rotate(-6deg)">WATCH</div>
+</div></section>
+
+<!-- 9 · QC barangays -->
+<section class="scene light" id="s-barangays"><div class="cam">
+  <div class="abs" style="left:110px;top:170px;width:760px;display:flex;flex-direction:column;gap:22px;z-index:2">
+    <div class="kicker" id="bg-k">Street level · QC barangays</div>
+    <div class="h2 split" id="bg-h">Visit these <span style="color:var(--forest)">first.</span></div>
+    <div id="bg-list" style="display:flex;flex-direction:column;gap:18px;margin-top:22px">
+      <div class="brg" style="display:flex;align-items:center;gap:26px"><span style="font-family:var(--mono);font-size:30px;font-weight:800;color:var(--forest)">01</span><span class="h2" style="font-size:76px">Batasan Hills</span></div>
+      <div class="brg" style="display:flex;align-items:center;gap:26px"><span style="font-family:var(--mono);font-size:30px;font-weight:800;color:var(--forest)">02</span><span class="h2" style="font-size:76px">Payatas</span></div>
+      <div class="brg" style="display:flex;align-items:center;gap:26px"><span style="font-family:var(--mono);font-size:30px;font-weight:800;color:var(--forest)">03</span><span class="h2" style="font-size:76px">Commonwealth</span></div>
+    </div>
+  </div>
+  <div class="persp" style="perspective-origin:80% 40%"><div class="browser" id="bg-br" style="left:880px;top:160px;width:1000px">
+    <div class="bar"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · QC barangays</span></div>
+    <div class="vp" style="height:625px"><img data-clip="barangays" alt=""></div></div></div>
+</div></section>
+
+<!-- 10 · Dengue Drill -->
+<section class="scene" id="s-drill" style="background:var(--night)"><div class="cam">
+  <div id="dr-a" class="abs dark" style="inset:0"><div class="persp"><div class="browser" id="dr-br" style="left:210px;top:70px;width:1500px;border-color:#2E3F7A;background:var(--night)">
+    <div class="bar" style="background:#142250;border-color:#2E3F7A"><i></i><i></i><i></i><span style="background:#0B1630;border-color:#2E3F7A;color:#A3B0DB">romeo-04.github.io/epilag/drill · Mission: Quezon City 2024–25</span></div>
+    <div class="vp" style="height:938px"><img data-clip="drill_intro" alt=""></div></div></div></div>
+  <div id="dr-b" class="full" style="visibility:hidden"><div id="dr-push" class="abs" style="inset:0;transform-origin:55% 45%"><img data-clip="drill_play" alt="" style="height:1200px"></div></div>
+  <div class="chip" id="dr-c1" style="left:110px;top:360px"><small>Budget</small>₱5 million</div>
+  <div class="chip" id="dr-c2" style="left:110px;top:520px"><small>Season</small>8 turns</div>
+  <div class="chip" id="dr-c3" style="left:110px;top:680px;border-color:var(--teal)"><small style="color:var(--teal)">Scorekeeper</small>The real cases</div>
+</div></section>
+
+<!-- 11 · proof -->
+<section class="scene dark" id="s-proof"><div class="cam">
+  <div class="abs" style="left:110px;top:140px;display:flex;flex-direction:column;gap:18px">
+    <div class="kicker" id="pr-k">Tested honestly</div>
+    <div class="h2 split" id="pr-h">Every year forecast <span class="muted">only from earlier years.</span></div>
+  </div>
+  <div class="cards">
+    <div class="card hi" id="pc1"><div class="stat"><span class="odo" id="odo-p1"></span><small>of 6</small></div><p>test sets where it beat both simple rules, 4 weeks ahead</p></div>
+    <div class="card" id="pc2"><div class="stat"><span class="odo" id="odo-p2"></span><small>–100%</small></div><p>of outbreak starts caught 4 weeks ahead</p></div>
+    <div class="card" id="pc3"><div class="stat"><span class="odo" id="odo-p3"></span><small>–92%</small></div><p>of real values inside the likely range (target 80%)</p></div>
+  </div>
+  <div class="foot" id="pr-foot">Honest limits: the watch level raises false alarms (42–63% of warnings), and it calls outbreaks better than their height.</div>
+</div></section>
+
+<!-- 12 · close -->
+<section class="scene green" id="s-close"><div class="cam">
+  <div class="twinkle" id="tw2"></div>
+  <div class="abs" id="cl-lines" style="left:0;right:0;top:330px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:30px">
+    <div class="h2 split" id="cl-1" style="color:rgba(255,255,255,.72)">Hospitals see dengue a month late.</div>
+    <div class="h1 split" id="cl-2" style="font-size:150px">EpiLag-PH sees it <span style="color:var(--amber)">now.</span></div>
+  </div>
+  <div class="abs" id="cl-end" style="left:0;right:0;top:250px;display:flex;flex-direction:column;align-items:center;gap:40px">
+    <div class="asm" id="asm2" style="position:relative;left:auto;top:auto;width:200px;height:200px"><div class="frame" style="inset:-12px"></div><div class="tile"></div></div>
+    <div class="split" id="cl-word" style="font-size:120px;font-weight:900;letter-spacing:-.05em;line-height:1">EpiLag-PH</div>
+    <span class="url" id="cl-url"><svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 1h2v1H6zM7 2h2v1H7zM8 3h2v1H8zM1 5h10v2H1zM9 4h2v1H9zM9 7h2v1H9zM8 8h2v1H8zM7 9h2v1H7zM6 10h2v1H6z"/></svg>romeo-04.github.io/epilag</span>
+    <div class="credits" id="cl-cred">Quezon City · 2024–25 · DOH, UPRI-NOAH and ERA5 data · PJDSC 2026<br>Motion: HTML, canvas and GSAP, rendered frame by frame · Voice: neural TTS</div>
+  </div>
+  <canvas class="spr abs" id="cl-frog" data-s="frog" data-f="happy" data-x="7" style="right:120px;bottom:0"></canvas>
+</div></section>
+
+<canvas id="fx" width="1920" height="1080"></canvas>
+<div id="slices"></div>
+</div>
+
+<div id="hud">
+  <div class="tl"><i></i>EPILAG-PH — SHOWREEL 2026</div>
+  <div class="tr"><span id="tc">00:00:00</span><b id="sc">01 / 12 · THE RAINS</b></div>
+  <div class="corner" style="left:28px;bottom:28px;border-right:0;border-top:0"></div>
+  <div class="corner" style="right:28px;bottom:28px;border-left:0;border-top:0"></div>
+</div>
+<div id="cap"></div>
+<canvas id="grain" width="480" height="270"></canvas>
+<div id="vignette"></div>
+<div id="progress"></div>
+<div id="fade"></div>
+
+<script src="gsap.min.js"></script>
+<script src="../film/data.js"></script>
+<script src="vo.js"></script>
+<script src="clips.js"></script>
+<script>
+"use strict";
+const FPS = 30, $ = (id) => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = { out: (k) => 1 - Math.pow(1 - k, 4), inOut: (k) => k < .5 ? 8 * k ** 4 : 1 - Math.pow(-2 * k + 2, 4) / 2, expo: (k) => k >= 1 ? 1 : 1 - Math.pow(2, -10 * k) };
+function rng(seed) { let s = seed % 2147483647 || 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+// ---------------------------------------------------------------- pixel art (poses from docs/sprites/*.json, as in docs/film)
+const SPR = {
+    mosquito: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","G":"#3D6B35","H":"#6E9A4A","K":"#071711","L":"#D5E3DA","M":"#A8BFB2","R":"#F04B2A","W":"#FFFFFF"}, poses: {
+      fly1: ["..............KKKKK..........","......K.......KKKKKK.........",".....KKKKKK..KKMMMMKK........","...KKKMKKKKK.KKLLLMKKK.......","...KKMLLLMKKKKMLLLMMKK.......","...KMMLLLLMKKKMLLLLMK....K...","..KKMMLLLLMKKKMLLLLKKK..K....","..KKKMLLLLLMKKMMLLMKKK..K....","...KKMMMLLMMKKMMMLMKKKKK.....","...KKMMMMLKKKKKKMMKKAAAK.....","....KKKKKKKKKKKKKKKAWWKAK....","....KKKKKKKDDDAAKKAWWWKKAK...",".....KKKDBDDDDAADKAWKKKKAK...",".....KKBBBDDDDDDDKAWKKKKAK...","....KKKBBBDDDDDDDKDAWKKADKKKK","....KKBBBBDDBDDDDDKDAAADKK...",".....KBBBDBBBDDDBDDKDDDKKK...",".....KKKKDDBBBBBBHHDKKKKK....",".......KKKKBBBDBBHHDKKKKK....","......K.KKKKKKKBBBKKKKK......",".....K....K..KKKKKKKKK.......",".....K...K...K..K....K.......","....K....K...K..K.....K......","..BBB...K...K....K....BBB....","........K...K....K...........",".......K....K....K...........","......BAB..BBB..BAB.........."],  // 29x27
+      fly2: [".............................",".............................",".............................",".............................","....................K........","....................K....K...",".....................K..K....",".....................K..K....","....................KKKK.....","..........KKKKKK...KAAAK.....","........KKKKKKKKK.KAWWKAK....","......KKKKKDDDAAKKAWWWKKAK...",".....KKKDBDDDDAADKAWKKKKAK...",".....KKBBBDDDDDDDKAWKKKKAK...","....KKKBBBDDDDDDDKDAWKKADKKKK","....KKBBBBDDBDDDDDKDAAADKK...","...KKKBBBDBBBDDDBDDKDDDKKK...",".KKKMKKKKDDBBBBBBHHDKKKKK....",".KMMLMMKKKKBBBDBBHHDKKKKK....",".KMLLLKMKKKKKKKBBBKKKKK......","KKMMLKLLMMKKKKKKKKKKKKK......","KKMMLKMMMKK..KKMKLLLLKKK.....",".KKKKKKKKK...KKKKLLLMKKK.....","..BBBKKKK...K.KKKKKMKKBBB....","...K....K...K..KKKKKKK.......",".......K....K....K..K........","......BAB..BBB..BAB.........."],  // 29x27
+    } },
+    frog: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","G":"#3D6B35","H":"#6E9A4A","K":"#071711","T":"#E5604F","W":"#FFFFFF"}, poses: {
+      peek: ["........KKK..........KKK...........","......KKAAAKK......KKAAAKK.........",".....KKAWWWAKK....KKAWWWAKK........",".....KAWWWWWAK...KKAWWWWWAK........","....KAWWWWWWWAKKKKAWWWWWWWAK.......","....KAWWWWWWWAKKKKAWWWWWWWAK.......","....KKWWKWWWWAKHHKKWWKWWWWAKK......","....KKKKKWWWWAKHHKKKKKWWWWAKKK.....","...KKKKKKWWWWAKHHKKKKKWWWWAKKKKK...","..KKKKKKWWWWAKHHHHKKKWWWWAKGKKKKK..","..KKKKKAWWWAKKHHHHKKAWWWAKKGGKKKK..",".KKKGGKKAAAKKGGGGGGKKAAAKKGGGGGKKK.",".KKGGGGGKKKGGGGGGGGGGKKKGGGGGGGGKK.","KKKGGGGGGGGGGGGKKKGGGGGGGGGGGGGGKKK","KKKGGGGGGGGGGGGKKKGGGGGGGGGGGGGGKKK"],  // 35x15
+      happy: [".................K.....................","...............KKKKKKKKK...............","........BBBBBBBKKKKKBBBBBBB............","........BBBBBBBKKKGKBBBBBBB............",".......BBBKKKBBBGGGBBBKKKBBBK..........",".......BBKKKKKBBGGGBBKKKKKBBKK.........","........KKKKKKKHGGGGKKKKKKKGKKK........","........BBBBBBBHHGGGBBBBBBBGGKK........","........KKHHHHHHHGGGGGGHHHGGGKKK.......",".......KKHHHHHHHGGGGGGGHHHGGGGKKK......",".......KKHHHHHHGGGGGGGGGGGGDDDDKKK.....","......KKKGHHHHGGGGGGGGGGGGDDDDDDKKK....",".....KKKGGHGKKKKKKKKGGGGGGDDDDDDKKKK...","....KKKGGGKKKKKKKKKKKKKGGDDDDDDHHHKK...","...KKKKKGKKKKKBBBBBBKKKKKKDKKKKKHHKKK..","..KKHHHHKKKKBBBBBBBBBBKKKKKHHHHKKHKKK..",".KKHHHHHHKBBBBBBBBBBBBBBBKHHHHHHKKGKKK.",".KKHHHHHHKBBBBBBBBBBBBHBBKHHHHHHKKGKKK.",".KKHHKKKKKKKKBBBBBBBBBHHHKHHHHHHKKDGKKK",".KKKHHHKKKKBBBBBBBBBBBBHHHKHHHHKKDDDKKK",".KKKKKKBBBBBBWWBBBBBBBBHHHHKKKKKDDDDDKK","KKKGDDBBBBBBWWWBBBBBBBBHHHHKKKDDDDDDDKK","KKKGDDDKKKBBWWWBBBBBBBHHHHHKKKDDDDDDDKK",".KKKGDDKKKKBBBBBBBBBBBHHHHHKKKDDDDDDDKK",".KKKKKKKKKKKBBBBBBBBBHHHHHKKKKKKKDDDKKK","..KKKKKKKKKKKKBBBBBBBBHKKKKKKKKKKKKKKK.",".KKKKKKKKKKKKKKKBBBBBBBKKKKKKKKKKKKKK..",".KKKKBBBKKKKKKKKKKBKKKKKKKKBAAKKKKKKKK.","...KKBAAKBBBKKKKKKKKKKKKKKKBAAKKBBBKKKK",".....KAAKBBBKKKKKKKK......KKKKKKBBBKKK."],  // 39x30
+    } },
+    props: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","F":"#F3EEE0","G":"#3D6B35","H":"#6E9A4A","K":"#071711","L":"#D5E3DA","M":"#A8BFB2","O":"#C8553D","R":"#F04B2A","S":"#BFE2EC","W":"#FFFFFF","s":"#7FB9CB"}, poses: {
+      cloud: [".............KKKKKKKKKKK.............",".............KKKKKKKKKKK.............",".............KKKKKKKKKKKKKKKK........","........KKKKKKKFFFFFFFFKKKKKK........","........KKKKKKKFFFFFFFFKKKKKK........","........KKKFFFFFFFFFFFFFFFFKKKKKK....","....KKKKKKKFFFFFFFFFFFFFFFFKKKKKK....","....KKKFFFFFFFFFFFFFFFFFFFFKKKKKK....","....KKKFFFFFFFFFFFFFFFFFFFFFFFFKK....","....KKKFFFFFFFFFFFFFFFFFFFFFFFFKKKKKK","KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKKKKK","KKKFFFFFFFsssssssFFFFFFFFFFFFFFFFFKKK","KKKFFFFFFFsssssssFFFFFFsssssssssFFKKK","KKKFFsssssssssssssssssssssssssssFFKKK","KKKKKsssssssssssssssssssssssssssKKKKK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK",".....................................",".....................................",".....................................",".....ss..........ss..........ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......","...........ss..........ss............","...........ss..........ss............"],  // 37x26
+      people: [".......D...........D...........D...........","......DDDDDK......DDDDDK......DDDDDK.......",".....DDDDDDDDD...DDDDDDDDD...DDDDDDDDD.....","....DDDDDDDDDD..DDDDDDDDDD..DDDDDDDDDD.....","....KDDDDDDDDDD.KDDDDDDDDDD.KDDDDDDDDDD....","...KKDDDDDDDDDDKKDDDDDDDDDDKKDDDDDDDDDDK...","...KKBBBBBBBBBKKKBBBBBBBBBKKKBBBBBBBBBKK...","...KKBBKKBBBBBKKKBBKKBBBBBKKKBBKKBBBBBKK...","...KKBBKKBBBBBKKKBBKKBBBBBKKKBBKKBBBBBKK...","...KKKBBBBBBBKKKKKBBBBBBBKKKKKBBBBBBBKKK...","....KKBBBBBBBKK.KKBBBBBBBKK.KKBBBBBBBKK....",".....KKKBBBKKK...KKKBBBKKK...KKKBBBKKK.....","......KKKKKKK.....KKKKKKK.....KKKKKKK......",".......KKKKK.......KKKKK.......KKKKK.......","...............K...........K...........K...","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","..KKKKKKKKKKKGKKKKKKKKKKKBKKKKKKKKKKKGKKK..","..KKGGAAAAAAGGKKBBAAAAAABBKKGGBBBBBBGGKKK..",".KKKGGAAAAAAGKKKBBAAAAAABKKKGGBBBBBBGGKKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.","KKKKGGGGGGGGKKKKKBBBKBKBKKKKGGGGGGGGGGGKKK.","KKKKGGGGGGGGKKKKKKBAAAAAKKKKGGGGGGGGGGGKKKK","KKAAAGGGGGGGKKAAAKKAAAAAKKBBBGGGGGGGGGGBBKK","KKAAAGGGGGGGKKAAABKAAAAAKKBBBGGGGGGGGGGBBKK",".KAAAGGGGGGGGKAAABBBBBBBBKBBBGGGGGGGGGGBBK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.","..KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGKKK..","..KKKKKKKGKKKKKKKKKKKBKKKKKKKKKKKGKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","....KKKKK.KKKKK.KKKKK.KKKKK.KKKKK.KKKKK....","....KKKKK.KKKKK.KKKKK.KKKKK.KKKKK.KKKKK....","....BBBBB.BBBBB.BBBBB.BBBBB.BBBBB.BBBBB....","....BBBBB.BBBBB.BBBBB.BBBBB.BBBBB.BBBBB...."],  // 43x39
+      hospital: ["...................K...................",".................KKKKK.................","................KKKKKKK................","..............KKKKKOKKKKK..............","............KKKKKOOOOOKKKKK............","..........KKKKKOOOOOOOOOKKKKK..........",".........KKKKOOOOOOOOOOOOOKKKK.........",".......KKKKOOOOOOOOOOOOOOOOOKKKK.......",".....KKKKOOOOOOOOOOOOOOOOOOOOOKKKK.....","...KKKKOOOOOOOOOOOOOOOOOOOOOOOOOKKKK...","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFKKKKKKKRRRRRRRRRRRKKKKKKKFFKKK..","..KKKFFKKKKKKKRRRRRRRRRRRKKKKKKKFFKKK..","..KKKFFKKSSSSSRRRRRRRRRRRSSSSSKKFFKKK..","..KKKFFKKSSSSSRRRRRRRRRRRSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKKKKKKKKFFFFFFFKKKKKKKKKFFKKK..","..KKKFFKKKKKKKKKFFFFFFFKKKKKKKKKFFKKK..","..KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKKKKKKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKKKKKKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.."],  // 39x40
+      house: ["...............K..........................","..............KKK.........................",".............KKKKK........................","............KKKKKKK.......................","...........KKKKOKKKK......................","..........KKKKOOOKKKK.....................",".........KKKKOOOOOKKKK....................","........KKKOOOOOOOOOKKK...................","......KKKKOOOOOOOOOOOKKKK.................",".....KKKKOOOOOOOOOOOOOKKKK................","....KKKKOOOOOOOOOOOOOOOKKKK...............","...KKKOOOOOOOOOOOOOOOOOOOKKK..............","..KKKOOOOOOOOOOOOOOOOOOOOOKKK.............",".KKKKKKKKKKKKKKKKKKKKKKKKKKKKK............","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..KKKK.....","...KKFFFFFFFFFFFFFFFFFFFFFFFKK.KKGGGGKK...","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKKGGGGGGKK..","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKGGGGGGGGKK.","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKGGGGGGGGKK.","...KKFKKKKKKFFFFFFFFFFFAAAFFKKGHHHGGGGGGKK","...KKFKSSSSKFFFFFFFFFFFAAAFFKKHHHHHGGDDGKK","...KKFKSSSSKFFFFFFFFFFFAAAFFKKHHHHHHDDDDKK","...KKFKSSSSKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKSSSSKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKKKKKKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKKKKKKFFFKKKKKKKFFFFFFKKHHHHHDDDDDD.","...KKFFFFFFFFFFKKKKKKKFFFFFFKKKHHHGDDDDDD.","...KKFFFFFFFFFFKKBBBBKFFFFFFKKKKKGGGDDDD..","...KKFFFFFFFFFFKKBBBBKFFFFFFKK.KKKKKKDD...","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKKKK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBKKBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBKKBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKK..KKBBK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKK..KKBBK....."],  // 42x38
+      tree: [".............K.....................","...........HHHHHKKKKKK.............","........KHHHHHHHHHKKKKKK...........","......KKHHHHHHHHHHHGGKKKK..........",".....KKHHHHHHHHHHHHHGGGGKKK........","....KKKHHHHHHHHHHHHHGGGGGGKK.......","....KKHHHHHHHHHHHHHHHGGGGGGKKK.....","...KKKHHHHHHHHHHHHHHHGGDDDDDKKK....","..KKKKHHHHHHHHHHHHHHHGDDDDDDDKK....",".KKKKGHHHHHHHHHHHHHHHDDDDDDDDDKK...",".KKKGGHHHHHHHHHHHHHHDDDDDDDDDDDK...",".KKKGGGHHHHHHHHHHHHHDDDDDDDDDDDKK..",".KKGGGGHHHHHHHHHHHHDDGGGGGDDDDDDK..",".KKGGGGGHHHHHHHHHHHDDGGGGGDDDDDDKK.","KKKGGGGGGHHHHHHHHHGDDGGGGGDDDDDDKK.","KKKGGGGGGGGHHHHHGGGDDGGGGGDDDDDDKKK","KKKGGGGGGGGGGGGGGGDDDDDDDDDDDDDDKKK","KKKGGGGGGGGGGGGGDDDDDDDDDDDDDDDDKK.","KKKGGGGGGGGGGGGDDDDDDDDDDDDDDDDGKK.",".KKKGGGGGGGGGGDDDDDDDDDDDDDDDDDKKK.","..KKGGGGGGGGGDDDDDDDDDDDDDDDDDGKKK.","...KKGGGGGGGGDDDDDDDDDDDDDDDDDKKK..","...KKKGGGGGGGDDDDDDDDDDDDDDDDDKKK..","....KKKGGGGGGDDDDDDDDDDDDDDDDDKKK..",".....KKKGGGGGDDDDDDDDDDDDDDDDDKK...",".......KKGGGGGDDDDDDDDDDDDDDDK.....",".........KKGGGGDDDDDDDDDDDDDK......","...........KKKGGDDDDDDDDDDD........","............KKKKKKDDDDDDDK.........","............KKKKKKKKKKK............","............KKKBKBBKKKK............","............KKKBBBBKKKK............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKKKKKKKKK............","............KKKKKKKKKKK............","............KKKKKKKKKKK............"],  // 35x41
+    } },
+  };
+const LOGO = ["..####....####..", ".#++++#..#++++#.", ".#+##+#..#+##+#.", ".#+##+####+##+#.", ".#++++++++++++#.",
+  "#++++++++++++++#", "#+a++++++++++a+#", "#++##########++#", ".#++++++++++++#.", "..############.."];
+const LOGO_COL = { "#": "#071711", "+": "#FBFAF4", a: "#F5A51C" };
+function bake(sheet, pose, flip) {
+  const rows = SPR[sheet].poses[pose], pal = SPR[sheet].palette, w = rows[0].length, h = rows.length;
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const g = c.getContext("2d");
+  rows.forEach((r, y) => { for (let x = 0; x < w; x++) { const col = pal[r[x]]; if (col) { g.fillStyle = col; g.fillRect(flip ? w - 1 - x : x, y, 1, 1); } } });
+  return c;
+}
+const animated = [];
+document.querySelectorAll("canvas.spr").forEach((cv) => {
+  const frames = cv.dataset.f.split(",").map((p) => bake(cv.dataset.s, p, cv.hasAttribute("data-flip")));
+  const scale = +(cv.dataset.x || 4);
+  cv.width = frames[0].width; cv.height = frames[0].height;
+  cv.style.width = frames[0].width * scale + "px"; cv.style.height = frames[0].height * scale + "px";
+  cv.getContext("2d").drawImage(frames[0], 0, 0);
+  if (frames.length > 1) animated.push({ cv, frames, fps: +cv.dataset.fps || 8, k: 0 });
+});
+const MOSQ = [bake("mosquito", "fly1"), bake("mosquito", "fly2"), bake("mosquito", "fly1", true), bake("mosquito", "fly2", true)];
+
+// ---------------------------------------------------------------- the voice-over and its word times
+const VO_AT = { rains: 1.2, breed: 9.6, surge: 17.0, late: 28.8, brand: 37.0, rewind: 42.6, overview: 55.8, area: 65.0, barangays: 72.8, drill: 81.0, proof: 94.0, close: 105.0 };
+const LINE = Object.fromEntries(VO.lines.map((l) => [l.id, l]));
+const norm = (s) => s.toLowerCase().replace(/[^a-z0-9₱-]/g, "");
+function W(id, word, nth = 1) {  // when the voice says a word (the nth time) in a line
+  const ws = LINE[id].words;
+  for (let i = 0, seen = 0; i < ws.length; i++) if (norm(ws[i].w) === norm(word) && ++seen === nth) return VO_AT[id] + ws[i].t;
+  throw new Error(`no "${word}" in ${id}`);
+}
+
+// ---------------------------------------------------------------- scenes, cut on a single timeline
+const SCENES = [
+  ["s-rains", 0, 9.6, "THE RAINS"], ["s-breed", 9.0, 16.9, "THEY BREED"], ["s-surge", 16.4, 28.6, "THE SURGE"], ["s-late", 28.2, 36.0, "THE LAG"],
+  ["s-brand", 35.6, 42.3, "EPILAG-PH"], ["s-rewind", 42.0, 55.6, "REWIND"], ["s-overview", 55.2, 65.0, "DASHBOARD"], ["s-area", 64.6, 72.6, "AREA DETAIL"],
+  ["s-barangays", 72.2, 80.8, "BARANGAYS"], ["s-drill", 80.4, 93.7, "DENGUE DRILL"], ["s-proof", 93.4, 104.8, "PROOF"], ["s-close", 104.2, 120, "SEE IT NOW"],
+];
+const TOTAL = 120;
+const tl = gsap.timeline({ paused: true, defaults: { ease: "expo.out", duration: 1 } });
+const S = {};
+SCENES.forEach(([id, a, b, label], i) => {
+  S[id] = { a, b, el: $(id), cam: $(id).querySelector(".cam"), label, i };
+  tl.set($(id), { visibility: "visible" }, a).set($(id), { visibility: "hidden" }, b);
+});
+const cues = { whoosh: [], impact: [], tick: [], glitch: [], riser: [], tape: [] };
+
+// split text into masked words and characters, keeping inner spans
+function split(el) {
+  const walk = (node) => [...node.childNodes].forEach((n) => {
+    if (n.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.append(" "); return; }
+        const w = document.createElement("span"); w.className = "w";
+        [...part].forEach((ch) => { const c = document.createElement("span"); c.className = "c"; c.textContent = ch; w.append(c); });
+        frag.append(w);
+      });
+      n.replaceWith(frag);
+    } else if (n.nodeType === 1 && n.tagName !== "BR") walk(n);
+  });
+  walk(el);
+  return el.querySelectorAll(".c");
+}
+document.querySelectorAll(".split").forEach(split);
+const chars = (id) => $(id).querySelectorAll(".c");
+const rise = (id, at, o = {}) => tl.fromTo(chars(id), { yPercent: 115, rotate: o.rot ?? 6 }, { yPercent: 0, rotate: 0, duration: o.dur ?? 1, stagger: o.stagger ?? .022, ease: "expo.out" }, at);
+const sink = (id, at, o = {}) => tl.to(chars(id), { yPercent: -115, duration: o.dur ?? .5, stagger: o.stagger ?? .012, ease: "power3.in" }, at);
+const up = (sel, at, o = {}) => tl.fromTo(sel, { autoAlpha: 0, y: o.y ?? 40 }, { autoAlpha: 1, y: 0, duration: o.dur ?? 1, stagger: o.stagger ?? 0, ease: o.ease ?? "expo.out" }, at);
+const pop = (sel, at, o = {}) => tl.fromTo(sel, { autoAlpha: 0, scale: o.from ?? .4 }, { autoAlpha: 1, scale: 1, duration: o.dur ?? .7, stagger: o.stagger ?? 0, ease: "back.out(2.2)" }, at);
+
+// layers: anything drawn per frame from the clock (canvases, digits, clips)
+const layers = [];
+const layer = (a, b, draw) => layers.push({ a, b, draw });
+
+// rolling digits: each column spins to its digit, the way an odometer does
+function odo(id, to, at, dur = 1.6) {
+  const el = $(id), digits = String(to).length, cols = [];
+  for (let i = 0; i < digits; i++) {
+    const col = document.createElement("span");
+    col.innerHTML = Array.from({ length: 11 }, (_, d) => `<b>${d % 10}</b>`).join("");
+    el.append(col); cols.push(col);
+  }
+  layer(at - 1, 999, (lt) => {
+    const v = to * ease.out(clamp(lt / dur));
+    cols.forEach((col, i) => {
+      const p = 10 ** (digits - 1 - i);
+      const k = i === digits - 1 ? v % 10 : Math.floor(v / p) % 10 + clamp((v % p) - (p - 1));  // higher columns roll only on the carry
+      col.style.transform = `translateY(${-k}em)`;
+    });
+  });
+}
+
+// ---------------------------------------------------------------- transitions
+const fx = $("fx").getContext("2d");
+function pixelWipe(mid, dur, colors, dir, seed) {  // squares bloom to cover the frame, the cut happens under them, then they shrink away
+  const r = rng(seed), cell = 80, cells = [];
+  for (let y = 0; y < 14; y++) for (let x = 0; x < 24; x++) {
+    const along = dir === "down" ? y / 13 : dir === "diag" ? (x / 23 + y / 13) / 2 : x / 23;
+    cells.push({ x: x * cell, y: y * cell, o: along * .7 + r() * .3, c: colors[Math.floor(r() * colors.length)] });
+  }
+  const a = mid - dur / 2;
+  layer(a, mid + dur / 2, (lt) => {
+    const k = lt / dur;
+    for (const c of cells) {
+      const s = clamp((2 * k - .8 * c.o) / .2) - clamp((2 * k - 1 - .8 * c.o) / .2);
+      if (s <= 0) continue;
+      const z = Math.ceil(s * cell / 8) * 8;
+      fx.fillStyle = c.c; fx.fillRect(c.x + (cell - z) / 2, c.y + (cell - z) / 2, z, z);
+    }
+  });
+  cues.whoosh.push(mid);
+}
+function slices(mid, dur, color, vertical) {
+  const box = $("slices"), n = 10, bars = [];
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement("i");
+    Object.assign(b.style, vertical ? { left: i * 192 + "px", width: "193px", top: 0, bottom: 0, right: "auto", transformOrigin: "50% 0" } : { top: i * 108 + "px", height: "109px", transformOrigin: "0 50%" }, { background: color });
+    box.append(b); bars.push(b);
+  }
+  const prop = vertical ? "scaleY" : "scaleX", half = dur / 2, each = half * .55, gap = (half - each) / (n - 1);
+  bars.forEach((b, i) => {  // each bar closes before the cut and opens after it, so the two halves never overlap
+    tl.fromTo(b, { [prop]: 0, [vertical ? "scaleX" : "scaleY"]: 1, transformOrigin: vertical ? "50% 0" : "0 50%" }, { [prop]: 1, duration: each, ease: "power3.in", immediateRender: false }, mid - half + i * gap)
+      .set(b, { transformOrigin: vertical ? "50% 100%" : "100% 50%" }, mid + .01)
+      .to(b, { [prop]: 0, duration: each, ease: "power3.out" }, mid + .02 + i * gap);
+  });
+  cues.whoosh.push(mid);
+}
+function glitch(at, dur = .35) {
+  const r = rng(Math.round(at * 100));
+  const bands = Array.from({ length: 40 }, () => [r(), r(), r(), r()]);
+  layer(at, at + dur, (lt) => {
+    const f = Math.floor(lt * FPS);
+    for (let i = 0; i < 14; i++) {
+      const b = bands[(i * 7 + f * 3) % bands.length];
+      fx.fillStyle = ["rgba(240,75,42,.75)", "rgba(47,214,195,.7)", "rgba(255,255,255,.85)", "#050A18"][Math.floor(b[2] * 4)];
+      fx.fillRect(b[0] * 1920 - 200, b[1] * 1080, 300 + b[3] * 1200, 6 + b[3] * 40);
+    }
+    $("stage").style.transform = `translate(${(bands[f % 40][0] - .5) * 40}px, 0) skewX(${(bands[f % 40][1] - .5) * 8}deg)`;
+  });
+  layer(at + dur, at + dur + .05, () => { $("stage").style.transform = ""; });
+  cues.glitch.push(at);
+}
+function iris(id, at, dur = .8) {  // the next scene opens through a stepped circle
+  tl.fromTo($(id), { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(75% at 50% 50%)", duration: dur, ease: "steps(10)" }, at)
+    .set($(id), { clipPath: "none" }, at + dur);
+  cues.whoosh.push(at + dur / 2);
+}
+
+// ---------------------------------------------------------------- 1 · rains: pixel rain that gathers into the city's name
+{
+  const cv = $("rain"), g = cv.getContext("2d"), r = rng(7);
+  const drops = Array.from({ length: 240 }, () => ({ x: Math.floor(r() * 240) * 8, v: 900 + r() * 700, p: r() * 1400, a: .2 + r() * .5 }));
+  // the name, sampled on an 8 px grid
+  const off = document.createElement("canvas"); off.width = 1920; off.height = 1080;
+  const o = off.getContext("2d");
+  const pts = [];
+  document.fonts.ready.then(() => {
+    o.fillStyle = "#fff"; o.font = "900 250px 'Inter Tight'"; o.textAlign = "center"; o.textBaseline = "middle";
+    o.letterSpacing = "-10px";
+    o.fillText("QUEZON CITY", 960, 420);
+    const d = o.getImageData(0, 0, 1920, 1080).data;
+    for (let y = 0; y < 1080; y += 8) for (let x = 0; x < 1920; x += 8) if (d[(y * 1920 + x) * 4 + 3] > 128) pts.push({ x, y, land: 1.3 + (x / 1920) * .9 + r() * .35, leave: 7.0 + (x / 1920) * .6 + r() * .5, s: r() });
+  });
+  const flash = [.5, 3.9];
+  layer(0, 9.6, (t) => {
+    g.clearRect(0, 0, 1920, 1080);
+    for (const f of flash) if (t > f && t < f + .35) { g.fillStyle = `rgba(191,226,236,${(.28 * (1 - (t - f) / .35)).toFixed(3)})`; g.fillRect(0, 0, 1920, 1080); }
+    for (const d of drops) {
+      const y = ((d.p + t * d.v) % 1300) - 120;
+      g.fillStyle = `rgba(191,226,236,${d.a})`; g.fillRect(d.x, Math.round(y / 8) * 8, 4, 20);
+    }
+    for (const p of pts) {
+      if (t < p.land) {  // still falling, as a streak
+        const y = p.y - (p.land - t) * 1500;
+        if (y > -40) { g.fillStyle = "rgba(191,226,236,.85)"; g.fillRect(p.x, Math.round(y / 8) * 8, 4, 18); }
+      } else if (t < p.leave) {
+        const k = t - p.land;
+        g.fillStyle = k < .12 ? "#FFFFFF" : (p.s < .08 ? "#F5A51C" : "#EEF2FF");
+        g.fillRect(p.x, p.y, 7, 7);
+      } else {  // and washes away
+        const k = t - p.leave, y = p.y + 900 * k * k;
+        g.fillStyle = `rgba(191,226,236,${clamp(1 - k / 1.4).toFixed(3)})`; g.fillRect(p.x, Math.round(y / 8) * 8, 4, 12 + k * 30);
+      }
+    }
+  });
+  document.querySelectorAll("#s-rains .cloud").forEach((c) => tl.fromTo(c, { x: 0 }, { x: +c.dataset.drift * 3, duration: 9.6, ease: "steps(24)" }, 0));
+  up("#r-k", W("rains", "September"), { y: 20 });
+  rise("r-h", W("rains", "The"));
+  // tilt down into the village
+  tl.to(S["s-rains"].cam, { y: -1080, duration: 1.1, ease: "expo.inOut" }, 8.6)
+    .fromTo(S["s-breed"].cam, { y: 1080 }, { y: 0, duration: 1.1, ease: "expo.inOut" }, 8.6);
+  cues.whoosh.push(9.1);
+}
+
+// ---------------------------------------------------------------- 2 · they breed: phrases on the beat of the voice, a doubling swarm
+{
+  const ph = [["p0", "Standing"], ["p1", "Warm"], ["p2", "In"], ["p3", "the", 2]];
+  ph.forEach(([id, word, n], i) => {
+    const at = W("breed", word, n || 1) - .1;
+    rise(id, at, { stagger: .028 });
+    const next = i < 3 ? W("breed", ph[i + 1][1], ph[i + 1][2] || 1) - .25 : 16.2;
+    sink(id, next);
+  });
+  const cv = $("swarm"), g = cv.getContext("2d"), r = rng(21);
+  const bugs = Array.from({ length: 256 }, (_, i) => ({ ax: 300 + r() * 500, ay: 120 + r() * 220, fx: .4 + r() * .9, fy: .6 + r() * 1.1, ph: r() * 6.28, born: i, s: 2 + Math.floor(r() * 2) }));
+  const t0 = W("breed", "mosquitoes") - 9.0;  // local to the scene start
+  layer(9.0, 16.9, (lt) => {
+    g.clearRect(0, 0, 1920, 1080);
+    const n = lt < t0 ? 0 : Math.min(256, 2 ** Math.floor((lt - t0) / .28));
+    $("swarm-n").textContent = n ? `× ${n}` : "";
+    const rush = clamp((lt - 6.6) / .6);
+    g.imageSmoothingEnabled = false;
+    for (let i = 0; i < n; i++) {
+      const b = bugs[i], age = lt - t0 - Math.log2(i + 1) * .28;
+      const cx = 960 + Math.sin(lt * b.fx + b.ph) * b.ax, cy = 600 + Math.cos(lt * b.fy + b.ph * 1.3) * b.ay - 60;
+      const sx = 960 + (cx - 960) * (1 + rush * 3), sy = 600 + (cy - 600) * (1 + rush * 3), sc = b.s * (1 + rush * 4);
+      const img = MOSQ[(Math.floor(lt * 12 + i) % 2) + (Math.sin(lt * b.fx + b.ph) < 0 ? 2 : 0)];
+      g.globalAlpha = clamp(age * 4);
+      g.drawImage(img, Math.round(sx), Math.round(sy), img.width * sc, img.height * sc);
+    }
+    g.globalAlpha = 1;
+  });
+  pixelWipe(16.65, 1.0, ["#F04B2A", "#C93A20", "#0B1630", "#F58220"], "right", 3);
+}
+
+// ---------------------------------------------------------------- QC season charts (as in docs/film)
+const QS = QC.stats, wk = (d) => QC.weeks.indexOf(d);
+const fmtDay = (d) => new Date(d + "T00:00:00").toLocaleString("en", { day: "numeric", month: "short", year: "numeric" });
+function qcChart(cv, replay) {
+  const W2 = 880, H2 = 700, P = { l: 70, r: 10, t: 40, b: 60 };
+  cv.width = W2; cv.height = H2;
+  const g = cv.getContext("2d");
+  const n = QC.weeks.length, slot = (W2 - P.l - P.r) / n, bw = Math.floor(slot) - 4, top = 720;
+  const px = (v) => Math.round(v / 4) * 4;
+  const x = (i) => Math.round(P.l + i * slot), y = (v) => px(H2 - P.b - Math.min(v, top) / top * (H2 - P.t - P.b));
+  const muted = replay ? "#7D8A82" : "#A3B0DB", grid = replay ? "rgba(7,23,17,.08)" : "rgba(255,255,255,.07)";
+  const mon = (w) => new Date(w + "T00:00:00").toLocaleString("en", { month: "short" });
+  function draw(t) {
+    g.clearRect(0, 0, W2, H2);
+    g.font = "700 18px 'Inter Tight', sans-serif";
+    for (let v = 0; v <= 700; v += 100) {
+      g.fillStyle = grid; g.fillRect(P.l, y(v), W2 - P.l - P.r, 2);
+      g.fillStyle = muted; g.textAlign = "right"; g.fillText(v, P.l - 14, y(v) + 6);
+    }
+    g.textAlign = "left";
+    QC.weeks.forEach((w, i) => { if (+w.slice(8) <= 7) g.fillText(mon(w), x(i), H2 - P.b + 34); });
+    for (let i = 0; i < n; i++) {
+      const c = QC.cases[i], k = replay ? 1 : clamp((t - .6 - i / n * 3.6) / .35);
+      if (!k) continue;
+      g.fillStyle = replay ? "#D7DACE" : c > QC.epi[i] ? "#F04B2A" : "#3A4C8C";
+      const h = px((H2 - P.b - y(c)) * k);
+      g.fillRect(x(i), H2 - P.b - h, bw, h);
+    }
+    g.fillStyle = replay ? "rgba(7,23,17,.55)" : "rgba(255,255,255,.75)";
+    const line = replay ? 1 : clamp((t - .2) / 1.2);
+    for (let i = 0; i < n * line; i++) for (let k = 0; k < slot - 6; k += 10) g.fillRect(x(i) + k, y(QC.epi[i]) - 2, 6, 4);
+    if (!replay) return;
+    if (t > 3) { const m = wk(QS.crossed); g.fillStyle = "#071711"; for (let v = y(690); v < H2 - P.b; v += 14) g.fillRect(x(m) + bw / 2 - 2, v, 4, 8); }
+    const shown = Math.floor(Math.max(0, t - 1.6) / 4.8 * n);
+    for (let i = 0; i < Math.min(n, shown); i++) {
+      const f = QC.fc[i]; if (!f) continue;
+      g.fillStyle = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928" }[f[0]] || "#9AA69E";
+      g.globalAlpha = .38; g.fillRect(x(i), y(f[3]), bw, y(f[1]) - y(f[3]));
+      g.globalAlpha = 1; g.fillRect(x(i) - 2, y(f[2]) - 4, bw + 4, 8);
+    }
+  }
+  return { draw, x: (i) => x(i) + bw / 2, y };
+}
+const place = (id, chart, i, v, dx, dy) => { const el = $(id); el.style.left = 930 + chart.x(i) + dx + "px"; el.style.top = 190 + chart.y(v) + dy + "px"; };
+
+// ---------------------------------------------------------------- 3 · the surge
+{
+  const ch = qcChart($("ch-surge"), false), go = W("surge", "October") - .3;
+  layer(16.4, 28.6, (lt, t) => ch.draw(t - go));
+  $("n-peak").textContent = `${QS.peak} cases · ${fmtDay(QS.peak_week)}`;
+  place("n-peak", ch, wk(QS.peak_week), QS.peak, -150, -44);
+  place("n-line", ch, 0, QC.epi[0], -10, -48);
+  up("#su-k", 16.9, { y: 20 });
+  rise("su-h", W("surge", "dengue") - .1);
+  up("#n-line", go + .8, { y: 10 });
+  up("#su-stat", W("surge", "27") - .5);
+  odo("odo-weeks", QS.weeks_above, W("surge", "27") - .3, 1.2);
+  up("#su-leg", W("surge", "27") + 1, { y: 10 });
+  pop("#n-peak", W("surge", "622") - .1);
+  tl.fromTo(S["s-surge"].cam, { scale: 1 }, { scale: 1.05, duration: 12, ease: "none" }, 16.4);
+  slices(28.4, .8, "#071711", false);
+}
+
+// ---------------------------------------------------------------- 4 · why responses come late
+{
+  rise("l-h", W("late", "So") - .15, { stagger: .02 });
+  const nodes = document.querySelectorAll("#s-late .node"), go = W("late", "Because");
+  pop(nodes, 29.9, { stagger: .45, from: .3 });
+  tl.fromTo("#l-bar", { scaleX: 0 }, { scaleX: 1, duration: 3.2, ease: "steps(30)" }, go - .4);
+  up("#l-br", W("late", "counted") - .2, { y: 20 });
+  tl.fromTo("#l-br .line", { scaleX: 0 }, { scaleX: 1, duration: .8, ease: "steps(8)" }, W("late", "counted"));
+  const late = $("l-late"), lt0 = W("late", "late?");
+  layer(lt0, lt0 + 1.2, (k) => {  // the word "late" shudders
+    const f = Math.floor(k * FPS), on = f % 4 < 2;
+    late.style.textShadow = on ? "5px 0 0 rgba(47,214,195,.8), -5px 0 0 rgba(240,75,42,.9)" : "none";
+    late.style.display = "inline-block"; late.style.transform = on ? `translate(${(f % 3 - 1) * 6}px, 0)` : "none";
+  });
+  layer(lt0 + 1.2, lt0 + 1.3, () => { late.style.textShadow = "none"; late.style.transform = "none"; });
+  cues.riser.push([33.9, 35.7]);
+  cues.riser.push([83.6, 85.6]);
+  tl.to(S["s-late"].cam, { scale: .9, autoAlpha: .4, duration: .6, ease: "power3.in" }, 35.3);
+  iris("s-brand", 35.6, .7);
+}
+
+// ---------------------------------------------------------------- 5 · brand: the logo builds itself from pixels
+{
+  function assemble(box, cell, at, seed, spread) {
+    const r = rng(seed), px = [];
+    LOGO.forEach((row, y) => [...row].forEach((c, x) => {
+      if (!LOGO_COL[c]) return;
+      const i = document.createElement("i");
+      Object.assign(i.style, { left: x * cell + "px", top: (y + 3) * cell + "px", width: cell + "px", height: cell + "px", background: LOGO_COL[c] });
+      box.append(i); px.push([i, r(), r(), r()]);
+    }));
+    px.forEach(([i, a, b, c]) => tl.fromTo(i, { x: (a - .5) * spread * 2.4, y: (b - .5) * spread * 1.3, rotate: (c - .5) * 540, scale: 2.5, autoAlpha: 0 },
+      { x: 0, y: 0, rotate: 0, scale: 1, autoAlpha: 1, duration: .9, ease: "expo.out" }, at + c * .45));
+    tl.fromTo(box.querySelector(".tile"), { scale: 0 }, { scale: 1, duration: .5, ease: "back.out(2)" }, at + .55)
+      .fromTo(box.querySelector(".frame"), { scale: 0 }, { scale: 1, duration: .5, ease: "back.out(2)" }, at + .62);
+  }
+  assemble($("asm"), 20, 35.9, 5, 1000);
+  tl.fromTo("#ring", { scale: .9, opacity: 1 }, { scale: 2.6, opacity: 0, duration: .9, ease: "steps(9)", immediateRender: false }, 36.9);
+  cues.impact.push(36.95);
+  rise("b-word", W("brand", "EpiLag-PH") - .05, { stagger: .04, rot: 0 });
+  rise("b-t1", W("brand", "See") - .05);
+  rise("b-t2", W("brand", "Act") - .05);
+  tl.fromTo("#b-frog", { y: 140 }, { y: 0, duration: .6, ease: "steps(6)" }, 39.6);
+  tl.fromTo(S["s-brand"].cam, { scale: 1 }, { scale: 1.06, duration: 6.7, ease: "none" }, 35.6);
+  function twinkle(box, seed, n) {
+    const r = rng(seed);
+    for (let k = 0; k < n; k++) {
+      const i = document.createElement("i"), size = [24, 24, 48, 12][Math.floor(r() * 4)];
+      let x = Math.floor(r() * 40) * 48, y = Math.floor(r() * 22.5) * 48;
+      if (x > 240 && x < 1640 && y > 120 && y < 860) x = r() < .5 ? Math.floor(r() * 5) * 48 : 1680 + Math.floor(r() * 5) * 48;
+      Object.assign(i.style, { left: x + "px", top: y + "px", width: size + "px", height: size + "px", background: size === 12 ? "#F5A51C" : `rgba(255,255,255,${(.05 + r() * .1).toFixed(2)})` });
+      box.append(i);
+      const per = 1.2 + r() * 1.6, off = r() * 2;
+      layer(0, 999, (lt, t) => { i.style.opacity = ((t + off) % per) < per / 2 ? 1 : .25; });
+    }
+  }
+  twinkle($("tw"), 4, 34); twinkle($("tw2"), 11, 30);
+  glitch(42.0);
+  cues.tape.push(42.0);
+}
+
+// ---------------------------------------------------------------- 6 · rewind, then what EpiLag-PH said at the time
+{
+  const back = qcChart($("ch-rewind"), false), rep = qcChart($("ch-replay"), true);
+  const playAt = 45.1;
+  layer(42.0, playAt, (lt) => back.draw(4.4 - 3.8 * ease.inOut(clamp(lt / 2.9))));
+  const weeks = QC.weeks.slice(0, wk(QS.peak_week) + 1).reverse(), stop = weeks.indexOf(QS.first_flag);
+  layer(42.0, playAt, (lt) => {
+    const k = Math.floor(ease.inOut(clamp(lt / 2.7)) * stop);
+    $("osd-date").textContent = fmtDay(weeks[k]).toUpperCase();
+    $("osd-rw").style.opacity = Math.floor(lt * 3) % 2 ? .35 : 1;
+  });
+  layer(42.0, playAt, (lt) => {  // tracking noise
+    const f = Math.floor(lt * FPS), r = rng(f + 3);
+    for (let i = 0; i < 3; i++) { const y = ((r() * 1080 + lt * 900) % 1080); fx.fillStyle = "rgba(255,255,255,.08)"; fx.fillRect(0, y, 1920, 10 + r() * 50); }
+  });
+  tl.set("#rw-b", { visibility: "visible" }, playAt).set("#rw-a", { visibility: "hidden" }, playAt);
+  layer(playAt, playAt + .25, (lt) => { fx.fillStyle = `rgba(255,255,255,${(1 - lt / .25).toFixed(3)})`; fx.fillRect(0, 0, 1920, 1080); });
+  cues.impact.push(playAt);
+  layer(playAt, 55.6, (lt) => rep.draw(lt + .2));
+  $("n-cross").textContent = `▼ crossed the epidemic line · ${fmtDay(QS.crossed)}`;
+  place("n-cross", rep, wk(QS.crossed), 720, -14, -40);
+  tl.fromTo("#osd-play", { autoAlpha: 1 }, { autoAlpha: 0, duration: .1, ease: "steps(1)" }, playAt + 1.4);
+  up("#rp-k", playAt + .1, { y: 20 });
+  rise("rp-h", playAt + .25);
+  up("#rp-leg", playAt + 1.2, { y: 10 });
+  up("#n-cross", playAt + 3.0, { y: -10 });
+  const five = W("rewind", "5") - .4;
+  up("#rp-card", five - .2);
+  odo("odo-lead", Math.round((new Date(QS.crossed) - new Date(QS.first_flag)) / 6048e5), five, 1.1);
+  tl.fromTo("#rw-b .cam", { scale: 1.04 }, { scale: 1, duration: 10.5, ease: "none" }, playAt);
+  pixelWipe(55.4, 1.0, ["#08754F", "#055C3E", "#FBFAF4", "#E3F0E7"], "diag", 9);
+}
+
+// ---------------------------------------------------------------- live captures: the image follows the clock, one frame at a time
+const clips = [];
+function clip(img, name, a, b, from = 0, rate = 1) {
+  img.dataset.k = "";
+  clips.push({ img, name, a, b, from, rate, n: CLIPS[name].n });
+}
+const pending = [];
+function updateClips(t) {
+  for (const c of clips) {
+    if (t < c.a - .4 || t > c.b) continue;
+    const k = Math.min(c.n - 1, Math.max(0, Math.round((Math.max(t, c.a) - c.a) * c.rate * FPS + c.from * FPS)));
+    if (c.img.dataset.k === String(k)) continue;
+    c.img.dataset.k = k;
+    c.img.src = `clips/${c.name}/${String(k).padStart(4, "0")}.jpg`;
+    pending.push(c.img.decode().catch(() => {}));
+  }
+}
+
+// ---------------------------------------------------------------- 7 · the dashboard
+{
+  clip(document.querySelector('[data-clip="overview"]'), "overview", 55.6, 65.0, .9, 1.32);
+  up("#ov-k", 55.9, { y: 20 });
+  rise("ov-h", 56.0);
+  up("#ov-b", 57.0, { y: 20 });
+  tl.fromTo("#ov-br", { rotateY: -34, rotateX: 14, z: -500, x: 260, autoAlpha: 0 }, { rotateY: -10, rotateX: 4, z: 0, x: 0, autoAlpha: 1, duration: 2.2, ease: "expo.out" }, 55.6)
+    .to("#ov-br", { rotateY: -6, rotateX: 2, duration: 2.2, ease: "none" }, 57.8)
+    .to("#s-overview .cam > .abs", { autoAlpha: 0, x: -140, duration: .7, ease: "power3.in" }, 59.8)
+    .to("#ov-br", { x: -330, y: -20, scale: 1.3, rotateY: 0, rotateX: 0, duration: 1.4, ease: "expo.inOut" }, 59.9)
+    .to("#ov-br", { scale: 1.36, duration: 3.3, ease: "none" }, 61.3);
+  pop("#ov-p2", 57.4);
+  pop("#ov-p1", W("overview", "warnings") - .1);
+  tl.to(S["s-overview"].cam, { scale: 1.7, autoAlpha: 0, duration: .45, ease: "power3.in" }, 64.6)
+    .fromTo(S["s-area"].cam, { scale: .82, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .8, ease: "expo.out" }, 64.75);
+  cues.whoosh.push(64.8);
+}
+
+// ---------------------------------------------------------------- 8 · area detail: the call, stamped
+{
+  clip(document.querySelector('[data-clip="area"]'), "area", 64.6, 72.6, .4, .9);
+  const watch = W("area", "Watch.");
+  tl.fromTo("#ar-zoom", { scale: 1.9 }, { scale: 1.9, duration: .1 }, 64.6)
+    .to("#ar-zoom", { scale: 1, duration: 1.4, ease: "expo.inOut" }, W("area", "checklist") - .6);
+  tl.fromTo("#ar-stamp", { autoAlpha: 0, scale: 3 }, { autoAlpha: 1, scale: 1, duration: .35, ease: "steps(5)" }, watch - .05)
+    .to("#ar-stamp", { autoAlpha: 0, scale: .9, duration: .3, ease: "power2.in" }, W("area", "checklist") - .7);
+  cues.tick.push(watch);
+  slices(72.4, .8, "#08754F", true);
+}
+
+// ---------------------------------------------------------------- 9 · QC barangays
+{
+  clip(document.querySelector('[data-clip="barangays"]'), "barangays", 72.2, 80.8, .2, .82);
+  up("#bg-k", 72.7, { y: 20 });
+  rise("bg-h", W("barangays", "The") - .1);
+  const rows = document.querySelectorAll("#bg-list .brg");
+  [["Batasan"], ["Payatas,"], ["Commonwealth."]].forEach(([w], i) => {
+    tl.fromTo(rows[i], { autoAlpha: 0, x: -120 }, { autoAlpha: 1, x: 0, duration: .7, ease: "expo.out" }, W("barangays", w) - .08);
+    cues.tick.push(W("barangays", w));
+  });
+  tl.fromTo("#bg-br", { rotateY: 28, rotateX: 6, z: -300, autoAlpha: 0 }, { rotateY: 12, rotateX: 3, z: 0, autoAlpha: 1, duration: 1.8 }, 72.4)
+    .to("#bg-br", { rotateY: 6, duration: 6.6, ease: "none" }, 74.2);
+  pixelWipe(80.6, 1.0, ["#0B1630", "#142250", "#2E3F7A", "#F5A51C"], "down", 13);
+}
+
+// ---------------------------------------------------------------- 10 · Dengue Drill
+{
+  const cut = 85.6;
+  clip(document.querySelector('[data-clip="drill_intro"]'), "drill_intro", 80.4, cut, .3, 1.5);
+  clip(document.querySelector('[data-clip="drill_play"]'), "drill_play", cut, 93.7, 0, 1.6);
+  tl.fromTo("#dr-br", { rotateY: 55, rotateX: 10, z: -900, autoAlpha: 0 }, { rotateY: 0, rotateX: 0, z: 0, autoAlpha: 1, duration: 2, ease: "expo.out" }, 80.6)
+    .to("#dr-br", { scale: 1.04, duration: 3, ease: "none" }, 82.6);
+  tl.set("#dr-b", { visibility: "visible" }, cut).set("#dr-a", { visibility: "hidden" }, cut);
+  tl.fromTo("#dr-push", { scale: 1.0 }, { scale: 1.12, duration: 8.1, ease: "none" }, cut);
+  cues.impact.push(cut);
+  tl.fromTo("#dr-c1", { autoAlpha: 0, x: -80 }, { autoAlpha: 1, x: 0, duration: .6 }, W("drill", "5") - .1)
+    .fromTo("#dr-c2", { autoAlpha: 0, x: -80 }, { autoAlpha: 1, x: 0, duration: .6 }, W("drill", "8") - .1)
+    .fromTo("#dr-c3", { autoAlpha: 0, x: -80 }, { autoAlpha: 1, x: 0, duration: .6 }, W("drill", "real", 2) - .1)
+    .to(["#dr-c1", "#dr-c2", "#dr-c3"], { autoAlpha: 0, x: -60, duration: .4, stagger: .06, ease: "power2.in" }, 92.6);
+  glitch(93.4);
+}
+
+// ---------------------------------------------------------------- 11 · proof
+{
+  up("#pr-k", 93.8, { y: 20 });
+  rise("pr-h", W("proof", "Tested") + .1);
+  const flip = (id, at) => tl.fromTo(id, { rotateX: -95, autoAlpha: 0 }, { rotateX: 0, autoAlpha: 1, duration: 1.1, ease: "expo.out" }, at);
+  const a1 = W("proof", "beat") - .2, a2 = W("proof", "caught") - .2, a3 = a2 + 1.6;
+  flip("#pc1", a1); odo("odo-p1", 5, a1 + .2, 1);
+  flip("#pc2", a2); odo("odo-p2", 79, a2 + .2, 1.2);
+  flip("#pc3", a3); odo("odo-p3", 70, a3 + .2, 1.2);
+  up("#pr-foot", a3 + 1.1, { y: 16 });
+  iris("s-close", 104.2, .8);
+}
+
+// ---------------------------------------------------------------- 12 · close and end card
+{
+  rise("cl-1", W("close", "Hospitals") - .1, { stagger: .018 });
+  rise("cl-2", W("close", "EpiLag-PH") - .1, { stagger: .035, rot: 0 });
+  cues.tick.push(W("close", "now."));
+  const end = 110.8;
+  tl.to("#cl-lines", { y: -160, autoAlpha: 0, duration: .7, ease: "power3.in" }, end - .6);
+  tl.set("#cl-end", { autoAlpha: 0 }, 0).set("#cl-end", { autoAlpha: 1 }, end);
+  const box = $("asm2"), r = rng(17);
+  LOGO.forEach((row, y) => [...row].forEach((c, x) => {
+    if (!LOGO_COL[c]) return;
+    const i = document.createElement("i");
+    Object.assign(i.style, { left: x * 12.5 + "px", top: (y + 3) * 12.5 + "px", width: "12.5px", height: "12.5px", background: LOGO_COL[c] });
+    box.append(i);
+    tl.fromTo(i, { x: (r() - .5) * 1600, y: (r() - .5) * 900, rotate: (r() - .5) * 400, autoAlpha: 0 }, { x: 0, y: 0, rotate: 0, autoAlpha: 1, duration: .9 }, end + r() * .4);
+  }));
+  pop(box.querySelectorAll(".tile, .frame"), end + .4, { from: 0 });
+  cues.impact.push(end + .6);
+  rise("cl-word", end + .7, { stagger: .04, rot: 0 });
+  pop("#cl-url", end + 1.4, { from: .6 });
+  up("#cl-cred", end + 2.0, { y: 16 });
+  tl.fromTo("#cl-frog", { y: 220 }, { y: 0, duration: .6, ease: "steps(6)" }, end + 2.6);
+  tl.fromTo("#fade", { opacity: 0 }, { opacity: 1, duration: 1.4, ease: "power1.in" }, 118.6);
+  tl.to({}, { duration: .01 }, TOTAL);
+}
+
+// ---------------------------------------------------------------- HUD, captions, grain
+const tc = $("tc"), sc = $("sc"), cap = $("cap"), prog = $("progress");
+const capLines = VO.lines.map((l) => {
+  const el = document.createElement("div");
+  el.innerHTML = l.words.map((w) => `<span>${w.w}</span>`).join(" ");
+  return { id: l.id, a: VO_AT[l.id], b: VO_AT[l.id] + l.dur + .5, el, spans: [...el.children], words: l.words };
+});
+const NO_CAPS = new Set(["brand", "close"]);
+let capNow = null;
+function hud(t) {
+  const f = Math.floor(t * FPS), s = Math.floor(t);
+  tc.textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}:${String(f % FPS).padStart(2, "0")}`;
+  const cur = SCENES.filter(([, a]) => t >= a).pop();
+  sc.textContent = `${String(SCENES.indexOf(cur) + 1).padStart(2, "0")} / 12 · ${cur[3]}`;
+  prog.style.width = (t / TOTAL * 100).toFixed(3) + "%";
+  $("hud").style.opacity = t > 110.6 ? clamp(1 - (t - 110.6) / .4) : clamp(t / .6);
+  const line = capLines.find((l) => t >= l.a && t <= l.b && !NO_CAPS.has(l.id));
+  if (line !== capNow) { cap.replaceChildren(...(line ? [line.el] : [])); capNow = line; }
+  cap.style.opacity = line ? clamp(Math.min((t - line.a) / .2, (line.b - t) / .3)) : 0;
+  if (line) line.spans.forEach((sp, i) => {
+    const w = line.words[i], at = line.a + w.t;
+    sp.className = t >= at + w.d ? "on" : t >= at ? "now" : "";
+  });
+}
+const grain = $("grain").getContext("2d"), noise = [];
+for (let k = 0; k < 6; k++) {
+  const img = grain.createImageData(480, 270), r = rng(100 + k);
+  for (let i = 0; i < img.data.length; i += 4) { const v = r() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  noise.push(img);
+}
+
+// ---------------------------------------------------------------- render one frame at time t (the recorder awaits this)
+window.TOTAL = TOTAL;
+window.REEL = { total: TOTAL, fps: FPS, vo: VO.lines.map((l) => ({ id: l.id, at: VO_AT[l.id], dur: l.dur })), cues, brand: 35.6, play: 45.1, end: 110.8 };
+window.render = async function (t) {
+  tl.seek(t, false);
+  fx.clearRect(0, 0, 1920, 1080);
+  for (const L of layers) if (t >= L.a && t <= L.b) L.draw(t - L.a, t);
+  for (const a of animated) {
+    const k = Math.floor(t * a.fps) % a.frames.length;
+    if (k !== a.k) { const g = a.cv.getContext("2d"); g.clearRect(0, 0, a.cv.width, a.cv.height); g.drawImage(a.frames[k], 0, 0); a.k = k; }
+  }
+  updateClips(t);
+  hud(t);
+  grain.putImageData(noise[Math.floor(t * FPS) % noise.length], 0, 0);
+  const waits = pending.splice(0);
+  await Promise.all(waits);
+};
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+
+// ---------------------------------------------------------------- preview: plays in real time with the voice (open the page; #t=42 starts at 42 s)
+if (location.hash !== "#record") {
+  const fit = () => { const s = Math.min(innerWidth / 1920, innerHeight / 1080); document.body.style.transform = `scale(${s})`; };
+  fit(); addEventListener("resize", fit);
+  const btn = document.createElement("div"); btn.id = "play"; btn.textContent = "▶ Play the reel"; document.body.append(btn);
+  const startAt = +(location.hash.match(/t=([\d.]+)/) || [0, 0])[1];
+  window.ready.then(() => window.render(startAt));
+  btn.onclick = () => {
+    btn.remove();
+    const t0 = performance.now() - startAt * 1000;
+    const voices = VO.lines.map((l) => ({ at: VO_AT[l.id], a: new Audio(`vo/${l.id}.wav`), done: false }));
+    voices.forEach((v) => { if (v.at < startAt) v.done = true; });
+    const loop = (now) => {
+      const t = (now - t0) / 1000;
+      voices.forEach((v) => { if (!v.done && t >= v.at) { v.done = true; v.a.play(); } });
+      window.render(Math.min(t, TOTAL));
+      if (t < TOTAL) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  };
+}
+</script>
+</body>
+</html>
