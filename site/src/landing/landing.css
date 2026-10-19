@@ -188,21 +188,40 @@ h2 + .lead { margin-top: 16px; }
 .proof__grid .evidence { align-items: flex-start; }
 .proof__more { margin-top: 18px; }
 
-/* ------------------------------------------------------------------ final cta + finale */
-.cta { padding-bottom: 0; }
-.cta__grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 40px; align-items: end; }
-.finale { position: relative; height: 340px; }
-.finale__frog { position: absolute; right: 8%; bottom: 0; z-index: 2; }
-.finale__tree { position: absolute; right: -10px; bottom: 0; opacity: .9; }
-.finale__slot { position: absolute; left: 0; top: 4%; width: 150px; height: 140px; --cell: 4; }
-.finale__tongue { position: absolute; height: 12px; background: #E5604F; box-shadow: 0 3px 0 #B8402F; transform-origin: right center; transform: scaleX(0); z-index: 1; }
-.finale__again { position: absolute; left: 0; bottom: 12px; color: var(--forest); font-weight: 700; opacity: 0; }
+/* ------------------------------------------------------------------ final cta + footer + finale */
+/* UI mockup ending: copy, links and credits on the left; a big frog bottom-right, cut off by the page edge,
+   whose tongue goes up to the mosquito that flew down the dotted path (see finale.js) */
+.cta { padding: 112px 0 40px; overflow: hidden; }
+.tx-leaves { --sf-img: url(/textures/leaves.svg); --sf-size: 512px 224px; }
+.cta::before { opacity: .16; background-position: 100% 100%; }
+.cta__grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 40px; align-items: end; }
+.cta__title { font-size: clamp(38px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -.035em; }
+.cta__dot { color: var(--amber); }
+.cta__copy .lead { margin-top: 20px; max-width: 520px; }
+.cta__copy .btn-row { margin-top: 28px; }
+.btn--lg { min-height: 58px; padding: 14px 34px; font-size: 18px; }
+.cta__note { margin-top: 14px; }
+.cta__foot { margin-top: 56px; }
+.cta__links { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; font-weight: 600; }
+.cta__links a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 4px; }
+.cta__links a:hover { text-decoration-color: var(--forest); color: var(--forest); }
+.cta__credits { margin-top: 20px; font-size: 12px; color: var(--muted); }
+.cta__credits span { margin: 0 8px; }
+.finale { position: relative; height: 560px; margin-bottom: -40px; }
+.finale__frog { position: absolute; right: -60px; bottom: -20px; z-index: 2; transform-origin: 100% 100%; }
+.finale__slot { position: absolute; left: 10px; top: 40px; width: 150px; height: 140px; --cell: 4; }
+.finale__path { position: absolute; left: -130px; top: -82px; width: 170px; height: 150px; overflow: visible; }
+.finale__path path, .finale__path circle { fill: none; stroke: var(--forest); stroke-width: 3; vector-effect: non-scaling-stroke; }
+.finale__path path { stroke-dasharray: 2 9; stroke-linecap: square; opacity: .7; }
+.finale__path circle { stroke: var(--amber); }
+.finale__tongue { position: absolute; height: 16px; border-radius: 8px; background: #E8846F; box-shadow: inset 0 -4px 0 #C8553D; transform-origin: right center; transform: scaleX(0); z-index: 3; }
+.finale__spark { position: absolute; width: 18px; height: 18px; z-index: 3; transform: scale(0);
+  background: linear-gradient(var(--amber) 0 0) 50% 0 / 6px 100% no-repeat, linear-gradient(var(--amber) 0 0) 0 50% / 100% 6px no-repeat; }
+.finale__spark.s1 { left: 170px; top: 66px; }
+.finale__spark.s2 { left: 196px; top: 118px; width: 12px; height: 12px; }
+.finale__spark.s3 { left: 150px; top: 164px; width: 12px; height: 12px; }
+.finale__again { position: absolute; left: 0; bottom: 64px; color: var(--forest); font-weight: 700; opacity: 0; }
 .finale.done .finale__again { opacity: 1; }
-.cta .canopy { margin-top: 32px; }
-
-.footer { padding: 24px 0 40px; border-top: 1px solid var(--line); }
-.footer .foot { padding: 14px 0; }
-.footer__credits { margin-top: 8px; }
 
 /* ------------------------------------------------------------------ intro */
 .intro { display: none; }
@@ -256,10 +275,15 @@ h2 + .lead { margin-top: 16px; }
   .rail { grid-template-columns: 1fr 1fr; row-gap: 20px; }
   .rail::before, .helps .rail::after { display: none; }
   .action__copy .brief { margin-left: 0; }
-  .finale { height: 260px; }
+  .finale { height: 440px; margin-top: 8px; }
+  .finale__frog { transform: scale(.7); right: -40px; }
+  .finale__slot { left: 90px; top: 70px; }
+  .finale__path { left: 0; top: -48px; }
+  .finale__spark.s1 { left: 250px; } .finale__spark.s2 { left: 270px; } .finale__spark.s3 { left: 230px; }
   .mascot-slot { --cell: 4; }
   .hero__slot { width: 140px; height: 140px; right: 4px; --cell: 4; }
   .finale__slot { --cell: 3; }
+  .cta { padding-top: 80px; }
   .features__slot { width: 110px; height: 100px; --cell: 3; }
   .ts-label { font-size: 21px; }
   .drill__frog { display: none; }

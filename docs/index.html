@@ -17,10 +17,10 @@
       if (!still && (force || !sessionStorage.getItem("el-intro"))) document.documentElement.classList.add("intro-pending");
     } catch (e) {}
   </script>
-  <script type="module" crossorigin src="/epilag/assets/build/index-DFBV4Frh.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/index-CXzrD0Lb.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-Ds24jN7l.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/voxel-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-CAyEPR-c.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-C52XuaQ-.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -297,46 +297,33 @@
       </div>
     </section>
 
-    <!-- ============================================================ final call to action -->
-    <section class="cta surface tone-soft edge-top" aria-labelledby="cta-title">
+    <!-- ============================================================ final call to action + footer -->
+    <section class="cta surface tone-paper tx-leaves edge-top" id="end" aria-labelledby="cta-title">
       <div class="wrap cta__grid">
-        <div>
-          <div class="label">Take action earlier</div>
-          <h2 id="cta-title">Hospitals see dengue a month late.<br><span class="em">EpiLag-PH sees it now.</span></h2>
+        <div class="cta__copy">
+          <h2 id="cta-title" class="cta__title">Hospitals see dengue a month late.<br><span class="em">EpiLag-PH sees it now</span><span class="cta__dot">.</span></h2>
           <p class="lead">From early warning to focused action, EpiLag-PH helps communities prepare before dengue spreads.</p>
-          <div class="btn-row"><a class="btn btn--primary" href="web/">Open EpiLag-PH <i data-icon="arrowRight" data-size="24"></i></a></div>
-          <p class="small muted" style="margin-top:12px">Runs in your browser. No account needed.</p>
-          <div class="trust" style="margin-top:20px">
-            <span><i data-icon="areaDetail" data-size="32"></i>Data-driven</span><span><i data-icon="database" data-size="32"></i>Open access</span><span><i data-icon="forecastMap" data-size="32"></i>Built for the Philippines</span>
-          </div>
+          <div class="btn-row"><a class="btn btn--primary btn--lg" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a></div>
+          <p class="small muted cta__note">Runs in your browser. The first load takes about a minute.</p>
+          <footer class="cta__foot">
+            <nav class="cta__links" aria-label="More">
+              <a href="methodology.html">Methodology</a><a href="data/">Open data</a><a href="drill/">Dengue Drill</a>
+              <a href="deck/EpiLag-PH_deck.pdf">Slides</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+            </nav>
+            <p class="cta__credits">DOH Epidemiology Bureau via HDX <span>·</span> UPRI-NOAH <span>·</span> ERA5 via Open-Meteo <span>·</span> OCHA COD-AB/PS.</p>
+          </footer>
         </div>
         <div class="finale" id="finale" aria-hidden="true">
+          <svg class="finale__path" viewBox="0 0 200 260" preserveAspectRatio="none"><circle cx="20" cy="8" r="6" /><path d="M20 16 C 30 70, 120 80, 120 140 S 150 220, 170 250" /></svg>
           <div class="mascot-slot finale__slot" id="slot-finale"></div>
           <div class="finale__tongue"></div>
-          <pixel-sprite class="finale__frog" sprite="frog" pose="watch" scale="6"></pixel-sprite>
-          <pixel-sprite class="finale__tree" sprite="props" pose="tree" scale="3"></pixel-sprite>
+          <pixel-sprite class="finale__frog" sprite="frog" pose="watch" scale="10"></pixel-sprite>
+          <span class="finale__spark s1"></span><span class="finale__spark s2"></span><span class="finale__spark s3"></span>
           <button type="button" class="finale__again small" tabindex="-1">Again</button>
         </div>
       </div>
-      <div class="canopy" aria-hidden="true"></div>
     </section>
   </main>
-
-  <footer class="footer">
-    <div class="wrap">
-      <div class="foot">
-        <a class="brand" href="#top"><span class="lg"><i data-icon="logo" data-size="32"></i></span>EpiLag-PH</a>
-        <a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#action">Action</a><a href="#proof">Proof</a><a href="#film">Film</a>
-      </div>
-      <div class="foot">
-        <a href="methodology.html"><i data-icon="file" data-size="24"></i>Methodology</a>
-        <a href="data/"><i data-icon="database" data-size="32"></i>Open data</a>
-        <a href="https://github.com/Romeo-04/epilag"><i data-icon="external" data-size="24"></i>Source code</a>
-        <a href="deck/EpiLag-PH_deck.pdf"><i data-icon="file" data-size="32"></i>Slides (PDF)</a>
-      </div>
-      <p class="small muted footer__credits">Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS. PJDSC 2026 · Trace the Pattern, Target the Cure.</p>
-    </div>
-  </footer>
 
 </body>
 </html>

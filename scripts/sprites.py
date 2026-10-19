@@ -58,6 +58,14 @@ def frame_rows(img, x0, w, h):
     return rows, off
 
 
+def strike_up(strike, close):
+    """The strike frame without its sideways tongue stub, for a tongue the page draws at any angle.
+
+    Tongue pixels (T) left of the mouth (x < 18) take the pixel of the closed-mouth frame there instead.
+    """
+    return ["".join(close[y][x] if c == "T" and x < 18 else c for x, c in enumerate(row)) for y, row in enumerate(strike)]
+
+
 def convert(name, size, anchor, poses, blink):
     path = SRC / f"{name}.png"
     img = Image.open(path).convert("RGBA")
@@ -72,6 +80,8 @@ def convert(name, size, anchor, poses, blink):
         rows, off = frame_rows(img, i * w, w, h)
         out[pose] = rows
         off_total += off
+    if name == "frog" and {"strike", "watchClose"} <= out.keys():
+        out["strikeUp"] = strike_up(out["strike"], out["watchClose"])
     used = sorted({c for rows in out.values() for row in rows for c in row} - {"."})
     data = {"palette": {k: PALETTE[k] for k in used}, "size": [w, h], "anchor": list(anchor), "blink": blink,
             "poses": out}
