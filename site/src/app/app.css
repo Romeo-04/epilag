@@ -89,7 +89,10 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.grid--map, .map-page-grid { grid-template-columns: minmax(0, 1.35fr) minmax(320px, .9fr); align-items: start; }
+.grid--map, .map-page-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1.35fr) minmax(320px, .9fr); align-items: stretch; }
+/* map cards match the list beside them: the map grows to fill the card */
+.map-card, .overview-map { display: flex; flex-direction: column; }
+.map-card .vmap, .overview-map .home-map { flex: 1 1 auto; }
 .grid--unit { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); }
 .grid--plan { grid-template-columns: minmax(300px, .78fr) minmax(0, 1.35fr); align-items: start; }
 .grid--public { grid-template-columns: minmax(0, 1.25fr) minmax(300px, .85fr); align-items: start; }
