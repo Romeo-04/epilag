@@ -3,24 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EpiLag-PH · dengue early warning</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.11.0/build/stlite.css">
-  <style>
-    #loading { font: 16px "Segoe UI", system-ui, sans-serif; color: #52606D; padding: 48px; }
-  </style>
+  <title>EpiLag-PH · Dengue early warning</title>
+  <meta name="description" content="EpiLag-PH: dengue early warning and action planning for Philippine provinces, regions and Quezon City.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="EpiLag-PH dashboard">
+  <meta property="og:description" content="Dengue forecasts 2–8 weeks ahead, priority areas, action plans and plain-language advisories for the Philippines.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/web/">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/epilag/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/epilag/assets/build/web-BrEdywTz.js"></script>
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-BDKxYwEy.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/rolldown-runtime-XKyaHtl9.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/logic-rqKjkrBE.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/data-DbYTdCf-.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/motion-Cbmd2PWW.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/ui-B6vaxqwQ.js">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/web-Bl8TMVg3.css">
 </head>
-<body>
-  <div id="root"><p id="loading">Loading EpiLag-PH in your browser. The first visit takes about a minute.</p></div>
-  <script type="module">
-    import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.11.0/build/stlite.js";
-    mount(
-      {
-        requirements: ["plotly"],
-        entrypoint: "app/streamlit_app.py",
-        archives: [{ url: "./epilag_app.zip", format: "zip" }],
-      },
-      document.getElementById("root"),
-    );
-  </script>
+<body class="app">
+  <a class="skip" href="#view">Skip to content</a>
+  <button type="button" class="mobile-menu" id="mobile-menu" aria-label="Open navigation" aria-expanded="false"><i data-icon="menu" data-size="24"></i></button>
+  <div class="nav-scrim" id="mobile-scrim" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside class="app-sidebar" id="sidebar" aria-label="Dashboard navigation">
+      <div class="sidebar__top">
+        <a class="sidebar__brand" href="../" aria-label="EpiLag-PH home">
+          <span class="sidebar__logo"><i data-icon="logo" data-size="30"></i></span>
+          <span class="sidebar__brand-copy"><b>EpiLag-PH</b><small id="sidebar-title">Public health dashboard</small></span>
+        </a>
+        <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse navigation" aria-expanded="true"><i data-icon="chevronLeft" data-size="20"></i></button>
+        <button type="button" class="mobile-close" id="mobile-close" aria-label="Close navigation" aria-expanded="false"><i data-icon="close" data-size="20"></i></button>
+      </div>
+      <nav class="app-tabs" id="tabs"></nav>
+      <div class="sidebar__bottom">
+        <a class="sidebar__link" href="../drill/"><span class="nav-item__icon"><i data-icon="play" data-size="22"></i></span><span class="nav-item__text">Dengue Drill</span></a>
+        <div class="sidebar__language"><span class="ctx__label">Language</span><div class="seg seg--sm" id="lang" role="group" aria-label="Language"></div></div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-top">
+        <div class="topbar wrap">
+          <div class="topbar__title">
+            <span class="topbar__group" id="app-page-group">Monitor</span>
+            <h1 id="app-page-title">Overview</h1>
+            <span class="topbar__note" id="app-page-note"></span>
+          </div>
+          <div class="topbar__actions" id="top-actions"></div>
+        </div>
+        <div class="wrap">
+          <section class="ctx" id="ctx" aria-label="Forecast settings"></section>
+        </div>
+      </header>
+
+      <main id="view" class="wrap app-view" tabindex="-1" aria-live="polite"></main>
+
+      <footer class="wrap app-foot small muted">
+        <span>EpiLag-PH · PJDSC 2026</span>
+        <a href="../methodology.html">Methodology</a><a href="../data/">Open data</a><a href="../drill/">Dengue Drill</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </footer>
+    </div>
+  </div>
+
 </body>
 </html>

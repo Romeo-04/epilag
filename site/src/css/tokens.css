@@ -1,0 +1,84 @@
+/* Design tokens. Colours and type from UI mockup/ "Visual foundations"; motion from REDESIGN_PLAN.md section 7.1.
+   Rules: ink for all body and interface text, forest for emphasis, weather blue for maps, rain and data graphics only
+   (never text). Every alert colour is always paired with its text label. */
+:root {
+  /* core brand */
+  --ink: #071711;
+  --forest: #08754F;
+  --sage: #789373;
+  --paper: #FBFAF4;
+  --amber: #F5A51C;
+  --sky: #BFE2EC;
+
+  /* derived surfaces and lines */
+  --surface: #FFFFFF;
+  --surface-2: #F3F2EA;
+  --forest-soft: #E3F0E7;
+  --forest-deep: #055C3E;
+  --sage-soft: #E9EDE3;
+  --sky-soft: #E6F3F6;
+  --amber-soft: #FDF0D5;
+  --line: #E4E4D9;
+  --line-strong: #CFD2C4;
+  --muted: #4A5A51;
+  --soft: #63706A;
+
+  /* dark sections (drill, console) */
+  --night: #0A2A1D;
+  --night-2: #0E3726;
+  --night-line: #1E5A40;
+  --night-text: #E9F3EC;
+  --night-muted: #9DBDAC;
+
+  /* alert levels */
+  --lv-warning: #F04B2A;
+  --lv-watch: #F58220;
+  --lv-above: #F7C928;
+  --lv-normal: #0C7A55;
+  --lv-nodata: #C9CFC9;
+  /* text on each level fill, chosen for at least 4.5:1 contrast */
+  --lv-warning-ink: #071711; /* white is only 3.7:1 */
+  --lv-watch-ink: #071711;
+  --lv-above-ink: #071711;
+  --lv-normal-ink: #FFFFFF;
+  --lv-nodata-ink: #071711;
+
+  /* type */
+  --font: "Inter Tight", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --fs-display: clamp(44px, 6.2vw, 72px);
+  --fs-h1: clamp(36px, 4.6vw, 56px);
+  --fs-h2: clamp(28px, 3.4vw, 40px);
+  --fs-h3: 22px;
+  --fs-lead: clamp(18px, 1.6vw, 21px);
+  --fs-body: 17px;
+  --fs-small: 14px;
+  --fs-label: 13px;
+  --lh-tight: 1.02;
+  --lh-head: 1.1;
+  --lh-body: 1.5;
+  --track-label: .14em;
+
+  /* space, shape, depth */
+  --gutter: clamp(16px, 4vw, 40px);
+  --wrap: 1200px;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(7, 23, 17, .06), 0 12px 32px -18px rgba(7, 23, 17, .28);
+  --shadow-float: 0 30px 60px -30px rgba(7, 23, 17, .35);
+  --px: 4px; /* one art pixel at 1x */
+
+  /* motion (seconds, matching gsap durations) */
+  --dur-instant: .08s;
+  --dur-fast: .14s;
+  --dur-base: .22s;
+  --dur-slow: .36s;
+  --dur-pointer: .52s;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-point: cubic-bezier(.34, 1.56, .64, 1);
+
+  color-scheme: light;
+}

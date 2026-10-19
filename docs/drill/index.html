@@ -3,673 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dengue Drill · Mission 2019 · EpiLag-PH</title>
+  <title>Dengue Drill · EpiLag-PH</title>
   <meta name="description" content="A strategy game: command the 2019 dengue response in your region, then replay it with EpiLag-PH's forecast intel.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="Dengue Drill · EpiLag-PH">
+  <meta property="og:description" content="Command the 2019 dengue response on a 3D pixel island, then replay it with EpiLag-PH's forecasts.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/drill/">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0A2A1D">
+  <link rel="icon" href="/epilag/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --night: #04100B; --deck: #08190F; --panel: #0C2418; --edge: #1C4532; --edge-2: #2A6148; --text: #E8F3EC; --dim: #8FB3A1; --faint: #5E8573;
-      --go: #34D27B; --go-ink: #04100B; --amber: #F2B33D; --orange: #EE8A2A; --red: #E5483C; --intel: #6FD6FF;
-      --hud: "Chakra Petch", "Segoe UI", sans-serif; --body: "Barlow", "Segoe UI", sans-serif; --ease: cubic-bezier(.2, .7, .2, 1);
-    }
-    * { box-sizing: border-box; margin: 0; }
-    html, body { height: 100%; }
-    body { font-family: var(--body); color: var(--text); background: var(--night); overflow-x: hidden; }
-    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 4px,
-                  linear-gradient(180deg, #071811 0%, var(--night) 60%); }
-    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
-    a { color: inherit; }
-    :focus-visible { outline: 2px solid var(--go); outline-offset: 3px; }
-    .screen { position: relative; z-index: 1; display: none; min-height: 100vh; }
-    .screen.on { display: block; animation: enter .6s var(--ease) both; }
-    canvas.fx { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
-
-    /* buttons */
-    .cta { font-family: var(--hud); text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: 17px; padding: 16px 28px;
-      background: var(--go); color: var(--go-ink); clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
-      transition: transform .15s var(--ease), filter .2s; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
-    .cta:hover { transform: translateY(-2px); filter: brightness(1.08); }
-    .cta:active { transform: translateY(1px); }
-    .cta.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1.5px var(--edge-2); }
-    .cta:disabled { opacity: .4; cursor: not-allowed; transform: none; }
-    .chip { font-family: var(--hud); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--edge-2); color: var(--dim); }
-
-    /* title */
-    .title-wrap { max-width: 1240px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 40px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 40px; align-items: center; min-height: 100vh; }
-    .back { position: absolute; top: 24px; left: clamp(16px, 4vw, 40px); font-family: var(--hud); letter-spacing: .1em; font-size: 13px; color: var(--dim); text-decoration: none; text-transform: uppercase; }
-    .logo-mark { font-family: var(--hud); font-weight: 700; line-height: .86; font-size: clamp(64px, 9vw, 132px); letter-spacing: -.01em; text-transform: uppercase; }
-    .logo-mark span { display: block; color: transparent; -webkit-text-stroke: 2px var(--go); }
-    .tagline { font-size: 20px; color: var(--dim); margin: 22px 0 28px; max-width: 46ch; line-height: 1.45; }
-    .tagline b { color: var(--text); }
-    .label { font-family: var(--hud); letter-spacing: .14em; font-size: 12px; color: var(--faint); margin-bottom: 10px; text-transform: uppercase; }
-    .mission-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-    .mission-head .label { margin: 0; }
-    .rail-ctl { display: flex; align-items: center; gap: 6px; font-family: var(--hud); font-size: 12px; letter-spacing: .12em; color: var(--dim); }
-    .rail-ctl output { min-width: 64px; text-align: right; margin-right: 6px; }
-    .rail-ctl output b { color: var(--go); font-weight: 700; }
-    .arrow { width: 34px; height: 34px; display: grid; place-items: center; border: 1.5px solid var(--edge-2); color: var(--text);
-      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); transition: border-color .2s, color .2s, transform .15s var(--ease); }
-    .arrow:hover { border-color: var(--go); color: var(--go); }
-    .arrow:active { transform: scale(.92); }
-    .arrow:disabled { opacity: .35; cursor: not-allowed; border-color: var(--edge-2); color: var(--text); transform: none; }
-    .arrow:focus-visible, .mission:focus-visible { outline: 2px solid var(--go); outline-offset: 2px; }
-    .missions { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 6px; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
-      --fl: 0px; --fr: 48px; mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); }
-    .missions::-webkit-scrollbar { display: none; }
-    .missions.past-start { --fl: 48px; }
-    .missions.at-end { --fr: 0px; }
-    .m-track { position: relative; height: 3px; margin-top: 10px; background: var(--edge); overflow: hidden; }
-    .m-track i { position: absolute; inset: 0 auto 0 0; background: var(--go); transition: transform .25s var(--ease); }
-    .mission { flex: none; width: 190px; scroll-snap-align: start; text-align: left; padding: 14px; background: var(--panel); border: 1.5px solid var(--edge);
-      transition: border-color .2s, transform .2s var(--ease); }
-    .mission:hover { transform: translateY(-3px); }
-    .mission.sel { border-color: var(--go); background: #0F2E1F; }
-    .mission b { display: block; font-family: var(--hud); font-size: 14px; letter-spacing: .04em; line-height: 1.2; min-height: 34px; }
-    .mission small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 8px; }
-    .threat { display: flex; gap: 3px; margin-top: 8px; }
-    .threat i { width: 14px; height: 6px; background: var(--edge); }
-    .threat i.on { background: var(--red); }
-    .title-map { position: relative; aspect-ratio: 1000 / 760; }
-    .title-map svg { width: 100%; height: 100%; }
-    .title-map path { fill: #0E2C1F; stroke: var(--edge-2); stroke-width: 1.5; animation: breathe 4s ease-in-out infinite; }
-    .title-map path:nth-child(2n) { animation-delay: -1.3s; } .title-map path:nth-child(3n) { animation-delay: -2.6s; }
-    .how { display: flex; gap: 18px; margin-top: 26px; flex-wrap: wrap; color: var(--dim); font-size: 14px; }
-    .how b { font-family: var(--hud); color: var(--go); margin-right: 6px; }
-
-    /* briefing */
-    .brief { max-width: 1180px; margin: 0 auto; padding: 56px clamp(16px, 4vw, 40px); display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; min-height: 100vh; }
-    .brief h2, .report h2 { font-family: var(--hud); text-transform: uppercase; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.02; letter-spacing: .01em; }
-    .brief h2 span { color: var(--red); }
-    .brief p { color: var(--dim); font-size: 18px; line-height: 1.5; margin: 18px 0; }
-    .objectives { display: grid; gap: 10px; margin: 22px 0 30px; }
-    .objectives div { display: flex; gap: 12px; align-items: baseline; font-size: 16px; }
-    .objectives b { font-family: var(--hud); color: var(--go); font-size: 13px; letter-spacing: .1em; }
-    .receipt { background: #FFFDF5; color: #262620; font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; padding: 26px 26px 34px; max-width: 420px; width: 100%; justify-self: center;
-      transform: rotate(-2deg); animation: print 1.6s steps(24, end) both; position: relative; }
-    .receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px;
-      background: linear-gradient(135deg, #FFFDF5 6px, transparent 0) 0 0 / 12px 12px, linear-gradient(-135deg, #FFFDF5 6px, transparent 0) 0 0 / 12px 12px; }
-    .receipt h3 { text-align: center; letter-spacing: .14em; font-size: 16px; }
-    .receipt .c { text-align: center; color: #6B6B5E; font-size: 12.5px; }
-    .receipt hr { border: 0; border-top: 1.5px dashed #BDBBA8; margin: 12px 0; }
-    .receipt .ln { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
-    .receipt .tot { font-size: 18px; font-weight: 700; }
-    .receipt .stamp { margin-top: 14px; text-align: center; color: #C8372D; outline: 2.5px solid #C8372D; padding: 6px; font-weight: 700; letter-spacing: .12em;
-      transform: rotate(-5deg); animation: stamp .45s var(--ease) 1.8s both; }
-
-    /* game */
-    .game { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; }
-    .hud { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 14px clamp(12px, 2vw, 28px); background: rgba(8, 25, 15, .94);
-      border-bottom: 1px solid var(--edge); position: sticky; top: 0; z-index: 10; }
-    .mode { font-family: var(--hud); text-transform: uppercase; letter-spacing: .1em; font-size: 13px; padding: 8px 14px; box-shadow: inset 0 0 0 1.5px var(--edge-2); color: var(--dim); }
-    .mode.intel { box-shadow: inset 0 0 0 1.5px var(--intel); color: var(--intel); }
-    .hud .mid { display: flex; gap: 26px; align-items: center; justify-content: center; flex-wrap: wrap; }
-    .k { font-family: var(--hud); font-size: 11px; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; }
-    .v { font-family: var(--hud); font-size: 22px; font-weight: 700; letter-spacing: .02em; }
-    .pips { display: flex; gap: 4px; margin-top: 4px; }
-    .pips i { width: 20px; height: 6px; background: var(--edge); }
-    .pips i.done { background: var(--go); } .pips i.now { background: var(--text); animation: blink 1s steps(2) infinite; }
-    .tokens { display: flex; gap: 3px; margin-top: 4px; }
-    .tokens i { width: 12px; height: 14px; background: var(--go); clip-path: polygon(50% 0, 100% 20%, 100% 60%, 50% 100%, 0 60%, 0 20%); transition: opacity .3s, transform .3s var(--ease); }
-    .tokens i.spent { opacity: .15; transform: scale(.7); }
-    .meter { width: 160px; height: 8px; background: var(--edge); margin-top: 6px; overflow: hidden; }
-    .meter i { display: block; height: 100%; width: 100%; transform-origin: left; transform: scaleX(0); transition: transform .8s var(--ease), background .8s; }
-    .mute { width: 40px; height: 40px; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--edge-2); color: var(--dim); }
-    .mute svg { width: 18px; height: 18px; }
-
-    .field { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
-    .board-wrap { position: relative; padding: 12px; min-height: 520px; }
-    .board { width: 100%; height: 100%; max-height: calc(100vh - 190px); display: block; overflow: hidden; }
-    .board .prov { cursor: pointer; stroke: #04100B; stroke-width: 1.4; transition: fill .9s var(--ease); }
-    .board .prov:hover { stroke: var(--dim); stroke-width: 2; }
-    .board .prov.sel { stroke: var(--text); stroke-width: 2.6; }
-    .board .lbl { font-family: var(--hud); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; fill: rgba(232, 243, 236, .82); pointer-events: none; paint-order: stroke; stroke: #04100B; stroke-width: 4px; }
-    .board .ring { fill: none; stroke-width: 2.5; pointer-events: none; }
-    .board .ring.pulse { animation: ring 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-    .board .tag { font-family: var(--hud); font-size: 14px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: #04100B; stroke-width: 4px; }
-    .board .team { pointer-events: none; animation: drop .5s var(--ease) both; }
-    .board .sweep { pointer-events: none; transform-origin: 500px 380px; animation: sweep 3.2s linear infinite; }
-    .legend { position: absolute; left: 22px; bottom: 18px; display: flex; gap: 14px; align-items: center; font-family: var(--hud); font-size: 11px; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; flex-wrap: wrap; }
-    .legend .grad { width: 140px; height: 8px; background: linear-gradient(90deg, #12352A, #2E6B3F, #F2B33D, #EE8A2A, #E5483C); }
-
-    .side { background: var(--deck); border-left: 1px solid var(--edge); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-    .side h3 { font-family: var(--hud); text-transform: uppercase; font-size: 24px; letter-spacing: .03em; line-height: 1.1; }
-    .sub { color: var(--dim); font-size: 14px; }
-    .spark { width: 100%; height: 110px; display: block; background: #071510; outline: 1px solid var(--edge); }
-    .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .kv > div { background: var(--panel); outline: 1px solid var(--edge); padding: 10px 12px; }
-    .intel-box { outline: 1.5px solid var(--intel); padding: 12px 14px; background: rgba(111, 214, 255, .06); animation: enter .5s var(--ease) both; }
-    .intel-box .k { color: var(--intel); }
-    .lvl { display: inline-block; font-family: var(--hud); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; font-weight: 700; margin-top: 6px; }
-    .lvl.warning { background: var(--red); color: #fff; } .lvl.watch { background: var(--orange); color: #1A0D02; }
-    .lvl.above { background: var(--amber); color: #1A1302; } .lvl.normal { background: var(--edge-2); color: var(--text); }
-    .deploy { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
-    .deploy .cta { justify-content: center; font-size: 15px; }
-    .recall { font-family: var(--hud); text-transform: uppercase; letter-spacing: .1em; font-size: 13px; padding: 14px 16px; box-shadow: inset 0 0 0 1.5px var(--edge-2); color: var(--dim); }
-    .recall:disabled { opacity: .35; cursor: not-allowed; }
-    .roster { font-size: 13.5px; color: var(--dim); }
-    .roster b { color: var(--text); }
-    .empty { color: var(--faint); font-size: 14px; outline: 1.5px dashed var(--edge); padding: 18px; text-align: center; }
-
-    .bottom { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 12px clamp(12px, 2vw, 28px); background: rgba(8, 25, 15, .96); border-top: 1px solid var(--edge);
-      position: sticky; bottom: 0; z-index: 10; }
-    .ticker { display: flex; gap: 12px; align-items: center; overflow: hidden; white-space: nowrap; }
-    .ticker .live { font-family: var(--hud); font-size: 12px; letter-spacing: .14em; background: var(--red); color: #fff; padding: 4px 8px; flex: none; }
-    .ticker .msg { font-size: 15px; animation: slide .6s var(--ease) both; overflow: hidden; text-overflow: ellipsis; }
-
-    .warp { position: fixed; inset: 0; z-index: 40; display: none; place-items: center; background: rgba(4, 16, 11, .9); }
-    .warp.on { display: grid; animation: enter .25s ease both; }
-    .warp div { font-family: var(--hud); font-size: clamp(36px, 6vw, 84px); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; text-align: center; }
-    .warp small { display: block; font-size: 18px; letter-spacing: .2em; color: var(--dim); margin-top: 8px; }
-    .floater { position: fixed; z-index: 30; font-family: var(--hud); font-weight: 700; font-size: 18px; color: var(--red); pointer-events: none; animation: float 1.8s var(--ease) both;
-      text-shadow: 0 2px 0 #04100B, 0 -1px 0 #04100B; }
-
-    /* reports */
-    .report { max-width: 1180px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 40px) 64px; }
-    .report-top { display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: center; }
-    .grade { width: 190px; height: 190px; display: grid; place-items: center; font-family: var(--hud); font-weight: 700; font-size: 140px; line-height: 1;
-      outline: 4px solid currentColor; outline-offset: -4px; transform: rotate(-6deg); animation: stamp .55s var(--ease) .3s both; }
-    .report h2 span { color: var(--dim); }
-    .lead { color: var(--dim); font-size: 18px; margin-top: 12px; max-width: 60ch; }
-    .scores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px 0 22px; }
-    .scores > div { background: var(--panel); outline: 1px solid var(--edge); padding: 18px; }
-    .scores .big { font-family: var(--hud); font-size: 44px; font-weight: 700; line-height: 1; }
-    .scores .big small { font-size: 18px; color: var(--dim); margin-left: .2em; }
-    .scores p { color: var(--dim); font-size: 14px; margin-top: 8px; }
-    .badges { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 26px; }
-    .badge { text-align: center; padding: 16px 10px; outline: 1.5px solid var(--edge); background: var(--deck); opacity: .35; filter: grayscale(1); }
-    .badge.got { opacity: 1; filter: none; outline-color: var(--go); animation: unlock .6s var(--ease) both; }
-    .badge svg { width: 40px; height: 40px; color: var(--go); }
-    .badge b { display: block; font-family: var(--hud); text-transform: uppercase; letter-spacing: .06em; font-size: 14px; margin-top: 8px; }
-    .badge span { font-size: 12.5px; color: var(--dim); }
-    .replay { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
-    .replay > div { background: var(--deck); outline: 1px solid var(--edge); padding: 12px; }
-    .replay b { font-family: var(--hud); text-transform: uppercase; letter-spacing: .04em; font-size: 14px; }
-    .replay small { display: block; color: var(--dim); font-size: 12.5px; }
-    .replay svg { width: 100%; height: 70px; display: block; margin-top: 8px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: stretch; margin: 30px 0; }
-    .vs .card { background: var(--panel); outline: 1.5px solid var(--edge); padding: 22px; }
-    .vs .card.win { outline-color: var(--go); }
-    .vs .x { font-family: var(--hud); font-size: 64px; font-weight: 700; align-self: center; color: var(--faint); }
-    .vs .g { font-family: var(--hud); font-size: 96px; font-weight: 700; line-height: 1; }
-    .bars { display: grid; gap: 12px; margin-top: 8px; }
-    .bars .b { display: grid; grid-template-columns: 260px 1fr 110px; gap: 14px; align-items: center; font-size: 15px; }
-    .bars .track { height: 18px; background: var(--edge); }
-    .bars .fill { height: 100%; transform-origin: left; animation: grow 1.1s var(--ease) both; }
-    .bars .n { font-family: var(--hud); font-weight: 700; text-align: right; }
-    .honest { color: var(--dim); font-size: 14px; margin-top: 18px; line-height: 1.5; max-width: 90ch; }
-
-    @keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes print { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 -20px 0); } }
-    @keyframes stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.8); } to { opacity: 1; transform: rotate(-6deg) scale(1); } }
-    @keyframes breathe { 0%, 100% { fill: #0E2C1F; } 50% { fill: #17432F; } }
-    @keyframes ring { 0% { opacity: .95; transform: scale(.6); } 100% { opacity: 0; transform: scale(1.9); } }
-    @keyframes drop { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: none; } }
-    @keyframes sweep { to { transform: rotate(360deg); } }
-    @keyframes blink { 50% { opacity: .2; } }
-    @keyframes slide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-    @keyframes float { 0% { opacity: 0; transform: translateY(8px); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-60px); } }
-    @keyframes unlock { 0% { transform: scale(.7); opacity: 0; } 70% { transform: scale(1.06); } 100% { transform: none; opacity: 1; } }
-    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    @media (max-width: 980px) {
-      .title-wrap, .brief, .field, .report-top, .vs { grid-template-columns: 1fr; } .side { border-left: 0; border-top: 1px solid var(--edge); }
-      .scores, .badges { grid-template-columns: 1fr 1fr; } .bars .b { grid-template-columns: 1fr; gap: 6px; } .bars .n { text-align: left; } .vs .x { display: none; }
-      .hud { grid-template-columns: 1fr auto; } .hud .mid { grid-column: 1 / -1; order: 3; justify-content: flex-start; }
-    }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/epilag/assets/build/drill-BC8FKqqH.js"></script>
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-BDKxYwEy.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-BfSZQAZg.js">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-F21s_2Zp.css">
 </head>
-<body>
-<canvas class="fx" id="fx"></canvas>
-
-<section class="screen on" id="s-title">
-  <a class="back" href="../">← EpiLag-PH</a>
-  <div class="title-wrap">
-    <div>
-      <div class="chip" style="display:inline-block;margin-bottom:18px">Mission 2019 · Philippines</div>
-      <div class="logo-mark">Dengue<span>Drill</span></div>
-      <p class="tagline">The rains are coming. You command the dengue response for your region with <b>₱5 million</b> and <b>8 turns</b>.
-        Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real 2019 cases keep score.</p>
-      <div class="mission-head">
-        <div class="label">Choose your mission</div>
-        <div class="rail-ctl"><output id="m-count" aria-live="polite"></output>
-          <button class="arrow" id="m-prev" aria-label="Previous region"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button class="arrow" id="m-next" aria-label="Next region"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M9 5l7 7-7 7"/></svg></button></div>
+<body class="drill">
+  <!-- ============================================================ title -->
+  <section class="screen on" id="s-title" aria-labelledby="t-title">
+    <div class="title__pond" aria-hidden="true"><pixel-sprite class="title__frog" sprite="frog" pose="peek" scale="3"></pixel-sprite><i></i><i></i></div>
+    <a class="back" href="../"><i data-icon="chevronLeft" data-size="24"></i>EpiLag-PH</a>
+    <div class="wrap title">
+      <div class="title__copy">
+        <span class="chip chip--night">Mission 2019 · Philippines</span>
+        <h1 id="t-title" class="logo-mark">Dengue <span>Drill</span></h1>
+        <p class="tagline">The rains are coming. You command the dengue response for your region with <b>₱5 million</b> and <b>8 turns</b>.
+          Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real cases keep score.</p>
+        <div class="mission-head">
+          <span class="kicker">Choose your mission</span>
+          <div class="rail-ctl"><output id="m-count" aria-live="polite"></output>
+            <button class="arrow" id="m-prev" type="button" aria-label="Previous region"><i data-icon="chevronLeft" data-size="24"></i></button>
+            <button class="arrow" id="m-next" type="button" aria-label="Next region"><i data-icon="chevronRight" data-size="24"></i></button></div>
+        </div>
+        <div class="missions" id="missions" role="listbox" aria-label="Region" tabindex="0"></div>
+        <div class="btn-row"><button class="btn btn--go" id="start" type="button">Start mission <i data-icon="play" data-size="24"></i></button></div>
+        <ol class="how"><li><b>01</b>Pick an area</li><li><b>02</b>Deploy response teams</li><li><b>03</b>End turn: 2 weeks pass</li></ol>
       </div>
-      <div class="missions" id="missions" role="listbox" aria-label="Region" tabindex="0"></div>
-      <div class="m-track" aria-hidden="true"><i id="m-thumb"></i></div>
-      <div style="margin-top:22px"><button class="cta" id="start">Start mission ▸</button></div>
-      <div class="how"><span><b>01</b>Click a province</span><span><b>02</b>Deploy response teams</span><span><b>03</b>End turn: 2 weeks pass</span></div>
-    </div>
-    <div class="title-map"><svg id="title-map" viewBox="0 0 1000 760" role="img" aria-label="Map of the selected region"></svg></div>
-  </div>
-</section>
-
-<section class="screen" id="s-brief">
-  <div class="brief">
-    <div>
-      <div class="chip" id="brief-chip" style="display:inline-block">Intel briefing</div>
-      <h2 style="margin-top:16px">The rain is free.<br><span>The dengue bill comes later.</span></h2>
-      <p>This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.</p>
-      <div class="objectives">
-        <div><b>OBJ 1</b>Avert as many cases as you can.</div>
-        <div><b>OBJ 2</b>Get teams in 4+ weeks before an outbreak peaks.</div>
-        <div><b>OBJ 3</b>Don't waste teams where no outbreak comes.</div>
+      <div class="title__stage">
+        <div class="title__caption"><b id="t-region">Region</b><span id="t-stats"></span></div>
+        <div class="title__map" id="t-map" role="img" aria-label="3D map of the selected region"></div>
       </div>
-      <button class="cta" id="go-r1">Deploy · Round 1: no intel ▸</button>
     </div>
-    <div class="receipt" id="receipt"></div>
-  </div>
-</section>
+  </section>
 
-<section class="screen" id="s-game">
-  <div class="game">
-    <div class="hud">
-      <div class="mode" id="mode">Round 1 · No intel</div>
-      <div class="mid">
-        <div><div class="k">Week ending</div><div class="v" id="h-week">5 May 2019</div><div class="pips" id="h-pips"></div></div>
-        <div><div class="k">Budget</div><div class="v" id="h-budget">₱5.0M</div><div class="tokens" id="h-tokens"></div></div>
-        <div><div class="k">Rain this week</div><div class="v" id="h-rain">0 mm</div></div>
-        <div><div class="k">Outbreak pressure</div><div class="v" id="h-press">Low</div><div class="meter"><i id="h-meter"></i></div></div>
+  <!-- ============================================================ briefing -->
+  <section class="screen" id="s-brief" aria-labelledby="b-title">
+    <div class="wrap briefing">
+      <div class="briefing__copy">
+        <span class="chip chip--night" id="brief-chip">Intel briefing</span>
+        <h2 id="b-title">The rain is free.<br><span>The dengue bill comes later.</span></h2>
+        <p>This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.</p>
+        <ol class="objectives">
+          <li class="console"><span class="objectives__ic"><i data-icon="residents" data-size="32"></i></span><div><b>Objective 1</b><span>Avert as many cases as you can.</span></div></li>
+          <li class="console"><span class="objectives__ic"><i data-icon="calendarGap" data-size="24"></i></span><div><b>Objective 2</b><span>Get teams in 4+ weeks before an outbreak peaks.</span></div></li>
+          <li class="console"><span class="objectives__ic"><i data-icon="check" data-size="24"></i></span><div><b>Objective 3</b><span>Don't waste teams where no outbreak comes.</span></div></li>
+        </ol>
+        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Deploy · Round 1: no intel <i data-icon="play" data-size="24"></i></button>
+          <span class="sub">10 teams · ₱500K each · 8 turns of 2 weeks</span></div>
       </div>
-      <button class="mute" id="mute" aria-label="Sound on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path id="mute-wave" d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg></button>
+      <div class="briefing__receipt"><div class="receipt" id="receipt"></div><pixel-sprite class="briefing__mosq" sprite="mosquito" pose="clipboard" scale="4"></pixel-sprite></div>
     </div>
-    <div class="field">
-      <div class="board-wrap">
-        <svg class="board" id="board" viewBox="0 0 1000 760" role="group" aria-label="Region map: click a province"></svg>
-        <div class="legend"><span>Cases vs epidemic line</span><span class="grad"></span><span id="legend-intel"></span></div>
+  </section>
+
+  <!-- ============================================================ game -->
+  <section class="screen" id="s-game" aria-label="Dengue Drill board">
+    <div class="game">
+      <header class="hud console">
+        <div class="hud__who"><span class="chip chip--night" id="mode">Round 1 · No intel</span><b id="h-region">Region</b></div>
+        <ol class="timeline" id="h-timeline" aria-label="Turns"></ol>
+        <div class="hud__budget"><span class="k">Budget</span><b class="v nums" id="h-budget">₱5.0M</b><span class="pips pips--tokens" id="h-tokens"></span></div>
+        <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false"></button>
+      </header>
+      <div class="field">
+        <div class="board-wrap" id="board-wrap" data-weather="clear">
+          <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="board" id="board" role="img" aria-label="3D map of the region: higher, redder provinces have more cases against their epidemic line"></div>
+          <div class="board__flash" id="flash" aria-hidden="true"></div>
+          <div class="stats">
+            <div class="stat"><span class="k">Cases this week</span><b class="nums" id="h-cases">0</b><span class="d" id="h-change"></span><span class="stat__spark" id="h-spark"></span></div>
+            <div class="stat"><span class="k">Rain</span><b class="nums" id="h-rain">0 mm</b><span class="d" id="h-sky"></span></div>
+            <div class="stat"><span class="k">Outbreak pressure</span><b id="h-press">Low</b><span class="meter"><i id="h-meter"></i></span></div>
+          </div>
+          <div class="controls" role="group" aria-label="View">
+            <button type="button" id="v-in" aria-label="Zoom in">+</button>
+            <button type="button" id="v-out" aria-label="Zoom out">−</button>
+            <button type="button" id="v-left" aria-label="Turn left">⟲</button>
+            <button type="button" id="v-right" aria-label="Turn right">⟳</button>
+            <button type="button" id="reset-view" aria-label="Reset view"><i data-icon="close" data-size="24"></i></button>
+          </div>
+          <div class="board__legend"><span>Cases vs epidemic line</span><span class="grad"></span><span id="legend-intel"></span></div>
+          <p class="board__hint">Drag to turn · right-drag to move · scroll or pinch to zoom</p>
+          <div class="toast" id="toast" aria-live="polite"></div>
+        </div>
+        <aside class="side console">
+          <div class="side__head"><span class="k">Provinces</span><span class="k" id="side-sub"></span></div>
+          <div class="plist" id="plist" role="listbox" aria-label="Provinces" tabindex="0"></div>
+          <div id="detail" class="detail" aria-live="polite"></div>
+        </aside>
       </div>
-      <aside class="side" id="side"></aside>
+      <footer class="bottom console">
+        <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker">Select an area.</span></div>
+        <button class="btn btn--go" id="end" type="button">End turn <i data-icon="play" data-size="24"></i></button>
+      </footer>
     </div>
-    <div class="bottom">
-      <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker">Select a province on the map.</span></div>
-      <button class="cta" id="end">End turn ▸</button>
+  </section>
+
+  <!-- ============================================================ round report -->
+  <section class="screen" id="s-report" aria-labelledby="r-title">
+    <div class="wrap report">
+      <div class="report__top">
+        <div class="grade-box"><div class="grade" id="r-grade">B</div><pixel-sprite class="grade-frog" id="r-frog" sprite="frog" pose="watch" scale="4"></pixel-sprite></div>
+        <div><span class="chip chip--night" id="r-chip">Mission report</span><h2 id="r-title"></h2><p class="lead" id="r-lead"></p></div>
+      </div>
+      <div class="scores" id="r-scores"></div>
+      <div class="badges" id="r-badges"></div>
+      <div class="kicker">How the season actually went · your teams ▲ · the peak |</div>
+      <div class="replay" id="r-replay"></div>
+      <div class="btn-row" id="r-actions"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="screen" id="s-report">
-  <div class="report">
-    <div class="report-top">
-      <div class="grade" id="r-grade">B</div>
-      <div><div class="chip" id="r-chip" style="display:inline-block">Mission report</div><h2 id="r-title" style="margin-top:12px"></h2><p class="lead" id="r-lead"></p></div>
+  <!-- ============================================================ debrief -->
+  <section class="screen" id="s-vs" aria-labelledby="vs-title">
+    <div class="wrap report">
+      <span class="chip chip--night">Debrief · <span id="vs-region"></span></span>
+      <h2 id="vs-title"></h2>
+      <div class="vs" id="vs"></div>
+      <div class="kicker">Estimated cases averted (central estimate)</div>
+      <div class="bars" id="vs-bars"></div>
+      <p class="honest" id="vs-honest"></p>
+      <div class="btn-row">
+        <button class="btn btn--go" id="again" type="button">New mission <i data-icon="play" data-size="24"></i></button>
+        <a class="btn btn--dark-ghost" href="../web/">Open the EpiLag-PH app</a>
+        <a class="btn btn--dark-ghost" href="../methodology.html">How the intel works</a>
+      </div>
     </div>
-    <div class="scores" id="r-scores"></div>
-    <div class="badges" id="r-badges"></div>
-    <div class="label">How the season actually went · your teams ▲ · the peak |</div>
-    <div class="replay" id="r-replay"></div>
-    <div class="actions" id="r-actions"></div>
-  </div>
-</section>
+  </section>
 
-<section class="screen" id="s-vs">
-  <div class="report">
-    <div class="chip" style="display:inline-block">Debrief · <span id="vs-region"></span></div>
-    <h2 style="margin-top:12px" id="vs-title"></h2>
-    <div class="vs" id="vs"></div>
-    <div class="label">Estimated cases averted (central estimate)</div>
-    <div class="bars" id="vs-bars"></div>
-    <p class="honest" id="vs-honest"></p>
-    <div class="actions">
-      <button class="cta" id="again">New mission ▸</button>
-      <a class="cta ghost" href="../web/">Open the EpiLag-PH app</a>
-      <a class="cta ghost" href="../methodology.html">How the intel works</a>
-    </div>
-  </div>
-</section>
+  <div class="warp" id="warp" aria-live="assertive"><div><span id="warp-text">2 weeks later</span><small id="warp-sub"></small></div></div>
 
-<div class="warp" id="warp"><div><span id="warp-text">2 weeks later</span><small id="warp-sub"></small></div></div>
-
-<script src="data.js"></script>
-<script>
-  const D = window.DRILL, K = D.kit, WEEKS = D.weeks, TURNS = D.turns, PEOPLE = K.pesos / K.per_person;
-  const LEVEL = { warning: "Outbreak warning", watch: "Watch", above: "Above usual", normal: "Normal" };
-  const LCOL = { warning: "#E5483C", watch: "#EE8A2A", above: "#F2B33D", normal: "#2A6148" };
-  const $ = id => document.getElementById(id);
-  const fmt = n => Math.round(n).toLocaleString("en");
-  const day = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
-  const idx = w => WEEKS.indexOf(w), FIRST = idx(TURNS[0]);
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let regionIdx = Math.max(0, D.regions.findIndex(r => r.name.includes("Western Visayas")));
-  let region, round, turn, kits, plan, sel = null, results = {};
-
-  // ------------------------------------------------------------ sound (synthesised, no audio files)
-  let ac = null, muted = false;
-  function tone(freq, dur, type = "sine", vol = .06, when = 0, slide = 0) {
-    if (muted) return;
-    try {
-      ac ||= new (window.AudioContext || window.webkitAudioContext)();
-      const t0 = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
-      o.type = type; o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
-      g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
-      o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur);
-    } catch (e) { /* no audio available */ }
-  }
-  const sfx = {
-    click: () => tone(880, .06, "square", .025),
-    deploy: () => { tone(330, .09, "square", .04); tone(660, .14, "square", .04, .08); },
-    recall: () => tone(440, .12, "square", .035, 0, 220),
-    turn: () => { tone(120, .5, "sawtooth", .035, 0, 60); tone(300, .35, "sine", .03, .1, 900); },
-    alarm: () => { tone(740, .12, "square", .04); tone(740, .12, "square", .04, .18); },
-    grade: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .18, "triangle", .06, i * .11)),
-  };
-  $("mute").addEventListener("click", () => { muted = !muted; $("mute-wave").style.display = muted ? "none" : ""; $("mute").setAttribute("aria-label", muted ? "Sound off" : "Sound on"); });
-
-  // ------------------------------------------------------------ scoring (same rules as scripts/drill_data.py)
-  function peak(p) {  // the season's peak week, if it rose above the epidemic line (an outbreak); else null
-    let best = null;
-    for (let i = FIRST; i < WEEKS.length; i++) if (p.cases[i] != null && (best == null || p.cases[i] > p.cases[best])) best = i;
-    return best != null && p.epi[best] != null && p.cases[best] > p.epi[best] ? best : null;
-  }
-  function score(planned, reg = region) {
-    let lo = 0, mid = 0, hi = 0, onTime = 0, late = 0, noOutbreak = 0, used = 0;
-    reg.provinces.forEach((p, k) => {
-      const pk = peak(p);
-      Object.entries(planned[k] || {}).forEach(([t, n]) => {
-        if (!n) return;
-        const i = idx(TURNS[t]);
-        const window = p.cases.slice(i + 2, i + 10).reduce((s, c) => s + (c || 0), 0);  // people already infected still fall sick
-        const share = Math.min(n * PEOPLE / p.pop, K.max_share);
-        lo += window * share * K.effect[0]; mid += window * share * K.effect[1]; hi += window * share * K.effect[2];
-        used += n;
-        if (pk == null) noOutbreak += n; else if (i <= pk - 4) onTime += n; else late += n;
-      });
-    });
-    return { lo, mid, hi, onTime, late, noOutbreak, used };
-  }
-  function autopilot(rule, reg = region) {  // two teams a turn, by a fixed rule
-    const planned = {}; let left = K.kits;
-    TURNS.forEach((tw, t) => {
-      const i = idx(tw);
-      let picks = reg.provinces.map((p, k) => ({ p, k }));
-      if (rule === "epilag") picks = picks.filter(({ p }) => p.fc[tw] && ["watch", "warning"].includes(p.fc[tw][0])).sort((a, b) => b.p.fc[tw][2] / b.p.pop - a.p.fc[tw][2] / a.p.pop);
-      else picks = picks.filter(({ p }) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]);
-      picks.slice(0, Math.min(2, left)).forEach(({ k }) => { (planned[k] ||= {})[t] = 1; left--; });
-    });
-    return score(planned, reg);
-  }
-  const teamsIn = k => Object.values(plan[k] || {}).reduce((a, b) => a + b, 0);
-  const capped = k => (teamsIn(k) + 1) * PEOPLE / region.provinces[k].pop > K.max_share + 1e-9;
-
-  // ------------------------------------------------------------ effects: mosquito swarms and rain
-  const fx = $("fx"), cx = fx.getContext("2d");
-  let bugs = [], drops = [], raining = 0;
-  function resize() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); }
-  addEventListener("resize", resize); resize();
-  function setBugs(n, anchors) {
-    bugs = Array.from({ length: n }, () => {
-      const a = anchors.length ? anchors[Math.floor(Math.random() * anchors.length)] : { x: Math.random() * innerWidth, y: Math.random() * innerHeight };
-      return { ax: a.x, ay: a.y, x: a.x + (Math.random() - .5) * 80, y: a.y + (Math.random() - .5) * 80, p: Math.random() * 6.28, s: .6 + Math.random() * .8 };
-    });
-  }
-  function loop() {
-    cx.clearRect(0, 0, innerWidth, innerHeight);
-    if (!reduce) {
-      cx.fillStyle = "rgba(232,243,236,.7)";
-      for (const b of bugs) {
-        b.p += .08 * b.s;
-        b.x += Math.cos(b.p * 1.3) * 1.4 * b.s + (b.ax - b.x) * .012; b.y += Math.sin(b.p) * 1.2 * b.s + (b.ay - b.y) * .012;
-        cx.fillRect(b.x, b.y, 2, 2); cx.fillRect(b.x - 2, b.y - 1 + Math.sin(b.p * 4), 2, 1); cx.fillRect(b.x + 2, b.y - 1 - Math.sin(b.p * 4), 2, 1);
-      }
-      if (raining > 0) { raining--; if (drops.length < 260) for (let i = 0; i < 8; i++) drops.push({ x: Math.random() * innerWidth * 1.2, y: -20, v: 14 + Math.random() * 10 }); }
-      cx.strokeStyle = "rgba(160,220,200,.5)"; cx.lineWidth = 1.2; cx.beginPath();
-      drops = drops.filter(d => { d.x -= 3; d.y += d.v; cx.moveTo(d.x, d.y); cx.lineTo(d.x + 4, d.y - 16); return d.y < innerHeight + 20; });
-      cx.stroke();
-    }
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-  function mapAnchors(svg, pts) {  // SVG board coordinates -> screen coordinates
-    const box = svg.getBoundingClientRect(), sc = Math.min(box.width / 1000, box.height / 760);
-    const ox = box.left + (box.width - 1000 * sc) / 2, oy = box.top + (box.height - 760 * sc) / 2;
-    return pts.map(([x, y]) => ({ x: ox + x * sc, y: oy + y * sc }));
-  }
-
-  // ------------------------------------------------------------ title screen
-  const totals = D.regions.map(r => r.provinces.reduce((s, p) => s + p.cases.slice(FIRST).reduce((a, c) => a + (c || 0), 0), 0)), tmax = Math.max(...totals);
-  function renderMissions() {
-    $("missions").innerHTML = D.regions.map((r, k) => {
-      const stars = Math.max(1, Math.ceil(totals[k] / tmax * 5)), m = r.name.match(/^(.*?)(?: \((.+)\))?$/);
-      return `<button class="mission${k === regionIdx ? " sel" : ""}" role="option" aria-selected="${k === regionIdx}" data-k="${k}"><b>${m[1]}${m[2] ? `<br><span style="color:var(--dim);font-weight:500">${m[2]}</span>` : ""}</b>
-        <small>${r.provinces.length} provinces · ${fmt(totals[k])} cases</small><div class="threat" aria-label="Threat ${stars} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= stars ? "on" : ""}"></i>`).join("")}</div></button>`;
-    }).join("");
-    const r = D.regions[regionIdx];
-    $("title-map").innerHTML = r.provinces.map(p => `<path d="${p.d}"/>`).join("");
-    setBugs(70, mapAnchors($("title-map"), r.provinces.map(p => [p.cx, p.cy])));
-    const n = D.regions.length, pad = v => String(v).padStart(2, "0");
-    $("m-count").innerHTML = `<b>${pad(regionIdx + 1)}</b> / ${pad(n)}`;
-    $("m-prev").disabled = regionIdx === 0; $("m-next").disabled = regionIdx === n - 1;
-    $("missions").querySelector(".sel").scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
-    railState();
-  }
-  // custom scroll indicator: thumb sized to the visible share, fades on the edges that have more cards
-  function railState() {
-    const m = $("missions"), share = m.clientWidth / m.scrollWidth, max = m.scrollWidth - m.clientWidth;
-    $("m-thumb").style.width = `${share * 100}%`;
-    $("m-thumb").style.transform = `translateX(${max > 0 ? m.scrollLeft / max * (1 / share - 1) * 100 : 0}%)`;
-    m.classList.toggle("past-start", m.scrollLeft > 4);
-    m.classList.toggle("at-end", m.scrollLeft >= max - 4);
-  }
-  function pickRegion(k) { if (k < 0 || k >= D.regions.length || k === regionIdx) return; regionIdx = k; sfx.click(); renderMissions(); }
-  $("missions").addEventListener("click", e => { const b = e.target.closest(".mission"); if (b) pickRegion(+b.dataset.k); });
-  $("missions").addEventListener("scroll", railState, { passive: true });
-  $("missions").addEventListener("keydown", e => {
-    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!step) return;
-    e.preventDefault(); pickRegion(regionIdx + step);
-  });
-  $("m-prev").addEventListener("click", () => pickRegion(regionIdx - 1));
-  $("m-next").addEventListener("click", () => pickRegion(regionIdx + 1));
-  addEventListener("resize", railState);
-  renderMissions();
-  document.fonts.ready.then(renderMissions);
-
-  function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 }); }
-
-  // ------------------------------------------------------------ briefing: the rain receipt
-  $("start").addEventListener("click", () => {
-    region = D.regions[regionIdx]; results = {}; sfx.deploy(); setBugs(0, []);
-    const i0 = FIRST, i1 = Math.min(WEEKS.length - 1, FIRST + 20);
-    const rain = region.provinces.map(p => p.rain.slice(i0, i1 + 1).reduce((s, r) => s + (r || 0), 0));
-    const items = region.provinces.map(p => ({ name: p.name, cases: p.cases.slice(i0, i1 + 1).reduce((s, c) => s + (c || 0), 0), hit: peak(p) != null }));
-    $("brief-chip").textContent = "Intel briefing · " + region.name;
-    $("receipt").innerHTML = `<h3>RAIN RECEIPT</h3><p class="c">${region.name}</p><p class="c">${day(WEEKS[i0])} 2019 – ${day(WEEKS[i1])} 2019</p><hr>`
-      + `<div class="ln"><span>Rain (avg per province)</span><span>${fmt(rain.reduce((a, b) => a + b, 0) / rain.length)} mm</span></div><div class="ln"><span>Price of rain</span><span>₱0.00</span></div><hr>`
-      + items.map(x => `<div class="ln"><span>${x.name}${x.hit ? " *" : ""}</span><span>${fmt(x.cases)}</span></div>`).join("")
-      + `<hr><div class="ln tot"><span>TOTAL DUE</span><span>${fmt(items.reduce((s, x) => s + x.cases, 0))} cases</span></div><p class="c" style="margin-top:8px">* outbreak: peaked above its epidemic line</p>`
-      + `<div class="stamp">UNPAID · ACT EARLIER</div>`;
-    show("s-brief"); raining = 90;
-  });
-  $("go-r1").addEventListener("click", () => startRound(1));
-
-  // ------------------------------------------------------------ the board
-  function heat(p, i) {  // cases this week against the epidemic line, as a colour
-    const c = p.cases[i], e = p.epi[i];
-    if (c == null || !e) return "#12352A";
-    const r = c / e, stops = [[0, [18, 53, 42]], [.5, [46, 107, 63]], [1, [242, 179, 61]], [1.6, [238, 138, 42]], [2.4, [229, 72, 60]]];
-    let a = stops[0], b = stops.at(-1);
-    for (let j = 1; j < stops.length; j++) if (r <= stops[j][0]) { a = stops[j - 1]; b = stops[j]; break; }
-    const k = r >= b[0] ? 1 : Math.max(0, (r - a[0]) / (b[0] - a[0] || 1));
-    return `rgb(${a[1].map((v, n) => Math.round(v + (b[1][n] - v) * k)).join(",")})`;
-  }
-  function boardSvg() {
-    const i = idx(TURNS[turn]), tw = TURNS[turn];
-    let s = region.provinces.map((p, k) => `<path class="prov${sel === k ? " sel" : ""}" data-k="${k}" tabindex="0" role="button" aria-label="${p.name}" d="${p.d}" fill="${heat(p, i)}"/>`).join("");
-    if (round === 2) {
-      s += `<g class="sweep"><path d="M500 380 L500 -260 A640 640 0 0 1 820 -174 Z" fill="#6FD6FF" fill-opacity=".07"/><line x1="500" y1="380" x2="820" y2="-174" stroke="#6FD6FF" stroke-opacity=".5" stroke-width="2"/></g>`;
-      region.provinces.forEach(p => {
-        const f = p.fc[tw]; if (!f || f[0] === "normal") return;
-        s += `<circle class="ring${f[0] === "warning" ? " pulse" : ""}" cx="${p.cx}" cy="${p.cy}" r="34" stroke="${LCOL[f[0]]}"/>`;
-        s += `<text class="tag" x="${p.cx + 38}" y="${p.cy - 22}" fill="${LCOL[f[0]]}">▲${fmt(f[2])}</text>`;
-      });
-    }
-    region.provinces.forEach((p, k) => {
-      s += `<text class="lbl" x="${p.cx}" y="${p.cy + 5}" text-anchor="middle">${p.name.replace(/ \(.+\)/, "")}</text>`;
-      const n = teamsIn(k);
-      if (n) s += `<g transform="translate(${p.cx - 14} ${p.cy + 14})"><g class="team"><path d="M14 0L28 6V16C28 24 21 30 14 33C7 30 0 24 0 16V6Z" fill="#34D27B" stroke="#04100B" stroke-width="2"/><text x="14" y="21" text-anchor="middle" font-family="Chakra Petch" font-weight="700" font-size="14" fill="#04100B">${n}</text></g></g>`;
-    });
-    $("board").innerHTML = s;
-    $("legend-intel").innerHTML = round === 2 ? `<span style="color:var(--intel)">◯ EpiLag intel: forecast 4 weeks ahead</span>` : "";
-    anchorBugs();
-  }
-  function anchorBugs() {
-    const i = idx(TURNS[turn]), pts = [];
-    region.provinces.forEach(p => { const r = Math.min(4, (p.cases[i] || 0) / (p.epi[i] || 1)); for (let j = 0; j < 1 + Math.round(r * 3); j++) pts.push([p.cx, p.cy]); });
-    const rain = region.provinces.reduce((s, p) => s + (p.rain[i] || 0) + (p.rain[i - 1] || 0), 0) / region.provinces.length;
-    setBugs(Math.max(12, Math.min(220, Math.round(rain * 1.6))), mapAnchors($("board"), pts));
-  }
-  function pick(k) { sel = k; sfx.click(); boardSvg(); renderSide(); }
-  $("board").addEventListener("click", e => { const p = e.target.closest(".prov"); if (p) pick(+p.dataset.k); });
-  $("board").addEventListener("keydown", e => {
-    const p = e.target.closest(".prov");
-    if (p && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(+p.dataset.k); $("board").querySelector(`[data-k="${sel}"]`)?.focus(); }
-  });
-  addEventListener("scroll", () => $("s-game").classList.contains("on") && anchorBugs(), { passive: true });
-
-  function spark(p, upto, opts = {}) {
-    const W = 340, H = 110, n = WEEKS.length, f = opts.fc, seen = p.cases.slice(0, upto + 1).map(c => c || 0);
-    const maxv = Math.max(1, ...seen, ...p.epi.map(e => e || 0), f ? f[3] : 0) * 1.12;  // never scaled to the unseen future
-    const X = j => 6 + j / (n - 1) * (W - 12), Y = v => H - 10 - v / maxv * (H - 20);
-    const line = (arr, end) => arr.slice(0, end + 1).map((v, j) => v == null ? null : `${X(j).toFixed(1)},${Y(v).toFixed(1)}`).filter(Boolean).join(" ");
-    let s = `<svg class="${opts.cls ?? "spark"}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Weekly cases in ${p.name}">`;
-    if (upto < n - 1) s += `<rect x="${X(upto)}" y="0" width="${W - X(upto)}" height="${H}" fill="rgba(255,255,255,.03)"/><line x1="${X(upto)}" x2="${X(upto)}" y1="0" y2="${H}" stroke="#2A6148" stroke-dasharray="3 3"/>`;
-    s += `<polyline points="${line(p.epi, n - 1)}" fill="none" stroke="#E5483C" stroke-width="1.3" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>`;
-    s += `<polyline points="${line(p.cases, upto)}" fill="none" stroke="#E8F3EC" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-    if (f) { const j = upto + 4; s += `<line x1="${X(j)}" x2="${X(j)}" y1="${Y(f[1])}" y2="${Y(f[3])}" stroke="#6FD6FF" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="${X(j)}" cy="${Y(f[2])}" r="4.5" fill="#6FD6FF"/>`; }
-    (opts.teams || []).forEach(t => { const x = X(idx(TURNS[t])); s += `<path d="M${x - 5} ${H}L${x} ${H - 9}L${x + 5} ${H}Z" fill="#34D27B"/>`; });
-    if (opts.peak != null) s += `<line x1="${X(opts.peak)}" x2="${X(opts.peak)}" y1="0" y2="${H}" stroke="#E5483C" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
-    return s + `</svg>`;
-  }
-  function roster() {
-    const sent = region.provinces.map((p, k) => [p.name, (plan[k] || {})[turn] || 0]).filter(x => x[1]);
-    return `<div class="roster"><div class="k" style="margin-bottom:6px">This turn</div>${sent.length ? sent.map(([n, c]) => `<b>${c}×</b> ${n}`).join(" · ") : "No teams deployed yet."}</div>`;
-  }
-  function renderSide() {
-    const tw = TURNS[turn], i = idx(tw);
-    if (sel == null) {
-      $("side").innerHTML = `<div class="k">Command</div><h3>Pick a province</h3><div class="empty">Click a province on the map to see its reports${round === 2 ? " and EpiLag intel" : ""}, then deploy teams.</div>${roster()}`;
-      return;
-    }
-    const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = p.fc[tw], now = (plan[sel] || {})[turn] || 0;
-    const trend = c != null && prev ? Math.round((c / prev - 1) * 100) : null;
-    $("side").innerHTML = `<div class="k">Province</div><h3>${p.name}</h3><div class="sub">${fmt(p.pop)} people · ${teamsIn(sel)} team${teamsIn(sel) === 1 ? "" : "s"} deployed</div>
-      ${spark(p, i, { fc: round === 2 ? f : null })}
-      <div class="kv"><div><div class="k">Reported this week</div><div class="v">${c == null ? "–" : fmt(c)}</div><div class="sub">${trend == null ? "" : (trend >= 0 ? "▲ " : "▼ ") + Math.abs(trend) + "% in 2 weeks"}</div></div>
-        <div><div class="k">Epidemic line</div><div class="v">${p.epi[i] == null ? "–" : fmt(p.epi[i])}</div><div class="sub">rain ${p.rain[i] == null ? "–" : fmt(p.rain[i]) + " mm"}</div></div></div>
-      ${round === 2 && f ? `<div class="intel-box"><div class="k">EpiLag intel · week of ${day(WEEKS[i + 4])}</div><div class="v" style="color:var(--intel)">~${fmt(f[2])} cases</div><div class="sub">likely ${fmt(f[1])}–${fmt(f[3])}</div><span class="lvl ${f[0]}">${LEVEL[f[0]]}</span></div>` : ""}
-      <div class="deploy"><button class="cta" id="deploy" ${kits && !capped(sel) ? "" : "disabled"}>Deploy team · ₱500K</button><button class="recall" id="recall" ${now ? "" : "disabled"}>Recall</button></div>
-      <div class="sub">${capped(sel) ? "Max coverage reached (30% of the population)." : "One team: clean-up drives and container covers for ~33,000 people."}</div>
-      ${roster()}`;
-    $("deploy").onclick = () => { if (!kits || capped(sel)) return; (plan[sel] ||= {})[turn] = now + 1; kits--; sfx.deploy(); tick(`Team deployed to ${p.name}.`); refresh(); };
-    $("recall").onclick = () => { if (!now) return; plan[sel][turn] = now - 1; kits++; sfx.recall(); refresh(); };
-  }
-  function refresh() {
-    const tw = TURNS[turn], i = idx(tw);
-    $("h-week").textContent = day(tw) + " 2019";
-    $("h-pips").innerHTML = TURNS.map((_, t) => `<i class="${t < turn ? "done" : t === turn ? "now" : ""}"></i>`).join("");
-    $("h-budget").textContent = "₱" + (kits * K.pesos / 1e6).toFixed(1) + "M";
-    $("h-tokens").innerHTML = Array.from({ length: K.kits }, (_, t) => `<i class="${t >= kits ? "spent" : ""}"></i>`).join("");
-    $("h-rain").textContent = fmt(region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length) + " mm";
-    const pr = region.provinces.reduce((s, p) => s + (p.cases[i] || 0), 0) / Math.max(1, region.provinces.reduce((s, p) => s + (p.epi[i] || 0), 0));
-    const lvl = pr < .6 ? ["Low", "#34D27B"] : pr < 1 ? ["Rising", "#F2B33D"] : pr < 1.6 ? ["High", "#EE8A2A"] : ["Critical", "#E5483C"];
-    $("h-press").textContent = lvl[0]; $("h-press").style.color = lvl[1];
-    $("h-meter").style.transform = `scaleX(${Math.min(1, pr / 2)})`; $("h-meter").style.background = lvl[1];
-    $("end").textContent = turn === TURNS.length - 1 ? "End season ▸" : "End turn ▸";
-    boardSvg(); renderSide();
-  }
-  function tick(msg) { const t = $("ticker"); t.textContent = msg; t.style.animation = "none"; t.offsetHeight; t.style.animation = ""; }
-  function headline() {
-    const i = idx(TURNS[turn]), tw = TURNS[turn];
-    if (round === 2) {
-      const w = region.provinces.filter(p => p.fc[tw] && p.fc[tw][0] === "warning");
-      if (w.length) return `EpiLag intel: ${w.map(p => p.name).join(", ")} flagged OUTBREAK WARNING for the week of ${day(WEEKS[i + 4])}.`;
-    }
-    const crossed = region.provinces.filter(p => p.cases[i] > p.epi[i] && !(p.cases[i - 2] > p.epi[i - 2]));
-    if (crossed.length) { sfx.alarm(); return `Alert: ${crossed.map(p => p.name).join(", ")} crossed the epidemic line this week.`; }
-    const up = region.provinces.map(p => ({ p, r: p.cases[i - 2] ? p.cases[i] / p.cases[i - 2] : 0 })).sort((a, b) => b.r - a.r)[0];
-    if (up && up.r > 1.3) return `${up.p.name}: reported cases up ${Math.round((up.r - 1) * 100)}% in two weeks.`;
-    return `Week ending ${day(tw)}: ${fmt(region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length)} mm of rain on average across the region.`;
-  }
-  function warp(text, sub, then) {
-    $("warp-text").textContent = text; $("warp-sub").textContent = sub; $("warp").classList.add("on");
-    setTimeout(() => { $("warp").classList.remove("on"); then && then(); }, reduce ? 50 : 1300);
-  }
-  function floaters() {
-    const i = idx(TURNS[turn]), at = mapAnchors($("board"), region.provinces.map(p => [p.cx, p.cy]));
-    region.provinces.forEach((p, k) => {
-      const add = (p.cases[i - 1] || 0) + (p.cases[i] || 0); if (!add) return;
-      const el = document.createElement("div"); el.className = "floater"; el.textContent = "+" + fmt(add) + " cases";
-      el.style.left = (at[k].x - 30) + "px"; el.style.top = (at[k].y - 44) + "px"; el.style.animationDelay = (k * 90) + "ms";
-      document.body.appendChild(el); setTimeout(() => el.remove(), 2600);
-    });
-  }
-  function startRound(r) {
-    round = r; turn = 0; kits = K.kits; plan = {}; sel = null;
-    $("mode").textContent = r === 1 ? "Round 1 · No intel" : "Round 2 · EpiLag intel";
-    $("mode").classList.toggle("intel", r === 2);
-    show("s-game"); sfx.turn();
-    warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : "EpiLag-PH intel online", () => { refresh(); tick(headline()); });
-  }
-  $("end").addEventListener("click", () => {
-    sfx.turn(); raining = 70;
-    if (turn < TURNS.length - 1) { turn++; warp("2 weeks later", day(TURNS[turn]) + " 2019", () => { refresh(); floaters(); tick(headline()); }); }
-    else warp("Season over", "Counting the real 2019 cases", endRound);
-  });
-
-  // ------------------------------------------------------------ mission report and debrief
-  function gradeOf(mid) {
-    const best = Math.max(1, autopilot("epilag").mid, autopilot("react").mid), r = mid / best;
-    return r >= 1.1 ? ["S", "#6FD6FF"] : r >= .85 ? ["A", "#34D27B"] : r >= .65 ? ["B", "#F2B33D"] : r >= .4 ? ["C", "#EE8A2A"] : ["D", "#E5483C"];
-  }
-  const BADGE_ICON = {
-    early: '<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/>',
-    waste: '<path d="M20 6 9 17l-5-5"/>', full: '<path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/>',
-    bot: '<rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 4v4M9 13h.01M15 13h.01"/>',
-    saved: '<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>',
-  };
-  function endRound() {
-    const s = score(plan), auto = autopilot("epilag"), [g, gc] = gradeOf(s.mid);
-    results[round] = { ...s, grade: g, color: gc };
-    setBugs(0, []); show("s-report"); sfx.grade();
-    $("r-grade").textContent = g; $("r-grade").style.color = gc;
-    $("r-chip").textContent = `Mission report · Round ${round} · ${round === 1 ? "no intel" : "EpiLag intel"}`;
-    $("r-title").innerHTML = `${fmt(s.mid)} cases averted. <span>${g === "S" || g === "A" ? "Outstanding command." : g === "B" ? "Solid response." : "The outbreak got ahead of you."}</span>`;
-    $("r-lead").textContent = `Your grade compares you with the better of two fixed strategies for ${region.name}. Range: ${fmt(s.lo)}–${fmt(s.hi)} cases averted.`;
-    $("r-scores").innerHTML = `<div><div class="big">${fmt(s.mid)}</div><p>cases averted (central estimate)</p></div>
-      <div><div class="big">${s.onTime}<small>/ ${s.used}</small></div><p>teams in 4+ weeks before a peak</p></div>
-      <div><div class="big">${s.late}<small>/ ${s.used}</small></div><p>teams too close to the peak, or after</p></div>
-      <div><div class="big">${s.noOutbreak}<small>/ ${s.used}</small></div><p>teams where no outbreak came</p></div>`;
-    const badges = [
-      ["early", "Early bird", "3+ teams 4 weeks before a peak", s.onTime >= 3], ["waste", "No waste", "No team where no outbreak came", s.used > 0 && s.noOutbreak === 0],
-      ["full", "All in", "Deployed all 10 teams", s.used === K.kits], ["bot", "Beat the bot", "More than EpiLag's autopilot", s.mid > auto.mid],
-      ["saved", "Life saver", "Averted 100+ cases", s.mid >= 100],
-    ];
-    $("r-badges").innerHTML = badges.map(([ic, n, d, got], j) => `<div class="badge${got ? " got" : ""}" style="animation-delay:${.5 + j * .15}s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BADGE_ICON[ic]}</svg><b>${n}</b><span>${got ? d : "Locked · " + d}</span></div>`).join("");
-    $("r-replay").innerHTML = region.provinces.map((p, k) => {
-      const pk = peak(p), ts = []; Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ts.push(+t); });
-      return `<div><b>${p.name}</b><small>${pk == null ? "No outbreak" : "Peaked " + day(WEEKS[pk])} · ${ts.length} team${ts.length === 1 ? "" : "s"}</small>${spark(p, WEEKS.length - 1, { teams: ts, peak: pk, cls: "" })}</div>`;
-    }).join("");
-    $("r-actions").innerHTML = `<button class="cta" id="next-r">${round === 1 ? "Round 2 · with EpiLag intel ▸" : "Debrief ▸"}</button>`;
-    $("next-r").onclick = () => round === 1 ? startRound(2) : versus();
-  }
-  function versus() {
-    const a = results[1], b = results[2], auto = autopilot("epilag"), react = autopilot("react");
-    $("vs-region").textContent = region.name;
-    $("vs-title").textContent = b.mid > a.mid * 1.02 ? "Intel made the difference." : b.mid < a.mid * .98 ? "Your instincts won this time." : "Dead heat.";
-    const card = (lab, r, win) => `<div class="card${win ? " win" : ""}"><div class="k">${lab}</div><div class="g" style="color:${r.color}">${r.grade}</div><div class="v">${fmt(r.mid)} cases averted</div><div class="sub">${r.onTime} of ${r.used} teams in 4+ weeks before a peak</div></div>`;
-    $("vs").innerHTML = card("Round 1 · no intel", a, a.mid > b.mid) + `<div class="x">VS</div>` + card("Round 2 · EpiLag intel", b, b.mid >= a.mid);
-    const rows = [["You · no intel", a.mid, "#8FB3A1"], ["You · EpiLag intel", b.mid, "#6FD6FF"], ["Bot · reacts to reported outbreaks", react.mid, "#2A6148"], ["Bot · follows EpiLag alerts", auto.mid, "#34D27B"]];
-    const max = Math.max(1, ...rows.map(r => r[1]));
-    $("vs-bars").innerHTML = rows.map(([n, v, c], j) => `<div class="b"><span>${n}</span><div class="track"><div class="fill" style="width:${v / max * 100}%;background:${c};animation-delay:${j * .12}s"></div></div><span class="n">${fmt(v)}</span></div>`).join("");
-    let better = 0, tie = 0, worse = 0;
-    D.regions.forEach(r => { const x = autopilot("epilag", r).mid, y = autopilot("react", r).mid; if (Math.abs(x - y) <= .05 * Math.max(x, y, 1)) tie++; else if (x > y) better++; else worse++; });
-    $("vs-honest").textContent = `Across all ${D.regions.length} regions, the bot that follows EpiLag's alerts averted more cases than the bot that reacts to reports in ${better}, about the same in ${tie}, and fewer in ${worse}. `
-      + `How scoring works: a team covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. `
-      + `The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016), so treat the numbers as estimates.`;
-    show("s-vs"); sfx.grade();
-  }
-  $("again").addEventListener("click", () => { show("s-title"); renderMissions(); });
-</script>
 </body>
 </html>

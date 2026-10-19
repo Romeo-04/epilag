@@ -1,0 +1,60 @@
+/* Section surfaces: a tone (background colour) plus an optional tiled pixel texture on a ::before layer,
+   so texture intensity changes with one variable and never affects content. */
+.surface { position: relative; isolation: isolate; background: var(--sf-bg, var(--paper)); }
+.surface::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--sf-img, none); background-size: var(--sf-size, auto); background-repeat: repeat;
+  opacity: var(--sf-opacity, .5);
+}
+.sf-subtle { --sf-opacity: .28; }
+.sf-bold { --sf-opacity: .85; }
+
+/* tones */
+.tone-paper { --sf-bg: var(--paper); }
+.tone-white { --sf-bg: var(--surface); }
+.tone-soft { --sf-bg: var(--forest-soft); }
+.tone-sky { --sf-bg: var(--sky-soft); }
+.tone-night { --sf-bg: var(--night); color: var(--night-text); }
+.tone-night .muted, .tone-night .lead { color: var(--night-muted); }
+.tone-night .em { color: #7FE0A8; }
+.tone-night .label { color: #7FE0A8; }
+
+/* textures */
+.tx-field { --sf-img: url(/textures/field.svg); --sf-size: 64px 64px; }
+.tx-rain { --sf-img: url(/textures/rain.svg); --sf-size: 64px 64px; }
+.tx-tracks { --sf-img: url(/textures/tracks.svg); --sf-size: 96px 96px; }
+.tx-contour { --sf-img: url(/textures/contour.svg); --sf-size: 240px 240px; }
+.tone-night.tx-rain::before, .tone-night.tx-field::before { filter: brightness(1.6); }
+
+/* stepped pixel edges on a section (mask the whole section, so a dark band gets a pixel stair edge) */
+.edge-top, .edge-bottom, .edge-both { -webkit-mask-repeat: repeat-x, no-repeat; mask-repeat: repeat-x, no-repeat; }
+.edge-top {
+  -webkit-mask-image: url(/seams/edge-top.svg), linear-gradient(#000 0 0);
+  mask-image: url(/seams/edge-top.svg), linear-gradient(#000 0 0);
+  -webkit-mask-size: 64px 16px, 100% calc(100% - 15px); mask-size: 64px 16px, 100% calc(100% - 15px);
+  -webkit-mask-position: 0 0, 0 15px; mask-position: 0 0, 0 15px;
+}
+.edge-bottom {
+  -webkit-mask-image: url(/seams/edge-bottom.svg), linear-gradient(#000 0 0);
+  mask-image: url(/seams/edge-bottom.svg), linear-gradient(#000 0 0);
+  -webkit-mask-size: 64px 16px, 100% calc(100% - 15px); mask-size: 64px 16px, 100% calc(100% - 15px);
+  -webkit-mask-position: 0 100%, 0 0; mask-position: 0 100%, 0 0;
+}
+.edge-both {
+  -webkit-mask-image: url(/seams/edge-top.svg), url(/seams/edge-bottom.svg), linear-gradient(#000 0 0);
+  mask-image: url(/seams/edge-top.svg), url(/seams/edge-bottom.svg), linear-gradient(#000 0 0);
+  -webkit-mask-repeat: repeat-x, repeat-x, no-repeat; mask-repeat: repeat-x, repeat-x, no-repeat;
+  -webkit-mask-size: 64px 16px, 64px 16px, 100% calc(100% - 30px); mask-size: 64px 16px, 64px 16px, 100% calc(100% - 30px);
+  -webkit-mask-position: 0 0, 0 100%, 0 15px; mask-position: 0 0, 0 100%, 0 15px;
+}
+
+/* dither fade into a dark section: place right before it */
+.dither { height: 48px; background:
+  url(/textures/dither-lo.svg) 0 0 / 16px 16px repeat-x,
+  url(/textures/dither-mid.svg) 0 16px / 16px 16px repeat-x,
+  url(/textures/dither-hi.svg) 0 32px / 16px 16px repeat-x; }
+.dither--up { transform: scaleY(-1); }
+
+/* decorative strips */
+.canopy { height: 56px; background: url(/textures/leaves.svg) 0 100% / 128px 56px repeat-x; }
+.town { height: 64px; background: url(/textures/town.svg) 0 100% / 192px 64px repeat-x; }
