@@ -13,7 +13,8 @@ const docsData = {
   name: "docs-data",
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      const m = /^\/epilag\/data\/([\w.-]+)$/.exec(req.url.split("?")[0]);
+      // data/index.html is a Vite page (site/data/index.html), so only the data files are served from docs/
+      const m = /^\/epilag\/data\/([\w.-]+\.(?:csv|json|md))$/.exec(req.url.split("?")[0]);
       const file = m && resolve(here, "../docs/data", m[1]);
       if (!file || !existsSync(file) || existsSync(resolve(here, "public/data", m[1]))) return next();
       res.setHeader("Content-Type", file.endsWith(".json") ? "application/json" : file.endsWith(".csv") ? "text/csv" : "text/plain");
@@ -28,6 +29,8 @@ const PAGES = {
   kit: "kit.html",
   web: "web/index.html",
   drill: "drill/index.html",
+  methodology: "methodology.html",
+  data: "data/index.html",
 };
 
 export default defineConfig({

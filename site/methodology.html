@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Methodology</title>
+  <meta name="description" content="How EpiLag-PH works: data engineering, features, LightGBM quantile models, honest backtests, and the step from forecast to action.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="How EpiLag-PH works">
+  <meta property="og:description" content="From weekly dengue, rain and population data to a calibrated forecast, an honest test and an action plan.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/methodology.html">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="./"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span><small class="brand__sub">Methodology</small></a>
+      <div class="nav__links" data-spy>
+        <a href="#data">Data</a><a href="#features">Features</a><a href="#model">Model</a><a href="#evaluation">Evaluation</a><a href="#action">Action</a><a href="#why">Why</a>
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ============================================================ hero + pipeline -->
+    <section class="pg-hero surface tone-paper tx-field sf-subtle" aria-labelledby="title">
+      <div class="wrap">
+        <div class="pg-hero__grid">
+          <div>
+            <div class="label">Methodology · as of 18 Oct 2026</div>
+            <h1 id="title">How EpiLag-PH works. <span class="em">From weekly data to a plan.</span></h1>
+            <p class="lead">EpiLag-PH forecasts weekly dengue cases 2–8 weeks ahead for 86 provinces, 17 regions and Quezon City, from recent cases and lagged rain,
+              heat and humidity. It flags areas heading for an outbreak and turns each alert into a checklist and a budget plan.</p>
+            <ul class="chips">
+              <li class="chip"><b>LightGBM</b> quantile regression</li><li class="chip"><b>Conformal</b> calibration</li><li class="chip"><b>SHAP</b> explanations</li><li class="chip"><b>No-peeking</b> backtests</li><li class="chip"><b>Knapsack</b> budget plan</li>
+            </ul>
+          </div>
+          <pixel-sprite class="pg-hero__sprite" sprite="mosquito" pose="clipboard" scale="5" flip></pixel-sprite>
+        </div>
+
+        <ol class="pipeline" aria-label="Pipeline">
+          <li data-reveal><a class="stage" href="#data"><span class="stage__top"><span class="stage__n px-box nums">1</span><i data-icon="database" data-size="32"></i></span><h3>Data</h3><p>4 public sources: cases, rain, population. Cleaned and coded.</p></a></li>
+          <li data-reveal><a class="stage" href="#features"><span class="stage__top"><span class="stage__n px-box nums">2</span><i data-icon="weatherCell" data-size="36"></i></span><h3>Features</h3><p>Recent cases, rain over 12 weekly lags, season, heat.</p></a></li>
+          <li data-reveal><a class="stage" href="#model"><span class="stage__top"><span class="stage__n px-box nums">3</span><i data-icon="areaDetail" data-size="32"></i></span><h3>Model</h3><p>LightGBM ranges, calibrated to 80%, with SHAP reasons.</p></a></li>
+          <li data-reveal><a class="stage" href="#evaluation"><span class="stage__top"><span class="stage__n px-box nums">4</span><i data-icon="didItWork" data-size="32"></i></span><h3>Test</h3><p>Past years only, against 2 simple rules. Won 5 of 6.</p></a></li>
+          <li data-reveal><a class="stage stage--final" href="#action"><span class="stage__top"><span class="stage__n px-box nums">5</span><i data-icon="actionPlan" data-size="32"></i></span><h3>Action</h3><p>Alert levels, week-by-week checklists, budget plan.</p></a></li>
+        </ol>
+        <p class="pipe-note">Each stage feeds the next; the test stage uses only years the model never saw.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 1 data -->
+    <section id="data" class="pg-sec surface tone-white" aria-labelledby="data-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">1 · Data engineering</div><h2 id="data-title" class="h2-sm">Four public sources, <span class="em">one weekly panel.</span></h2></div>
+          <p>Cleaned totals match the raw file exactly (2019: 441,902 cases).</p>
+        </div>
+        <div class="tbl tbl--stack" data-reveal>
+          <table>
+            <thead><tr><th scope="col">Source</th><th scope="col">What we use</th><th scope="col">Coverage</th></tr></thead>
+            <tbody>
+              <tr><td>DOH dengue cases via HDX (official PJDSC dataset)</td><td data-th="What we use">Weekly cases by province</td><td data-th="Coverage">2016 – Jan 2021, 86 units</td></tr>
+              <tr><td>UPRI-NOAH Dengue–Rainfall Dataset (Zenodo 19448695)</td><td data-th="What we use">Weekly cases and rain</td><td data-th="Coverage">17 regions (2016–2019, 2022–2025); Quezon City (2010–2025)</td></tr>
+              <tr><td>ERA5 reanalysis via Open-Meteo</td><td data-th="What we use">Daily rain, temperature, humidity at each area's centre</td><td data-th="Coverage">Summed to weeks</td></tr>
+              <tr><td>OCHA COD-AB / COD-PS (PSA-based)</td><td data-th="What we use">Area codes, boundaries, 2022 population</td><td data-th="Coverage">All areas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid g4 mt">
+          <div class="card" data-reveal><h3>Names to codes</h3><p>126 location names matched to 86 official PSGC units; typos fixed (NUEVA VISCAYA, SISQUIJOR, BASILIG).</p></div>
+          <div class="card" data-reveal><h3>Consistent units</h3><p>Cities folded into provinces, NCR split into 4 districts, Maguindanao kept whole for 2016–2020.</p></div>
+          <div class="card" data-reveal><h3>Bad values removed</h3><p>Deaths for 2016–2017 excluded: 586 weeks show more deaths than cases.</p></div>
+          <div class="card" data-reveal><h3>Missing stays missing</h3><p>A week with no report is left empty, never set to zero.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 2 features -->
+    <section id="features" class="pg-sec surface tone-sky tx-rain sf-subtle" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">2 · Feature engineering</div><h2 id="features-title" class="h2-sm">Rain turns into cases <span class="em">4–8 weeks later.</span></h2></div>
+          <p>So each week of rain enters the model separately, as its own lag. That lag is the "Lag" in EpiLag.</p>
+        </div>
+        <div class="grid g2">
+          <div class="card" data-reveal>
+            <span class="ic px-box"><i data-icon="weatherCell" data-size="36"></i></span>
+            <h3>Rain, lagged week by week</h3><p>Rain in each of the last 12 weeks separately; 4-, 8- and 12-week totals; heavy-rain days.</p>
+            <div class="lag" aria-hidden="true"><i style="--o:.25;--h:16px"></i><i style="--o:.3;--h:20px"></i><i style="--o:.35;--h:24px"></i><i style="--o:.45;--h:28px"></i><i style="--o:.6;--h:40px"></i><i style="--o:.75;--h:48px"></i><i style="--o:.85;--h:56px"></i><i style="--o:.9;--h:60px"></i><i style="--o:.75;--h:48px"></i><i style="--o:.55;--h:36px"></i><i style="--o:.4;--h:24px"></i><i style="--o:.3;--h:20px"></i></div>
+            <div class="lag-axis"><span>this week</span><span>12 weeks ago</span></div>
+          </div>
+          <div class="grid">
+            <div class="card" data-reveal><h3>Recent cases</h3><p>Each of the last 4 weeks; 4- and 12-week averages; trend; same week last year.</p></div>
+            <div class="card" data-reveal><h3>Heat, humidity, season, population</h3><p>Lagged temperature and humidity; week of the year as a cycle, so late December sits next to early January; log population, so large and small areas share one model.</p></div>
+            <div class="card" data-reveal><h3>Targets</h3><p>Cases 2, 4, 6 and 8 weeks ahead, on a log scale so large outbreaks do not dominate training.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 3 model -->
+    <section id="model" class="pg-sec surface tone-paper" aria-labelledby="model-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">3 · Machine learning</div><h2 id="model-title" class="h2-sm">A likely range, <span class="em">not a single number.</span></h2></div>
+          <p>Gradient-boosted trees predict a low, middle and high case count; a calibration step makes that range honest.</p>
+        </div>
+        <div class="grid g4">
+          <div class="card card--why" data-reveal><span class="ic px-box"><i data-icon="derived" data-size="36"></i></span><h3>Model</h3><p>LightGBM quantile regression: one model per horizon (2/4/6/8 weeks), trained on all areas together.</p><div class="callout why">Fast, accurate on tables, explainable</div></div>
+          <div class="card card--why" data-reveal><span class="ic px-box"><i data-icon="areaDetail" data-size="32"></i></span><h3>Range</h3><p>10th, 50th and 90th percentiles of the coming weeks' cases, sorted so low ≤ middle ≤ high.</p><div class="callout why">Officers plan for the high case</div></div>
+          <div class="card card--why" data-reveal><span class="ic px-box"><i data-icon="calendarGap" data-size="36"></i></span><h3>Calibration</h3><p>Conformalized quantile regression (Romano et al. 2019): hold out the last training year, measure misses, widen the range to cover 80%.</p><div class="callout why">Raw ranges are too narrow on a new year</div></div>
+          <div class="card card--why" data-reveal><span class="ic px-box"><i data-icon="info" data-size="36"></i></span><h3>Explanations</h3><p>SHAP values grouped into recent cases, season, rain by week, humidity and temperature.</p><div class="callout why">Shows why a forecast rose or fell</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 4 evaluation -->
+    <section id="evaluation" class="pg-sec surface tone-white" aria-labelledby="evaluation-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">4 · Evaluation</div><h2 id="evaluation-title" class="h2-sm">Tested honestly. <span class="em">No peeking at the future.</span></h2></div>
+          <p>Each test year is forecast by a model trained only on earlier years (2019 from 2016–2018), against two simple rules: "same week last year" and "same as this week".</p>
+        </div>
+        <div class="stats">
+          <div class="stat stat--dark" data-reveal><b class="nums"><span data-count="5">5</span> <small>of 6</small></b><p>test sets where it beat both rules, 4 weeks ahead</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-count="79">79</span><small>–100%</small></b><p>of outbreak starts caught 4 weeks ahead (watch level)</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-count="70">70</span><small>–92%</small></b><p>of real values inside the likely range (target 80%)</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-count="30">30</span> <small>of 32</small></b><p>provinces flagged 4 weeks before crossing the threshold (2 Jun 2019 replay)</p></div>
+        </div>
+        <div class="tbl tbl--wide" data-reveal role="region" aria-label="Backtest results, 4 weeks ahead" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">Test set</th><th scope="col" class="num">EpiLag error</th><th scope="col" class="num">Same week last year</th><th scope="col" class="num">Same as this week</th><th scope="col" class="num">Inside range</th><th scope="col" class="num">Starts caught</th><th scope="col" class="num">False alarms</th></tr></thead>
+            <tbody>
+              <tr><td>Provinces 2019</td><td class="num best">42<span class="sr-only"> (lowest)</span></td><td class="num">64</td><td class="num">53</td><td class="num">77%</td><td class="num">87%</td><td class="num">46%</td></tr>
+              <tr><td>Provinces 2020</td><td class="num best">10<span class="sr-only"> (lowest)</span></td><td class="num">86</td><td class="num">12</td><td class="num">79%</td><td class="num">83%</td><td class="num">87%</td></tr>
+              <tr><td>Regions + QC 2019</td><td class="num best">174<span class="sr-only"> (lowest)</span></td><td class="num">255</td><td class="num">213</td><td class="num">70%</td><td class="num">79%</td><td class="num">42%</td></tr>
+              <tr><td>Regions + QC 2023</td><td class="num">58</td><td class="num">158</td><td class="num best">56<span class="sr-only"> (lowest)</span></td><td class="num">92%</td><td class="num">100%</td><td class="num">63%</td></tr>
+              <tr><td>Regions + QC 2024</td><td class="num best">101<span class="sr-only"> (lowest)</span></td><td class="num">229</td><td class="num">149</td><td class="num">80%</td><td class="num">80%</td><td class="num">42%</td></tr>
+              <tr><td>Regions + QC 2025</td><td class="num best">86<span class="sr-only"> (lowest)</span></td><td class="num">283</td><td class="num">108</td><td class="num">78%</td><td class="num">100%</td><td class="num">54%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Error = mean absolute error in cases per area-week, 4 weeks ahead; the lowest in each row is marked. Caught and false alarms are for the watch level.</p>
+        <div class="note" data-reveal><span class="disc"><i data-icon="weatherCell" data-size="24"></i></span>
+          <span><b>Weather test.</b> Retraining without any weather inputs changed error by −12% to +11%: about +2% on average for regions, about 0% for provinces. Most of the skill comes from recent cases and season, and we report that openly.</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 5 action -->
+    <section id="action" class="pg-sec surface tone-soft" aria-labelledby="action-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">5 · From forecast to action</div><h2 id="action-title" class="h2-sm">Every alert comes <span class="em">with a plan.</span></h2></div>
+          <p>Thresholds per area and week of year, from earlier years only: <b>usual</b> = the average for that week (±2 weeks); <b>epidemic</b> = that average + 2 standard deviations.</p>
+        </div>
+        <ul class="ladder">
+          <li class="rung" data-lv="warning" data-reveal><span class="lv"><span class="blink" aria-hidden="true"></span>Outbreak warning</span><span class="rule">Middle forecast above the epidemic threshold</span><span class="act">Convene the task force; clean-ups in top barangays; prepare hospitals</span></li>
+          <li class="rung" data-lv="watch" data-reveal><span class="lv">Watch</span><span class="rule">High forecast above the epidemic threshold</span><span class="act">Inspect breeding sites; check test-kit and IV-fluid stocks</span></li>
+          <li class="rung" data-lv="above" data-reveal><span class="lv">Above usual</span><span class="rule">Middle forecast above usual</span><span class="act">Remind households of the DOH 4S</span></li>
+          <li class="rung" data-lv="normal" data-reveal><span class="lv">Normal</span><span class="rule">Middle forecast at or below usual</span><span class="act">Keep routine surveillance and clean-ups</span></li>
+        </ul>
+        <div class="grid g3 mt">
+          <div class="card" data-reveal><h3>Action checklist</h3><p>Week-by-week steps for each level (today, weeks 1–2, weeks 2–4) and what EpiLag-PH contributes to each, downloadable as an action brief.</p></div>
+          <div class="card" data-reveal><h3>Budget allocation</h3><p>A fractional knapsack ranks area-and-action pairs by cases averted per peso. Effects from Bowman et al. (2016): 10–50% for clean-ups with container covers, 0–10% for fogging. Costs are editable.</p></div>
+          <div class="card" data-reveal><h3>Quezon City barangays</h3><p>The city forecast is shared out by each barangay's share of cases in 2022–2025, because barangay data is yearly only.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 why + end -->
+    <section id="why" class="pg-sec surface tone-paper tx-field sf-subtle" aria-labelledby="why-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">6 · Why these choices</div><h2 id="why-title" class="h2-sm">Simple, explainable, <span class="em">honestly tested.</span></h2></div>
+          <p>Past PJDSC champions won with models like XGBoost and K-means used well, not with deep learning.</p>
+        </div>
+        <div class="grid g3">
+          <div class="card" data-reveal><h3>Explainable over exotic</h3><p>LightGBM with SHAP can be defended in front of judges and health officers.</p></div>
+          <div class="card" data-reveal><h3>Ranges over single numbers</h3><p>A health office stocks supplies for the high case.</p></div>
+          <div class="card" data-reveal><h3>No peeking</h3><p>Every result comes from years the model never saw, compared with simple rules, with false alarms and the weak weather effect reported.</p></div>
+        </div>
+        <div class="end surface tone-night tx-rain" data-reveal>
+          <h2 class="h2-sm">All of it is open. <span class="em">Check every number.</span></h2>
+          <p>Code for each stage in <code>src/</code>, every result as CSV in <code>reports/</code>, and the full write-up in the README.</p>
+          <div class="btn-row"><a class="btn btn--light" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag">Code on GitHub <i data-icon="external" data-size="24"></i></a><a class="btn btn--dark-ghost" href="./">Back to overview</a></div>
+          <pixel-sprite class="end__frog" sprite="frog" pose="peek" scale="3"></pixel-sprite>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pg-foot">
+    <div class="wrap foot">
+      <nav class="foot__links" aria-label="More">
+        <a href="./">Overview</a><a href="web/">App</a><a href="drill/">Dengue Drill</a><a href="data/">Open data</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </nav>
+      <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
+      <span>EpiLag-PH · PJDSC 2026</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/pages/methodology.js"></script>
+</body>
+</html>

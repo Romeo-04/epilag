@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Open forecast data</title>
+  <meta name="description" content="The latest EpiLag-PH dengue forecasts as CSV and JSON, free to reuse for research, news stories and other apps.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="EpiLag-PH open data">
+  <meta property="og:description" content="The latest dengue forecasts for 17 regions, Quezon City and 86 provinces, as CSV and JSON.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/data/">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="../"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span><small class="brand__sub">Open data</small></a>
+      <div class="nav__links">
+        <a href="../">Overview</a><a href="../methodology.html">Methodology</a><a href="./" aria-current="page">Open data</a><a href="../drill/">Dengue Drill</a>
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href="../web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="pg-hero pg-hero--data surface tone-paper tx-field sf-subtle" aria-labelledby="title">
+      <div class="wrap">
+        <a class="back" href="../"><i data-icon="chevronLeft" data-size="24"></i>EpiLag-PH</a>
+        <div class="pg-hero__grid">
+          <div>
+            <div class="label">Open data</div>
+            <h1 id="title">Every forecast, <span class="em">free to reuse.</span></h1>
+            <p class="lead">The latest EpiLag-PH dengue forecasts as CSV and JSON, for research, news stories and other apps. Forecasts estimate
+              <i>reported</i> cases and carry uncertainty: use the range, not only the middle value. How they are made: <a href="../methodology.html">methodology</a>.</p>
+          </div>
+          <div class="data-art" aria-hidden="true">
+            <i data-icon="database" data-size="64"></i>
+            <span class="file-tag file-tag--csv"><i data-icon="file" data-size="64"></i><span>CSV</span></span>
+            <span class="file-tag file-tag--json"><i data-icon="file" data-size="64"></i><span>JSON</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pg-sec pg-sec--tight surface tone-white" aria-labelledby="files-title">
+      <div class="wrap">
+        <h2 id="files-title" class="sr-only">Files</h2>
+        <div class="files">
+          <article class="card file" data-reveal>
+            <div class="file__head"><span class="ic px-box"><i data-icon="database" data-size="32"></i></span><h3>17 regions and Quezon City</h3></div>
+            <p>Forecast from the week ending 28 Dec 2025, 2–8 weeks ahead. 72 rows.</p>
+            <ul class="dl">
+              <li><a href="epilag_forecast_region_qc.csv" download>
+                <span class="file-tag file-tag--csv"><i data-icon="file" data-size="48"></i><span>CSV</span></span>
+                <span class="dl__name"><b>epilag_forecast_region_qc.csv</b><small>CSV · download</small></span>
+                <i class="dl__go" data-icon="downloadBox" data-size="32"></i></a></li>
+              <li><a href="epilag_forecast_region_qc.json">
+                <span class="file-tag file-tag--json"><i data-icon="file" data-size="48"></i><span>JSON</span></span>
+                <span class="dl__name"><b>epilag_forecast_region_qc.json</b><small>JSON · open</small></span>
+                <i class="dl__go" data-icon="arrowRight" data-size="24"></i></a></li>
+            </ul>
+          </article>
+          <article class="card file" data-reveal>
+            <div class="file__head"><span class="ic px-box"><i data-icon="database" data-size="32"></i></span><h3>86 provinces</h3></div>
+            <p>Forecast from the week ending 10 Jan 2021, where the official province data ends. 344 rows.</p>
+            <ul class="dl">
+              <li><a href="epilag_forecast_province.csv" download>
+                <span class="file-tag file-tag--csv"><i data-icon="file" data-size="48"></i><span>CSV</span></span>
+                <span class="dl__name"><b>epilag_forecast_province.csv</b><small>CSV · download</small></span>
+                <i class="dl__go" data-icon="downloadBox" data-size="32"></i></a></li>
+              <li><a href="epilag_forecast_province.json">
+                <span class="file-tag file-tag--json"><i data-icon="file" data-size="48"></i><span>JSON</span></span>
+                <span class="dl__name"><b>epilag_forecast_province.json</b><small>JSON · open</small></span>
+                <i class="dl__go" data-icon="arrowRight" data-size="24"></i></a></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="pg-head pg-head--cols" data-reveal>
+          <div><div class="label">Column definitions</div><h2 class="h2-sm">What each column means</h2></div>
+        </div>
+        <div class="tbl tbl--stack tbl--cols" data-reveal>
+          <table>
+            <thead><tr><th scope="col">Column</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>area_code</code>, <code>area_name</code></td><td>PSGC-based area code and name (regions use <code>R_&lt;name&gt;</code>, Quezon City <code>QC</code>)</td></tr>
+              <tr><td><code>forecast_made_week_ending</code></td><td>Last week of data the forecast used (weeks end on Sunday)</td></tr>
+              <tr><td><code>weeks_ahead</code>, <code>target_week_ending</code></td><td>How far ahead, and the week being forecast</td></tr>
+              <tr><td><code>cases_low</code>, <code>cases_middle</code>, <code>cases_high</code></td><td>Likely range of reported cases that week (10th, 50th, 90th percentile, calibrated to cover 80%)</td></tr>
+              <tr><td><code>cases_middle_per_100k</code></td><td>Middle forecast per 100,000 people</td></tr>
+              <tr><td><code>usual_level</code>, <code>epidemic_threshold</code></td><td>Average for that week in earlier years, and that average + 2 standard deviations</td></tr>
+              <tr><td><code>alert_level</code></td><td>normal, above usual, watch (high forecast above the epidemic threshold), outbreak warning (middle forecast above it)</td></tr>
+              <tr><td><code>population</code></td><td>Population used (OCHA COD-PS, 2022)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="credit" data-reveal>
+          <span class="disc"><i data-icon="info" data-size="24"></i></span>
+          <p>Regional and Quezon City forecasts build on the UPRI-NOAH Dengue–Rainfall Dataset (ODC-ODbL). Please credit EpiLag-PH and the original sources listed in the
+            <a href="https://github.com/Romeo-04/epilag">repository README</a>. A machine-readable list of files is in <a href="index.json">index.json</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pg-foot">
+    <div class="wrap foot">
+      <nav class="foot__links" aria-label="More">
+        <a href="../">Overview</a><a href="../web/">App</a><a href="../methodology.html">Methodology</a><a href="../drill/">Dengue Drill</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </nav>
+      <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
+      <span>EpiLag-PH · PJDSC 2026</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/pages/data.js"></script>
+</body>
+</html>
