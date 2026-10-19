@@ -17,7 +17,8 @@ h2 + .lead { margin-top: 16px; }
    the latest forecast (3D region map, level counts, cases per 100,000, map/table view) */
 .hero { padding: 64px 0 88px; margin-top: -76px; padding-top: 140px; }
 .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: start; }
-.hero__copy { padding-top: 24px; }
+/* centred on the app window; the 150px matches the stage padding that makes room for the mascot */
+.hero__copy { align-self: center; padding-top: 150px; }
 .hero__title { margin: 16px 0 20px; }
 .hero__ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 28px; }
 .hero__link { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
@@ -87,9 +88,19 @@ h2 + .lead { margin-top: 16px; }
 /* ------------------------------------------------------------------ drill */
 .drill { padding: 88px 0; }
 .drill__grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
-.drill__how { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 10px; --i1: var(--night-text); --i2: rgba(255, 255, 255, .12); --i3: #7FE0A8; }
-.drill__how li { display: flex; align-items: center; gap: 12px; }
-.drill__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+/* pick, deploy, replay: lit one by one as you scroll (--on per step, --fill for the line); all lit without motion */
+.drill__how { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 4px; position: relative; --fill: 1;
+  --i1: var(--night-text); --i2: rgba(255, 255, 255, .12); --i3: #7FE0A8; }
+.drill__how::before, .drill__how::after { content: ""; position: absolute; left: 25px; top: 30px; bottom: 30px; width: 2px; background: var(--night-line); }
+.drill__how::after { background: #7FE0A8; transform-origin: top; transform: scaleY(var(--fill)); }
+.dh-step { --on: 1; position: relative; z-index: 1; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 14px; align-items: center; padding: 6px 0;
+  opacity: calc(.38 + .62 * var(--on)); transform: translateX(calc((1 - var(--on)) * -6px)); }
+.dh-ic { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r-sm); background: var(--night-2);
+  border: 2px solid var(--night-line); box-shadow: 0 0 0 2px rgba(127, 224, 168, var(--on)); }
+.dh-step b { display: block; font-size: 18px; }
+.dh-step div span { font-size: 14px; color: var(--night-muted); }
+.console:not([data-step="0"]) .action .tick { background: #7FE0A8; border-color: #7FE0A8; }
+.drill__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
 .drill__stats div { padding: 14px; border-radius: var(--r-md); background: rgba(255, 255, 255, .05); border: 1px solid var(--night-line); }
 .drill__stats b { display: block; font-size: 26px; letter-spacing: -.02em; }
 .drill__stats span { font-size: 13px; color: var(--night-muted); }
@@ -98,21 +109,66 @@ h2 + .lead { margin-top: 16px; }
 .drill__details p { margin-top: 8px; }
 .drill__console-wrap { position: relative; }
 .drill__slot { position: absolute; right: -10px; top: -96px; width: 140px; height: 110px; }
-.drill__panels { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.drill__board { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
-.drill__map { height: 300px; border-radius: var(--r-sm); background: #12382A; overflow: hidden; }
-.drill__side { display: grid; gap: 10px; align-content: start; }
-.drill__side .scenario { font-size: 13px; }
-.drill__side .scenario > span { display: flex; align-items: center; gap: 8px; padding: 4px 6px; }
-.drill__take { font-size: 12px; color: var(--night-muted); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.drill__side .status-tile { font-size: 14px; padding: 10px 12px; }
-.drill__frog { position: absolute; left: -54px; bottom: -40px; z-index: 3; }
+/* the game screen in miniature: the Dengue Drill's own navy palette, pixel bevels, HUD, board, list and ticker */
+.dgame { --night-2: #142250; --night-line: #2E3F7A; --night-text: #EEF2FF; --night-muted: #A3B0DB; --d-hi: rgba(255, 255, 255, .14); --d-lo: rgba(0, 0, 0, .35);
+  --d-amber: #F5A51C; --d-teal: #2FD6C3; display: grid; gap: 8px; padding: 8px; background: #0B1630; color: var(--night-text); border: 2px solid var(--night-line);
+  box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo), 0 24px 48px rgba(0, 0, 0, .35); }
+.dgame .k { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--night-muted); }
+.dgame__hud, .dgame__side, .dgame__bottom, .dgame__stat { background: rgba(16, 27, 66, .9); border: 2px solid var(--night-line); box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo); }
+.dgame__hud { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 8px 10px; }
+.dgame__who { display: grid; gap: 4px; justify-items: start; }
+.dgame__who b { font-size: 14px; line-height: 1.1; }
+.dgame__who .chip { padding: 3px 9px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, .08); border: 1px solid var(--night-line); color: var(--night-text); }
+.dgame__who .chip--intel { background: transparent; border: 1.5px solid #6FD6FF; color: #A9E7FF; }
+.dgame__timeline { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); position: relative; }
+.dgame__timeline::before { content: ""; position: absolute; left: 6%; right: 6%; top: 5px; height: 2px; background: var(--night-line); }
+.dgame__timeline li { position: relative; display: grid; justify-items: center; gap: 4px; font-size: 9px; color: var(--night-muted); white-space: nowrap; }
+.dgame__timeline i { width: 12px; height: 12px; background: var(--night-2); border: 2px solid var(--night-line); }
+.dgame__timeline .done i { background: var(--d-teal); border-color: var(--d-teal); }
+.dgame__timeline .now i { background: var(--d-amber); border-color: #FFE2A6; box-shadow: 0 0 0 3px rgba(245, 165, 28, .25); }
+.dgame__timeline .now span { color: var(--night-text); font-weight: 800; }
+.dgame__budget { display: grid; gap: 1px; justify-items: end; }
+.dgame__budget b { font-size: 18px; font-weight: 800; line-height: 1.1; }
+.dgame__pips { display: flex; gap: 2px; }
+.dgame__pips i { width: 8px; height: 10px; background: var(--d-teal); clip-path: polygon(50% 0, 100% 20%, 100% 60%, 50% 100%, 0 60%, 0 20%); transition: opacity .3s, transform .3s; }
+.dgame__pips i.spent { opacity: .15; transform: scale(.7); }
+.dgame__field { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 8px; }
+.dgame__board { position: relative; overflow: hidden; border: 2px solid var(--night-line); box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo); background: #1C4F6E; }
+.dgame .drill__map { height: 300px; }
+.dgame__stats { position: absolute; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.dgame__stat { display: grid; gap: 1px; padding: 5px 8px; background: rgba(9, 16, 42, .76); }
+.dgame__stat b { font-size: 16px; font-weight: 800; line-height: 1.1; }
+.dgame__stat .d { font-size: 10px; font-weight: 700; color: var(--lv-watch); }
+.dgame__meter { display: block; width: 90px; height: 6px; margin-top: 3px; background: rgba(255, 255, 255, .12); }
+.dgame__meter i { display: block; height: 100%; transform-origin: left; transition: transform .6s, background .6s; }
+.dgame__legend { position: absolute; left: 10px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 9px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--night-text); text-shadow: 0 1px 0 #050A1C; pointer-events: none; }
+.dgame__legend .grad { width: 90px; height: 6px; background: linear-gradient(90deg, #12352A, #2E6B3F, #F2B33D, #EE8A2A, #E5483C); }
+.dgame__legend .intel { color: #7FE4FF; }
+.dgame__lv { display: inline-flex; align-items: center; gap: 4px; }
+.dgame__lv::before { content: ""; width: 8px; height: 8px; background: var(--c); }
+.dgame__side { display: flex; flex-direction: column; gap: 6px; padding: 8px; min-width: 0; }
+.dgame__head { display: flex; justify-content: space-between; gap: 6px; }
+.dgame__plist { display: grid; gap: 1px; }
+.dgame__row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; padding: 5px 6px; font-size: 12px; }
+.dgame__row.on { background: rgba(245, 165, 28, .14); box-shadow: inset 3px 0 0 var(--d-amber); }
+.dgame__heat { width: 10px; height: 10px; }
+.dgame__nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.dgame__fc { font-size: 10px; font-weight: 800; color: var(--c); }
+.dgame__n { font-weight: 700; min-width: 26px; text-align: right; }
+.dgame__team { display: grid; place-items: center; min-width: 16px; height: 16px; font-size: 10px; font-weight: 800; background: var(--d-teal); color: #071711; }
+.dgame__bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 8px; }
+.dgame__ticker { display: flex; gap: 8px; align-items: center; overflow: hidden; white-space: nowrap; font-size: 12px; }
+.dgame__ticker .live { flex: none; padding: 2px 6px; font-size: 10px; font-weight: 800; letter-spacing: .12em; background: var(--lv-warning); color: #071711; }
+.dgame__ticker span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.dgame__end { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 13px; font-weight: 800; background: var(--d-amber); color: #1A1206; --i1: currentColor;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .45), inset -2px -2px 0 rgba(0, 0, 0, .28), 0 3px 0 #8A5A0A; }
+.drill__frog { position: absolute; left: -64px; bottom: -78px; z-index: 3; }
 
 /* ------------------------------------------------------------------ features */
 /* six tools as getcko's "How it works" band (pinned scrub on desktop, see main.js) */
 .features { padding-top: 72px; padding-bottom: 0; }
 .features .sec-head { margin-bottom: 8px; }
-.features__lead { max-width: 420px; }
 .tools-band { padding: 92px 0 32px; --sf-opacity: .22; }
 .tools-band::before { background-position: var(--sf-x, 0px) 0; }
 .tools-band__inner { position: relative; }
@@ -239,6 +295,7 @@ h2 + .lead { margin-top: 16px; }
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 1100px) {
   .hero__grid, .drill__grid, .action__grid, .film__grid, .cta__grid { grid-template-columns: minmax(0, 1fr); }
+  .hero__copy { padding-top: 24px; }
   .hero__stage { margin-top: 24px; padding-top: 170px; }
   .hero__slot { left: auto; right: 10%; top: 0; width: 200px; height: 200px; --cell: 6; }
   .hero__trail { display: none; }
@@ -266,12 +323,14 @@ h2 + .lead { margin-top: 16px; }
 @media (max-width: 680px) {
   section { padding: 64px 0; }
   .hero { padding-top: 112px; }
-  .hero__app-main, .drill__board, .action__case { grid-template-columns: minmax(0, 1fr); }
+  .hero__app-main, .dgame__field, .action__case { grid-template-columns: minmax(0, 1fr); }
+  .dgame__hud { grid-template-columns: minmax(0, 1fr) auto; }
+  .dgame__timeline { display: none; }
   .hero__map { height: 300px; }
   .hero__stage { padding-top: 130px; }
   .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 120px; margin-top: 120px; }
   .chain__step::after { display: none; }
-  .tools, .proof__grid, .drill__stats, .drill__panels { grid-template-columns: minmax(0, 1fr); }
+  .tools, .proof__grid, .drill__stats { grid-template-columns: minmax(0, 1fr); }
   .rail { grid-template-columns: 1fr 1fr; row-gap: 20px; }
   .rail::before, .helps .rail::after { display: none; }
   .action__copy .brief { margin-left: 0; }
