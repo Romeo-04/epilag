@@ -32,7 +32,7 @@ function shieldCanvas(n) {
   return c;
 }
 
-export async function createBoard(el, { grid, region, onPick, onFlash }) {
+export async function createBoard(el, { grid, region, onPick, onFlash, labels: labelIds = null }) {
   const overlay = Object.assign(document.createElement("div"), { className: "board__overlay" });
   let selected = null, world = null;
   world = await createWorld(el, { grid, pixel: 2, onPick, onFlash, onHover: (u) => world?.highlight(u ?? selected) });
@@ -51,10 +51,13 @@ export async function createBoard(el, { grid, region, onPick, onFlash }) {
     overlay.append(el2);
     return [u, el2];
   }));
+  // with many areas (Quezon City's 142 barangays) only `labelIds`, the selection and intel-tagged ones get a name
+  const quiet = (u, el2) => labelIds && !labelIds.includes(u) && !el2.classList.contains("on") && !el2.querySelector(".board__tag").textContent;
   function placeLabels() {
     for (const [u, el2] of labels) {
       const c = world.centreOf(u);
-      if (!c) { el2.hidden = true; continue; }
+      el2.hidden = !c || quiet(u, el2);
+      if (el2.hidden) continue;
       const p = world.toScreen(new T.Vector3(c.x, world.heightOf(u) + 1, c.z));
       el2.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
     }
@@ -101,6 +104,7 @@ export async function createBoard(el, { grid, region, onPick, onFlash }) {
   }
   function puff(u) {
     const c = world.centreOf(u), y = world.heightOf(u);
+    if (!c) return;
     for (let i = 0; i < 18; i++) {
       const m = new T.Mesh(dustGeo, dustMat);
       m.position.set(c.x, y + 0.5, c.z);
@@ -115,6 +119,7 @@ export async function createBoard(el, { grid, region, onPick, onFlash }) {
   let bugs = [];
   function setBugs(n, anchors) {
     bugs.forEach((b) => scene.remove(b.s));
+    anchors = anchors.filter((u) => world.centreOf(u));
     bugs = reduced() || !anchors.length ? [] : Array.from({ length: n }, (_, i) => {
       const s = new T.Sprite(bugMat[i % 2]);
       s.scale.set(1.5, 1.5, 1);
@@ -129,6 +134,7 @@ export async function createBoard(el, { grid, region, onPick, onFlash }) {
   world.addTicker((t, dt) => {
     for (const [u, k] of tokens) {
       const c = world.centreOf(u), top = world.heightOf(u) + 3.2;
+      if (!c) { k.sprite.visible = false; continue; } // an area without a shape on the board (listed only)
       let y = top;
       if (k.t0) {
         const a = Math.min(1, (t - k.t0) / 650);

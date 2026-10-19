@@ -1,6 +1,8 @@
-// Dengue Drill: command the 2019 dengue response in one region, twice (round 1: case reports only; round 2: with
-// EpiLag-PH's 4-week forecasts), on a 3D pixel board. The real 2019 cases keep score (rules.js, the same rules as
-// scripts/drill_data.py). Flow: title -> rain receipt -> round 1 -> report -> round 2 -> report -> debrief.
+// Dengue Drill: command a dengue response twice (round 1: case reports only; round 2: with EpiLag-PH's 4-week
+// forecasts) on a 3D pixel board, scored on the real cases (rules.js, the same rules as scripts/drill_data.py).
+// Missions: Quezon City in 2024-25 (the latest data, barangay by barangay, estimated from the city's weekly cases;
+// scripts/qc_drill_data.py) and the 17 regions in 2019, province by province (scripts/drill_data.py).
+// Flow: title -> receipt -> round 1 -> report -> round 2 -> report -> debrief.
 import "../css/tokens.css";
 import "../css/base.css";
 import "../css/surfaces.css";
@@ -13,21 +15,32 @@ import { createWorld } from "./world.js";
 import { rules } from "./rules.js";
 import { createBoard } from "./board.js";
 
-const D = await fetch(`${import.meta.env.BASE_URL}drill/data.json`).then((r) => r.json());
-const R = rules(D), { K, WEEKS, TURNS, FIRST, idx } = R;
-const boards = await loadGrids("voxel_regions");
+const json = (f) => fetch(`${import.meta.env.BASE_URL}drill/${f}`).then((r) => r.json());
+const [D2019, DQ, boards2019, boardsQC] = await Promise.all([json("data.json"), json("qc.json"), loadGrids("voxel_regions"), loadGrids("voxel_qc")]);
+const R2019 = rules(D2019);
+const byTotal = (reg, R) => [...reg.provinces].sort((a, b) => R.total(b) - R.total(a));
+// Quezon City first (the latest data), then the 17 regions of 2019
+const MISSIONS = [
+  { id: "QC", D: DQ, R: rules(DQ), region: DQ.regions[0], board: boardsQC.QC, year: "2024–25", place: "Quezon City", unit: ["barangay", "barangays"], estimated: true },
+  ...D2019.regions.map((r) => ({ id: r.id, D: D2019, R: R2019, region: r, board: boards2019[r.id], year: "2019", place: "Philippines", unit: ["province", "provinces"] })),
+];
+let M, R, K, WEEKS, TURNS, FIRST, idx;
+function useMission(m) { M = m; R = m.R; ({ K, WEEKS, TURNS, FIRST, idx } = R); }
 const LEVEL = { warning: "Outbreak warning", watch: "Watch", above: "Above usual", normal: "Normal" };
 const GRADE_COL = { S: "#6FD6FF", A: "#34D27B", B: "#F7C928", C: "#F58220", D: "#F04B2A" };
 const PRESS = { low: ["Low", "#34D27B"], rising: ["Rising", "#F7C928"], high: ["High", "#F58220"], critical: ["Critical", "#F04B2A"] };
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.round(n).toLocaleString("en");
 const day = (s) => new Date(`${s}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const dayY = (s) => `${day(s)} ${s.slice(0, 4)}`;
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const short = (name) => name.replace(/ \(.+\)/, "");
 // for tests/test_drill_rules.py (parity with scripts/drill_data.py through Playwright)
-window.drill = { D, R };
+window.drill = { D: D2019, R: R2019, missions: MISSIONS };
 
-let regionIdx = Math.max(0, D.regions.findIndex((r) => r.name.includes("Western Visayas")));
+let regionIdx = 0;
+useMission(MISSIONS[0]);
 let region, round, turn, kits, plan, sel = null, results = {}, board = null;
 
 // ------------------------------------------------------------------ sound (synthesised, no audio files)
@@ -80,26 +93,29 @@ $("mute").addEventListener("click", () => {
 function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 }); }
 
 // ------------------------------------------------------------------ title: region rail and a turning 3D preview
-const totals = D.regions.map((r) => r.provinces.reduce((s, p) => s + p.cases.slice(FIRST).reduce((a, c) => a + (c || 0), 0), 0));
-const tmax = Math.max(...totals);
+const totals = MISSIONS.map((m) => m.region.provinces.reduce((s, p) => s + m.R.total(p), 0));
+const tmax = Math.max(...totals.slice(1));
 let preview = null, previewId = 0;
 async function renderMissions() {
-  $("missions").innerHTML = D.regions.map((r, k) => {
-    const stars = Math.max(1, Math.ceil((totals[k] / tmax) * 5)), m = r.name.match(/^(.*?)(?: \((.+)\))?$/);
-    return `<button type="button" class="mission${k === regionIdx ? " sel" : ""}" role="option" aria-selected="${k === regionIdx}" data-k="${k}">
-      <b>${m[1]}${m[2] ? `<span>${m[2]}</span>` : ""}</b><small>${r.provinces.length} provinces · ${fmt(totals[k])} cases</small>
+  $("missions").innerHTML = MISSIONS.map((mi, k) => {
+    const r = mi.region, stars = Math.max(1, Math.min(5, Math.ceil((totals[k] / tmax) * 5))), m = r.name.match(/^(.*?)(?: \((.+)\))?$/);
+    const sub = mi.estimated ? `${mi.year} · latest data` : m[2];
+    return `<button type="button" class="mission${mi.estimated ? " mission--latest" : ""}${k === regionIdx ? " sel" : ""}" role="option" aria-selected="${k === regionIdx}" data-k="${k}">
+      <b>${m[1]}${sub ? `<span>${sub}</span>` : ""}</b><small>${r.provinces.length} ${mi.unit[1]} · ${fmt(totals[k])} cases</small>
       <span class="threat" aria-label="Threat ${stars} of 5">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= stars ? "on" : ""}"></i>`).join("")}</span></button>`;
   }).join("");
-  const r = D.regions[regionIdx], n = D.regions.length, pad = (v) => String(v).padStart(2, "0");
+  useMission(MISSIONS[regionIdx]);
+  const r = M.region, n = MISSIONS.length, pad = (v) => String(v).padStart(2, "0");
+  document.querySelector(".title__copy .chip").textContent = `Mission ${M.year} · ${M.place}`;
   $("m-count").innerHTML = `<b>${pad(regionIdx + 1)}</b> / ${pad(n)}`;
   $("m-prev").disabled = regionIdx === 0; $("m-next").disabled = regionIdx === n - 1;
   $("missions").querySelector(".sel").scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
   $("t-region").textContent = r.name;
-  $("t-stats").textContent = `${r.provinces.length} provinces · ${fmt(totals[regionIdx])} cases in 2019`;
+  $("t-stats").textContent = `${r.provinces.length} ${M.unit[1]} · ${fmt(totals[regionIdx])} cases in ${M.year}`;
   // the preview: the region's columns at the season's busiest week, slowly turning
   const id = ++previewId;
   preview?.dispose(); preview = null;
-  const grid = boards[r.id];
+  const grid = M.board;
   $("t-map").innerHTML = "";
   const w = await createWorld($("t-map"), { grid, pixel: 2, water: false });
   if (id !== previewId) { w.dispose(); return; } // the reader picked another region meanwhile
@@ -109,7 +125,7 @@ async function renderMissions() {
   preview.setWeather({ rain: 0.25 });
   preview.spin();
 }
-function pickRegion(k) { if (k < 0 || k >= D.regions.length || k === regionIdx) return; regionIdx = k; sfx.click(); renderMissions(); }
+function pickRegion(k) { if (k < 0 || k >= MISSIONS.length || k === regionIdx) return; regionIdx = k; sfx.click(); renderMissions(); }
 $("missions").addEventListener("click", (e) => { const b = e.target.closest(".mission"); if (b) pickRegion(+b.dataset.k); });
 $("missions").addEventListener("keydown", (e) => { const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (step) { e.preventDefault(); pickRegion(regionIdx + step); } });
 $("m-prev").addEventListener("click", () => pickRegion(regionIdx - 1));
@@ -123,16 +139,22 @@ function columnOf(p, i) {
 
 // ------------------------------------------------------------------ briefing: the rain receipt
 $("start").addEventListener("click", () => {
-  region = D.regions[regionIdx]; results = {}; sfx.deploy();
+  useMission(MISSIONS[regionIdx]);
+  region = M.region; results = {}; sfx.deploy();
   previewId++; preview?.dispose(); preview = null;
   const i0 = FIRST, i1 = Math.min(WEEKS.length - 1, FIRST + 20);
   const rain = region.provinces.map((p) => p.rain.slice(i0, i1 + 1).reduce((s, r) => s + (r || 0), 0));
-  const items = region.provinces.map((p) => ({ name: p.name, cases: p.cases.slice(i0, i1 + 1).reduce((s, c) => s + (c || 0), 0), hit: R.peak(p) != null }));
-  $("brief-chip").textContent = `Intel briefing · ${region.name}`;
-  $("receipt").innerHTML = `<h3>RAIN RECEIPT</h3><p class="c">${region.name}</p><p class="c">${day(WEEKS[i0])} 2019 – ${day(WEEKS[i1])} 2019</p><hr>`
-    + `<div class="ln"><span>Rain (avg per province)</span><span>${fmt(rain.reduce((a, b) => a + b, 0) / rain.length)} mm</span></div><div class="ln"><span>Price of rain</span><span>₱0.00</span></div><hr>`
-    + items.map((x) => `<div class="ln"><span>${x.name}${x.hit ? " *" : ""}</span><span>${fmt(x.cases)}</span></div>`).join("")
-    + `<hr><div class="ln tot"><span>TOTAL DUE</span><span>${fmt(items.reduce((s, x) => s + x.cases, 0))} cases</span></div><p class="c">* outbreak: peaked above its epidemic line</p>`
+  const items = byTotal(region, R).map((p) => ({ name: p.name, cases: p.cases.slice(i0, i1 + 1).reduce((s, c) => s + (c || 0), 0), hit: R.peak(p) != null }));
+  const shown = M.estimated ? items.slice(0, 12) : region.provinces.map((p) => items.find((x) => x.name === p.name));
+  $("brief-chip").textContent = `Intel briefing · ${region.name} · ${M.year}`;
+  document.querySelector(".briefing__copy p").textContent = M.estimated
+    ? "This is what the 2024–25 season charged Quezon City in reported dengue cases. Weekly reports exist only for the whole city, so each barangay's share is an estimate. Clean-ups cut the bill, but only if teams arrive before the cases do."
+    : "This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.";
+  $("receipt").innerHTML = `<h3>${M.estimated ? "CASE RECEIPT" : "RAIN RECEIPT"}</h3><p class="c">${region.name}</p><p class="c">${dayY(WEEKS[i0])} – ${dayY(WEEKS[i1])}</p><hr>`
+    + (M.estimated ? "" : `<div class="ln"><span>Rain (avg per province)</span><span>${fmt(rain.reduce((a, b) => a + b, 0) / rain.length)} mm</span></div><div class="ln"><span>Price of rain</span><span>₱0.00</span></div><hr>`)
+    + shown.map((x) => `<div class="ln"><span>${x.name}${x.hit ? " *" : ""}</span><span>${fmt(x.cases)}</span></div>`).join("")
+    + (items.length > shown.length ? `<div class="ln"><span>+ ${items.length - shown.length} more ${M.unit[1]}</span><span>${fmt(items.slice(shown.length).reduce((s, x) => s + x.cases, 0))}</span></div>` : "")
+    + `<hr><div class="ln tot"><span>TOTAL DUE</span><span>${fmt(items.reduce((s, x) => s + x.cases, 0))} cases</span></div><p class="c">* outbreak: peaked above its epidemic line${M.estimated ? "<br>barangay counts: city cases × 2025 share" : ""}</p>`
     + `<div class="stamp">UNPAID · ACT EARLIER</div>`;
   show("s-brief");
 });
@@ -180,7 +202,7 @@ function renderList() {
 function renderDetail() {
   const tw = TURNS[turn], i = idx(tw);
   if (sel == null) {
-    $("detail").innerHTML = `<div class="empty">Pick a province on the board or in the list to see its reports${round === 2 ? " and EpiLag intel" : ""}, then deploy teams.</div>${roster()}`;
+    $("detail").innerHTML = `<div class="empty">Pick a ${M.unit[0]} on the board or in the list to see its reports${round === 2 ? " and EpiLag intel" : ""}, then deploy teams.</div>${roster()}`;
     return;
   }
   const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = p.fc[tw], now = (plan[sel] || {})[turn] || 0;
@@ -243,8 +265,10 @@ function refresh({ drop = null, duration = 900 } = {}) {
   $("h-change").textContent = before ? `${now >= before ? "▲" : "▼"} ${Math.abs(Math.round((now / before - 1) * 100))}% in 2 weeks` : "";
   $("h-spark").innerHTML = hudSpark(i);
   const mm = region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length;
-  $("h-rain").textContent = `${fmt(mm)} mm`;
-  const sky = mm < 10 ? ["clear", "Mostly dry"] : mm < 30 ? ["rain", "Showers"] : mm < 56 ? ["rain", "Heavy rain"] : ["storm", "Storm"];
+  $("h-rain").textContent = M.estimated ? "–" : `${fmt(mm)} mm`;
+  const sky = M.estimated ? ["clear", "No rain data"] : mm < 10 ? ["clear", "Mostly dry"] : mm < 30 ? ["rain", "Showers"] : mm < 56 ? ["rain", "Heavy rain"] : ["storm", "Storm"];
+  document.querySelector(".side__head .k").textContent = cap(M.unit[1]);
+  $("plist").setAttribute("aria-label", cap(M.unit[1]));
   $("h-sky").textContent = sky[1];
   $("board-wrap").dataset.weather = sky[0];
   const pr = R.pressure(region, i), [lab, col] = PRESS[pr.level];
@@ -262,15 +286,16 @@ function refresh({ drop = null, duration = 900 } = {}) {
   rainSound(rainLevel);
   board.setGlow(region.provinces.filter((p) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]).map((p) => p.id));
   if (round === 2) {
-    board.setIntel(Object.fromEntries(region.provinces.map((p) => [p.id, p.fc[tw]?.[0] ?? null])),
-      Object.fromEntries(region.provinces.filter((p) => p.fc[tw] && p.fc[tw][0] !== "normal").map((p) => [p.id, `▲${fmt(p.fc[tw][2])}`])));
+    // with 142 barangays, mark only the 12 with the highest forecast, so the board stays readable
+    const flagged = region.provinces.filter((p) => p.fc[tw] && p.fc[tw][0] !== "normal").sort((a, b) => b.fc[tw][2] - a.fc[tw][2]).slice(0, M.estimated ? 12 : Infinity);
+    board.setIntel(Object.fromEntries(flagged.map((p) => [p.id, p.fc[tw][0]])), Object.fromEntries(flagged.map((p) => [p.id, `▲${fmt(p.fc[tw][2])}`])));
   } else board.setIntel(null);
   // mosquitoes: more after rain; more over provinces with more cases (same formula as before)
   const anchors = [];
   region.provinces.forEach((p) => { const r = Math.min(4, (p.cases[i] || 0) / (p.epi[i] || 1)); for (let j = 0; j < 1 + Math.round(r * 3); j++) anchors.push(p.id); });
   const rain = region.provinces.reduce((s, p) => s + (p.rain[i] || 0) + (p.rain[i - 1] || 0), 0) / region.provinces.length;
   // the old 2D board drew up to 220 specks; in 3D each is a sprite, so draw half as many
-  board.setBugs(Math.round(Math.max(12, Math.min(220, Math.round(rain * 1.6))) / 2), anchors);
+  board.setBugs(M.estimated ? Math.round(24 + Math.min(60, pr.value * 25)) : Math.round(Math.max(12, Math.min(220, Math.round(rain * 1.6))) / 2), anchors);
   renderList(); renderDetail();
 }
 function tick(msg) { const t = $("ticker"); t.textContent = msg; t.style.animation = "none"; void t.offsetHeight; t.style.animation = ""; }
@@ -284,7 +309,8 @@ function headline() {
   if (crossed.length) { sfx.alarm(); return `Alert: ${crossed.map((p) => p.name).join(", ")} crossed the epidemic line this week.`; }
   const up = region.provinces.map((p) => ({ p, r: p.cases[i - 2] ? p.cases[i] / p.cases[i - 2] : 0 })).sort((a, b) => b.r - a.r)[0];
   if (up && up.r > 1.3) return `${up.p.name}: reported cases up ${Math.round((up.r - 1) * 100)}% in two weeks.`;
-  return `Week ending ${day(tw)}: ${fmt(region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length)} mm of rain on average across the region.`;
+  if (M.estimated) return `Week ending ${dayY(tw)}: ${fmt(region.provinces.reduce((s, p) => s + (p.cases[i] || 0), 0))} cases reported across the city.`;
+  return `Week ending ${dayY(tw)}: ${fmt(region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length)} mm of rain on average across the region.`;
 }
 function warp(text, sub, then) {
   $("warp-text").textContent = text; $("warp-sub").textContent = sub; $("warp").classList.add("on");
@@ -298,7 +324,7 @@ async function startRound(r) {
   if (!board || board.regionId !== region.id) {
     board?.dispose();
     $("board").innerHTML = "";
-    board = await createBoard($("board"), { grid: boards[region.id], region, onFlash: lightning,
+    board = await createBoard($("board"), { grid: M.board, region, onFlash: lightning, labels: M.estimated ? byTotal(region, R).slice(0, 10).map((p) => p.id) : null,
       onPick: (u) => { const k = region.provinces.findIndex((p) => p.id === u); if (k >= 0) pick(k); } });
     board.regionId = region.id;
   }
@@ -311,7 +337,7 @@ $("end").addEventListener("click", () => {
   if (turn < TURNS.length - 1) {
     turn++;
     $("end").disabled = true;
-    toast("2 weeks later", `${day(TURNS[turn])} 2019`);
+    toast("2 weeks later", dayY(TURNS[turn]));
     setTimeout(() => {
       $("end").disabled = false;
       refresh({ duration: 1400 });
@@ -319,7 +345,7 @@ $("end").addEventListener("click", () => {
       board.floaters(region.provinces.map((p) => [p.id, (p.cases[i - 1] || 0) + (p.cases[i] || 0)]));
       tick(headline());
     }, reduce ? 0 : 900);
-  } else warp("Season over", "Counting the real 2019 cases", endRound);
+  } else warp("Season over", `Counting the real ${M.year} cases`, endRound);
 });
 
 // ------------------------------------------------------------------ round report and debrief
@@ -367,8 +393,10 @@ function versus() {
   const rows = [["You · no intel", a.mid, "#9DBDAC"], ["You · EpiLag intel", b.mid, "#6FD6FF"], ["Bot · reacts to reported outbreaks", react.mid, "#1E5A40"], ["Bot · follows EpiLag alerts", auto.mid, "#34D27B"]];
   const max = Math.max(1, ...rows.map((r) => r[1]));
   $("vs-bars").innerHTML = rows.map(([n, v, c], j) => `<div class="bar"><span>${n}</span><div class="bar__track"><div class="bar__fill" style="width:${(v / max) * 100}%;background:${c};animation-delay:${j * 0.12}s"></div></div><b class="nums">${fmt(v)}</b></div>`).join("");
-  const h = R.honest();
-  $("vs-honest").textContent = `Across all ${D.regions.length} regions, the bot that follows EpiLag's alerts averted more cases than the bot that reacts to reports in ${h.better}, about the same in ${h.tie}, and fewer in ${h.worse}. `
+  const h = R2019.honest();
+  $("vs-honest").textContent = (M.estimated
+    ? "Quezon City's barangay numbers are estimates: weekly reports exist only for the whole city, so each barangay gets the city's weekly cases × its share of the city's 2025 cases, an epidemic line from its 2022–2025 share, and EpiLag-PH's real city forecast shared out the same way. "
+    : "") + `In the 2019 missions, across all ${D2019.regions.length} regions, the bot that follows EpiLag's alerts averted more cases than the bot that reacts to reports in ${h.better}, about the same in ${h.tie}, and fewer in ${h.worse}. `
     + "How scoring works: a team covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. "
     + "The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016), so treat the numbers as estimates.";
   show("s-vs"); sfx.grade();

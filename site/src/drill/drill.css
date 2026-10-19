@@ -342,3 +342,7 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .title__pond i + i { animation-delay: 1.2s; }
 @keyframes d-ripple { from { transform: scale(.55); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
 @media (max-width: 1000px) { .title__pond { right: 6%; bottom: 2vh; } }
+/* the latest-data mission (Quezon City 2024-25) stands out in the rail */
+.mission--latest { border-color: var(--d-teal, #2FD6C3); background: linear-gradient(160deg, rgba(47, 214, 195, .16), rgba(16, 27, 66, .9) 60%); }
+.mission--latest b span { color: #8FF3E6; }
+.mission--latest.sel { border-color: var(--d-amber, #F5A51C); }

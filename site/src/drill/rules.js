@@ -46,6 +46,8 @@ export function rules(D) {
     return planned;
   }
   const autopilot = (rule, reg) => score(autoplan(rule, reg), reg);
+  /** Reported cases over the season, from the first turn on. */
+  const total = (p) => p.cases.slice(FIRST).reduce((a, c) => a + (c || 0), 0);
 
   /** Grade against the better of the two computer players. */
   function gradeOf(mid, reg) {
@@ -84,5 +86,5 @@ export function rules(D) {
     return { value: pr, level: pr < 0.6 ? "low" : pr < 1 ? "rising" : pr < 1.6 ? "high" : "critical" };
   }
 
-  return { K, WEEKS, TURNS, PEOPLE, FIRST, idx, peak, score, autoplan, autopilot, gradeOf, honest, teamsIn, capped, heat, pressure };
+  return { K, WEEKS, TURNS, PEOPLE, FIRST, idx, peak, score, autoplan, autopilot, gradeOf, honest, teamsIn, capped, heat, pressure, total };
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dengue Drill · Mission 2019 · EpiLag-PH</title>
+  <title>Dengue Drill · EpiLag-PH</title>
   <meta name="description" content="A strategy game: command the 2019 dengue response in your region, then replay it with EpiLag-PH's forecast intel.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="EpiLag-PH">
@@ -30,7 +30,7 @@
         <span class="chip chip--night">Mission 2019 · Philippines</span>
         <h1 id="t-title" class="logo-mark">Dengue <span>Drill</span></h1>
         <p class="tagline">The rains are coming. You command the dengue response for your region with <b>₱5 million</b> and <b>8 turns</b>.
-          Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real 2019 cases keep score.</p>
+          Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real cases keep score.</p>
         <div class="mission-head">
           <span class="kicker">Choose your mission</span>
           <div class="rail-ctl"><output id="m-count" aria-live="polite"></output>
@@ -39,7 +39,7 @@
         </div>
         <div class="missions" id="missions" role="listbox" aria-label="Region" tabindex="0"></div>
         <div class="btn-row"><button class="btn btn--go" id="start" type="button">Start mission <i data-icon="play" data-size="24"></i></button></div>
-        <ol class="how"><li><b>01</b>Pick a province</li><li><b>02</b>Deploy response teams</li><li><b>03</b>End turn: 2 weeks pass</li></ol>
+        <ol class="how"><li><b>01</b>Pick an area</li><li><b>02</b>Deploy response teams</li><li><b>03</b>End turn: 2 weeks pass</li></ol>
       </div>
       <div class="title__stage">
         <div class="title__caption"><b id="t-region">Region</b><span id="t-stats"></span></div>
@@ -104,7 +104,7 @@
         </aside>
       </div>
       <footer class="bottom console">
-        <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker">Select a province.</span></div>
+        <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker">Select an area.</span></div>
         <button class="btn btn--go" id="end" type="button">End turn <i data-icon="play" data-size="24"></i></button>
       </footer>
     </div>
