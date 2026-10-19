@@ -17,10 +17,10 @@
       if (!still && (force || !sessionStorage.getItem("el-intro"))) document.documentElement.classList.add("intro-pending");
     } catch (e) {}
   </script>
-  <script type="module" crossorigin src="/epilag/assets/build/index-Clav00Fo.js"></script>
-  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-CMSmMS4B.js">
+  <script type="module" crossorigin src="/epilag/assets/build/index-6LI3QUIJ.js"></script>
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-Ds24jN7l.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/voxel-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-BvGQPq15.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/index-CYsfjmjo.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="hero__stage">
-          <div class="mascot-slot hero__slot" id="slot-hero" style="--cell:5"></div>
+          <div class="mascot-slot hero__slot" id="slot-hero"></div>
           <div class="window hero__window" data-hero-window>
             <div class="window__bar">
               <span class="brand brand--sm"><span class="lg"><i data-icon="logo" data-size="16"></i></span>EpiLag-PH</span>
@@ -114,11 +114,11 @@
               <p class="lead">Rain and heat create mosquito breeding sites. People get sick weeks later. Cases are only reported when they reach hospitals, often 4–8 weeks after conditions have already worsened.</p>
             </div>
             <div class="problem__aside">
-              <div class="mascot-slot problem__slot" id="slot-problem" style="--cell:4"></div>
               <div class="callout" id="problem-callout"><b>There's a gap between changing weather and hospital reports.</b> EpiLag-PH helps close it.</div>
             </div>
           </div>
 
+          <div class="mascot-slot problem__slot" id="slot-problem"></div>
           <ol class="chain" aria-label="How dengue spreads after rain">
             <li class="chain__step"><pixel-sprite sprite="props" pose="cloud" scale="2"></pixel-sprite><span class="chip chip--dark">Week 0</span><span>Rain and heat create breeding sites.</span></li>
             <li class="chain__step"><pixel-sprite sprite="props" pose="house" scale="2"></pixel-sprite><span class="chip chip--amber">+1–2 weeks</span><span>Mosquito populations increase.</span></li>
@@ -169,7 +169,7 @@
         </div>
 
         <div class="drill__console-wrap">
-          <div class="mascot-slot drill__slot" id="slot-drill" style="--cell:4"></div>
+          <div class="mascot-slot drill__slot" id="slot-drill"></div>
           <div class="console" id="drill-console">
             <div class="console__bar"><span id="dc-title">Dengue Drill · Western Visayas (2019)</span><span class="chip chip--intel">Round 2 · With EpiLag-PH</span></div>
             <div class="console__grid drill__panels">
@@ -199,13 +199,20 @@
     <div class="dither dither--up" aria-hidden="true"></div>
 
     <!-- ============================================================ features -->
-    <section class="features surface tone-paper tx-tracks sf-subtle" id="features" aria-labelledby="features-title">
+    <section class="features surface tone-paper sf-subtle" id="features" aria-labelledby="features-title">
       <div class="wrap">
         <div class="sec-head">
           <div><div class="label">Features</div><h2 id="features-title">Six tools. <span class="em">Each one leads to an action.</span></h2></div>
-          <div class="mascot-slot features__slot" id="slot-features" style="--cell:3"></div>
+          <p class="lead features__lead">From the forecast to the barangay, every tool ends in something to do.</p>
         </div>
-        <div class="tools" id="tools"></div>
+      </div>
+      <div class="tools-band surface tx-tracks" id="tools-band">
+        <div class="wrap tools-band__inner">
+          <div class="mascot-slot features__slot" id="slot-features"></div>
+          <ol class="ts-row" id="tools" aria-label="The six tools"></ol>
+        </div>
+      </div>
+      <div class="wrap">
         <div class="opendata">
           <div class="opendata__text"><i data-icon="database" data-size="32"></i><div><b>Open data for deeper analysis</b><span class="small muted">Every forecast as CSV and JSON, with column definitions.</span></div></div>
           <div class="btn-row">
@@ -225,6 +232,7 @@
           <div class="label">From alert to action</div>
           <h2 id="action-title">Each alert comes<br><span class="em">with a plan.</span></h2>
           <p class="lead">A forecast is just the beginning. EpiLag-PH turns each early warning into clear, practical steps for local action, and a one-page brief for the mayor.</p>
+          <div class="mascot-slot action__slot" id="slot-action"></div>
           <div class="brief brief--tilt" id="brief">
             <div class="brief__head"><span class="brand"><span class="lg brief__lg"><i data-icon="logo" data-size="16"></i></span></span><div><div class="small muted">EpiLag-PH</div><h4>Guimaras Action Brief</h4></div></div>
             <div class="meta nums" id="brief-meta">Forecast: 35 cases · likely range 15–65<br>Week ending 30 June 2019</div>
@@ -251,7 +259,6 @@
             <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="broom" scale="1"></pixel-sprite></span><div><b>Weeks 1–2</b><span>Clean-up drives and container covers where the budget averts the most cases.</span></div></li>
             <li class="step"><span class="step__ic"><pixel-sprite sprite="props" pose="hospital" scale="1"></pixel-sprite></span><div><b>Weeks 2–4</b><span>Stock NS1 tests and IV fluids for the upper forecast; open dengue fast lanes.</span></div></li>
           </ol>
-          <div class="mascot-slot action__slot" id="slot-action" style="--cell:3"></div>
         </div>
       </div>
     </section>
@@ -263,10 +270,10 @@
           <div class="label">The film</div>
           <h2 id="film-title">Can dengue be seen<br><span class="em">before hospitals fill up?</span></h2>
           <p class="lead">Follow the signal from rain to forecast to local action, in 1:48.</p>
-          <div class="film__player"><video controls preload="none" poster="film/poster.jpg" src="demo.mp4" aria-label="EpiLag-PH film, 1 minute 48 seconds"></video></div>
+          <div class="film__stage"><div class="mascot-slot film__slot" id="slot-film"></div>
+          <div class="film__player"><video controls preload="none" poster="film/poster.jpg" src="demo.mp4" aria-label="EpiLag-PH film, 1 minute 48 seconds"></video></div></div>
         </div>
         <div class="inside">
-          <div class="mascot-slot film__slot" id="slot-film" style="--cell:3"></div>
           <div class="label">Inside the app</div>
           <p class="small muted">Explore the tools when you're ready.</p>
           <ul class="inside__list" id="inside"></ul>
@@ -280,7 +287,7 @@
         <div class="sec-head">
           <div><div class="label">Evidence from real outbreaks</div><h2 id="proof-title" class="h2-sm">Tested honestly. <span class="em">No peeking at the future.</span></h2>
             <p class="muted">Every test year was forecast only from earlier years.</p></div>
-          <div class="mascot-slot proof__slot" id="slot-proof" style="--cell:3"></div>
+          <div class="mascot-slot proof__slot" id="slot-proof"></div>
         </div>
         <div class="proof__grid">
           <div class="evidence evidence--alert" id="proof-claim"><span class="disc"><i data-icon="alert" data-size="24"></i></span><div><b class="nums"><span data-count="30">30</span> of <span data-count="32">32</span></b><span>provinces that crossed the epidemic line were flagged 4 weeks ahead (2019 replay)</span></div></div>
@@ -306,7 +313,7 @@
           </div>
         </div>
         <div class="finale" id="finale" aria-hidden="true">
-          <pixel-sprite class="finale__mosq" sprite="mosquito" frames="fly1,fly2" fps="10" scale="3"></pixel-sprite>
+          <div class="mascot-slot finale__slot" id="slot-finale"></div>
           <div class="finale__tongue"></div>
           <pixel-sprite class="finale__frog" sprite="frog" pose="watch" scale="6"></pixel-sprite>
           <pixel-sprite class="finale__tree" sprite="props" pose="tree" scale="3"></pixel-sprite>

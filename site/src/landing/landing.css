@@ -5,7 +5,7 @@ section { padding: 96px 0; }
 .sec-head p { margin-top: 10px; }
 .label + h1, .label + h2 { margin-top: 14px; }
 h2 + .lead { margin-top: 16px; }
-.mascot-slot { pointer-events: none; }
+.mascot-slot { pointer-events: none; --cell: 5; }
 
 /* nav */
 .top { position: sticky; top: 14px; z-index: 40; }
@@ -18,7 +18,7 @@ h2 + .lead { margin-top: 16px; }
 .hero__title { margin: 16px 0 20px; }
 .hero__copy .btn-row { margin: 28px 0 24px; }
 .hero__stage { position: relative; }
-.hero__slot { position: absolute; right: -128px; top: 96px; width: 132px; height: 150px; z-index: 3; }
+.hero__slot { position: absolute; right: -120px; top: 70px; width: 170px; height: 190px; z-index: 3; --cell: 6; }
 .hero__window { position: relative; z-index: 2; }
 .hero__app { display: grid; gap: 14px; }
 .hero__app-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 20px; align-items: start; }
@@ -47,9 +47,12 @@ h2 + .lead { margin-top: 16px; }
 /* ------------------------------------------------------------------ problem */
 .problem { overflow: hidden; }
 .problem__head { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr); gap: 32px; align-items: end; }
-.problem__aside { position: relative; padding-top: 120px; }
-.problem__slot { position: absolute; right: 8px; top: 0; width: 140px; height: 120px; }
-.chain { list-style: none; padding: 0; margin: 48px 0 40px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; counter-reset: c; }
+.problem__aside { position: relative; }
+.problem__pin .wrap { position: relative; }
+/* the mosquito hops along the chain, standing on the lit step's prop (see main.js) */
+.problem__slot { position: absolute; left: 0; top: 0; width: 140px; height: 130px; --cell: 4; z-index: 2;
+  transition: left .36s steps(6), top .36s steps(6); }
+.chain { list-style: none; padding: 0; margin: 136px 0 40px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; counter-reset: c; }
 .chain__step { position: relative; display: grid; justify-items: center; text-align: center; gap: 10px; font-size: 14px; color: var(--muted); --on: 1; }
 .chain__step pixel-sprite { height: 96px; display: grid; align-items: end; opacity: calc(.35 + .65 * var(--on)); transform: translateY(calc((1 - var(--on)) * 10px)); }
 .chain__step .chip { opacity: calc(.4 + .6 * var(--on)); }
@@ -87,11 +90,33 @@ h2 + .lead { margin-top: 16px; }
 .drill__frog { position: absolute; left: -54px; bottom: -40px; z-index: 3; }
 
 /* ------------------------------------------------------------------ features */
+/* six tools as getcko's "How it works" band (pinned scrub on desktop, see main.js) */
 .features { padding-bottom: 0; }
-.features__slot { width: 120px; height: 100px; }
+.features__lead { max-width: 420px; }
+.tools-band { padding: 72px 0 56px; --sf-opacity: .22; }
+.tools-band::before { background-position: var(--sf-x, 0px) 0; }
+.tools-band__inner { position: relative; }
+.features__slot { position: absolute; left: 0; top: 0; width: 150px; height: 140px; z-index: 2;
+  transition: left .36s steps(6), top .36s steps(6); }
+.ts-row { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr) 96px minmax(0, 1fr); row-gap: 112px; }
+.ts-link[data-after="2"] { display: none; }
+.ts-step { --on: 1; min-width: 0; opacity: calc(.36 + .64 * var(--on)); }
+.ts-step a { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; text-decoration: none; color: inherit; }
+.ts-icon { display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: var(--r-md); background: var(--surface);
+  border: 1px solid var(--line); box-shadow: var(--shadow-1, 0 1px 2px rgba(7, 23, 17, .08)); transform-origin: 50% 100%;
+  --i1: var(--ink); --i2: var(--forest-soft); --i3: var(--forest); transition: transform var(--dur-base) var(--ease-out); }
+.ts-step a:hover .ts-icon { transform: translateY(-4px); }
+.ts-head { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+.ts-n { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 13px; color: var(--muted); }
+.ts-label { position: relative; isolation: isolate; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.ts-mark { position: absolute; inset: .14em -.12em .02em; z-index: -1; background: var(--forest-soft); transform-origin: 0 50%; }
+.ts-mark::after { content: ""; position: absolute; inset: auto 0 0; height: 4px; background: var(--forest); }
+.ts-line { margin-left: -10px; padding: 6px 10px; border-radius: var(--r-sm); background: var(--surface); font-size: 14px; color: var(--muted); max-width: 300px; }
+.ts-link { display: flex; justify-content: space-between; align-self: start; margin: 32px 12px 0; }
+.ts-link span { width: 8px; height: 8px; background: var(--line-strong); }
+.ts-link i { display: block; width: 100%; height: 100%; background: var(--forest); }
 .tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.tool { text-decoration: none; }
-.opendata { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; padding: 16px 20px;
+.opendata { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding: 16px 20px;
   border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
 .opendata__text { display: flex; align-items: center; gap: 14px; --i2: var(--forest-soft); }
 .opendata__text b { display: block; }
@@ -119,14 +144,16 @@ h2 + .lead { margin-top: 16px; }
 .step__ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--forest-soft); }
 .step b { display: block; font-size: 17px; }
 .step span { font-size: 14px; color: var(--muted); }
-.action__slot { position: absolute; right: -8px; top: -112px; width: 110px; height: 100px; }
+.action__copy { position: relative; }
+.action__slot { position: absolute; right: -44px; bottom: 150px; width: 140px; height: 130px; --cell: 4; }
 
 /* ------------------------------------------------------------------ film */
 .film__grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 .film__player { margin-top: 24px; border-radius: var(--r-lg); overflow: hidden; background: var(--night); box-shadow: var(--shadow-float); }
 .film__player video { width: 100%; aspect-ratio: 16 / 9; background: var(--night); }
 .inside { position: relative; padding: 22px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); margin-top: 52px; }
-.film__slot { position: absolute; right: 12px; top: -92px; width: 110px; height: 96px; }
+.film__stage { position: relative; }
+.film__slot { position: absolute; left: -116px; top: 70px; width: 150px; height: 150px; z-index: 2; }
 .inside__list { list-style: none; padding: 0; margin-top: 10px; }
 .inside__list a { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--line); text-decoration: none; --i1: var(--ink); --i2: var(--forest-soft); --i3: var(--forest); }
 .inside__list a b { display: block; font-size: 15px; }
@@ -147,7 +174,7 @@ h2 + .lead { margin-top: 16px; }
 .finale { position: relative; height: 340px; }
 .finale__frog { position: absolute; right: 8%; bottom: 0; z-index: 2; }
 .finale__tree { position: absolute; right: -10px; bottom: 0; opacity: .9; }
-.finale__mosq { position: absolute; left: 6%; top: 18%; z-index: 3; }
+.finale__slot { position: absolute; left: 0; top: 4%; width: 150px; height: 140px; --cell: 4; }
 .finale__tongue { position: absolute; height: 12px; background: #E5604F; box-shadow: 0 3px 0 #B8402F; transform-origin: right center; transform: scaleX(0); z-index: 1; }
 .finale__again { position: absolute; left: 0; bottom: 12px; color: var(--forest); font-weight: 700; opacity: 0; }
 .finale.done .finale__again { opacity: 1; }
@@ -173,14 +200,25 @@ h2 + .lead { margin-top: 16px; }
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 1100px) {
   .hero__grid, .drill__grid, .action__grid, .film__grid, .cta__grid { grid-template-columns: minmax(0, 1fr); }
-  .hero__stage { margin-top: 120px; }
-  .hero__slot { right: 0; top: -132px; height: 130px; }
+  .hero__stage { margin-top: 150px; }
+  .hero__slot { right: 0; top: -150px; height: 150px; --cell: 5; }
   .problem__head { grid-template-columns: minmax(0, 1fr); }
-  .chain { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; }
+  .chain { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 120px; }
   .chain__step:nth-child(3)::after { display: none; }
   .proof__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .drill__frog { left: auto; right: -8px; }
+  .action__slot { right: 0; bottom: -40px; }
+  .film__slot { left: auto; right: 0; top: -100px; --cell: 4; }
+  /* tool band: one column, icon beside the text, dots running down */
+  .tools-band { padding: 40px 0; }
+  .ts-row { grid-template-columns: minmax(0, 1fr); row-gap: 0; }
+  .ts-link[data-after="2"] { display: flex; }
+  .ts-step a { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 6px 16px; align-items: center; padding-block: 8px; }
+  .ts-icon { grid-row: span 2; }
+  .ts-head { align-self: end; }
+  .ts-line { justify-self: start; }
+  .ts-link { flex-direction: column; gap: 4px; margin: 0; padding: 4px 0 4px 32px; }
 }
 @media (max-width: 680px) {
   section { padding: 64px 0; }
@@ -189,13 +227,18 @@ h2 + .lead { margin-top: 16px; }
   .hero__map { height: 300px; }
   .hero__time { flex-wrap: wrap; }
   .hero__more { margin-left: 0; }
-  .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 120px; margin-top: 120px; }
   .chain__step::after { display: none; }
   .tools, .proof__grid, .drill__stats, .drill__panels { grid-template-columns: minmax(0, 1fr); }
   .rail { grid-template-columns: 1fr 1fr; row-gap: 20px; }
   .rail::before, .helps .rail::after { display: none; }
   .action__copy .brief { margin-left: 0; }
   .finale { height: 260px; }
+  .mascot-slot { --cell: 4; }
+  .hero__slot { --cell: 4; }
+  .finale__slot { --cell: 3; }
+  .features__slot { width: 110px; height: 100px; --cell: 3; }
+  .ts-label { font-size: 21px; }
   .hero__props { left: 0; right: 0; }
   .drill__frog { display: none; }
 }

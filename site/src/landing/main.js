@@ -23,10 +23,13 @@ const fmt = (n) => Math.round(n).toLocaleString("en");
 const phone = matchMedia("(max-width: 680px)").matches;
 
 // ------------------------------------------------------------------ static parts
-$("tools").innerHTML = TOOLS.map((t, i) => `<a class="card tool" href="web/?page=${t.page}">
-  <span class="ic">${icon(t.icon, { size: 48 })}</span>
-  <div><h3>${i + 1}. ${t.name}</h3><p>${t.short}</p></div>
-  <span class="go">${icon("arrowRight", { size: 24 })}</span></a>`).join("");
+// six tools as a getcko-style step band: icon tile, number, highlighted name, one line; dotted links between
+const toolStep = (t, i) => `<li class="ts-step"><a href="web/?page=${t.page}">
+  <span class="ts-icon">${icon(t.icon, { size: 48 })}</span>
+  <span class="ts-head"><span class="ts-n nums">0${i + 1}</span><span class="ts-label"><span class="ts-mark" aria-hidden="true"></span>${t.name}</span></span>
+  <span class="ts-line">${t.short}</span></a></li>`;
+const toolLink = (i) => `<li class="ts-link" data-after="${i}" aria-hidden="true">${"<span><i></i></span>".repeat(6)}</li>`;
+$("tools").innerHTML = TOOLS.map((t, i) => (i ? toolLink(i - 1) : "") + toolStep(t, i)).join("");
 
 const INSIDE = [["menu", 24, "home", "Overview", "A quick view of the situation."], ["forecastMap", 32, "map", "Forecast Map", "See areas at higher risk in the next weeks."],
   ["areaDetail", 32, "unit", "Area Detail", "Explore local forecasts and trends."], ["actionPlan", 32, "budget", "Action Plan", "Find where resources have the greatest impact."],
@@ -129,22 +132,51 @@ whenNear($("action-map"), async () => {
 });
 
 // ------------------------------------------------------------------ mascot (the mosquito follows the reader)
+// It flies from section to section, standing on alternate sides of the page and facing the content, then
+// ends in the frog's mouth at the bottom of the page.
 let mascot = null;
+// a slot that hops between items (the lit chain step, the lit tool): `place(item, box)` gives its left/top in
+// px inside the slot's offset parent, whose box is passed in; the slot's CSS transition makes the hop
+function hopper(slotEl, items, place) {
+  const h = { on: 0, items, move(i) {
+    h.on = i;
+    const box = slotEl.offsetParent.getBoundingClientRect(), [left, top] = place(items[i], box, slotEl);
+    Object.assign(slotEl.style, { left: `${left}px`, top: `${top}px` });
+  } };
+  h.move(0);
+  addEventListener("resize", () => h.move(h.on));
+  return h;
+}
+const lit = (els) => { let i = 0; els.forEach((e, k) => { if (Number(gsap.getProperty(e, "--on")) > 0.5) i = k; }); return i; };
+// problem: stand on top of the lit step's prop
+const chainHop = hopper($("slot-problem"), [...document.querySelectorAll(".chain__step pixel-sprite")], (el, box, sl) => {
+  const r = el.getBoundingClientRect();
+  return [r.left + r.width / 2 - box.left - sl.offsetWidth / 2, r.top - box.top - sl.offsetHeight + 4];
+});
+// six tools: beside the lit tool's icon (desktop), or above the right end of its row (one column)
+const toolSteps = [...document.querySelectorAll(".ts-step")];
+const toolHop = hopper($("slot-features"), toolSteps, (el, box, sl) => {
+  const st = el.getBoundingClientRect(), ic = el.querySelector(".ts-icon").getBoundingClientRect();
+  if (matchMedia("(max-width: 1099px)").matches) return [st.right - box.left - sl.offsetWidth, st.top - box.top - sl.offsetHeight + 20];
+  return [ic.right - box.left + 4, ic.bottom - box.top - sl.offsetHeight];
+});
+
 introFinished.then(() => Mascot.create("mosquito")).then((m) => {
   mascot = m;
   const slot = (id, section, pose, target, extra = {}) => m.register({ id, section: document.querySelector(section), slot: $(`slot-${id}`), target, ...pose, ...extra });
-  slot("hero", ".hero", { frames: ["fly1", "fly2"], fps: 10 }, () => $("prio-first"), { flip: !phone });
-  slot("problem", ".problem", { pose: "alert" }, $("problem-callout"));
-  slot("drill", ".drill", { pose: "dash" }, $("dc-status"), { flip: true });
-  slot("features", ".features", { pose: "search" }, document.querySelector(".tool"), { flip: true });
+  slot("hero", ".hero", { frames: ["fly1", "fly2"], fps: 12 }, () => $("prio-first"));
+  slot("problem", ".problem", { pose: "alert" }, $("problem-callout"), { flip: false });
+  slot("drill", ".drill", { pose: "dash" }, $("dc-status"));
+  slot("features", ".features", { pose: "search" }, () => toolSteps[toolHop.on].querySelector(".ts-icon"), { flip: true });
   slot("action", ".alert-action", { pose: "clipboard" }, $("brief"), { flip: true });
   slot("film", ".film", { pose: "front" }, null);
-  slot("proof", ".proof", { pose: "check" }, $("proof-claim"), { flip: true });
-  // the final section has no slot: the mosquito breaks apart there, and the frog's own mosquito takes over
-}).catch(() => { /* sprites missing: the page still works without the mascot */ });
+  slot("proof", ".proof", { pose: "check" }, $("proof-claim"));
+  // final call to action: the mosquito flies down to the frog, which eats it
+  playFinale($("finale"), m);
+}).catch(() => playFinale($("finale"), null));
 
 // ------------------------------------------------------------------ scroll animations
-reveal(".sec-head, .problem__head, .tool, .opendata, .action__card, .action__map, .step, .inside, .film__player, .evidence, .drill__copy > *, .console, .cta__grid > div:first-child");
+reveal(".sec-head, .problem__head, .opendata, .action__card, .action__map, .step, .inside, .film__player, .evidence, .drill__copy > *, .console, .cta__grid > div:first-child");
 document.querySelectorAll("[data-count]").forEach((el) => countUp(el));
 
 const mm = gsap.matchMedia();
@@ -154,13 +186,29 @@ mm.add({ desk: "(min-width: 1100px) and (prefers-reduced-motion: no-preference)"
   const tl = gsap.timeline({ defaults: { ease: "none" },
     scrollTrigger: ctx.conditions.desk
       ? { trigger: ".problem", start: "top top", end: "+=120%", scrub: 0.6, pin: ".problem__pin", anticipatePin: 1 }
-      : { trigger: ".chain", start: "top 80%", end: "bottom 45%", scrub: 0.6 } });
+      : { trigger: ".chain", start: "top 80%", end: "bottom 45%", scrub: 0.6 },
+    onUpdate() { const i = lit(steps); if (i !== chainHop.on) chainHop.move(i); } });
   steps.forEach((s, i) => tl.fromTo(s, { "--on": 0 }, { "--on": 1, duration: 0.4, ease: "steps(2)" }, i * 0.5));
   tl.fromTo("#helps-rail", { "--fill": 0 }, { "--fill": 1, duration: steps.length * 0.5 }, 0);
   tl.to({}, { duration: 0.4 });
   // action steps: the timeline line fills as the steps scroll past
+  // six tools: getcko's "How it works" band. Pinned on desktop; each step lights up, its name gets the
+  // highlighter, its icon pops in two steps, the dots to the next step pop, and the texture slides sideways
+  const band = $("tools-band");
+  const tt = gsap.timeline({ defaults: { ease: "none" },
+    scrollTrigger: ctx.conditions.desk
+      ? { trigger: band, start: "center center", end: "+=140%", scrub: 0.6, pin: true, anticipatePin: 1 }
+      : { trigger: band, start: "top 85%", end: "bottom 35%", scrub: 0.6 },
+    onUpdate() { const i = lit(toolSteps); if (i !== toolHop.on) toolHop.move(i); } });
+  tt.fromTo(band, { "--sf-x": "0px" }, { "--sf-x": "1280px", duration: toolSteps.length }, 0);
+  toolSteps.forEach((s, i) => {
+    tt.fromTo(s, { "--on": 0 }, { "--on": 1, duration: 0.35, ease: "power2.out" }, i)
+      .fromTo(s.querySelector(".ts-mark"), { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.out" }, i + 0.05)
+      .fromTo(s.querySelector(".ts-icon"), { scale: 0.5 }, { scale: 1, duration: 0.25, ease: "steps(2)" }, i);
+    const dots = band.querySelectorAll(`.ts-link[data-after="${i}"] i`);
+    if (dots.length) tt.fromTo(dots, { scale: 0 }, { scale: 1, duration: 0.12, ease: "steps(2)", stagger: 0.09 }, i + 0.4);
+  });
+  tt.to({}, { duration: 0.5 });
   gsap.fromTo(".steps", { "--fill": 0 }, { "--fill": 1, ease: "none", scrollTrigger: { trigger: ".steps", start: "top 80%", end: "bottom 55%", scrub: 0.5 } });
 });
 
-// final call to action: the frog catches the mosquito (once, replayable)
-playFinale($("finale"));
