@@ -6,7 +6,7 @@ import { cardTitle, count, details, esc, head, infoDisclosure, tableHtml } from 
 export async function render(el, ctx) {
   const { t, labels, lang, i18n, fc, horizon, panel } = ctx;
   if (panel !== "region_qc") {
-    el.innerHTML = `${head(t.qc_head, t.qc_muted)}${infoDisclosure(labels.about_this, `<p>${esc(t.qc_note)}</p>`)}<section class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.switch_data)}</b><p>${esc(t.switch_qc)}</p><div class="btn-row"><button type="button" class="btn btn--primary btn--sm" id="switch">${esc(t.switch_btn)}</button></div></div></section>`;
+    el.innerHTML = `${head(t.qc_head, t.qc_muted)}${infoDisclosure(labels.about_this, `<p>${esc(t.qc_note)}</p>`)}<section class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.switch_data)}</b><p>${esc(labels.latest_panel_available)}</p><div class="btn-row"><button type="button" class="btn btn--primary btn--sm" id="switch">${esc(labels.switch_to_regions)}</button></div></div></section>`;
     el.querySelector("#switch").addEventListener("click", () => ctx.set({ panel: "region_qc" }));
     return;
   }

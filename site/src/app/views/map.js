@@ -4,7 +4,7 @@ import { loadGrids, createVoxelMap } from "../../lib/voxel.js";
 import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, details, download, downloadButton, esc, head, infoDisclosure, pill, tableHtml } from "../ui.js";
 
 export async function render(el, ctx) {
-  const { t, labels, fc, fcH, horizon, mode, panel } = ctx;
+  const { t, labels, fc, fcH, horizon, mode, panel, area, regionMeta } = ctx;
   const target = Math.max(...fcH.map((r) => r.target_week)), asOf = Math.max(...fcH.map((r) => r.week));
   const table = [...fcH].sort((a, b) => b.q50_per100k - a.q50_per100k);
   const top = table.slice(0, 12), peak = Math.max(table[0]?.q50_per100k ?? 0, 1e-9);
@@ -57,8 +57,8 @@ export async function render(el, ctx) {
   ctx.topDownload(t.download_all, saveAll);
 
   const box = el.querySelector("#vmap"), tip = el.querySelector("#vmap-tip");
-  const grids = await loadGrids("voxel_ph");
-  const grid = panel === "province" ? grids.province : grids.region;
+  const grids = panel === "province" && regionMeta ? await loadGrids("voxel_regions") : await loadGrids("voxel_ph");
+  const grid = panel === "province" && regionMeta ? grids[regionMeta.psgc] : panel === "province" ? grids.province : grids.region;
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
   const create = ctx.map === "maplibre" ? (await import("../../lib/maplibre-map.js")).createMaplibreMap : createVoxelMap;
   const map = await create(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province",
@@ -78,11 +78,12 @@ export async function render(el, ctx) {
     const r = byId.get(u);
     return [u, r ? { color: LV_COLOR[r.level], height: LV_HEIGHT[r.level] } : { color: NODATA, height: 1 }];
   })), { duration: 620 });
-  const onLeave = () => { tip.hidden = true; map.highlight(null); };
+  map.highlight(area);
+  const onLeave = () => { tip.hidden = true; map.highlight(area); };
   box.addEventListener("pointerleave", onLeave);
   const rank = el.querySelector("#rank");
   const onRankOver = (e) => map.highlight(e.target.closest("[data-u]")?.dataset.u ?? null);
-  const onRankLeave = () => map.highlight(null);
+  const onRankLeave = () => map.highlight(area);
   rank.addEventListener("pointerover", onRankOver);
   rank.addEventListener("pointerleave", onRankLeave);
   rank.addEventListener("focusin", onRankOver);
