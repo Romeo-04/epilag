@@ -1,7 +1,8 @@
 """Export the data and copy for the JavaScript web app (site/web/ -> docs/web/).
 
 Writes compact JSON into site/public/web/data/, which Vite copies to docs/web/data/:
-  meta.json                       units, names, populations and data dates per panel
+  meta.json                       units, names, populations and data dates per panel, and the regions with their
+                                  provinces and cities (for the Region -> Province / City pickers)
   {panel}_forecast.json           latest forecasts (2/4/6/8 weeks ahead)
   {panel}_thresholds.json         alert / epidemic thresholds per unit and week of year
   {panel}_history.json            weekly reported cases
@@ -28,6 +29,12 @@ REPORTS = ROOT / "reports"
 OUT = ROOT / "site" / "public" / "web" / "data"
 I18N = ROOT / "site" / "src" / "app" / "i18n.json"
 PANELS = ["region_qc", "province"]
+# Dengue Drill region codes (PSGC) -> region unit ids of the region_qc panel
+REGION_OF = {"PH01": "R_REGION_I", "PH02": "R_REGION_II", "PH03": "R_REGION_III", "PH04": "R_REGION_IV-A",
+             "PH05": "R_REGION_V", "PH06": "R_REGION_VI", "PH07": "R_REGION_VII", "PH08": "R_REGION_VIII",
+             "PH09": "R_REGION_IX", "PH10": "R_REGION_X", "PH11": "R_REGION_XI", "PH12": "R_REGION_XII",
+             "PH13": "R_NCR", "PH14": "R_CAR", "PH16": "R_REGION_XIII", "PH17": "R_MIMAROPA", "PH19": "R_BARMM"}
+CITIES = {"R_NCR": ["QC"]}  # cities with their own (latest) forecast, listed under their region
 EPOCH = pd.Timestamp("1970-01-01")
 
 
@@ -103,6 +110,11 @@ def main() -> None:
         write(f"{panel}_history.json", table(hist[["unit_id", "week", "cases"]], units))
         write(f"{panel}_backtest.json", table(pd.read_parquet(DATA / f"{panel}_backtest.parquet"), units))
         write(f"{panel}_drivers.json", table(pd.read_parquet(DATA / f"{panel}_drivers.parquet"), units))
+    # regions in PSGC order, each with its provinces (old panel, to Jan 2021) and cities (latest panel)
+    drill = json.loads((ROOT / "site" / "public" / "drill" / "data.json").read_text(encoding="utf-8"))
+    meta["regions"] = [{"id": REGION_OF[r["id"]], "psgc": r["id"], "name": r["name"],
+                        "provinces": [p["id"] for p in r["provinces"]], "cities": CITIES.get(REGION_OF[r["id"]], [])}
+                       for r in sorted(drill["regions"], key=lambda r: r["id"])]
     write("meta.json", meta)
 
     brgy = pd.read_csv(DATA / "qc_barangays.csv")
