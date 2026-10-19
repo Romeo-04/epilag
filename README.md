@@ -7,12 +7,13 @@ health office should do this week, and where a limited budget prevents the most 
 Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
-| [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Film (1:48)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
-| --- | --- | --- | --- | --- | --- |
+| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Film (1:48)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
+| --- | --- | --- | --- | --- | --- | --- |
 
-The live app runs fully in your browser, with no install or account. The first load takes about a minute.
+Everything runs in your browser, with no install or account: the app is ready in about 3 seconds, and the maps and
+the game are drawn as 3D pixel art.
 
-![Replay of the forecast made on 2 June 2019](docs/screenshots/map_replay_2019.png)
+![The EpiLag-PH website](docs/screenshots/landing.png)
 
 ## In one minute
 - **Problem:** dengue response usually starts after hospital admissions are already high. Cases are reported after
@@ -31,9 +32,13 @@ The live app runs fully in your browser, with no install or account. The first l
 Forecasts are easy to ignore until you feel what they are worth. Dengue Drill makes you the health officer for one of 17
 regions during the real 2019 outbreak, the year the Philippines declared a national dengue epidemic.
 
+Your region is a 3D pixel island: each province rises higher and redder as its cases pass its epidemic line, rain falls
+as heavily as it did that week (storms bring lightning), mosquitoes swarm after the rain, and outbreaks glow. Drag to
+turn the island, scroll or pinch to zoom.
+
 | | |
 | --- | --- |
-| ![Dengue Drill title screen: choose one of 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the map](docs/screenshots/drill_round2.png) |
+| ![Dengue Drill title screen: choose one of 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the 3D board](docs/screenshots/drill_round2.png) |
 
 1. **Pick a region.** You get ₱5 million in response teams and 8 turns starting in May 2019. Each turn is 2 weeks.
 2. **Read the rain receipt.** Before you start, a receipt lists the season's rain and the cases it brought, province by province.
@@ -75,10 +80,16 @@ flowchart LR
 | **Researchers, newsrooms and other apps** | Every forecast as [CSV and JSON](https://romeo-04.github.io/epilag/data/), with column definitions |
 
 ## What you can do
-**Overview: see this week's priorities.** The app opens on what each tool does, why it matters, and which areas need
-action now.
+**Overview: see this week's priorities.** The app opens on a dashboard: how many areas need action now, a 3D map of
+the forecast, the priority list, and this week's action brief. The sidebar groups the tools into *Monitor*, *Act* and
+*Evidence*; explanations sit behind "About this" buttons, in English and Filipino.
 
-![Overview: what each tool does, and this week's action brief](docs/screenshots/home.png)
+![Overview dashboard](docs/screenshots/home.png)
+
+**Forecast map: where to act first.** Columns rise with the alert level; hover for the numbers, click to open an area.
+In replay mode it shows what happened next.
+
+![Forecast map, replay of 2 June 2019](docs/screenshots/map_replay_2019.png)
 
 **Area page: know what to do and why.** Each area shows its forecast range, alert level, checklist, and the
 factors behind the forecast (recent cases, season, rain, heat, humidity).
@@ -151,21 +162,26 @@ Full write-up: [methodology page](https://romeo-04.github.io/epilag/methodology.
 - EpiLag-PH supports, and does not replace, the judgement of local epidemiologists and DOH surveillance.
 
 ## Run it
-```bash
-python -m venv .venv
-.venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
-streamlit run app/streamlit_app.py                 # the app runs from committed files in app/data
-python scripts/build_web.py                        # rebuild the in-browser version in docs/web
-pytest tests                                       # 71 tests
-```
-
-The redesigned site (in progress, see [REDESIGN_PLAN.md](REDESIGN_PLAN.md)) is built with Vite from `site/` into `docs/`:
+The website, app and game are built with Vite from `site/` into `docs/` (served by GitHub Pages):
 ```bash
 cd site
 npm ci
 npm run dev        # http://localhost:5173/epilag/
 npm run build      # writes the pages into ../docs
 ```
+
+The Python side makes the data the site reads, and holds the tests:
+```bash
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
+python scripts/build_web.py                        # app data (site/public/web/data) and EN/FIL copy
+pytest tests                                       # needs Playwright and a built site for the browser tests
+streamlit run app/streamlit_app.py                 # the original Streamlit app, kept for local use
+```
+
+The tests check that the JavaScript app computes what the Python does (alert levels, thresholds, replays, the
+"30 of 32" claim, budget plans), that the game scores like `scripts/drill_data.py`, and that every page loads without
+errors, fits a phone, works with reduced motion and the keyboard, and passes an accessibility scan.
 
 <details>
 <summary>Rebuild everything from the raw data</summary>
@@ -181,21 +197,27 @@ python src/alerts.py province && python src/alerts.py region_qc
 python src/train_final.py province && python src/train_final.py region_qc
 python src/export_app_data.py
 python scripts/make_figures.py
-python scripts/drill_data.py         # Dengue Drill season data (docs/drill/data.js)
+python scripts/drill_data.py         # Dengue Drill season data (site/public/drill/data.json)
 python scripts/export_open_data.py   # open forecast files (docs/data/)
+python scripts/build_web.py          # app data and EN/FIL copy
+python scripts/voxel_data.py         # 3D map grids (site/public/geo/)
+python scripts/landing_data.py       # the landing page's 2019 replay numbers
+python scripts/og_image.py           # social card (site/public/og.png)
+python scripts/screenshots.py        # docs/screenshots, from the built site
 ```
 </details>
 
 ## Repository
 ```
-app/            Streamlit app and its small data files
+site/           the website, app and game (Vite): pages, src/app (dashboard), src/drill (3D game),
+                src/landing, src/lib (pixel sprites, voxel maps, motion), public/ (data, sprites, grids)
+docs/           the built site for GitHub Pages, plus open data (data/), film (film/, demo.mp4), deck,
+                figures and screenshots
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
-tests/          unit tests (allocation) and app smoke tests
+app/            the original Streamlit app and its small data files
+tests/          allocation, JS/Python parity, game rules, site checks (Playwright), Streamlit smoke tests
 reports/        backtest, early-warning, ablation and SHAP results (CSV)
-docs/           landing page, in-browser app (web/), Dengue Drill (drill/), open data (data/), methodology,
-                film (film/, demo.mp4), deck, figures, screenshots
-scripts/        figures, screenshots, film recording (record_film.py), in-browser build
-site/           source of the redesigned site (Vite); `npm run build` writes into docs/
+scripts/        data for the site, sprites, voxel grids, figures, screenshots, social card, film recording
 ```
 
 ## References
