@@ -1,7 +1,7 @@
 // Did it work?: honest backtests, alert hit rates, range coverage, weather contribution, and full results tables.
 import { reports } from "../data.js";
 import { barChart } from "../chart.js";
-import { cardTitle, count, details, esc, head, infoDisclosure, tableHtml } from "../ui.js";
+import { cardTitle, count, details, esc, infoDisclosure, tableHtml } from "../ui.js";
 
 const FOREST = "#08754F", GREY = "#C5CFC9", SAGE = "#8A9891", WATCH = "#F58220";
 const pct = (v) => `${Math.round(v * 100)}%`;
@@ -10,7 +10,7 @@ const signed = (v) => `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(Math.round(
 export async function render(el, ctx) {
   const { t, labels, lang, horizon, panel } = ctx;
   const rep = (await reports())[panel] || {};
-  if (!rep.backtest) { el.innerHTML = `${head(t.proof_head, t.proof_muted)}<section class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.no_data)}</b><p>No backtest results for this dataset yet.</p></div></section>`; return; }
+  if (!rep.backtest) { el.innerHTML = `<section class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.no_data)}</b><p>No backtest results for this dataset yet.</p></div></section>`; return; }
   const bt = rep.backtest;
   const h = bt.some((r) => r.horizon === horizon) ? horizon : 4;
   const bh = bt.filter((r) => r.horizon === h);
@@ -26,7 +26,7 @@ export async function render(el, ctx) {
   const g = gain.filter((r) => r.horizon === h);
 
   el.innerHTML = `
-    ${head(t.proof_head, t.proof_muted)}${infoDisclosure(labels.about_this, `<p>${esc(t.proof_sub)}</p>`)}
+    ${infoDisclosure(labels.about_this, `<p>${esc(t.proof_sub)}</p>`)}
     <div class="grid grid--3"><section class="hero-card"><div class="hero-card__big">${count(beat)}<span class="hero-card__of"> / ${bh.length}</span></div><p>${esc(t.beat.replace("{h}", h))}</p><pixel-sprite class="hero-card__sprite" sprite="mosquito" pose="check" scale="3"></pixel-sprite></section>
       <section class="card kpi"><div class="kpi__lab"><i data-icon="alert" data-size="20"></i>${esc(t.ew_chart.replace("{h}", h))}</div><div class="kpi__val">${alw.length ? range(alw.map((r) => r.share_warned)) : "–"}</div><div class="kpi__desc">${esc(t.caught_share.replace("{h}", h))}</div></section>
       <section class="card kpi"><div class="kpi__lab"><i data-icon="didItWork" data-size="22"></i>${esc(t.range)}</div><div class="kpi__val">${range(bh.map((r) => r.coverage_10_90))}</div><div class="kpi__desc">${esc(t.coverage)}</div></section></div>

@@ -1,5 +1,5 @@
 // Data & limits: four concise reference blocks and eight symbols that explain what each number means.
-import { cardTitle, esc, head, infoDisclosure } from "../ui.js";
+import { cardTitle, esc, infoDisclosure } from "../ui.js";
 
 const BLOCKS = {
   en: [
@@ -26,9 +26,8 @@ const SYMBOLS = {
 };
 
 export function render(el, ctx) {
-  const { t, labels, lang } = ctx;
+  const { labels, lang } = ctx;
   el.innerHTML = `
-    ${head(t.about_head, t.about_muted)}
     <div class="about-grid">${BLOCKS[lang].map(([ic, title, body]) => `<section class="card about-block">${cardTitle(ic, title)}${infoDisclosure(labels.show_details, body.startsWith("<") ? body : `<p>${esc(body)}</p>`)}</section>`).join("")}</div>
     <section class="card">${cardTitle("database", labels.data_symbols)}<ul class="symbols">${SYMBOLS[lang].map(([ic, name, text]) => `<li><span class="symbols__ic"><i data-icon="${ic}" data-size="24"></i></span><div><b>${esc(name)}</b><span>${esc(text)}</span></div></li>`).join("")}</ul></section>`;
 }
