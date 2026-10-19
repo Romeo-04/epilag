@@ -58,7 +58,8 @@
         <div class="hero__stage">
           <svg class="hero__trail" viewBox="0 0 60 260" preserveAspectRatio="none" aria-hidden="true"><path d="M54 4 C 10 50, 4 110, 30 150 S 50 230, 8 256" /></svg>
           <div class="mascot-slot hero__slot" id="slot-hero"></div>
-          <div class="window hero__window" data-hero-window>
+          <div class="hero__deck-in" data-hero-window><div class="hero__deck">
+          <div class="window hero__window">
             <div class="window__bar">
               <span class="brand brand--sm"><span class="lg"><i data-icon="logo" data-size="16"></i></span>EpiLag-PH</span>
               <div class="window__tabs"><span aria-current="page">Overview</span><span>Forecast map</span><span>Area detail</span><span>QC barangays</span></div>
@@ -69,12 +70,7 @@
                 <div class="small muted" id="hero-sub">Latest forecast</div>
               </div>
               <div class="hero__app-main">
-                <div class="hero__view">
-                  <div class="hero__map" id="hero-map" role="img" aria-label="3D map of the Philippine regions coloured by dengue alert level, latest forecast"></div>
-                  <ul class="hero__counts" id="hero-counts" aria-label="Areas per alert level"></ul>
-                  <div class="hero__labels" id="hero-labels" aria-hidden="true"></div>
-                  <div class="hero__table" id="hero-table" hidden></div>
-                </div>
+                <div class="hero__spacer" aria-hidden="true"></div>
                 <div class="hero__rank">
                   <b class="hero__rank-title">Cases per 100,000 people</b>
                   <span class="small muted">(latest available)</span>
@@ -87,6 +83,14 @@
               </div>
             </div>
           </div>
+          <!-- the map is a second card, floating over the window's left side -->
+          <div class="hero__view">
+            <div class="hero__map" id="hero-map" role="img" aria-label="3D map of the Philippine regions coloured by dengue alert level, latest forecast"></div>
+            <ul class="hero__counts" id="hero-counts" aria-label="Areas per alert level"></ul>
+            <div class="hero__labels" id="hero-labels" aria-hidden="true"></div>
+            <div class="hero__table" id="hero-table" hidden></div>
+          </div>
+          </div></div>
         </div>
       </div>
     </section>

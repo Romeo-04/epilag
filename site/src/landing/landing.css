@@ -23,21 +23,25 @@ h2 + .lead { margin-top: 16px; }
 .hero__link { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
 .hero__link .disc { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--ink); }
 .hero__link:hover { color: var(--forest); }
-.hero__stage { position: relative; padding-top: 176px; }
-.hero__slot { position: absolute; left: -64px; top: -64px; width: 260px; height: 260px; z-index: 3; --cell: 8; }
-.hero__trail { position: absolute; left: -46px; top: 196px; width: 60px; height: 260px; overflow: visible; z-index: 0; pointer-events: none; }
+.hero__stage { position: relative; padding-top: 150px; }
+.hero__slot { position: absolute; left: -96px; top: -118px; width: 360px; height: 340px; z-index: 3; --cell: 11; }
+.hero__trail { position: absolute; left: -64px; top: 220px; width: 60px; height: 240px; overflow: visible; z-index: 0; pointer-events: none; }
 .hero__trail path { fill: none; stroke: var(--forest); stroke-width: 4; stroke-linecap: square; stroke-dasharray: 2 12; vector-effect: non-scaling-stroke;
   animation: trail-march 1.2s steps(7) infinite; }
 @keyframes trail-march { to { stroke-dashoffset: -28; } }
 @media (prefers-reduced-motion: reduce) { .hero__trail path { animation: none; } }
-.hero__window { position: relative; z-index: 2; }
+/* two cards, slightly turned in 3D like the mockup: the app window behind, the map card in front of its left side */
+.hero__deck { position: relative; z-index: 2; transform: perspective(1600px) rotateY(-9deg) rotateX(3deg) rotateZ(-1.2deg); transform-origin: 60% 50%; }
+.hero__window { position: relative; }
+.hero__spacer { min-height: 350px; }
 .hero__app { display: grid; gap: 12px; }
 .hero__app-title { font-size: 19px; letter-spacing: -.01em; }
 .hero__app-head .small { margin-top: 2px; }
 .hero__app-main { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; }
-.hero__view { position: relative; border-radius: var(--r-md); overflow: hidden; }
-.hero__map { height: 320px; background: var(--sky); }
-.hero__counts { position: absolute; right: 10px; top: 10px; list-style: none; margin: 0; padding: 8px 10px; display: grid; gap: 4px;
+.hero__view { position: absolute; left: -44px; top: 134px; width: 58%; border-radius: var(--r-lg); overflow: hidden; background: var(--sky);
+  border: 6px solid var(--surface); box-shadow: var(--shadow-float); transform: translateZ(40px); }
+.hero__map { height: 340px; background: var(--sky); }
+.hero__counts { position: absolute; left: 10px; top: 10px; list-style: none; margin: 0; padding: 8px 10px; display: grid; gap: 4px;
   background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--line); border-radius: var(--r-sm); font-size: 12px; }
 .hero__counts li { display: flex; align-items: center; gap: 6px; }
 .hero__counts .sq { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
@@ -219,6 +223,9 @@ h2 + .lead { margin-top: 16px; }
   .hero__stage { margin-top: 24px; padding-top: 170px; }
   .hero__slot { left: auto; right: 10%; top: 0; width: 200px; height: 200px; --cell: 6; }
   .hero__trail { display: none; }
+  .hero__deck { transform: none; display: grid; }
+  .hero__spacer { display: none; }
+  .hero__view { position: relative; left: auto; top: auto; width: auto; order: -1; margin: 0 0 -10px; transform: none; }
   .problem__head { grid-template-columns: minmax(0, 1fr); }
   .chain { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 120px; }
   .chain__step:nth-child(3)::after { display: none; }
