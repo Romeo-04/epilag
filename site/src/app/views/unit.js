@@ -8,7 +8,8 @@ const INK = "#071711", FOREST = "#08754F", BAND = "#08754F", RED = "#F04B2A";
 
 export async function render(el, ctx) {
   const { t, labels, lang, i18n, fc, fcH, horizon, mode, origin, panel } = ctx;
-  const names = [...fcH].sort((a, b) => b.q50_per100k - a.q50_per100k);
+  const localScope = panel === "region_qc" && ctx.regionMeta ? new Set([ctx.regionMeta.id, ...(ctx.regionMeta.cities || [])]) : null;
+  const names = [...fcH].filter((r) => !localScope || localScope.has(r.unit_id)).sort((a, b) => b.q50_per100k - a.q50_per100k);
   const unit = names.some((r) => r.unit_id === ctx.area) ? ctx.area : names[0].unit_id;
   const row = fcH.find((r) => r.unit_id === unit);
   const one = briefTable(fc.filter((r) => r.unit_id === unit), [row]);

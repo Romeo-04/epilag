@@ -6,7 +6,7 @@ import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, download, downloadBu
 const STORY_ART = [["props", "cloud"], ["mosquito", "fly1"], ["props", "residents"], ["props", "hospital"]];
 
 export async function render(el, ctx) {
-  const { t, labels, lang, i18n, fc, fcH, horizon, mode, panel } = ctx;
+  const { t, labels, lang, i18n, fc, fcH, horizon, mode, panel, area, regionMeta } = ctx;
   const asOf = Math.max(...fcH.map((r) => r.week));
   const target = Math.max(...fcH.map((r) => r.target_week));
   const n = (lv) => fcH.filter((r) => r.level === lv).length;
@@ -67,13 +67,13 @@ export async function render(el, ctx) {
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     e.preventDefault(); ctx.go(a.dataset.go, a.dataset.u ? { area: a.dataset.u } : {});
   }));
-  el.querySelector("#story-btn")?.addEventListener("click", () => ctx.set({ panel: "province", mode: "replay" }));
+  el.querySelector("#story-btn")?.addEventListener("click", () => ctx.set({ panel: "province", mode: "replay", region: null, area: null }));
   el.querySelector("#dl-brief")?.addEventListener("click", saveBrief);
   ctx.topDownload(t.download_brief, saveBrief);
 
   const box = el.querySelector("#home-map"), tip = el.querySelector("#home-map-tip");
-  const grids = await loadGrids("voxel_ph");
-  const grid = panel === "province" ? grids.province : grids.region;
+  const grids = panel === "province" && regionMeta ? await loadGrids("voxel_regions") : await loadGrids("voxel_ph");
+  const grid = panel === "province" && regionMeta ? grids[regionMeta.psgc] : panel === "province" ? grids.province : grids.region;
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
   const map = await createVoxelMap(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province",
     onHover(u, e) {
@@ -92,11 +92,12 @@ export async function render(el, ctx) {
     const r = byId.get(u);
     return [u, r ? { color: LV_COLOR[r.level], height: LV_HEIGHT[r.level] } : { color: NODATA, height: 1 }];
   })), { duration: 520 });
-  const onLeave = () => { tip.hidden = true; map.highlight(null); };
+  map.highlight(area);
+  const onLeave = () => { tip.hidden = true; map.highlight(area); };
   box.addEventListener("pointerleave", onLeave);
   const priorityList = el.querySelector("#home-priority");
   const onPriorityOver = (e) => map.highlight(e.target.closest("[data-u]")?.dataset.u ?? null);
-  const onPriorityLeave = () => map.highlight(null);
+  const onPriorityLeave = () => map.highlight(area);
   priorityList?.addEventListener("pointerover", onPriorityOver);
   priorityList?.addEventListener("pointerleave", onPriorityLeave);
   priorityList?.addEventListener("focusin", onPriorityOver);

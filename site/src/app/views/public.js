@@ -8,7 +8,8 @@ const MASCOT = { "outbreak warning": ["mosquito", "alert"], watch: ["mosquito", 
 export function render(el, ctx) {
   const { t, labels, lang, i18n, fcH, horizon } = ctx;
   const P = i18n.PUBLIC[lang];
-  const names = [...fcH].sort((a, b) => a.unit_name.localeCompare(b.unit_name));
+  const localScope = ctx.panel === "region_qc" && ctx.regionMeta ? new Set([ctx.regionMeta.id, ...(ctx.regionMeta.cities || [])]) : null;
+  const names = [...fcH].filter((r) => !localScope || localScope.has(r.unit_id)).sort((a, b) => a.unit_name.localeCompare(b.unit_name));
   const unit = names.some((r) => r.unit_id === ctx.area) ? ctx.area : names[0].unit_id;
   const row = fcH.find((r) => r.unit_id === unit);
   const status = P.status[row.level].replace("{area}", row.unit_name).replace("{h}", horizon);

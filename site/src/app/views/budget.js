@@ -9,7 +9,7 @@ const inputs = { budget: 5_000_000, costA: 15, effA: [0.1, 0.5], costB: 25, effB
 const SPEND = ["#DDEBDD", "#9FCBA6", "#4E9E6E", "#08754F"];
 
 export async function render(el, ctx) {
-  const { t, labels, fc, panel } = ctx;
+  const { t, labels, fc, panel, area, regionMeta } = ctx;
   const actionName = (name) => name === A ? labels.clean_up : labels.fogging;
   const effField = (id, [lo, hi]) => `<div class="effect"><span class="field__label">${esc(t.effect)}</span>
     <div class="effect__pair"><label>${esc(labels.low)}<input type="range" id="${id}-lo" min="0" max="0.8" step="0.05" value="${lo}"><output>${pct(lo)}</output></label>
@@ -34,8 +34,10 @@ export async function render(el, ctx) {
       <div class="spend-layout"><div class="vmap vmap--sm" id="pmap" role="img" aria-label="${esc(t.spend_chart)}"></div><div id="spend" class="chart-box"></div></div></section>
     <section class="card funded-table">${cardTitle("check", t.plan)}<div id="plan-table"></div><div class="btn-row">${downloadButton("dl-plan", t.download_plan)}</div></section>`;
 
-  const grids = await loadGrids("voxel_ph");
-  const map = await createVoxelMap(el.querySelector("#pmap"), { grid: panel === "province" ? grids.province : grids.region, pixel: 3, markers: panel !== "province" });
+  const grids = panel === "province" && regionMeta ? await loadGrids("voxel_regions") : await loadGrids("voxel_ph");
+  const grid = panel === "province" && regionMeta ? grids[regionMeta.psgc] : panel === "province" ? grids.province : grids.region;
+  const map = await createVoxelMap(el.querySelector("#pmap"), { grid, pixel: 3, markers: panel !== "province" });
+  map.highlight(area);
   let plan = [], disposeChart = null;
 
   function update() {

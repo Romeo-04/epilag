@@ -43,6 +43,7 @@ function readUrl() {
     origin: /^\d{4}-\d{2}-\d{2}$/.test(q.get("origin") || "") ? q.get("origin") : null,
     h: hs.includes(h) ? h : 4,
     lang: q.get("lang") === "fil" ? "fil" : "en",
+    region: q.get("region") || null,
     area: q.get("area") || null,
     map: q.get("map") === "maplibre" ? "maplibre" : null,
   };
@@ -51,6 +52,7 @@ function readUrl() {
 function writeUrl(s, push) {
   const q = new URLSearchParams({ page: s.page, panel: s.panel, mode: s.mode, h: s.h, lang: s.lang });
   if (s.mode === "replay" && s.origin) q.set("origin", s.origin);
+  if (s.region) q.set("region", s.region);
   if (s.area) q.set("area", s.area);
   if (s.map) q.set("map", s.map);
   history[push ? "pushState" : "replaceState"](null, "", `?${q}`);
@@ -61,7 +63,7 @@ let state = readUrl();
 /** Change URL state and re-render. A new page returns focus to the content heading. */
 function set(patch, { push = true } = {}) {
   const next = { ...state, ...patch };
-  if (patch.panel && patch.panel !== state.panel) next.area = null;
+  if (patch.panel && patch.panel !== state.panel && !Object.prototype.hasOwnProperty.call(patch, "area")) next.area = null;
   if (patch.mode === "latest") next.origin = null;
   const pageChanged = next.page !== state.page;
   state = next;
@@ -120,13 +122,75 @@ function groupFor(page) {
   return GROUPS.find(([, pages]) => pages.includes(page))?.[0] || "monitor";
 }
 
-function renderChrome(t, originList) {
+function panelLabel(labels, panel) {
+  return panel === "province" ? labels.provinces : labels.regions;
+}
+
+/** Keep old URLs usable while making the new region/area relationship explicit. */
+function normalizeState(m) {
+  const regions = Array.isArray(m.regions) ? m.regions : [];
+  let region = regions.find((r) => r.id === state.region) || null;
+  let changed = false;
+
+  if (state.region && !region) {
+    state.region = null;
+    changed = true;
+  }
+
+  // Old latest links may contain area=R_* or area=QC without the new region param.
+  if (!state.region && state.panel === "region_qc" && state.area) {
+    region = regions.find((r) => r.id === state.area || (r.cities || []).includes(state.area)) || null;
+    if (region) {
+      state.region = region.id;
+      changed = true;
+    } else {
+      state.area = null;
+      changed = true;
+    }
+  } else {
+    region = regions.find((r) => r.id === state.region) || null;
+  }
+
+  if (region) {
+    const isProvince = (region.provinces || []).includes(state.area);
+    const isLatest = state.area === region.id || (region.cities || []).includes(state.area);
+    if (!isProvince && !isLatest) {
+      state.panel = "region_qc";
+      state.area = region.id;
+      changed = true;
+    } else {
+      const panel = isProvince ? "province" : "region_qc";
+      if (state.panel !== panel) { state.panel = panel; changed = true; }
+      if (isProvince && state.mode === "latest") { state.mode = "replay"; state.origin = null; changed = true; }
+    }
+  } else if (state.panel === "region_qc" && state.area) {
+    state.area = null;
+    changed = true;
+  }
+
+  if (changed) writeUrl(state, false);
+  return region;
+}
+
+function renderChrome(t, originList, m) {
   const labels = LABELS[state.lang];
+  const regions = [...(m.regions || [])].sort((a, b) => String(a.psgc).localeCompare(String(b.psgc)));
+  const region = regions.find((r) => r.id === state.region) || null;
+  const latestNames = m.panels.region_qc.names || {};
+  const provinceNames = m.panels.province.names || {};
+  const areaRows = region ? [
+    { value: region.id, kind: "latest", label: `${labels.whole_region} ${labels.latest_suffix}` },
+    ...(region.cities || []).map((id) => ({ value: id, kind: "latest", label: `${latestNames[id] || id} ${labels.latest_suffix}` })),
+    ...(region.provinces || []).map((id) => ({ value: id, kind: "province", label: `${provinceNames[id] || id} ${labels.province_suffix}` })),
+  ] : [];
+  const selectedArea = areaRows.some((r) => r.value === state.area) ? state.area : region?.id || "";
+  const provinceScope = state.panel === "province";
+  const panelNote = i18n.PANELS[state.panel].note[state.lang];
   document.documentElement.lang = state.lang === "fil" ? "fil" : "en";
   const group = groupFor(state.page);
   $("app-page-title").textContent = t[`nav_${state.page}`];
   $("app-page-group").textContent = labels[group];
-  $("app-page-note").textContent = i18n.PANELS[state.panel].note[state.lang];
+  $("app-page-note").textContent = panelNote;
   $("sidebar-title").textContent = labels.dashboard;
   $("sidebar").querySelector(".sidebar__language .ctx__label")?.replaceChildren(document.createTextNode(t.lang));
   $("sidebar").querySelector(".sidebar__link .nav-item__text")?.replaceChildren(document.createTextNode(labels.drill));
@@ -149,22 +213,47 @@ function renderChrome(t, originList) {
 
   segmented($("lang"), t.lang, [["en", "EN"], ["fil", "FIL"]], state.lang, (v) => set({ lang: v }, { push: false }));
 
-  const P = i18n.PANELS, replay = state.mode === "replay";
+  const replay = state.mode === "replay";
   const hs = replay ? [4, 8] : [2, 4, 6, 8];
   $("ctx").innerHTML = `
-    <div class="ctx__item"><span class="ctx__label">${esc(t.dataset)}</span><div class="seg" id="c-panel"></div>
-      <span class="ctx__note">${esc(P[state.panel].note[state.lang])}</span></div>
-    <div class="ctx__item"><span class="ctx__label">${esc(t.mode)}</span><div class="seg" id="c-mode"></div></div>
-    ${replay ? `<div class="ctx__item ctx__item--origin"><label class="ctx__label" for="c-origin">${esc(t.origin)} <b id="c-origin-v">${esc(fmtDay(dayOf(state.origin)))}</b></label>
-      <input type="range" id="c-origin" min="0" max="${Math.max(0, originList.length - 1)}" step="1" value="${Math.max(0, originList.indexOf(dayOf(state.origin)))}" aria-label="${esc(t.origin)}"></div>` : ""}
-    <div class="ctx__item"><span class="ctx__label">${esc(t.horizon)}</span><div class="seg" id="c-h"></div></div>`;
-  segmented($("c-panel"), t.dataset, Object.keys(P).map((p) => [p, P[p].label[state.lang]]), state.panel, (v) => set({ panel: v }));
-  segmented($("c-mode"), t.mode, [["latest", t.mode_latest], ["replay", t.mode_replay]], state.mode, (v) => set({ mode: v }));
-  segmented($("c-h"), t.horizon, hs.map((h) => [h, String(h)]), state.h, (v) => set({ h: Number(v) }, { push: false }));
+    <label class="ctx__item ctx__item--region" for="c-region"><span class="ctx__label">${esc(labels.region)}</span>
+      <select class="ctx__select" id="c-region" aria-label="${esc(labels.region)}">
+        <option value=""${state.region ? "" : " selected"}>${esc(labels.all_philippines)}</option>
+        ${regions.map((r) => `<option value="${esc(r.id)}"${r.id === state.region ? " selected" : ""}>${esc(r.name)}</option>`).join("")}
+      </select></label>
+    <label class="ctx__item ctx__item--area" for="c-area"><span class="ctx__label">${esc(labels.province_city)}</span>
+      <select class="ctx__select" id="c-area"${region ? "" : " disabled"}${provinceScope ? ' aria-describedby="c-scope-note"' : ""}>
+        ${region ? areaRows.map((r) => `<option value="${esc(r.value)}"${r.value === selectedArea ? " selected" : ""}>${esc(r.label)}</option>`).join("") : `<option value="">${esc(labels.choose_region_first)}</option>`}
+      </select>${provinceScope ? `<span class="ctx__note ctx__note--old" id="c-scope-note">${esc(labels.province_note)}</span>` : ""}
+    </label>
+    <label class="ctx__item ctx__item--mode" for="c-mode"><span class="ctx__label">${esc(t.mode)}</span>
+      <select class="ctx__select" id="c-mode"><option value="latest"${state.mode === "latest" ? " selected" : ""}>${esc(t.mode_latest)}</option><option value="replay"${state.mode === "replay" ? " selected" : ""}>${esc(t.mode_replay)}</option></select>
+    </label>
+    ${replay ? `<label class="ctx__item ctx__item--origin" for="c-origin"><span class="ctx__label">${esc(t.origin)} <b id="c-origin-v">${esc(fmtDay(dayOf(state.origin)))}</b></span>
+      <input class="ctx__range" type="range" id="c-origin" min="0" max="${Math.max(0, originList.length - 1)}" step="1" value="${Math.max(0, originList.indexOf(dayOf(state.origin)))}" aria-label="${esc(t.origin)}" aria-valuetext="${esc(fmtDay(dayOf(state.origin)))}"></label>` : ""}
+    <label class="ctx__item ctx__item--horizon" for="c-h"><span class="ctx__label">${esc(t.horizon)}</span>
+      <select class="ctx__select" id="c-h">${hs.map((h) => `<option value="${h}"${h === state.h ? " selected" : ""}>${h}</option>`).join("")}</select>
+    </label>`;
+  $("c-region").addEventListener("change", (e) => {
+    const id = e.target.value || null;
+    set({ region: id, panel: "region_qc", area: id }, { push: true });
+  });
+  $("c-area").addEventListener("change", (e) => {
+    const choice = areaRows.find((r) => r.value === e.target.value);
+    if (!choice || !region) return;
+    const isProvince = choice.kind === "province";
+    set({ region: region.id, panel: isProvince ? "province" : "region_qc", area: choice.value, mode: isProvince && state.mode === "latest" ? "replay" : state.mode }, { push: true });
+  });
+  $("c-mode").addEventListener("change", (e) => set({ mode: e.target.value }));
+  $("c-h").addEventListener("change", (e) => set({ h: Number(e.target.value) }, { push: false }));
   const slider = $("c-origin");
   if (slider) {
     const day = () => originList[Number(slider.value)];
-    slider.oninput = () => { $("c-origin-v").textContent = fmtDay(day()); };
+    slider.oninput = () => {
+      const selected = day();
+      $("c-origin-v").textContent = fmtDay(selected);
+      slider.setAttribute("aria-valuetext", fmtDay(selected));
+    };
     slider.onchange = () => set({ origin: isoOf(day()) }, { push: false });
   }
   clearTopAction();
@@ -180,6 +269,7 @@ async function render() {
   const view = $("view");
   try {
     const m = await meta();
+    const region = normalizeState(m);
     let list = [];
     if (state.mode === "replay") {
       const o = await origins(state.panel);
@@ -188,7 +278,7 @@ async function render() {
     }
     const hs = state.mode === "replay" ? [4, 8] : [2, 4, 6, 8];
     if (!hs.includes(state.h)) { state.h = 4; writeUrl(state, false); }
-    renderChrome(t, list);
+    renderChrome(t, list, m);
     if (id !== renderId) return;
 
     cleanup?.(); cleanup = null;
@@ -196,15 +286,17 @@ async function render() {
     view.setAttribute("aria-busy", "true");
     view.innerHTML = `<div class="skeleton" aria-label="Loading"><i></i><i></i><i></i></div>`;
     const origin = state.mode === "replay" ? dayOf(state.origin) : null;
-    const [mod, fc] = await Promise.all([VIEWS[state.page](), NEEDS_FORECAST.has(state.page) ? forecastFor({ panel: state.panel, mode: state.mode, origin }) : null]);
+    const [mod, allFc] = await Promise.all([VIEWS[state.page](), NEEDS_FORECAST.has(state.page) ? forecastFor({ panel: state.panel, mode: state.mode, origin }) : null]);
+    const allowed = state.panel === "province" && region ? new Set(region.provinces || []) : null;
+    const fc = allFc && allowed ? allFc.filter((r) => allowed.has(r.unit_id)) : allFc;
     if (id !== renderId) return;
     if (fc?.length) {
       const current = fc.filter((r) => r.horizon === state.h);
       $("app-page-note").textContent = `${t.as_of} ${fmtDay(Math.max(...current.map((r) => r.week)))} · ${i18n.PANELS[state.panel].note[state.lang]}`;
     }
     const ctx = {
-      ...state, horizon: state.h, origin, t, i18n, labels: LABELS[state.lang], lang: state.lang, meta: m.panels[state.panel],
-      panelLabel: i18n.PANELS[state.panel].label[state.lang],
+      ...state, horizon: state.h, origin, t, i18n, labels: LABELS[state.lang], lang: state.lang, meta: m.panels[state.panel], regionMeta: region,
+      panelLabel: panelLabel(LABELS[state.lang], state.panel),
       levelName: (lv) => i18n.LEVEL_NAME[state.lang][lv],
       fc, fcH: fc ? fc.filter((r) => r.horizon === state.h) : null,
       set, go: (page, extra = {}) => set({ page, ...extra }),
