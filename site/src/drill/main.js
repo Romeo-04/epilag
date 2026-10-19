@@ -210,7 +210,7 @@ function renderDetail() {
   $("detail").innerHTML = `<h3>${p.name}</h3><div class="sub">${fmt(p.pop)} people · ${teamsIn(sel)} team${teamsIn(sel) === 1 ? "" : "s"} deployed</div>
     <div class="chart-surface">${spark(p, i, { fc: round === 2 ? f : null })}</div>
     <div class="kv"><div class="panel"><div class="k">Reported this week</div><div class="v nums">${c == null ? "–" : fmt(c)}</div><div class="d">${trend == null ? "" : `${trend >= 0 ? "▲ " : "▼ "}${Math.abs(trend)}% in 2 weeks`}</div></div>
-      <div class="panel"><div class="k">Epidemic line</div><div class="v nums">${p.epi[i] == null ? "–" : fmt(p.epi[i])}</div><div class="sub">rain ${p.rain[i] == null ? "–" : `${fmt(p.rain[i])} mm`}</div></div></div>
+      <div class="panel"><div class="k">Epidemic line</div><div class="v nums">${p.epi[i] == null ? "–" : fmt(p.epi[i])}</div><div class="sub">${M.estimated ? "city line × usual share" : `rain ${p.rain[i] == null ? "–" : `${fmt(p.rain[i])} mm`}`}</div></div></div>
     ${round === 2 && f ? `<div class="intel-box"><div class="k">EpiLag intel · week of ${day(WEEKS[i + 4])}</div><div class="v">~${fmt(f[2])} cases</div><div class="sub">likely ${fmt(f[1])}–${fmt(f[3])}</div><span class="lv" data-lv="${f[0]}">${LEVEL[f[0]]}</span></div>` : ""}
     <div class="take"><span class="k">Take action</span>
       <div class="action"><span class="tick"></span><div><b>Response team</b><small>Clean-up drives · container covers · household info, for ~${fmt(R.PEOPLE)} people</small></div><b>₱500K</b></div>
