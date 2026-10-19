@@ -50,26 +50,32 @@ const heroIn = () => {
 if (document.documentElement.classList.contains("intro-pending")) playIntro(heroIn); else heroIn();
 
 // ------------------------------------------------------------------ data-driven parts
+// hero: the latest forecast from the open data, 4 weeks ahead, for the 17 regions and Quezon City
+const LEVEL = { "outbreak warning": "warning", warning: "warning", watch: "watch", "above usual": "above", above: "above", normal: "normal" };
+const dayY = (s) => new Date(`${s}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const areaName = (n) => n.replace(/^REGION /, "Region ");
+const latest = (await fetch(`${BASE}data/epilag_forecast_region_qc.json`).then((r) => r.json()).catch(() => []))
+  .filter((r) => r.weeks_ahead === 4).map((r) => ({ ...r, lv: LEVEL[r.alert_level] || "normal" }))
+  .sort((a, b) => b.cases_middle_per_100k - a.cases_middle_per_100k);
+const bars = (lv) => `<span class="bar" aria-hidden="true">${[1, 2, 3, 4].map((k) => `<i class="${k <= LV[lv][1] ? "on" : ""}"></i>`).join("")}</span>`;
+if (latest.length) {
+  $("hero-sub").textContent = `Forecast made from the week ending ${dayY(latest[0].forecast_made_week_ending)} · for the week ending ${dayY(latest[0].target_week_ending)}`;
+  $("hero-counts").innerHTML = ["warning", "watch", "above", "normal"]
+    .map((lv) => `<li data-lv="${lv}"><span class="sq"></span><b class="nums">${latest.filter((r) => r.lv === lv).length}</b>${LV[lv][2]}</li>`).join("");
+  $("hero-prio").innerHTML = latest.slice(0, 3).map((r, i) => `<div class="prio" data-lv="${r.lv}" ${i === 0 ? 'id="prio-first"' : ""}><span class="rank">${i + 1}</span>
+    <div><div class="name">${areaName(r.area_name)}</div><div class="fc nums">${fmt(r.cases_middle)} (${fmt(r.cases_low)}–${fmt(r.cases_high)})</div></div>${bars(r.lv)}</div>`).join("");
+  $("hero-table").innerHTML = `<table><thead><tr><th>Area</th><th>Level</th><th>Cases (range)</th><th>/100k</th></tr></thead><tbody>${latest.map((r) =>
+    `<tr><td>${areaName(r.area_name)}</td><td><span class="lv" data-lv="${r.lv}">${LV[r.lv][2]}</span></td><td class="nums">${fmt(r.cases_middle)} (${fmt(r.cases_low)}–${fmt(r.cases_high)})</td><td class="nums">${r.cases_middle_per_100k.toFixed(1)}</td></tr>`).join("")}</tbody></table>`;
+}
+document.querySelectorAll(".hero__views [data-view]").forEach((b) => b.addEventListener("click", () => {
+  const table = b.dataset.view === "table";
+  document.querySelectorAll(".hero__views [data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  $("hero-table").hidden = !table;
+}));
+
+// 2019 replay: the proof numbers, the Guimaras story and the drill console
 const data = await fetch(`${BASE}data/replay_2019-06-02.json`).then((r) => r.json());
 const H = data.horizons;
-const valuesAt = (h) => Object.fromEntries(Object.entries(H[h].units).map(([u, f]) => [u, { color: LV[f[0]][0], height: LV[f[0]][1] }]));
-$("t4").textContent = `week of ${day(H[4].target)}`;
-$("t8").textContent = `week of ${day(H[8].target)}`;
-
-function renderPrio(h) {
-  $("hero-sub").textContent = `Forecast made 2 June 2019 · ${h} weeks ahead (week ending ${day(H[h].target)})`;
-  const top = Object.entries(H[h].units).filter(([, f]) => f[0] === "warning" || f[0] === "watch")
-    .map(([u, f]) => [u, f, f[2] / data.pop[u] * 1e5]).sort((a, b) => b[2] - a[2]).slice(0, 3);
-  $("hero-prio").innerHTML = top.map(([u, f], i) => {
-    const bars = LV[f[0]][1];
-    return `<div class="prio" data-lv="${f[0]}" ${i === 0 ? 'id="prio-first"' : ""}><span class="rank">${i + 1}</span>
-      <div><div class="name">${data.names[u]}</div><div class="fc nums">${fmt(f[2])} (${fmt(f[1])}–${fmt(f[3])}) · <span class="lv-text">${LV[f[0]][2]}</span></div></div>
-      <span class="bar" aria-hidden="true">${[1, 2, 3, 4].map((k) => `<i class="${k <= bars ? "on" : ""}"></i>`).join("")}</span></div>`;
-  }).join("");
-  const c = data.claim[h];
-  $("hero-claim").textContent = `${c.flagged} of the ${c.crossed} provinces that crossed the epidemic line ${h} weeks later were flagged watch or warning.`;
-}
-renderPrio(4);
 const claim4 = data.claim[4];
 $("proof-claim").querySelectorAll("[data-count]").forEach((el, i) => { el.dataset.count = String(i ? claim4.crossed : claim4.flagged); el.textContent = el.dataset.count; });
 
@@ -97,27 +103,22 @@ function whenNear(el, fn) {
   const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); fn(); } }, { rootMargin: "300px" });
   io.observe(el);
 }
-let heroMap = null, heroH = 4, heroAuto = true;
+// island names over the hero map, placed at a region's projected centre
+const ISLANDS = [["Luzon", "R_REGION_III", 34, -6], ["Visayas", "R_REGION_VII", 30, 0], ["Mindanao", "R_REGION_X", 34, 4]];
 whenNear($("hero-map"), async () => {
-  const gr = await grids;
-  heroMap = await createVoxelMap($("hero-map"), { grid: phone ? gr.province_coarse : gr.province, pixel: phone ? 2 : 3, zoom: 1.25 });
-  heroMap.setValues({ ...Object.fromEntries(gr.province.units.map((u) => [u, NODATA])), ...valuesAt(4) }, { duration: 0 });
+  const gr = await grids, grid = phone ? gr.region_coarse : gr.region;
+  const map = await createVoxelMap($("hero-map"), { grid, pixel: phone ? 2 : 3 });
+  const byArea = Object.fromEntries(latest.map((r) => [r.area_code, { color: LV[r.lv][0], height: LV[r.lv][1] }]));
+  map.setValues({ ...Object.fromEntries(grid.units.map((u) => [u, NODATA])), ...byArea }, { duration: 900 });
+  const place = () => {
+    $("hero-labels").innerHTML = ISLANDS.map(([name, u, dx, dy]) => {
+      const p = map.project(u);
+      return p ? `<span style="left:${Math.round(p.x + dx)}px;top:${Math.round(p.y + dy)}px">${name}</span>` : "";
+    }).join("");
+  };
+  setTimeout(place, 950);
+  new ResizeObserver(place).observe($("hero-map"));
 });
-function setHorizon(h, { user = false } = {}) {
-  if (user) heroAuto = false;
-  heroH = h;
-  document.querySelectorAll(".hero__step[data-h='4'], .hero__step[data-h='8']").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.h) === h)));
-  renderPrio(h);
-  heroMap?.setValues(valuesAt(h), { duration: 900 });
-  mascot?.setPose("hero", null, ["fly1", "fly2"]);
-}
-document.querySelectorAll(".hero__step[data-h='4'], .hero__step[data-h='8']").forEach((b) => b.addEventListener("click", () => setHorizon(Number(b.dataset.h), { user: true })));
-// hero loop: step between 4 and 8 weeks ahead while the hero is on screen and nobody has clicked
-if (!reduced()) {
-  let timer = 0;
-  ScrollTrigger.create({ trigger: ".hero", start: "top bottom", end: "bottom top",
-    onToggle: (st) => { clearInterval(timer); if (st.isActive) timer = setInterval(() => heroAuto && setHorizon(heroH === 4 ? 8 : 4), 3600); } });
-}
 
 whenNear($("drill-map"), async () => {
   const b = await boards;
@@ -164,7 +165,7 @@ const toolHop = hopper($("slot-features"), toolSteps, (el, box, sl) => {
 introFinished.then(() => Mascot.create("mosquito")).then((m) => {
   mascot = m;
   const slot = (id, section, pose, target, extra = {}) => m.register({ id, section: document.querySelector(section), slot: $(`slot-${id}`), target, ...pose, ...extra });
-  slot("hero", ".hero", { frames: ["fly1", "fly2"], fps: 12 }, () => $("prio-first"));
+  slot("hero", ".hero", { frames: ["fly1", "fly2"], fps: 12 }, () => $("prio-first"), { flip: false });
   slot("problem", ".problem", { pose: "alert" }, $("problem-callout"), { flip: false });
   slot("drill", ".drill", { pose: "dash" }, $("dc-status"));
   slot("features", ".features", { pose: "search" }, () => toolSteps[toolHop.on].querySelector(".ts-icon"), { flip: true });
@@ -192,12 +193,13 @@ mm.add({ desk: "(min-width: 1100px) and (prefers-reduced-motion: no-preference)"
   tl.fromTo("#helps-rail", { "--fill": 0 }, { "--fill": 1, duration: steps.length * 0.5 }, 0);
   tl.to({}, { duration: 0.4 });
   // action steps: the timeline line fills as the steps scroll past
-  // six tools: getcko's "How it works" band. Pinned on desktop; each step lights up, its name gets the
-  // highlighter, its icon pops in two steps, the dots to the next step pop, and the texture slides sideways
+  // six tools: getcko's "How it works" band. On desktop the heading and band lock under the nav while each
+  // step lights up, its name gets the highlighter, its icon pops in two steps, the dots to the next step pop,
+  // and the texture slides sideways
   const band = $("tools-band");
   const tt = gsap.timeline({ defaults: { ease: "none" },
     scrollTrigger: ctx.conditions.desk
-      ? { trigger: band, start: "center center", end: "+=140%", scrub: 0.6, pin: true, anticipatePin: 1 }
+      ? { trigger: ".features__pin", start: "top 84px", end: "+=140%", scrub: 0.6, pin: true, anticipatePin: 1 }
       : { trigger: band, start: "top 85%", end: "bottom 35%", scrub: 0.6 },
     onUpdate() { const i = lit(toolSteps); if (i !== toolHop.on) toolHop.move(i); } });
   tt.fromTo(band, { "--sf-x": "0px" }, { "--sf-x": "1280px", duration: toolSteps.length }, 0);

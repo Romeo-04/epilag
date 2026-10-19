@@ -45,55 +45,47 @@
     <section class="hero surface tone-paper tx-field sf-subtle" id="top" aria-labelledby="hero-title">
       <div class="wrap hero__grid">
         <div class="hero__copy" data-hero-copy>
-          <div class="label">Dengue early warning · Philippines</div>
+          <div class="label">PJDSC 2026 · Trace the Pattern, Target the Cure</div>
           <h1 id="hero-title" class="hero__title">Rain starts the clock.<br><span class="em">We read what comes next.</span></h1>
-          <p class="lead">EpiLag-PH forecasts dengue cases 2–8 weeks ahead for every province, region and Quezon City, from recent cases, the season and rain, so health offices can act before hospitals fill up.</p>
-          <div class="btn-row">
+          <p class="lead">Dengue risk builds in the gap between changing weather and hospital reports. EpiLag-PH forecasts cases 2–8 weeks ahead, helping communities prepare before the surge becomes visible.</p>
+          <div class="hero__ctas">
             <a class="btn btn--primary" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
-            <a class="btn btn--ghost" href="#film"><span class="disc"><i data-icon="play" data-size="12"></i></span>Watch the film</a>
-          </div>
-          <div class="trust">
-            <span><i data-icon="alert" data-size="24"></i>Early warning</span>
-            <span><i data-icon="residents" data-size="32"></i>Local action</span>
-            <span><i data-icon="didItWork" data-size="32"></i>Tested on past outbreaks</span>
+            <a class="hero__link" href="#film"><span class="disc"><i data-icon="play" data-size="12"></i></span>Watch the film</a>
+            <a class="hero__link" href="methodology.html"><i data-icon="file" data-size="24"></i>Methodology</a>
           </div>
         </div>
 
         <div class="hero__stage">
+          <svg class="hero__trail" viewBox="0 0 60 260" preserveAspectRatio="none" aria-hidden="true"><path d="M54 4 C 10 50, 4 110, 30 150 S 50 230, 8 256" /></svg>
           <div class="mascot-slot hero__slot" id="slot-hero"></div>
           <div class="window hero__window" data-hero-window>
             <div class="window__bar">
               <span class="brand brand--sm"><span class="lg"><i data-icon="logo" data-size="16"></i></span>EpiLag-PH</span>
-              <div class="window__tabs"><span aria-current="page">Overview</span><span>Forecast Map</span><span>Area Detail</span><span>Action Plan</span></div>
+              <div class="window__tabs"><span aria-current="page">Overview</span><span>Forecast map</span><span>Area detail</span><span>QC barangays</span></div>
             </div>
             <div class="window__body hero__app">
               <div class="hero__app-head">
-                <div><b>Dengue risk forecast</b><div class="small muted" id="hero-sub">Forecast made 2 June 2019 · 4 weeks ahead</div></div>
-                <ul class="legend legend--row" aria-label="Alert levels">
-                  <li data-lv="warning"><span class="sq"></span>Outbreak warning</li><li data-lv="watch"><span class="sq"></span>Watch</li>
-                  <li data-lv="above"><span class="sq"></span>Above usual</li><li data-lv="normal"><span class="sq"></span>Normal</li>
-                </ul>
+                <b class="hero__app-title">Forecast map <span class="em" id="hero-h">4 weeks ahead</span></b>
+                <div class="small muted" id="hero-sub">Latest forecast</div>
               </div>
               <div class="hero__app-main">
-                <div class="hero__map" id="hero-map" role="img" aria-label="3D map of Philippine provinces coloured by dengue alert level, forecast made 2 June 2019"></div>
-                <div class="hero__prio">
-                  <div class="label">Priority locations</div>
+                <div class="hero__view">
+                  <div class="hero__map" id="hero-map" role="img" aria-label="3D map of the Philippine regions coloured by dengue alert level, latest forecast"></div>
+                  <ul class="hero__counts" id="hero-counts" aria-label="Areas per alert level"></ul>
+                  <div class="hero__labels" id="hero-labels" aria-hidden="true"></div>
+                  <div class="hero__table" id="hero-table" hidden></div>
+                </div>
+                <div class="hero__rank">
+                  <b class="hero__rank-title">Cases per 100,000 people</b>
+                  <span class="small muted">(latest available)</span>
                   <div id="hero-prio"></div>
-                  <p class="small muted hero__claim" id="hero-claim"></p>
+                  <div class="hero__views" role="group" aria-label="View">
+                    <button type="button" class="btn btn--sm" data-view="map" aria-pressed="true">Map view</button>
+                    <button type="button" class="btn btn--sm" data-view="table" aria-pressed="false">Table view</button>
+                  </div>
                 </div>
               </div>
-              <div class="hero__time" role="group" aria-label="Forecast horizon">
-                <button type="button" class="hero__step" data-h="0" disabled><span class="node"></span>2 Jun 2019<small>forecast made</small></button>
-                <button type="button" class="hero__step" data-h="4" aria-pressed="true"><span class="node"></span>+4 weeks<small id="t4"></small></button>
-                <button type="button" class="hero__step" data-h="8" aria-pressed="false"><span class="node"></span>+8 weeks<small id="t8"></small></button>
-                <a class="btn btn--primary btn--sm hero__more" href="web/?page=map">View full map <i data-icon="arrowRight" data-size="24"></i></a>
-              </div>
             </div>
-          </div>
-          <div class="hero__props" aria-hidden="true">
-            <pixel-sprite sprite="props" pose="tree" scale="3"></pixel-sprite>
-            <pixel-sprite sprite="props" pose="house" scale="3"></pixel-sprite>
-            <pixel-sprite sprite="props" pose="tree" scale="2"></pixel-sprite>
           </div>
         </div>
       </div>
@@ -196,6 +188,7 @@
 
     <!-- ============================================================ features -->
     <section class="features surface tone-paper sf-subtle" id="features" aria-labelledby="features-title">
+      <div class="features__pin">
       <div class="wrap">
         <div class="sec-head">
           <div><div class="label">Features</div><h2 id="features-title">Six tools. <span class="em">Each one leads to an action.</span></h2></div>
@@ -207,6 +200,7 @@
           <div class="mascot-slot features__slot" id="slot-features"></div>
           <ol class="ts-row" id="tools" aria-label="The six tools"></ol>
         </div>
+      </div>
       </div>
       <div class="wrap">
         <div class="opendata">
@@ -327,7 +321,7 @@
         <a href="#story">Story</a><a href="#drill">Drill</a><a href="#features">Features</a><a href="#action">Action</a><a href="#proof">Proof</a><a href="#film">Film</a>
       </div>
       <div class="foot">
-        <a href="methodology.html"><i data-icon="file" data-size="32"></i>Methodology</a>
+        <a href="methodology.html"><i data-icon="file" data-size="24"></i>Methodology</a>
         <a href="data/"><i data-icon="database" data-size="32"></i>Open data</a>
         <a href="https://github.com/Romeo-04/epilag"><i data-icon="external" data-size="24"></i>Source code</a>
         <a href="deck/EpiLag-PH_deck.pdf"><i data-icon="file" data-size="32"></i>Slides (PDF)</a>
