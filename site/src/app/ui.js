@@ -13,10 +13,6 @@ export const NODATA = "#C9CFC9";
 export const pill = (ctx, level) => `<span class="lv${level === "outbreak warning" ? " lv--pulse" : ""}" data-lv="${LV[level]}">${esc(ctx.levelName(level))}</span>`;
 export const dot = (level) => `<span class="sq sq--round" data-lv="${LV[level]}"></span>`;
 
-/** Page title row: title, muted part, sub line. */
-export const head = (title, muted, sub = "") =>
-  `<header class="vhead"><h1>${esc(title)} <span>${esc(muted)}</span></h1>${sub ? `<p class="vhead__sub">${esc(sub)}</p>` : ""}</header>`;
-
 /** Card title with a pixel icon (16-grid art icons at 32 px, 12-grid UI icons at 24 px). */
 const ICON16 = new Set(["forecastMap", "areaDetail", "actionPlan", "residents", "barangay", "didItWork", "database", "file", "downloadBox"]);
 export const cardTitle = (ic, title, sub = "") =>
