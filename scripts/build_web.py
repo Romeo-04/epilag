@@ -120,7 +120,7 @@ def main() -> None:
     write("reports.json", reports)
 
     I18N.parent.mkdir(parents=True, exist_ok=True)
-    I18N.write_text(json.dumps(i18n(), ensure_ascii=False, indent=1), encoding="utf-8")
+    I18N.write_text(json.dumps(i18n(), ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
     print(f"{I18N.relative_to(ROOT)}: {I18N.stat().st_size / 1e3:.0f} kB")
 
 
