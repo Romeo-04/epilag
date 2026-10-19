@@ -7,7 +7,7 @@ health office should do this week, and where a limited budget prevents the most 
 Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
-| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Film (1:48)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
+| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Film (2:09)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
 | --- | --- | --- | --- | --- | --- | --- |
 
 Everything runs in your browser, with no install or account: the app is ready in about 3 seconds, and the maps and
@@ -23,33 +23,44 @@ the game are drawn as 3D pixel art.
   breeding sites weeks before mosquitoes multiply. That lag is time a health office can use.
 - **Solution:** EpiLag-PH turns those signs into a forecast with a likely range, an alert level, a week-by-week
   checklist, a budget plan and a plain-language message for residents.
-- **Proof:** in a replay of 2019 using only data available on 2 June, **30 of the 32 provinces** that later
-  crossed the epidemic threshold were flagged 4 weeks ahead.
+- **Proof, latest data:** Quezon City's 2024–25 outbreak stayed above its epidemic line for 27 weeks and peaked at
+  622 cases a week (five times the line) in February 2025. EpiLag-PH's out-of-sample forecasts flagged it **5 weeks
+  before it crossed the line**, and kept it flagged every week to the peak.
+- **Proof, nationwide:** in a replay of 2019 using only data available on 2 June, **30 of the 32 provinces** that
+  later crossed the epidemic threshold were flagged 4 weeks ahead.
 
 ## Play it: Dengue Drill
 **[▶ Play Dengue Drill in your browser](https://romeo-04.github.io/epilag/drill/)**. No install needed.
 
-Forecasts are easy to ignore until you feel what they are worth. Dengue Drill makes you the health officer for one of 17
-regions during the real 2019 outbreak, the year the Philippines declared a national dengue epidemic.
+Forecasts are easy to ignore until you feel what they are worth. Dengue Drill makes you the health officer for one area
+during a real outbreak. The first mission is the latest: **Quezon City's 2024–25 season, barangay by barangay** (142
+barangays). The other 17 missions are the regions during the 2019 outbreak, the year the Philippines declared a
+national dengue epidemic.
 
-Your region is a 3D pixel island: each province rises higher and redder as its cases pass its epidemic line, rain falls
-as heavily as it did that week (storms bring lightning), mosquitoes swarm after the rain, and outbreaks glow. Drag to
-turn the island, scroll or pinch to zoom.
+Your area is a 3D pixel island: each province or barangay rises higher and redder as its cases pass its epidemic line,
+rain falls as heavily as it did that week (storms bring lightning), mosquitoes swarm after the rain, and outbreaks glow.
+Drag to turn the island, scroll or pinch to zoom.
+
+Quezon City reports weekly cases only for the whole city, so the mission's barangay numbers are estimates, and the game
+says so: each barangay gets the city's weekly cases times its share of the city's 2025 cases, and the EpiLag-PH intel is
+the real city forecast made that week, shared out the same way. There is no city rain series, so that mission has no
+rain.
 
 | | |
 | --- | --- |
-| ![Dengue Drill title screen: choose one of 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the 3D board](docs/screenshots/drill_round2.png) |
+| ![Dengue Drill title screen: the Quezon City mission first, then 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the 3D board](docs/screenshots/drill_round2.png) |
 
-1. **Pick a region.** You get ₱5 million in response teams and 8 turns starting in May 2019. Each turn is 2 weeks.
-2. **Read the rain receipt.** Before you start, a receipt lists the season's rain and the cases it brought, province by province.
+1. **Pick a mission.** You get ₱5 million in response teams and 8 turns (from November 2024 in Quezon City, May 2019
+   in the regions). Each turn is 2 weeks.
+2. **Read the receipt.** Before you start, a receipt lists the season's cases (and, for the regions, its rain), area by area.
 3. **Round 1: react.** You see only case reports, just as most health offices do today. Deploy teams to provinces, then end the turn.
 4. **Round 2: forecast.** Same region, same budget, now with EpiLag-PH alerts and forecast ranges on the map.
 5. **Get scored on real data.** Each team prevents a share of the cases reported 2–9 weeks after it is deployed. After
-   each round you get a mission report and a grade based on the real 2019 cases. At the end, your two rounds are
+   each round you get a mission report and a grade based on the real cases. At the end, your two rounds are
    compared with two computer players: one that reacts to reports and one that follows EpiLag-PH.
 
-In test runs, the computer player that follows EpiLag-PH's alerts averted more cases than the one reacting to reports in
-**11 of 17 regions** (about the same in 1, fewer in 5). The game shows this result honestly, including the regions where
+In test runs of the 2019 missions, the computer player that follows EpiLag-PH's alerts averted more cases than the one
+reacting to reports in **11 of 17 regions** (about the same in 1, fewer in 5). The game shows this result honestly, including the regions where
 early action did not pay off.
 
 ## How it works
@@ -76,13 +87,18 @@ flowchart LR
 | --- | --- |
 | **Provincial, city and municipal health offices** | Alert map, area checklists, action brief, budget plan, and an explanation of why each area is flagged |
 | **Barangays and residents** | A *For residents* page with this week's outlook, the DOH 4S steps, warning signs, and a message ready to share in a group chat |
-| **Trainees, students and the public** | [Dengue Drill](https://romeo-04.github.io/epilag/drill/), a game where you run the 2019 response yourself |
+| **Trainees, students and the public** | [Dengue Drill](https://romeo-04.github.io/epilag/drill/), a game where you run the response yourself, from Quezon City's barangays in 2024–25 to the 2019 regions |
 | **Researchers, newsrooms and other apps** | Every forecast as [CSV and JSON](https://romeo-04.github.io/epilag/data/), with column definitions |
 
 ## What you can do
 **Overview: see this week's priorities.** The app opens on a dashboard: how many areas need action now, a 3D map of
 the forecast, the priority list, and this week's action brief. The sidebar groups the tools into *Monitor*, *Act* and
 *Evidence*; explanations sit behind "About this" buttons, in English and Filipino.
+
+**Pick the area, from latest to most specific.** The settings bar has two dropdowns. *Region* is All Philippines or one
+of 17 regions (the latest data, to December 2025). *Province / city* then lists only that region: the whole region,
+Quezon City under NCR (also to December 2025), and the region's provinces, marked as data to January 2021 and opened
+as a historical replay limited to that region's provinces.
 
 ![Overview dashboard](docs/screenshots/home.png)
 
@@ -110,7 +126,7 @@ warning signs, and a message ready to share.
 ## Does it work?
 Every result is out of sample: each test year is forecast only from earlier years.
 
-| | Provinces (86 units) | Regions + Quezon City |
+| | Provinces (86 units) | Regions and Quezon City |
 | --- | --- | --- |
 | Error vs "same week last year", 4 weeks ahead | 36% lower (2019), 89% lower (2020) | 32–70% lower (2019, 2023–2025) |
 | Error vs "same as this week", 4 weeks ahead | 22% / 20% lower | 18–32% lower, except quiet 2023 (4% higher) |
@@ -120,8 +136,10 @@ Every result is out of sample: each test year is forecast only from earlier year
 
 - **2019 replay (week ending 2 June):** 30 of 32 provinces that later crossed the epidemic threshold were flagged
   4 weeks ahead. For regions and Quezon City it was 11 of 11.
-- **Quezon City, 2025:** the record early-year outbreak peaked at 622 cases in the week ending 23 Feb 2025. It was on
-  *watch* from forecasts issued on 8 Dec 2024 (4 weeks ahead).
+- **Quezon City, 2024–25:** the record early-year outbreak crossed the epidemic line in the week ending 20 Oct 2024,
+  stayed above it for 27 weeks and peaked at 622 cases in the week ending 23 Feb 2025 (the line was 121). The 4-week
+  forecasts were on *watch* from the one made on 15 Sep 2024 and on *watch* or *outbreak warning* every week after,
+  through the peak. They called the outbreak, not its height: for the peak week the forecast was 237 (likely 164–338).
 - **Honest finding on weather:** most of the skill comes from recent cases and the season. Adding rain, heat and
   humidity changed the error by about −12% to +11% depending on year and horizon (about +2% on average for regions,
   about 0% for provinces). See `reports/` and the app's *Did it work?* page.
@@ -198,6 +216,7 @@ python src/train_final.py province && python src/train_final.py region_qc
 python src/export_app_data.py
 python scripts/make_figures.py
 python scripts/drill_data.py         # Dengue Drill season data (site/public/drill/data.json)
+python scripts/qc_drill_data.py      # Dengue Drill Quezon City mission (site/public/drill/qc.json, geo/voxel_qc.json)
 python scripts/export_open_data.py   # open forecast files (docs/data/)
 python scripts/build_web.py          # app data and EN/FIL copy
 python scripts/voxel_data.py         # 3D map grids (site/public/geo/)

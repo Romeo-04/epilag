@@ -27,11 +27,11 @@ SHOTS = [
     ("home_replay_2019", f"web/?page=home{REPLAY}", 1440, True),
     ("map_latest", "web/?page=map", 1440, True),
     ("map_replay_2019", f"web/?page=map{REPLAY}", 1440, True),
-    ("unit_latest", "web/?page=unit", 1440, True),
+    ("unit_latest", "web/?page=unit&region=R_NCR&area=QC", 1440, True),
     ("unit_replay_2019", f"web/?page=unit{REPLAY}", 1440, True),
     ("budget_replay_2019", f"web/?page=budget{REPLAY}", 1440, True),
     ("public", f"web/?page=public{REPLAY}", 1440, True),
-    ("qc", "web/?page=qc", 1440, True),
+    ("qc", "web/?page=qc&region=R_NCR&area=QC", 1440, True),
     ("proof", "web/?page=proof", 1440, True),
     ("about", "web/?page=about", 1440, True),
     ("app_phone", "web/?page=home", 390, False),
@@ -65,7 +65,7 @@ def shoot(browser, base, name, path, width, full):
 
 
 def drill(browser, base, only):
-    """Play into the drill: title, the rain receipt, round 2 with a few teams out, and the round report."""
+    """Play into the drill (its first mission, Quezon City): title, the case receipt, round 2 with a few teams out, and the round report."""
     page = browser.new_page(viewport={"width": 1440, "height": 900})
     page.goto(base + "drill/", wait_until="networkidle")
     page.wait_for_timeout(4000)
@@ -80,7 +80,10 @@ def drill(browser, base, only):
     page.click("#next-r"); page.wait_for_timeout(3000)  # round 2: EpiLag-PH intel
     for t in range(2):
         page.click(f".prow[data-k='{t + 1}']"); page.wait_for_timeout(300)
-        page.click("#deploy"); page.wait_for_timeout(500); page.click("#deploy"); page.wait_for_timeout(900)
+        page.click("#deploy"); page.wait_for_timeout(500)
+        if page.is_enabled("#deploy"):  # a second team, unless the area is at its coverage cap
+            page.click("#deploy")
+        page.wait_for_timeout(900)
         page.click("#end"); page.wait_for_timeout(1600)
     page.click(".prow[data-k='1']"); page.wait_for_timeout(1500)
     page.evaluate("scrollTo(0, 0)")

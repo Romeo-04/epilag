@@ -78,6 +78,11 @@
   /* maps: provinces drawn as pixels */
   .map { position: absolute; top: 50px; width: 700px; height: 980px; image-rendering: pixelated; }
 
+  /* Quezon City's season, week by week, as pixel bars */
+  .chart { position: absolute; right: 110px; top: 190px; width: 880px; height: 700px; image-rendering: pixelated; }
+  .chart-note { position: absolute; font-size: 22px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
+  .fine { font-size: 24px; line-height: 1.45; color: var(--soft); padding-left: 24px; border-left: 6px solid var(--amber); }
+
   .stat { font-size: 150px; font-weight: 800; letter-spacing: -.045em; line-height: 1; font-variant-numeric: tabular-nums; }
   .stat small { font-size: 60px; color: var(--night-muted); font-weight: 700; letter-spacing: -.03em; }
   .light .stat small { color: var(--soft); }
@@ -197,24 +202,26 @@
   <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="7" data-flip style="left:1500px;top:50px"></canvas>
   <div class="fly" style="--d:3"><canvas class="spr" data-s="mosquito" data-f="fly1,fly2" data-fps="12" data-x="5" data-flip></canvas></div>
   <div class="center">
-    <div class="kicker a" style="--d:.3">Philippines · June 2019</div>
+    <div class="kicker a" style="--d:.3">Quezon City · September 2024</div>
     <div class="h1 a" style="--d:1.2">The rains arrive.</div>
     <div class="body a" style="--d:2.6">Standing water. Warm nights. Mosquitoes breed.</div>
   </div>
   <div class="tag a fade" style="--d:3.4"><i></i>Week 0</div>
 </section>
 
-<!-- 2 · the surge -->
-<section class="scene dark" data-dur="9" data-wm="0">
-  <canvas class="map" id="map-actual" style="right:170px"></canvas>
-  <div style="position:absolute;left:110px;top:250px;width:860px;display:flex;flex-direction:column;gap:26px">
-    <div class="kicker a" style="--d:.2">Four weeks later</div>
-    <div class="h2 a" style="--d:.7">Dengue surges<br><span class="muted">across the country.</span></div>
-    <div class="a" style="--d:2.2"><div class="stat"><span data-count="32">0</span> <small>provinces</small></div>
-      <div class="body" style="margin-top:12px">crossed the epidemic threshold in a single week.</div></div>
-    <div class="legend a fade" style="--d:3"><span><i style="background:var(--warn)"></i>Above epidemic threshold</span></div>
+<!-- 2 · the surge: Quezon City, 2024-25 -->
+<section class="scene dark" data-dur="10" data-wm="0">
+  <canvas class="chart" id="qc-actual"></canvas>
+  <div class="chart-note a fade" id="qc-peak-note" style="--d:4.6;color:#FF7A5C"></div>
+  <div class="chart-note a fade" id="qc-line-note" style="--d:1.4;color:var(--night-muted)">Epidemic line</div>
+  <div style="position:absolute;left:110px;top:230px;width:820px;display:flex;flex-direction:column;gap:26px">
+    <div class="kicker a" style="--d:.2">Quezon City · the latest data</div>
+    <div class="h2 a" style="--d:.7">Dengue surges<br><span class="muted">for half a year.</span></div>
+    <div class="a" style="--d:2.4"><div class="stat"><span data-count="27" id="qc-weeks">0</span> <small>weeks</small></div>
+      <div class="body" style="margin-top:12px">above the epidemic line, from October 2024 to April 2025.</div></div>
+    <div class="legend a fade" style="--d:3"><span><i style="background:var(--warn)"></i>Above the epidemic line</span><span><i style="background:#3A4C8C"></i>Below</span></div>
   </div>
-  <div class="tag a fade" style="--d:.5"><i style="background:var(--warn);box-shadow:0 0 0 6px rgba(240,75,42,.3)"></i>Week 4 · 30 Jun 2019</div>
+  <div class="tag a fade" style="--d:.5"><i style="background:var(--warn);box-shadow:0 0 0 6px rgba(240,75,42,.3)"></i><span id="qc-tag">Weekly cases</span></div>
 </section>
 
 <!-- 3 · why responses come late -->
@@ -241,21 +248,62 @@
   </div>
 </section>
 
-<!-- 5 · rewind: what EpiLag said on 2 June -->
-<section class="scene light" data-dur="12" data-wm="1">
+<!-- 5 · rewind: what EpiLag-PH said about Quezon City, 4 weeks ahead -->
+<section class="scene light" data-dur="13" data-wm="1">
+  <canvas class="chart" id="qc-forecast"></canvas>
+  <div class="chart-note a fade" id="qc-cross-note" style="--d:3.2;color:var(--ink)"></div>
+  <div style="position:absolute;left:110px;top:150px;width:820px;display:flex;flex-direction:column;gap:26px">
+    <div class="kicker a" style="--d:.2">Replay · forecasts made 4 weeks ahead</div>
+    <div class="h2 a" style="--d:.6">What if you had<br>known <span style="color:var(--forest)">weeks earlier?</span></div>
+    <div class="legend a fade" style="--d:1.4;color:var(--muted)"><span><i style="background:var(--warn)"></i>Outbreak warning</span><span><i style="background:var(--watch)"></i>Watch</span><span><i style="background:#C9CCBF"></i>Reported cases</span></div>
+    <div class="a" style="--d:6.2;margin-top:20px;padding:40px 44px;border-radius:6px;background:var(--ink);color:var(--paper);box-shadow:14px 14px 0 var(--forest)">
+      <div class="stat"><span data-count="5" data-delay="6.4" id="qc-lead">0</span> <small style="margin-left:.15em;color:#9DBDAC">weeks</small></div>
+      <div class="body" style="margin-top:14px;color:rgba(251,250,244,.78)">before Quezon City crossed its epidemic line, EpiLag-PH flagged it, and kept it flagged <b style="color:var(--amber)">every week to the February peak</b>.</div>
+    </div>
+    <div class="fine a fade" style="--d:8.4" id="qc-honest"></div>
+  </div>
+</section>
+
+<!-- 6 · target: the barangay shortlist -->
+<section class="scene light" data-dur="8" data-wm="1">
+  <div class="copy">
+    <div class="kicker a" style="--d:.2">Then, street by street</div>
+    <div class="h2 a" style="--d:.5">Target barangays</div>
+    <div class="body a" style="--d:.9">The city forecast becomes a shortlist of barangays to visit first, from the 2025 counts.</div>
+  </div>
+  <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · QC barangays</span></div>
+    <div class="vp"><img src="../screenshots/qc.png" style="--from:0px;--to:-50px;--t:7s;--zoom:1.06" alt=""></div></div>
+  <div class="callout a pop" style="--d:2.6;right:560px;top:880px"><i style="background:var(--normal)"></i>Batasan Hills · Payatas · Commonwealth</div>
+</section>
+
+<!-- 7 · practice: the Dengue Drill, Quezon City mission -->
+<section class="scene light" data-dur="9" data-wm="1">
+  <div class="copy">
+    <div class="kicker a" style="--d:.2">Practice it</div>
+    <div class="h2 a" style="--d:.5">Dengue Drill</div>
+    <div class="body a" style="--d:.9">Replay Quezon City's 2024–25 season, barangay by barangay: ₱5 million, 8 turns, and the real cases keep score.</div>
+    <div class="feature-list a" style="--d:1.5"><span><b>Round 1</b> case reports only</span><span><b>Round 2</b> with EpiLag-PH intel</span></div>
+  </div>
+  <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/drill · Quezon City 2024–25</span></div>
+    <div class="vp" style="background:var(--night)"><img src="../screenshots/drill_round2.png" style="--from:0px;--to:0px;--t:8s;--zoom:1.08" alt=""></div></div>
+  <div class="callout a pop" style="--d:2.8;right:160px;top:860px"><i style="background:var(--teal)"></i>142 barangays · one board</div>
+</section>
+
+<!-- 8 · the national proof: what EpiLag-PH said on 2 June 2019 -->
+<section class="scene light" data-dur="10" data-wm="1">
   <canvas class="map" id="map-forecast" style="right:200px"></canvas>
   <div style="position:absolute;left:110px;top:200px;width:820px;display:flex;flex-direction:column;gap:26px">
-    <div class="kicker a" style="--d:.2">Replay · forecast made 2 June 2019</div>
-    <div class="h2 a" style="--d:.6">What if you had<br>known <span style="color:var(--forest)">4 weeks earlier?</span></div>
+    <div class="kicker a" style="--d:.2">Nationwide · forecast made 2 June 2019</div>
+    <div class="h2 a" style="--d:.6">Not just one city.<br><span style="color:var(--forest)">Every province.</span></div>
     <div class="legend a fade" style="--d:1.6;color:var(--muted)"><span><i style="background:var(--warn)"></i>Outbreak warning</span><span><i style="background:var(--watch)"></i>Watch</span><span><i style="background:var(--above)"></i>Above usual</span></div>
-    <div class="a" style="--d:5.2;margin-top:30px;padding:40px 44px;border-radius:6px;background:var(--ink);color:var(--paper);box-shadow:14px 14px 0 var(--forest)">
-      <div class="stat"><span data-count="30" data-delay="5.4">0</span> <small style="margin-left:.15em;color:#9DBDAC">of <span id="crossed" style="margin-left:.12em">32</span></small></div>
+    <div class="a" style="--d:3.6;margin-top:30px;padding:40px 44px;border-radius:6px;background:var(--ink);color:var(--paper);box-shadow:14px 14px 0 var(--forest)">
+      <div class="stat"><span data-count="30" data-delay="3.8">0</span> <small style="margin-left:.15em;color:#9DBDAC">of <span id="crossed" style="margin-left:.12em">32</span></small></div>
       <div class="body" style="margin-top:14px;color:rgba(251,250,244,.78)">provinces that crossed the epidemic threshold were flagged <b style="color:var(--amber)">4 weeks ahead</b>, by models trained only on earlier years.</div>
     </div>
   </div>
 </section>
 
-<!-- 6 · start here: the overview -->
+<!-- 9 · start here: the overview -->
 <section class="scene light" data-dur="9" data-wm="1">
   <div class="copy">
     <div class="kicker a" style="--d:.2">Start here</div>
@@ -264,11 +312,11 @@
   </div>
   <div class="frog-top"><canvas class="spr" data-s="frog" data-f="peek" data-x="5"></canvas></div>
   <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web</span></div>
-    <div class="vp"><img src="../screenshots/home_replay_2019.png" style="--from:0px;--to:0px;--t:7.5s;--zoom:1.05" alt=""></div></div>
+    <div class="vp"><img src="../screenshots/home.png" style="--from:0px;--to:0px;--t:7.5s;--zoom:1.05" alt=""></div></div>
   <div class="callout g a pop" style="--d:2.4;right:150px;top:890px">What it does · Why it matters · You can</div>
 </section>
 
-<!-- 6 · forecast -->
+<!-- 10 · forecast -->
 <section class="scene light" data-dur="9" data-wm="1">
   <div class="copy">
     <div class="num a pop" style="--d:.3">1</div>
@@ -282,7 +330,7 @@
   <div class="callout g a pop" style="--d:4.8;right:120px;top:700px">Guimaras · outbreak warning</div>
 </section>
 
-<!-- 7 · explain & act -->
+<!-- 11 · explain & act -->
 <section class="scene light" data-dur="9" data-wm="1">
   <div class="copy">
     <div class="num a pop" style="--d:.3">2</div>
@@ -295,7 +343,7 @@
   <div class="callout a pop" style="--d:3;right:150px;top:150px"><i style="background:var(--warn)"></i>Download the action brief</div>
 </section>
 
-<!-- 8 · plan -->
+<!-- 12 · plan -->
 <section class="scene light" data-dur="9" data-wm="1">
   <div class="copy">
     <div class="num a pop" style="--d:.3">3</div>
@@ -308,19 +356,7 @@
   <div class="callout g a pop" style="--d:2.8;right:160px;top:330px">₱5M → cases averted, with a range</div>
 </section>
 
-<!-- 9 · target -->
-<section class="scene light" data-dur="8" data-wm="1">
-  <div class="copy">
-    <div class="num a pop" style="--d:.3">4</div>
-    <div class="h2 a" style="--d:.5">Target barangays</div>
-    <div class="body a" style="--d:.9">In Quezon City, the city forecast becomes a shortlist of barangays to visit first.</div>
-  </div>
-  <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · QC barangays</span></div>
-    <div class="vp"><img src="../screenshots/qc.png" style="--from:0px;--to:-50px;--t:7s;--zoom:1.06" alt=""></div></div>
-  <div class="callout a pop" style="--d:2.6;right:560px;top:880px"><i style="background:var(--normal)"></i>Batasan Hills · Payatas · Commonwealth</div>
-</section>
-
-<!-- 10 · proof -->
+<!-- 13 · proof -->
 <section class="scene dark" data-dur="11" data-wm="1">
   <div style="position:absolute;left:110px;top:130px;display:flex;flex-direction:column;gap:18px">
     <div class="kicker a" style="--d:.2">Tested honestly</div>
@@ -334,7 +370,7 @@
   <div class="foot a fade" style="--d:4">Honest limits: the watch level raises false alarms (42–63% of warnings, 87% in one year), and weather adds little beyond recent cases, so it runs on data LGUs already have.</div>
 </section>
 
-<!-- 11 · close -->
+<!-- 14 · close -->
 <section class="scene green" data-dur="10" data-wm="0">
   <div class="pixels" data-n="30" data-seed="11"></div>
   <canvas class="spr peek" data-s="frog" data-f="happy" data-x="7" style="right:120px;--d:4.6"></canvas>
@@ -505,7 +541,65 @@
     const section = cv.closest("section");
     return { section, draw, dur: +section.dataset.dur, t0: null };
   }
-  const maps = [pixelMap("map-actual", "act", false), pixelMap("map-forecast", "fc", true)];
+  // Quezon City's season: reported cases as pixel bars against the epidemic line; in the replay, each week's
+  // forecast made 4 weeks earlier (likely range, coloured by its alert level) slides in over the faded bars.
+  const CH = { left: 1920 - 110 - 880, top: 190, W: 880, H: 700 };
+  function qcChart(id, replay) {
+    const cv = document.getElementById(id), { W, H } = CH, P = { l: 70, r: 10, t: 40, b: 60 };
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = W * dpr; cv.height = H * dpr;
+    const g = cv.getContext("2d"); g.scale(dpr, dpr);
+    const n = QC.weeks.length, slot = (W - P.l - P.r) / n, bw = Math.floor(slot) - 4, top = 720;
+    const px = (v) => Math.round(v / 4) * 4;
+    const x = (i) => Math.round(P.l + i * slot), y = (v) => px(H - P.b - Math.min(v, top) / top * (H - P.t - P.b));
+    const muted = replay ? "#7D8A82" : "#A3B0DB", grid = replay ? "rgba(7,23,17,.08)" : "rgba(255,255,255,.07)";
+    const mon = (w) => new Date(w + "T00:00:00").toLocaleString("en", { month: "short" });
+    function draw(t) {
+      g.clearRect(0, 0, W, H);
+      g.font = "700 18px 'Inter Tight', sans-serif";
+      for (let v = 0; v <= 700; v += 100) {
+        g.fillStyle = grid; g.fillRect(P.l, y(v), W - P.l - P.r, 2);
+        g.fillStyle = muted; g.textAlign = "right"; g.fillText(v, P.l - 14, y(v) + 6);
+      }
+      g.textAlign = "left";
+      QC.weeks.forEach((w, i) => { if (+w.slice(8) <= 7) g.fillText(mon(w), x(i), H - P.b + 34); });
+      for (let i = 0; i < n; i++) {
+        const c = QC.cases[i], k = replay ? 1 : Math.min(1, Math.max(0, (t - .6 - i / n * 3.6) / .35));
+        if (!k) continue;
+        g.fillStyle = replay ? "#D7DACE" : c > QC.epi[i] ? "#F04B2A" : "#3A4C8C";
+        const h = px((H - P.b - y(c)) * k);
+        g.fillRect(x(i), H - P.b - h, bw, h);
+      }
+      g.fillStyle = replay ? "rgba(7,23,17,.55)" : "rgba(255,255,255,.75)";  // the epidemic line, dashed in pixel steps
+      for (let i = 0; i < n; i++) for (let k = 0; k < slot - 6; k += 10) g.fillRect(x(i) + k, y(QC.epi[i]) - 2, 6, 4);
+      if (!replay) return;
+      if (t > 3) { const m = QC.weeks.indexOf(QC.stats.crossed); g.fillStyle = "#071711"; for (let v = y(690); v < H - P.b; v += 14) g.fillRect(x(m) + bw / 2 - 2, v, 4, 8); }
+      const shown = Math.floor(Math.max(0, t - 1.6) / 4.8 * n);
+      for (let i = 0; i < Math.min(n, shown); i++) {
+        const f = QC.fc[i]; if (!f) continue;
+        g.fillStyle = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928" }[f[0]] || "#9AA69E";
+        g.globalAlpha = .38; g.fillRect(x(i), y(f[3]), bw, y(f[1]) - y(f[3]));
+        g.globalAlpha = 1; g.fillRect(x(i) - 2, y(f[2]) - 4, bw + 4, 8);
+      }
+    }
+    draw(-1);
+    const section = cv.closest("section");
+    return { section, draw, dur: +section.dataset.dur, t0: null, x: (i) => x(i) + bw / 2, y };
+  }
+  const QS = QC.stats, wk = (d) => QC.weeks.indexOf(d);
+  const fmtDay = (d) => new Date(d + "T00:00:00").toLocaleString("en", { day: "numeric", month: "short", year: "numeric" });
+  const qa = qcChart("qc-actual", false), qf = qcChart("qc-forecast", true);
+  const place = (id, chart, i, v, dx, dy) => { const el = document.getElementById(id); el.style.left = CH.left + chart.x(i) + dx + "px"; el.style.top = CH.top + chart.y(v) + dy + "px"; };
+  document.getElementById("qc-peak-note").textContent = `${QS.peak} cases · ${fmtDay(QS.peak_week)}`;
+  place("qc-peak-note", qa, wk(QS.peak_week), QS.peak, -150, -44);
+  place("qc-line-note", qa, 0, QC.epi[0], -10, -48);
+  document.getElementById("qc-cross-note").textContent = `▼ crossed the epidemic line · ${fmtDay(QS.crossed)}`;
+  place("qc-cross-note", qf, wk(QS.crossed), 720, -14, -40);
+  document.getElementById("qc-weeks").dataset.count = QS.weeks_above;
+  document.getElementById("qc-tag").textContent = `Peak ${fmtDay(QS.peak_week)} · ${Math.round(QS.peak / QS.peak_epi)}× the epidemic line`;
+  document.getElementById("qc-lead").dataset.count = Math.round((new Date(QS.crossed) - new Date(QS.first_flag)) / 6048e5);
+  document.getElementById("qc-honest").textContent = `Honest limit: it called the outbreak, not its height. For the ${QS.peak}-case peak week it forecast ${QS.peak_fc[1]} (likely ${QS.peak_fc[0]}–${QS.peak_fc[2]}).`;
+  const maps = [qa, qf, pixelMap("map-forecast", "fc", true)];
   (function tick(now) {
     for (const m of maps) {
       if (m.t0 === null && m.section.classList.contains("on")) m.t0 = now;
@@ -515,7 +609,6 @@
   })(performance.now());
   document.getElementById("crossed").textContent = STATS.crossed;
   document.querySelector('[data-count="30"]').dataset.count = STATS.flagged;
-  document.querySelector('#map-actual').closest("section").querySelector('[data-count="32"]').dataset.count = STATS.crossed;
 
   function countUp(el, delay) {
     const to = +el.dataset.count, dur = 1400;

@@ -1,5 +1,6 @@
 """Write docs/film/data.js for the motion-graphics film: province outlines as SVG paths, coloured by the
-forecast EpiLag-PH made on 2 Jun 2019 (4 weeks ahead) and by what actually happened.
+forecast EpiLag-PH made on 2 Jun 2019 (4 weeks ahead) and by what actually happened; and Quezon City's 2024-25
+season, week by week, with the out-of-sample forecast made 4 weeks before each week.
 Usage: python scripts/film_data.py"""
 import json
 import sys
@@ -12,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from thresholds import thresholds  # noqa: E402
 
 ORIGIN, HORIZON = pd.Timestamp("2019-06-02"), 4
+QC_SEASON = pd.date_range("2024-09-01", "2025-06-29", freq="W-SUN")
 W, H = 1000, 1400  # SVG viewBox
 LON, LAT = (116.8, 127.0), (4.4, 21.2)
 
@@ -34,6 +36,38 @@ def ring_path(ring):
     if len(pts) < 3:
         return ""
     return "M" + "L".join(f"{x:g},{y:g}" for x, y in pts) + "Z"
+
+
+def woy(d) -> int:
+    return min(52, int(d.isocalendar().week))
+
+
+def qc_season(data: Path) -> dict:
+    """Quezon City's weekly cases, its epidemic line (from years before 2024), and the forecast for each week made
+    4 weeks earlier, its level judged on the thresholds known at the time (years before the forecast's year)."""
+    hist = pd.read_parquet(data / "region_qc_history.parquet").query("unit_id == 'QC'")
+    bt = pd.read_parquet(data / "region_qc_backtest.parquet").query("unit_id == 'QC' and horizon == @HORIZON")
+    thr = {y: thresholds(hist[hist.week < f"{y}-01-01"]).set_index("woy") for y in (2024, 2025)}
+    cases = hist.set_index("week").cases.reindex(QC_SEASON)
+    epi = [float(thr[2024].epidemic[woy(d)]) for d in QC_SEASON]
+    fc = []
+    for d in QC_SEASON:
+        r = bt[bt.target_week == d]
+        if r.empty:
+            fc.append(None)
+            continue
+        r = r.iloc[0]
+        t = thr[(d - pd.Timedelta(weeks=HORIZON)).year]
+        fc.append([level(r.q50, r.q90, t.alert[woy(d)], t.epidemic[woy(d)]), round(r.q10), round(r.q50), round(r.q90)])
+    above = [i for i, (c, e) in enumerate(zip(cases, epi)) if c > e]
+    peak = int(cases.values.argmax())
+    flagged = [i for i, f in enumerate(fc) if f and f[0] in ("watch", "warning")]
+    stats = {"crossed": QC_SEASON[above[0]].strftime("%Y-%m-%d"), "weeks_above": len(above), "peak": int(cases.iloc[peak]),
+             "peak_week": QC_SEASON[peak].strftime("%Y-%m-%d"), "peak_epi": round(epi[peak]), "peak_fc": fc[peak][1:],
+             "first_flag": (QC_SEASON[flagged[0]] - pd.Timedelta(weeks=HORIZON)).strftime("%Y-%m-%d"),
+             "season_cases": int(cases.sum())}
+    return {"weeks": [d.strftime("%Y-%m-%d") for d in QC_SEASON], "cases": [int(c) for c in cases],
+            "epi": [round(e, 1) for e in epi], "fc": fc, "stats": stats}
 
 
 def main() -> None:
@@ -61,8 +95,10 @@ def main() -> None:
     crossed = f[f.act == "warning"]
     stats = {"crossed": int(len(crossed)), "flagged": int(crossed.fc.isin(["watch", "warning"]).sum())}
     out = ROOT / "docs" / "film" / "data.js"
-    out.write_text(f"window.PH = {json.dumps(shapes, separators=(',', ':'))};\nwindow.STATS = {json.dumps(stats)};\n")
-    print(out.relative_to(ROOT), f"{out.stat().st_size / 1e3:.0f} kB", stats)
+    qc = qc_season(data)
+    out.write_text(f"window.PH = {json.dumps(shapes, separators=(',', ':'))};\nwindow.STATS = {json.dumps(stats)};\n"
+                   f"window.QC = {json.dumps(qc, separators=(',', ':'))};\n", newline="\n")
+    print(out.relative_to(ROOT), f"{out.stat().st_size / 1e3:.0f} kB", stats, qc["stats"])
 
 
 if __name__ == "__main__":
