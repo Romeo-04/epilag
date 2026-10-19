@@ -19,14 +19,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/epilag/assets/build/drill-eZL0_ns_.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/drill-BRhG4ITm.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-BDKxYwEy.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-BfSZQAZg.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-B5GnU56J.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-Djq-q3oX.css">
 </head>
 <body class="drill">
   <!-- ============================================================ title -->
@@ -58,19 +58,20 @@
 
   <!-- ============================================================ briefing -->
   <section class="screen" id="s-brief" aria-labelledby="b-title">
-    <div class="wrap brief">
-      <div>
+    <div class="wrap briefing">
+      <div class="briefing__copy">
         <span class="chip chip--night" id="brief-chip">Intel briefing</span>
         <h2 id="b-title">The rain is free.<br><span>The dengue bill comes later.</span></h2>
         <p>This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.</p>
         <ol class="objectives">
-          <li><b>OBJ 1</b>Avert as many cases as you can.</li>
-          <li><b>OBJ 2</b>Get teams in 4+ weeks before an outbreak peaks.</li>
-          <li><b>OBJ 3</b>Don't waste teams where no outbreak comes.</li>
+          <li class="console"><span class="objectives__ic"><i data-icon="residents" data-size="32"></i></span><div><b>Objective 1</b><span>Avert as many cases as you can.</span></div></li>
+          <li class="console"><span class="objectives__ic"><i data-icon="calendarGap" data-size="24"></i></span><div><b>Objective 2</b><span>Get teams in 4+ weeks before an outbreak peaks.</span></div></li>
+          <li class="console"><span class="objectives__ic"><i data-icon="check" data-size="24"></i></span><div><b>Objective 3</b><span>Don't waste teams where no outbreak comes.</span></div></li>
         </ol>
-        <button class="btn btn--go" id="go-r1" type="button">Deploy · Round 1: no intel <i data-icon="play" data-size="24"></i></button>
+        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Deploy · Round 1: no intel <i data-icon="play" data-size="24"></i></button>
+          <span class="sub">10 teams · ₱500K each · 8 turns of 2 weeks</span></div>
       </div>
-      <div class="receipt" id="receipt"></div>
+      <div class="briefing__receipt"><div class="receipt" id="receipt"></div><pixel-sprite class="briefing__mosq" sprite="mosquito" pose="clipboard" scale="4"></pixel-sprite></div>
     </div>
   </section>
 

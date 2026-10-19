@@ -50,14 +50,23 @@ body.drill::before { content: ""; position: fixed; inset: 0; pointer-events: non
 .title__frog { position: absolute; left: 18px; bottom: -6px; z-index: 2; }
 
 /* ------------------------------------------------------------------ briefing */
-.brief { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; min-height: 100vh; padding-top: 56px; padding-bottom: 56px; }
-.brief h2, .report h2 { margin-top: 16px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.04; color: var(--night-text); }
-.brief h2 span { color: var(--lv-warning); }
-.brief p { color: var(--night-muted); font-size: 18px; line-height: 1.5; margin: 18px 0; }
-.objectives { list-style: none; padding: 0; display: grid; gap: 10px; margin: 20px 0 28px; }
-.objectives b { color: #34D27B; font-size: 13px; letter-spacing: .1em; margin-right: 12px; }
-.receipt { background: #FFFDF5; color: #262620; font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; padding: 26px 26px 34px; max-width: 420px; width: 100%;
-  justify-self: center; transform: rotate(-2deg); animation: d-print 1.6s steps(24, end) both; position: relative; }
+/* the briefing: the mission dossier on the left, the season's "receipt" on the right */
+.briefing { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 56px; align-items: center; min-height: 100vh; padding-top: 56px; padding-bottom: 56px; }
+.briefing__copy { display: grid; justify-items: start; }
+.briefing h2, .report h2 { margin-top: 16px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.04; color: var(--night-text); }
+.briefing h2 span { color: var(--lv-warning); }
+.briefing p { color: var(--night-muted); font-size: 18px; line-height: 1.5; margin: 18px 0 6px; max-width: 52ch; }
+.objectives { list-style: none; padding: 0; display: grid; gap: 10px; margin: 22px 0 28px; width: 100%; max-width: 560px; }
+.objectives li { display: flex; align-items: center; gap: 14px; padding: 12px 14px; }
+.objectives__ic { display: grid; place-items: center; width: 48px; height: 48px; flex: none; background: rgba(245, 165, 28, .14); border: 1.5px solid rgba(245, 165, 28, .45);
+  --i1: #FFE2A6; --i2: rgba(245, 165, 28, .35); --i3: #F5A51C; }
+.objectives b { display: block; color: var(--d-amber, #F5A51C); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.objectives span { color: var(--night-text); font-size: 15.5px; }
+.briefing__go { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.briefing__receipt { position: relative; justify-self: center; width: min(100%, 440px); }
+.briefing__mosq { position: absolute; right: -36px; bottom: -40px; transform: rotate(-8deg); }
+.receipt { background: #FFFDF5; color: #262620; font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; padding: 26px 28px 34px; width: 100%;
+  transform: rotate(-2deg); box-shadow: 10px 12px 0 rgba(0, 0, 0, .35); animation: d-print 1.6s steps(24, end) both; position: relative; }
 .receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px;
   background: linear-gradient(135deg, #FFFDF5 6px, transparent 0) 0 0 / 12px 12px, linear-gradient(-135deg, #FFFDF5 6px, transparent 0) 0 0 / 12px 12px; }
 .receipt h3 { text-align: center; letter-spacing: .14em; font-size: 16px; }
@@ -99,21 +108,13 @@ body.drill::before { content: ""; position: fixed; inset: 0; pointer-events: non
 .board-wrap[data-weather="rain"] { background: linear-gradient(#1B2A33, #44606A); }
 .board-wrap[data-weather="storm"] { background: linear-gradient(#0D141A, #2E3E46); }
 /* the sky: stars and pixel clouds drifting behind the island */
-.sky { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.sky::before { content: ""; position: absolute; inset: 0; opacity: .5;
-  background: radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 33% 9%, #fff 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 58% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 76% 12%, #fff 50%, transparent 51%),
-    radial-gradient(1px 1px at 91% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 22% 36%, #fff 50%, transparent 51%); }
-[data-weather="rain"] .sky::before, [data-weather="storm"] .sky::before { opacity: 0; }
-.sky i { position: absolute; left: -30%; width: 220px; height: 48px; opacity: .22; background:
-  linear-gradient(#E9F3EC 0 0) 40px 0 / 90px 16px no-repeat, linear-gradient(#E9F3EC 0 0) 16px 16px / 160px 16px no-repeat,
-  linear-gradient(#E9F3EC 0 0) 0 32px / 220px 16px no-repeat; animation: d-cloud 60s linear infinite; }
-.sky i:nth-child(1) { top: 8%; }
-.sky i:nth-child(2) { top: 22%; transform: scale(.6); animation-duration: 90s; animation-delay: -30s; }
-.sky i:nth-child(3) { top: 4%; transform: scale(1.4); animation-duration: 75s; animation-delay: -50s; opacity: .14; }
-.sky i:nth-child(4) { top: 30%; transform: scale(.8); animation-duration: 110s; animation-delay: -80s; opacity: .12; }
-[data-weather="storm"] .sky i { opacity: .35; filter: brightness(.5); }
-@keyframes d-cloud { to { left: 110%; } }
+/* the sky behind the island: the painted clear sky, with the storm sky fading in as the rain gets heavier */
+.sky { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: url(/drill/sky_clear.png) center / cover no-repeat; image-rendering: pixelated; }
+.sky::after { content: ""; position: absolute; inset: 0; background: url(/drill/sky_storm.png) center / cover no-repeat; image-rendering: pixelated;
+  opacity: 0; transition: opacity 1.2s; }
+[data-weather="rain"] .sky::after { opacity: .65; }
+[data-weather="storm"] .sky::after { opacity: 1; }
+.sky i { display: none; }
 .board__flash { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: #F2FBFF; opacity: 0; }
 .board__flash.on { animation: d-flash .5s steps(4) both; }
 @keyframes d-flash { 0% { opacity: .75; } 25% { opacity: .1; } 50% { opacity: .55; } 100% { opacity: 0; } }
@@ -240,7 +241,8 @@ body.drill::before { content: ""; position: fixed; inset: 0; pointer-events: non
 
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 1000px) {
-  .title, .brief, .report__top, .vs { grid-template-columns: minmax(0, 1fr); }
+  .title, .briefing, .report__top, .vs { grid-template-columns: minmax(0, 1fr); }
+  .briefing__mosq { right: -6px; }
   .field { grid-template-columns: minmax(0, 1fr); }
   .game { height: auto; min-height: 100vh; }
   .board-wrap { height: 66vh; }
@@ -271,3 +273,54 @@ body.drill::before { content: ""; position: fixed; inset: 0; pointer-events: non
   .grade { width: 140px; height: 140px; font-size: 100px; }
 }
 @media (prefers-reduced-motion: reduce) { .drill *, .drill *::before, .drill *::after { animation: none !important; transition: none !important; } }
+
+/* ------------------------------------------------------------------ art pass: night palette, painted backgrounds, pixel UI */
+/* the drill's own night palette (navy and indigo with amber and teal accents) instead of flat green */
+body.drill { --night: #0B1630; --night-2: #142250; --night-line: #2E3F7A; --night-text: #EEF2FF; --night-muted: #A3B0DB;
+  --d-hi: rgba(255, 255, 255, .14); --d-lo: rgba(0, 0, 0, .35); --d-amber: #F5A51C; --d-teal: #2FD6C3; background: #0B1630; }
+body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 3px, radial-gradient(120% 90% at 70% 0%, #1B2B63, #0B1630 62%); }
+/* title: the painted village at night, darkened on the left where the text sits */
+#s-title { background: linear-gradient(90deg, rgba(8, 14, 36, .94) 0%, rgba(8, 14, 36, .78) 42%, rgba(8, 14, 36, .1) 72%),
+  url(/drill/title.png) center / cover no-repeat; image-rendering: pixelated; }
+#s-brief, #s-report, #s-vs { background: linear-gradient(rgba(8, 14, 36, .86), rgba(8, 14, 36, .94)), url(/drill/sky_clear.png) center / cover fixed no-repeat; image-rendering: pixelated; }
+.logo-mark span { -webkit-text-stroke-color: var(--d-amber); }
+.logo-mark { text-shadow: 4px 4px 0 #050A1C; }
+.tagline b, .how b, .objectives b, .rail-ctl output b { color: var(--d-amber); }
+/* panels: a pixel frame (bevel: light top-left, dark bottom-right) on translucent navy */
+.drill .console, .drill .panel, .mission, .stat, .controls button, .toast, .badge, .intel-box, .take .action {
+  box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo); }
+.drill .console { background: rgba(16, 27, 66, .9); border-color: var(--night-line); }
+.drill .panel { background: rgba(255, 255, 255, .04); }
+.title__stage.console { background: rgba(10, 18, 46, .72); backdrop-filter: blur(2px); }
+.mission { background: rgba(16, 27, 66, .85); }
+.mission.sel { border-color: var(--d-amber); background: rgba(58, 44, 16, .85); }
+.mission.sel b { color: #FFE2A6; }
+.chip--night { background: rgba(255, 255, 255, .08); border-color: var(--night-line); }
+/* buttons: chunky pixel buttons that press down */
+.btn--go { background: #F5A51C; color: #1A1206; box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .45), inset -3px -3px 0 rgba(0, 0, 0, .28), 0 4px 0 #8A5A0A;
+  transition: transform .08s, box-shadow .08s; }
+.btn--go:hover { filter: brightness(1.06); }
+.btn--go:active:not(:disabled) { transform: translateY(3px); box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .35), inset -3px -3px 0 rgba(0, 0, 0, .28), 0 1px 0 #8A5A0A; }
+.btn--go:focus-visible { box-shadow: inset 0 0 0 3px #1A1206, inset 0 0 0 5px #fff; }
+.btn--dark-ghost { background: rgba(255, 255, 255, .06); box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo); }
+.arrow { background: rgba(16, 27, 66, .85); }
+.arrow:hover { border-color: var(--d-amber); color: var(--d-amber); }
+/* HUD and board */
+.timeline li.done i { background: var(--d-teal); border-color: var(--d-teal); }
+.timeline li.now i { background: var(--d-amber); border-color: #FFE2A6; box-shadow: 0 0 0 4px rgba(245, 165, 28, .25); }
+.pips--tokens i { background: var(--d-teal); }
+.board-wrap { border-color: var(--night-line); box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo); background: #0B1630; }
+.stat, .controls button { background: rgba(9, 16, 42, .76); border-color: var(--night-line); }
+.controls button:hover { border-color: var(--d-amber); color: var(--d-amber); }
+.toast { background: rgba(9, 16, 42, .9); border-color: var(--d-amber); }
+.prow.on { background: rgba(245, 165, 28, .14); box-shadow: inset 3px 0 0 var(--d-amber); }
+.prow__team { background: var(--d-teal); }
+.ticker .live { background: var(--lv-warning); }
+.badge.got { border-color: var(--d-amber); }
+.vs__card.win { border-color: var(--d-amber); }
+.board__legend .intel, .intel-box .k { color: #7FE4FF; }
+.drill .chart-surface { background: linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px) 0 0 / 100% 25%,
+  linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px) 0 0 / 12.5% 100%, #0B1630; }
+.title__map { background: url(/drill/sky_clear.png) center / cover no-repeat; image-rendering: pixelated; }
+.receipt .stamp { display: table; margin: 16px auto 0; padding: 6px 16px; }
+.briefing__mosq { right: -34px; bottom: auto; top: -54px; transform: rotate(8deg); }
