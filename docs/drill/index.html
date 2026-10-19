@@ -10,13 +10,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/epilag/assets/build/drill-CftIOInd.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/drill-CAjyKqkx.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-BiF2NbgQ.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-BDKxYwEy.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-BfSZQAZg.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/pixel-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-E_C5xHOM.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-B5GnU56J.css">
 </head>
 <body class="drill">
   <!-- ============================================================ title -->
@@ -68,22 +68,31 @@
   <section class="screen" id="s-game" aria-label="Dengue Drill board">
     <div class="game">
       <header class="hud console">
-        <span class="chip chip--night" id="mode">Round 1 · No intel</span>
-        <div class="hud__cells">
-          <div class="hud__cell"><span class="k">Budget</span><b class="v nums" id="h-budget">₱5.0M</b><span class="pips pips--tokens" id="h-tokens"></span></div>
-          <div class="hud__cell"><span class="k">Week <span id="h-turn">1</span> of 8</span><b class="v" id="h-week">5 May 2019</b><span class="pips" id="h-pips"></span></div>
-          <div class="hud__cell hud__cell--cases"><span class="k">Cases this week</span><b class="v nums" id="h-cases">0</b><span class="d" id="h-change"></span><span class="hud__spark" id="h-spark"></span></div>
-          <div class="hud__cell"><span class="k">Rain this week</span><b class="v nums" id="h-rain">0 mm</b></div>
-          <div class="hud__cell"><span class="k">Outbreak pressure</span><b class="v" id="h-press">Low</b><span class="meter"><i id="h-meter"></i></span></div>
-        </div>
-        <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false"><i data-icon="alert" data-size="24"></i></button>
+        <div class="hud__who"><span class="chip chip--night" id="mode">Round 1 · No intel</span><b id="h-region">Region</b></div>
+        <ol class="timeline" id="h-timeline" aria-label="Turns"></ol>
+        <div class="hud__budget"><span class="k">Budget</span><b class="v nums" id="h-budget">₱5.0M</b><span class="pips pips--tokens" id="h-tokens"></span></div>
+        <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false"></button>
       </header>
       <div class="field">
-        <div class="board-wrap">
-          <div class="board" id="board" role="img" aria-label="3D map of the region: column height and colour show cases against the epidemic line"></div>
+        <div class="board-wrap" id="board-wrap" data-weather="clear">
+          <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="board" id="board" role="img" aria-label="3D map of the region: higher, redder provinces have more cases against their epidemic line"></div>
+          <div class="board__flash" id="flash" aria-hidden="true"></div>
+          <div class="stats">
+            <div class="stat"><span class="k">Cases this week</span><b class="nums" id="h-cases">0</b><span class="d" id="h-change"></span><span class="stat__spark" id="h-spark"></span></div>
+            <div class="stat"><span class="k">Rain</span><b class="nums" id="h-rain">0 mm</b><span class="d" id="h-sky"></span></div>
+            <div class="stat"><span class="k">Outbreak pressure</span><b id="h-press">Low</b><span class="meter"><i id="h-meter"></i></span></div>
+          </div>
+          <div class="controls" role="group" aria-label="View">
+            <button type="button" id="v-in" aria-label="Zoom in">+</button>
+            <button type="button" id="v-out" aria-label="Zoom out">−</button>
+            <button type="button" id="v-left" aria-label="Turn left">⟲</button>
+            <button type="button" id="v-right" aria-label="Turn right">⟳</button>
+            <button type="button" id="reset-view" aria-label="Reset view"><i data-icon="close" data-size="24"></i></button>
+          </div>
           <div class="board__legend"><span>Cases vs epidemic line</span><span class="grad"></span><span id="legend-intel"></span></div>
-          <button class="board__reset" id="reset-view" type="button">Reset view</button>
-          <p class="board__hint">Drag to turn the board</p>
+          <p class="board__hint">Drag to turn · right-drag to move · scroll or pinch to zoom</p>
+          <div class="toast" id="toast" aria-live="polite"></div>
         </div>
         <aside class="side console">
           <div class="side__head"><span class="k">Provinces</span><span class="k" id="side-sub"></span></div>

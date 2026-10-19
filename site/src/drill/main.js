@@ -8,7 +8,8 @@ import "../css/components.css";
 import "./drill.css";
 import "../lib/pixel.js";
 import { hydrateIcons, icon } from "../lib/icons.js";
-import { createVoxelMap, loadGrids } from "../lib/voxel.js";
+import { loadGrids } from "../lib/voxel.js";
+import { createWorld } from "./world.js";
 import { rules } from "./rules.js";
 import { createBoard } from "./board.js";
 
@@ -48,6 +49,7 @@ const sfx = {
   turn: () => { tone(120, 0.5, "sawtooth", 0.035, 0, 60); tone(300, 0.35, "sine", 0.03, 0.1, 900); },
   alarm: () => { tone(740, 0.12, "square", 0.04); tone(740, 0.12, "square", 0.04, 0.18); },
   grade: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, "triangle", 0.06, i * 0.11)),
+  thunder: () => { tone(60, 1.2, "sawtooth", 0.05, 0.15, 30); tone(90, 0.8, "triangle", 0.04, 0.1, 40); },
 };
 $("mute").addEventListener("click", () => {
   muted = !muted;
@@ -61,7 +63,7 @@ function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classL
 // ------------------------------------------------------------------ title: region rail and a turning 3D preview
 const totals = D.regions.map((r) => r.provinces.reduce((s, p) => s + p.cases.slice(FIRST).reduce((a, c) => a + (c || 0), 0), 0));
 const tmax = Math.max(...totals);
-let preview = null, previewTimer = 0;
+let preview = null, previewId = 0;
 async function renderMissions() {
   $("missions").innerHTML = D.regions.map((r, k) => {
     const stars = Math.max(1, Math.ceil((totals[k] / tmax) * 5)), m = r.name.match(/^(.*?)(?: \((.+)\))?$/);
@@ -76,17 +78,17 @@ async function renderMissions() {
   $("t-region").textContent = r.name;
   $("t-stats").textContent = `${r.provinces.length} provinces · ${fmt(totals[regionIdx])} cases in 2019`;
   // the preview: the region's columns at the season's busiest week, slowly turning
-  clearTimeout(previewTimer);
-  preview?.dispose();
+  const id = ++previewId;
+  preview?.dispose(); preview = null;
   const grid = boards[r.id];
-  preview = await createVoxelMap($("t-map"), { grid, pixel: 3, pitch: 48, yaw: -30, lift: 2.2, top: 7, sea: "#0B2A1F" });
+  $("t-map").innerHTML = "";
+  const w = await createWorld($("t-map"), { grid, pixel: 2 });
+  if (id !== previewId) { w.dispose(); return; } // the reader picked another region meanwhile
+  preview = w;
   const busiest = r.provinces.map((p) => R.peak(p) ?? FIRST);
   preview.setValues(Object.fromEntries(r.provinces.map((p, k) => [p.id, columnOf(p, busiest[k])])), { duration: 1200 });
-  if (!reduce && preview.setView) {
-    let dir = 1;
-    const swing = () => { preview.setView({ yaw: dir > 0 ? 18 : -38 }, { duration: 6000 }); dir = -dir; previewTimer = setTimeout(swing, 6000); };
-    swing();
-  }
+  preview.setWeather({ rain: 0.25 });
+  preview.spin();
 }
 function pickRegion(k) { if (k < 0 || k >= D.regions.length || k === regionIdx) return; regionIdx = k; sfx.click(); renderMissions(); }
 $("missions").addEventListener("click", (e) => { const b = e.target.closest(".mission"); if (b) pickRegion(+b.dataset.k); });
@@ -97,13 +99,13 @@ $("m-next").addEventListener("click", () => pickRegion(regionIdx + 1));
 /** A province's column for week i: height from cases against the epidemic line, colour from the heat ramp. */
 function columnOf(p, i) {
   const c = p.cases[i], e = p.epi[i];
-  return { color: R.heat(p, i), height: c == null || !e ? 0.6 : 0.6 + Math.min(5.4, (c / e) * 2.2) };
+  return { color: R.heat(p, i), height: c == null || !e ? 0.3 : 0.3 + Math.min(5.5, (c / e) * 2.4) };
 }
 
 // ------------------------------------------------------------------ briefing: the rain receipt
 $("start").addEventListener("click", () => {
   region = D.regions[regionIdx]; results = {}; sfx.deploy();
-  clearTimeout(previewTimer); preview?.dispose(); preview = null;
+  previewId++; preview?.dispose(); preview = null;
   const i0 = FIRST, i1 = Math.min(WEEKS.length - 1, FIRST + 20);
   const rain = region.provinces.map((p) => p.rain.slice(i0, i1 + 1).reduce((s, r) => s + (r || 0), 0));
   const items = region.provinces.map((p) => ({ name: p.name, cases: p.cases.slice(i0, i1 + 1).reduce((s, c) => s + (c || 0), 0), hit: R.peak(p) != null }));
@@ -196,19 +198,36 @@ $("plist").addEventListener("keydown", (e) => {
   pick(k); $("plist").querySelector(`[data-k="${k}"]`)?.focus();
 });
 $("reset-view").addEventListener("click", () => board?.resetView());
+$("v-in").addEventListener("click", () => board?.zoomBy(1.35));
+$("v-out").addEventListener("click", () => board?.zoomBy(1 / 1.35));
+$("v-left").addEventListener("click", () => board?.rotateBy(-25));
+$("v-right").addEventListener("click", () => board?.rotateBy(25));
+function lightning() {
+  sfx.thunder();
+  if (reduce) return;
+  $("flash").classList.remove("on"); void $("flash").offsetWidth; $("flash").classList.add("on");
+}
+/** A short banner over the board (two weeks passing), instead of covering the whole screen. */
+function toast(text, sub) {
+  $("toast").innerHTML = `<b>${text}</b><span>${sub}</span>`;
+  $("toast").classList.remove("on"); void $("toast").offsetWidth; $("toast").classList.add("on");
+}
 
 function refresh({ drop = null, duration = 900 } = {}) {
   const tw = TURNS[turn], i = idx(tw);
-  $("h-turn").textContent = turn + 1;
-  $("h-week").textContent = `${day(tw)} 2019`;
-  $("h-pips").innerHTML = TURNS.map((_, t) => `<i class="${t < turn ? "done" : t === turn ? "now" : ""}"></i>`).join("");
+  $("h-region").textContent = region.name;
+  $("h-timeline").innerHTML = TURNS.map((w, t) => `<li class="${t < turn ? "done" : t === turn ? "now" : ""}"${t === turn ? ' aria-current="step"' : ""}><i></i><span>${day(w)}</span></li>`).join("");
   $("h-budget").textContent = `₱${((kits * K.pesos) / 1e6).toFixed(1)}M`;
   $("h-tokens").innerHTML = Array.from({ length: K.kits }, (_, t) => `<i class="${t >= kits ? "spent" : ""}"></i>`).join("");
   const now = region.provinces.reduce((s, p) => s + (p.cases[i] || 0), 0), before = region.provinces.reduce((s, p) => s + (p.cases[i - 2] || 0), 0);
   $("h-cases").textContent = fmt(now);
   $("h-change").textContent = before ? `${now >= before ? "▲" : "▼"} ${Math.abs(Math.round((now / before - 1) * 100))}% in 2 weeks` : "";
   $("h-spark").innerHTML = hudSpark(i);
-  $("h-rain").textContent = `${fmt(region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length)} mm`;
+  const mm = region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length;
+  $("h-rain").textContent = `${fmt(mm)} mm`;
+  const sky = mm < 10 ? ["clear", "Mostly dry"] : mm < 30 ? ["rain", "Showers"] : mm < 56 ? ["rain", "Heavy rain"] : ["storm", "Storm"];
+  $("h-sky").textContent = sky[1];
+  $("board-wrap").dataset.weather = sky[0];
   const pr = R.pressure(region, i), [lab, col] = PRESS[pr.level];
   $("h-press").textContent = lab; $("h-press").style.color = col;
   $("h-meter").style.transform = `scaleX(${Math.min(1, pr.value / 2)})`; $("h-meter").style.background = col;
@@ -219,6 +238,8 @@ function refresh({ drop = null, duration = 900 } = {}) {
   board.setWeek(Object.fromEntries(region.provinces.map((p) => [p.id, columnOf(p, i)])), { duration });
   const counts = Object.fromEntries(region.provinces.map((p, k) => [p.id, teamsIn(k)]));
   board.setTeams(counts, { drop });
+  board.setRain(mm);
+  board.setGlow(region.provinces.filter((p) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]).map((p) => p.id));
   if (round === 2) {
     board.setIntel(Object.fromEntries(region.provinces.map((p) => [p.id, p.fc[tw]?.[0] ?? null])),
       Object.fromEntries(region.provinces.filter((p) => p.fc[tw] && p.fc[tw][0] !== "normal").map((p) => [p.id, `▲${fmt(p.fc[tw][2])}`])));
@@ -256,7 +277,8 @@ async function startRound(r) {
   if (!board || board.regionId !== region.id) {
     board?.dispose();
     $("board").innerHTML = "";
-    board = await createBoard($("board"), { grid: boards[region.id], region, onPick: (u) => { const k = region.provinces.findIndex((p) => p.id === u); if (k >= 0) pick(k); } });
+    board = await createBoard($("board"), { grid: boards[region.id], region, onFlash: lightning,
+      onPick: (u) => { const k = region.provinces.findIndex((p) => p.id === u); if (k >= 0) pick(k); } });
     board.regionId = region.id;
   }
   board.select(null);
@@ -264,16 +286,18 @@ async function startRound(r) {
   warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : "EpiLag-PH intel online", () => { refresh({ duration: 0 }); tick(headline()); });
 }
 $("end").addEventListener("click", () => {
-  sfx.turn(); board.rain();
+  sfx.turn(); board.burst();
   if (turn < TURNS.length - 1) {
     turn++;
-    warp("2 weeks later", `${day(TURNS[turn])} 2019`, () => {
-      board.resetView();
-      refresh();
+    $("end").disabled = true;
+    toast("2 weeks later", `${day(TURNS[turn])} 2019`);
+    setTimeout(() => {
+      $("end").disabled = false;
+      refresh({ duration: 1400 });
       const i = idx(TURNS[turn]);
       board.floaters(region.provinces.map((p) => [p.id, (p.cases[i - 1] || 0) + (p.cases[i] || 0)]));
       tick(headline());
-    });
+    }, reduce ? 0 : 900);
   } else warp("Season over", "Counting the real 2019 cases", endRound);
 });
 

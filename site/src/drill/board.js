@@ -1,10 +1,10 @@
-// The Dengue Drill's 3D board: a region's provinces as voxel columns (height = cases against the epidemic line this
-// week, colour = the heat ramp), with the game's pieces in the same scene:
-//   intel rings that pulse by forecast level and a scan line sweeping the board (round 2),
+// The Dengue Drill's board: the region's diorama (world.js) plus the game's pieces in the same scene:
+//   intel rings that pulse by forecast level and a scan line sweeping the island (round 2),
 //   shield tokens that drop with a bounce and a puff of dust when teams deploy,
-//   pixel mosquitoes swarming over the provinces (count from rain, as before), and voxel rain on turn change,
-// plus HTML labels, forecast tags and "+N cases" floaters projected from 3D. Built on src/lib/voxel.js.
-import { createVoxelMap } from "../lib/voxel.js";
+//   pixel mosquitoes swarming over the provinces (count from rain, as before), outbreaks glowing,
+//   the week's weather (rain from the data; a heavier burst when two weeks pass),
+// plus HTML labels, forecast tags and "+N cases" floaters projected from 3D.
+import { createWorld } from "./world.js";
 import { bake, loadSprite, rows } from "../lib/pixel.js";
 
 const LCOL = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928", normal: "#0C7A55" };
@@ -19,19 +19,8 @@ function texture(T, canvas) {
 
 // a pixel shield, 12 x 13 art pixels: K outline, G body, L highlight
 const SHIELD = [
-  "..KKKKKKKK..",
-  ".KLLGGGGGGK.",
-  "KLGGGGGGGGGK",
-  "KLGGGGGGGGGK",
-  "KGGGGGGGGGGK",
-  "KGGGGGGGGGGK",
-  "KGGGGGGGGGGK",
-  ".KGGGGGGGGK.",
-  ".KGGGGGGGGK.",
-  "..KGGGGGGK..",
-  "...KGGGGK...",
-  "....KGGK....",
-  ".....KK.....",
+  "..KKKKKKKK..", ".KLLGGGGGGK.", "KLGGGGGGGGGK", "KLGGGGGGGGGK", "KGGGGGGGGGGK", "KGGGGGGGGGGK", "KGGGGGGGGGGK",
+  ".KGGGGGGGGK.", ".KGGGGGGGGK.", "..KGGGGGGK..", "...KGGGGK...", "....KGGK....", ".....KK.....",
 ];
 function shieldCanvas(n) {
   const s = 6, c = document.createElement("canvas");
@@ -43,62 +32,57 @@ function shieldCanvas(n) {
   return c;
 }
 
-export async function createBoard(el, { grid, region, onPick }) {
+export async function createBoard(el, { grid, region, onPick, onFlash }) {
   const overlay = Object.assign(document.createElement("div"), { className: "board__overlay" });
-  let selected = null;
-  const map = await createVoxelMap(el, { grid, pixel: 3, pitch: 50, yaw: -12, lift: 2.2, top: 7, sea: "#0B2A1F",
-    orbit: { yaw: [-50, 26], pitch: [28, 70] }, onPick, onHover: (u) => map?.highlight(u ?? selected) });
-  if (!map.three) return flatBoard(map); // no WebGL: the 2D map, without the 3D pieces
+  let selected = null, world = null;
+  world = await createWorld(el, { grid, pixel: 2, onPick, onFlash, onHover: (u) => world?.highlight(u ?? selected) });
   el.append(overlay);
-  const T = map.three, scene = map.scene, ids = region.provinces.map((p) => p.id);
+  const T = world.three, scene = world.scene, ids = region.provinces.map((p) => p.id);
   const mosquito = await loadSprite("mosquito");
   const disposables = [];
   const keep = (x) => { disposables.push(x); return x; };
+  const [W, H] = world.size;
 
   // ------------------------------------------------------------------ HTML labels projected from 3D
   const labels = new Map(ids.map((u, k) => {
     const el2 = document.createElement("div");
     el2.className = "board__label";
-    el2.innerHTML = `<span class="board__name">${region.provinces[k].name.replace(/ \(.+\)/, "")}</span><span class="board__tag"></span><span class="board__team"></span>`;
+    el2.innerHTML = `<span class="board__name">${region.provinces[k].name.replace(/ \(.+\)/, "")}</span><span class="board__tag"></span>`;
     overlay.append(el2);
     return [u, el2];
   }));
   function placeLabels() {
     for (const [u, el2] of labels) {
-      const c = map.centreOf(u);
+      const c = world.centreOf(u);
       if (!c) { el2.hidden = true; continue; }
-      const p = map.toScreen(new T.Vector3(c.x, map.heightOf(u) + 1, c.z));
+      const p = world.toScreen(new T.Vector3(c.x, world.heightOf(u) + 1, c.z));
       el2.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
     }
   }
 
   // ------------------------------------------------------------------ intel rings and the scan line (round 2)
-  const ringGeo = keep(new T.RingGeometry(0.82, 1, 48));
+  const ringGeo = keep(new T.RingGeometry(0.82, 1, 40));
   const rings = new Map();
   for (const u of ids) {
-    const c = map.centreOf(u);
+    const c = world.centreOf(u);
     if (!c) continue;
-    const r = Math.max(2.5, Math.sqrt(map.cellsOf(u).length / Math.PI) * 0.9);
     const m = new T.Mesh(ringGeo, keep(new T.MeshBasicMaterial({ color: "#6FD6FF", transparent: true, opacity: 0.9, side: T.DoubleSide, depthWrite: false })));
     m.rotation.x = -Math.PI / 2;
     m.position.set(c.x, 0, c.z);
-    m.scale.setScalar(r);
     m.visible = false;
-    m.userData = { r, level: null };
+    m.userData = { r: Math.max(2.5, Math.sqrt(world.cellsOf(u).length / Math.PI) * 0.9), level: null };
     scene.add(m);
     rings.set(u, m);
   }
-  const [W, H] = map.size;
-  // the scan line: a thin glowing bar on the ground, crossing the board
-  const sweepBox = new T.Mesh(keep(new T.BoxGeometry(0.8, 2.5, H)), keep(new T.MeshBasicMaterial({ color: "#6FD6FF", transparent: true, opacity: 0.35, depthWrite: false })));
-  sweepBox.position.set(0, 1.25, H / 2);
-  sweepBox.visible = false;
-  scene.add(sweepBox);
+  const sweep = new T.Mesh(keep(new T.BoxGeometry(0.8, 14, H + 14)), keep(new T.MeshBasicMaterial({ color: "#6FD6FF", transparent: true, opacity: 0.16, depthWrite: false })));
+  sweep.position.set(0, 7, H / 2);
+  sweep.visible = false;
+  scene.add(sweep);
 
-  // ------------------------------------------------------------------ team tokens
-  const tokens = new Map(); // u -> { sprite, n, drop: {t0} }
+  // ------------------------------------------------------------------ team tokens and dust
+  const tokens = new Map();
   const dust = [];
-  const dustGeo = keep(new T.BoxGeometry(0.5, 0.5, 0.5)), dustMat = keep(new T.MeshBasicMaterial({ color: "#D5E3DA", transparent: true }));
+  const dustGeo = keep(new T.BoxGeometry(0.5, 0.5, 0.5)), dustMat = keep(new T.MeshLambertMaterial({ color: "#D9C48A" }));
   function setTeams(counts, { drop = null } = {}) {
     for (const u of ids) {
       const n = counts[u] || 0, cur = tokens.get(u);
@@ -113,14 +97,14 @@ export async function createBoard(el, { grid, region, onPick }) {
       tokens.set(u, { sprite, n, t0: u === drop && !reduced() ? performance.now() : 0 });
       if (u === drop && !reduced()) puff(u);
     }
-    map.render();
+    world.render();
   }
   function puff(u) {
-    const c = map.centreOf(u), y = map.heightOf(u);
-    for (let i = 0; i < 14; i++) {
+    const c = world.centreOf(u), y = world.heightOf(u);
+    for (let i = 0; i < 18; i++) {
       const m = new T.Mesh(dustGeo, dustMat);
       m.position.set(c.x, y + 0.5, c.z);
-      m.userData = { vx: (Math.random() - 0.5) * 9, vy: 3 + Math.random() * 5, vz: (Math.random() - 0.5) * 9, life: 0.6 + Math.random() * 0.4, age: -0.35 };
+      m.userData = { vx: (Math.random() - 0.5) * 10, vy: 3 + Math.random() * 6, vz: (Math.random() - 0.5) * 10, life: 0.6 + Math.random() * 0.4, age: -0.4 };
       scene.add(m); dust.push(m);
     }
   }
@@ -132,30 +116,19 @@ export async function createBoard(el, { grid, region, onPick }) {
   function setBugs(n, anchors) {
     bugs.forEach((b) => scene.remove(b.s));
     bugs = reduced() || !anchors.length ? [] : Array.from({ length: n }, (_, i) => {
-      const a = anchors[Math.floor(Math.random() * anchors.length)];
       const s = new T.Sprite(bugMat[i % 2]);
       s.scale.set(1.5, 1.5, 1);
       scene.add(s);
-      return { s, a, p: Math.random() * 6.28, sp: 0.6 + Math.random() * 0.8, r: 1.5 + Math.random() * 4, h: 4 + Math.random() * 6 };
+      return { s, a: anchors[Math.floor(Math.random() * anchors.length)], p: Math.random() * 6.28, sp: 0.6 + Math.random() * 0.8, r: 1.5 + Math.random() * 4, h: 3 + Math.random() * 5 };
     });
-    map.render();
+    world.render();
   }
 
-  // ------------------------------------------------------------------ rain
-  const RAIN = 260;
-  const rainMesh = new T.InstancedMesh(keep(new T.BoxGeometry(0.15, 2.2, 0.15)), keep(new T.MeshBasicMaterial({ color: "#A0DCC8", transparent: true, opacity: 0.55 })), RAIN);
-  const drops = Array.from({ length: RAIN }, () => ({ x: Math.random() * W, y: Math.random() * 60, z: Math.random() * H, v: 30 + Math.random() * 20 }));
-  rainMesh.visible = false;
-  scene.add(rainMesh);
-  let rainUntil = 0;
-  const m4 = new T.Matrix4();
-
   // ------------------------------------------------------------------ the frame loop
-  let intelOn = false;
-  map.addTicker((t, dt) => {
-    // tokens: drop from above with a bounce, then sit on top of the column
+  let intelOn = false, weekRain = 0, burstUntil = 0;
+  world.addTicker((t, dt) => {
     for (const [u, k] of tokens) {
-      const c = map.centreOf(u), top = map.heightOf(u) + 3.2;
+      const c = world.centreOf(u), top = world.heightOf(u) + 3.2;
       let y = top;
       if (k.t0) {
         const a = Math.min(1, (t - k.t0) / 650);
@@ -172,51 +145,39 @@ export async function createBoard(el, { grid, region, onPick }) {
       d.vy -= 18 * dt; m.position.x += d.vx * dt; m.position.y = Math.max(0.2, m.position.y + d.vy * dt); m.position.z += d.vz * dt;
       if (d.age > d.life) { scene.remove(m); dust.splice(i, 1); }
     }
-    // rings pulse by level; the scan line crosses the board every 3.2 s
     if (intelOn) {
       for (const [u, m] of rings) {
         if (!m.visible) continue;
-        const lv = m.userData.level, speed = lv === "warning" ? 1.6 : 2.6;
-        const k = ((t / 1000) / speed + m.userData.r) % 1;
-        m.position.y = map.heightOf(u) + 0.3;
+        const speed = m.userData.level === "warning" ? 1.6 : 2.6, k = ((t / 1000) / speed + m.userData.r) % 1;
+        m.position.y = world.heightOf(u) + 0.3;
         m.scale.setScalar(m.userData.r * (reduced() ? 1.2 : 0.9 + k * 0.7));
         m.material.opacity = reduced() ? 0.9 : 0.95 * (1 - k);
       }
-      sweepBox.position.x = reduced() ? -10 : (((t / 3200) % 1) * (W + 20)) - 10;
+      sweep.position.x = reduced() ? -20 : (((t / 3600) % 1) * (W + 30)) - 15;
     }
-    // mosquitoes wander around their province
-    const fr = Math.floor(t / 100) % 2;
+    const fr = Math.floor(t / 90) % 2;
     for (const b of bugs) {
       b.p += dt * 3 * b.sp;
-      const c = map.centreOf(b.a);
+      const c = world.centreOf(b.a);
       b.s.material = bugMat[fr];
-      b.s.position.set(c.x + Math.cos(b.p * 1.3) * b.r, map.heightOf(b.a) + b.h + Math.sin(b.p * 2.1), c.z + Math.sin(b.p) * b.r);
+      b.s.position.set(c.x + Math.cos(b.p * 1.3) * b.r, world.heightOf(b.a) + b.h + Math.sin(b.p * 2.1), c.z + Math.sin(b.p) * b.r);
     }
-    // rain
-    if (rainMesh.visible) {
-      const on = t < rainUntil;
-      let alive = 0;
-      drops.forEach((d, i) => {
-        d.y -= d.v * dt;
-        if (d.y < 0) { if (on) { d.y = 50 + Math.random() * 12; d.x = Math.random() * W; d.z = Math.random() * H; } else d.y = -100; }
-        if (d.y > -50) alive++;
-        m4.makeTranslation(d.x, d.y, d.z);
-        rainMesh.setMatrixAt(i, m4);
-      });
-      rainMesh.instanceMatrix.needsUpdate = true;
-      if (!on && !alive) rainMesh.visible = false;
-    }
+    if (burstUntil && t > burstUntil) { burstUntil = 0; world.setWeather({ rain: weekRain, storm: weekRain > 0.8 }); }
     placeLabels();
   });
 
   return {
-    map,
-    /** Columns for week index i: height from cases / epidemic line, colour from the heat ramp. */
-    setWeek(values, { duration = 900 } = {}) { map.setValues(values, { duration }); },
-    /** Round 2 intel: { unitId: level } for watch/warning/above (rings + tags); null hides it. */
+    world,
+    setWeek(values, { duration = 900 } = {}) { world.setValues(values, { duration }); },
+    /** Outbreak provinces (cases above the epidemic line) glow. */
+    setGlow(list) { world.setGlow(list); },
+    /** The week's rain in mm (region average) sets the weather, from drizzle to a storm. */
+    setRain(mm) { weekRain = Math.min(1, Math.max(0.04, mm / 70)); if (!burstUntil) world.setWeather({ rain: weekRain, storm: weekRain > 0.8 }); },
+    /** A heavier downpour for a few seconds (two weeks passing), then back to the week's rain. */
+    burst(ms = 2600) { if (reduced()) return; burstUntil = performance.now() + ms; world.setWeather({ rain: 1, storm: true }); },
     setIntel(levels, tags = {}) {
       intelOn = !!levels;
-      sweepBox.visible = intelOn && !reduced();
+      sweep.visible = intelOn && !reduced();
       for (const [u, m] of rings) {
         const lv = levels?.[u];
         m.visible = !!lv && lv !== "normal";
@@ -228,43 +189,32 @@ export async function createBoard(el, { grid, region, onPick }) {
         tag.textContent = tags[u] ?? "";
         tag.style.color = LCOL[levels?.[u]] || "";
       }
-      map.render();
+      world.render();
     },
-    setTeams(counts, opts) {
-      setTeams(counts, opts);
-      for (const [u, el2] of labels) el2.querySelector(".board__team").textContent = "";
-    },
+    setTeams,
     setBugs,
-    rain(ms = 2600) { if (reduced()) return; rainUntil = performance.now() + ms; drops.forEach((d) => { d.y = 20 + Math.random() * 45; }); rainMesh.visible = true; map.render(); },
-    select(u) { selected = u; map.highlight(u); for (const [k, el2] of labels) el2.classList.toggle("on", k === u); },
-    /** "+N cases" floaters over provinces. */
+    select(u) { selected = u; world.highlight(u); for (const [k, el2] of labels) el2.classList.toggle("on", k === u); },
     floaters(adds) {
       adds.forEach(([u, n], i) => {
         if (!n) return;
-        const c = map.centreOf(u);
+        const c = world.centreOf(u);
         if (!c) return;
-        const p = map.toScreen(new T.Vector3(c.x, map.heightOf(u) + 2, c.z));
+        const p = world.toScreen(new T.Vector3(c.x, world.heightOf(u) + 2, c.z));
         const f = Object.assign(document.createElement("div"), { className: "board__floater", textContent: `+${Math.round(n).toLocaleString("en")} cases` });
         f.style.left = `${p.x}px`; f.style.top = `${p.y}px`; f.style.animationDelay = `${i * 90}ms`;
         overlay.append(f);
         setTimeout(() => f.remove(), 2600);
       });
     },
-    resetView() { map.setView(); },
+    zoomBy: (f) => world.zoomBy(f),
+    rotateBy: (d) => world.rotateBy(d),
+    resetView: () => world.resetView(),
     dispose() {
       bugs.forEach((b) => scene.remove(b.s));
       for (const k of tokens.values()) { k.sprite.material.map.dispose(); k.sprite.material.dispose(); }
       disposables.forEach((d) => d.dispose?.());
-      rainMesh.dispose();
-      map.dispose();
+      world.dispose();
       overlay.remove();
     },
   };
-}
-
-// without WebGL the voxel engine falls back to a flat 2D map; the game still works, just without the 3D pieces
-function flatBoard(map) {
-  const none = () => {};
-  return { map, setWeek: (v) => map.setValues(v), setIntel: none, setTeams: none, setBugs: none, rain: none,
-    select: (u) => map.highlight(u), floaters: none, resetView: none, dispose: () => map.dispose() };
 }
