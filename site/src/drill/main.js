@@ -101,7 +101,7 @@ async function renderMissions() {
   preview?.dispose(); preview = null;
   const grid = boards[r.id];
   $("t-map").innerHTML = "";
-  const w = await createWorld($("t-map"), { grid, pixel: 2 });
+  const w = await createWorld($("t-map"), { grid, pixel: 2, water: false });
   if (id !== previewId) { w.dispose(); return; } // the reader picked another region meanwhile
   preview = w;
   const busiest = r.provinces.map((p) => R.peak(p) ?? FIRST);

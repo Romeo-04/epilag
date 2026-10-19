@@ -16,7 +16,7 @@ function vnoise(x, y) { // smooth value noise
 }
 const PAD = 7; // water around the land, in cells
 
-export async function createWorld(el, { grid, pixel = 2, lift = 1.35, onPick, onHover, onFlash }) {
+export async function createWorld(el, { grid, pixel = 2, lift = 1.35, water: withWater = true, onPick, onHover, onFlash }) {
   const THREE = await import("three");
   const { cells, centre, units } = decode(grid);
   const W = grid.w, H = grid.h, index = new Map(units.map((u, i) => [u, i]));
@@ -75,6 +75,7 @@ export async function createWorld(el, { grid, pixel = 2, lift = 1.35, onPick, on
   rock.position.set(cx, -5.1, cz);
   soil.receiveShadow = true;
   scene.add(soil, rock);
+  soil.visible = rock.visible = withWater; // without water, just the land (the title screen)
 
   // ------------------------------------------------------------------ water: pixel cells that bob, foam at the coast
   const water = [];
@@ -85,6 +86,7 @@ export async function createWorld(el, { grid, pixel = 2, lift = 1.35, onPick, on
   }
   const waterMesh = new THREE.InstancedMesh(box, new THREE.MeshLambertMaterial({ color: 0xffffff }), water.length);
   waterMesh.receiveShadow = true;
+  waterMesh.visible = withWater;
   scene.add(waterMesh);
   function writeWater(t) {
     const k = Math.floor(t / 140); // stepped, so the water moves like pixel art
@@ -136,6 +138,7 @@ export async function createWorld(el, { grid, pixel = 2, lift = 1.35, onPick, on
   clouds.forEach((c) => c.parts.forEach(() => puffs.push(c)));
   const cloudMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 1.3, 1.8), new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }), puffs.length);
   cloudMesh.castShadow = true;
+  cloudMesh.visible = withWater; // over the painted title backdrop, its own clouds read as debris
   scene.add(cloudMesh);
   let cloudTint = 0; // 0 white .. 1 storm grey
   function writeClouds(dt) {

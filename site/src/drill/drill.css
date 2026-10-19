@@ -324,3 +324,11 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .title__map { background: url(/drill/sky_clear.png) center / cover no-repeat; image-rendering: pixelated; }
 .receipt .stamp { display: table; margin: 16px auto 0; padding: 6px 16px; }
 .briefing__mosq { right: -34px; bottom: auto; top: -54px; transform: rotate(8deg); }
+
+/* title: no frame, just the region's island floating over the painted village, with a caption above */
+.title__stage { position: relative; overflow: visible; background: none; border: 0; box-shadow: none; padding: 0; }
+.title__caption { display: grid; justify-items: center; gap: 4px; text-align: center; text-shadow: 0 2px 0 #050A1C, 0 0 12px rgba(5, 10, 28, .9); }
+.title__caption b { font-size: 20px; letter-spacing: -.01em; }
+.title__caption span { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #FFE2A6; }
+.title__map { margin: 4px 0 0; height: min(64vh, 600px); background: none; }
+.title__frog { left: 50%; transform: translateX(-50%); bottom: -10px; }
