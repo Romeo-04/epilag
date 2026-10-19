@@ -584,15 +584,33 @@ merged by PR).
   every number matches the README.
 
 ### Phase 5: JavaScript web app
-- [ ] `build_web.py` JSON export
-- [ ] Logic modules + parity tests passing
-- [ ] Shell, router, controls, i18n
-- [ ] 8 views (section 10.4)
-- [ ] Downloads (brief, CSV)
-- [ ] Old `?page=` links work
-- [ ] D9 comparison: MapLibre `fill-extrusion` prototype of the forecast map (voxel cells as square polygons, no
-      basemap tiles), on a hidden `?map=maplibre` switch. Compare against the Three.js map on look, pan and zoom feel,
-      bundle size, and frame rate on a mid phone. Write the result in this plan and keep the winner.
+- [x] `build_web.py` JSON export: columnar tables in `site/public/web/data/` (largest view about 140 kB gzip), plus
+      `site/src/app/i18n.json` read from `app/streamlit_app.py` with `ast`, so both apps share the EN/FIL copy
+- [x] Logic modules + parity tests passing: `site/src/app/logic.js`; `tests/test_web_logic.py` (21 tests: alert
+      levels, thresholds, replay forecasts for 4 weeks of both panels, the 30-of-32 claim at 4 weeks, the budget
+      plan at PHP 0.5M–20M and with custom actions)
+- [x] Shell, router, controls, i18n (`site/web/index.html`, `site/src/app/main.js`): state in the URL, lazy views
+- [x] 8 views (section 10.4), with 3D pixel maps on the forecast map (hover card, click to the area, list ↔ map) and
+      the action plan (spend by area); SVG charts in `site/src/app/chart.js`; Quezon City drawn as its own marker
+      area inside NCR (`decode(grid, { markers })`)
+- [x] Downloads (action brief Markdown, all forecasts CSV, funded plan CSV)
+- [x] Old `?page=` links work (same URL, same parameter)
+- [x] Data and limits symbols (8 pixel icons) on the Data & limits view
+- [x] Checked: 8 views × 1440 px and 390 px, both panels, both modes, EN and FIL, reduced motion: no console errors,
+      no failed requests, no horizontal scroll. Ready in about 2.9 s on throttled fast 4G (was about 60 s).
+- [x] `docs/web/epilag_app.zip` (stlite) retired (D8); `app/streamlit_app.py` stays for local use
+- [x] D9 comparison: MapLibre `fill-extrusion` prototype (`site/src/lib/maplibre-map.js`, hidden `?map=maplibre` on
+      the forecast map). Result:
+
+      | | Three.js voxel map | MapLibre fill-extrusion |
+      | --- | --- | --- |
+      | Look | Crisp pixel-art cubes (low-res render, `pixelated`), matches the brand | Smooth, antialiased; reads as a normal 3D map |
+      | Pan, zoom, rotate | Fixed camera (drag-orbit comes in Phase 6) | Built in |
+      | Bundle (gzip) | 187 kB, already used by the landing page and the drill | 210 kB + 9 kB CSS, extra |
+      | Frame rate (1440 px, idle) | 60 fps | 60 fps |
+
+      **Kept: Three.js** (brand look, one engine for the landing, app and drill, smaller). The prototype stays behind
+      the hidden switch until the team has compared them, then goes with the `maplibre-gl` dependency.
 - **Done when** every feature of the Streamlit app is present, parity tests are green, and the app is ready in under 3 s.
 
 ### Phase 6: 3D Dengue Drill

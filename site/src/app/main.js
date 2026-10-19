@@ -31,12 +31,14 @@ function readUrl() {
   const page = PAGES.includes(q.get("page")) ? q.get("page") : "home";
   return { page, panel: q.get("panel") === "province" ? "province" : "region_qc", mode: q.get("mode") === "replay" ? "replay" : "latest",
     origin: /^\d{4}-\d{2}-\d{2}$/.test(q.get("origin") || "") ? q.get("origin") : null, h: Number(q.get("h")) || 4,
-    lang: q.get("lang") === "fil" ? "fil" : "en", area: q.get("area") || null };
+    lang: q.get("lang") === "fil" ? "fil" : "en", area: q.get("area") || null,
+    map: q.get("map") === "maplibre" ? "maplibre" : null }; // hidden switch for the D9 MapLibre comparison
 }
 function writeUrl(s, push) {
   const q = new URLSearchParams({ page: s.page, panel: s.panel, mode: s.mode, h: s.h, lang: s.lang });
   if (s.mode === "replay" && s.origin) q.set("origin", s.origin);
   if (s.area) q.set("area", s.area);
+  if (s.map) q.set("map", s.map);
   history[push ? "pushState" : "replaceState"](null, "", `?${q}`);
 }
 let state = readUrl();

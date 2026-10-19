@@ -57,7 +57,9 @@ export async function render(el, ctx) {
   const grids = await loadGrids("voxel_ph");
   const grid = panel === "province" ? grids.province : grids.region;
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
-  const map = await createVoxelMap(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province",
+  // ?map=maplibre: the D9 comparison prototype (MapLibre fill-extrusion) instead of the Three.js voxel map
+  const create = ctx.map === "maplibre" ? (await import("../../lib/maplibre-map.js")).createMaplibreMap : createVoxelMap;
+  const map = await create(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province",
     onHover(u, e) {
       const r = u && byId.get(u);
       map?.highlight(u);
