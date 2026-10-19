@@ -14,19 +14,32 @@ export function loadGrids(file) {
   return files.get(file);
 }
 
-/** Decode a run-length grid into land cells [{x, y, u}] and per-area centroids (in cell units). */
-export function decode(grid) {
-  const cells = [], sum = grid.units.map(() => [0, 0, 0]);
+/**
+ * Decode a run-length grid into land cells [{x, y, u}], per-area centroids (in cell units) and the unit list.
+ * With `markers`, each point area in grid.markers (e.g. Quezon City inside the NCR region) becomes a unit of its
+ * own: it takes over its marker cell and the land cells around it (a 3x3 block), so it can be coloured and picked.
+ */
+export function decode(grid, { markers = false } = {}) {
+  const units = [...grid.units];
+  const cells = [], at = new Map();
   grid.rows.forEach((row, y) => {
     let x = 0;
     for (let i = 0; i < row.length; i += 2) {
       const u = row[i], n = row[i + 1];
-      if (u >= 0) for (let k = 0; k < n; k++) { cells.push({ x: x + k, y, u }); sum[u][0] += x + k; sum[u][1] += y; sum[u][2]++; }
+      if (u >= 0) for (let k = 0; k < n; k++) { const c = { x: x + k, y, u }; cells.push(c); at.set(`${x + k},${y}`, c); }
       x += n;
     }
   });
+  if (markers) {
+    for (const [id, [mx, my]] of Object.entries(grid.markers || {})) {
+      const u = units.push(id) - 1;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const c = at.get(`${mx + dx},${my + dy}`); if (c) c.u = u; }
+    }
+  }
+  const sum = units.map(() => [0, 0, 0]);
+  for (const c of cells) { sum[c.u][0] += c.x; sum[c.u][1] += c.y; sum[c.u][2]++; }
   const centre = sum.map(([sx, sy, n]) => (n ? [sx / n + 0.5, sy / n + 0.5] : null));
-  return { cells, centre };
+  return { cells, centre, units };
 }
 
 function webgl() {
@@ -39,12 +52,12 @@ function webgl() {
  *   pixel       art-pixel size in screen pixels (render scale is 1 / pixel), default 3
  *   pitch, yaw  camera angles in degrees (default 40, -14)
  *   lift        screen height of one level step, in cells (default 2.5)
+ *   markers     also make grid.markers point areas (Quezon City) their own units (see decode)
  *   onPick      called with (unitId | null) on click; enables hover too (onHover)
  * Returns { setValues, highlight, project, pickAt, render, dispose, units }.
  */
-export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -14, zoom = 1, lift = 2.5, onPick, onHover } = {}) {
-  const { cells, centre } = decode(grid);
-  const units = grid.units;
+export async function createVoxelMap(el, { grid, pixel = 3, pitch = 40, yaw = -14, zoom = 1, lift = 2.5, markers = false, onPick, onHover } = {}) {
+  const { cells, centre, units } = decode(grid, { markers });
   const index = new Map(units.map((u, i) => [u, i]));
   const value = units.map(() => ({ color: LAND, height: 1 }));
   if (!webgl()) return flat(el, grid, cells, centre, units, index, value);

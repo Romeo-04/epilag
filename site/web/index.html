@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Dengue early warning</title>
+  <meta name="description" content="EpiLag-PH: dengue forecasts 2–8 weeks ahead for Philippine provinces, regions and Quezon City, with checklists, a budget plan and plain-language advisories.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="app">
+  <a class="skip" href="#view">Skip to content</a>
+
+  <header class="app-top">
+    <div class="wrap app-top__in">
+      <nav class="nav app-nav" aria-label="App">
+        <a class="brand" href="../"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH<small>Dengue early warning</small></span></a>
+        <div class="app-tabs" id="tabs" role="list"></div>
+        <div class="seg seg--sm" id="lang" role="group" aria-label="Language"></div>
+      </nav>
+      <div class="ctx" id="ctx" aria-label="Forecast settings"></div>
+    </div>
+  </header>
+
+  <main id="view" class="wrap app-view" tabindex="-1" aria-live="polite"></main>
+
+  <footer class="wrap app-foot small muted">
+    <span>EpiLag-PH · PJDSC 2026</span>
+    <a href="../methodology.html">Methodology</a><a href="../data/">Open data</a><a href="../drill/">Dengue Drill</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+  </footer>
+
+  <script type="module" src="/src/app/main.js"></script>
+</body>
+</html>

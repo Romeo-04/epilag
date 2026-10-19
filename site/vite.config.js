@@ -26,6 +26,7 @@ const docsData = {
 const PAGES = {
   index: "index.html",
   kit: "kit.html",
+  web: "web/index.html",
 };
 
 export default defineConfig({

@@ -107,9 +107,9 @@ function whenNear(el, fn) {
 const ISLANDS = [["Luzon", "R_REGION_III", 34, -6], ["Visayas", "R_REGION_VII", 30, 0], ["Mindanao", "R_REGION_X", 34, 4]];
 whenNear($("hero-map"), async () => {
   const gr = await grids, grid = phone ? gr.region_coarse : gr.region;
-  const map = await createVoxelMap($("hero-map"), { grid, pixel: phone ? 2 : 3 });
+  const map = await createVoxelMap($("hero-map"), { grid, pixel: phone ? 2 : 3, markers: true });
   const byArea = Object.fromEntries(latest.map((r) => [r.area_code, { color: LV[r.lv][0], height: LV[r.lv][1] }]));
-  map.setValues({ ...Object.fromEntries(grid.units.map((u) => [u, NODATA])), ...byArea }, { duration: 900 });
+  map.setValues({ ...Object.fromEntries(map.units.map((u) => [u, NODATA])), ...byArea }, { duration: 900 });
   const place = () => {
     $("hero-labels").innerHTML = ISLANDS.map(([name, u, dx, dy]) => {
       const p = map.project(u);
