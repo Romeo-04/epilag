@@ -4,24 +4,34 @@
 <meta charset="UTF-8">
 <title>EpiLag-PH · film</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* Brand tokens (site/src/css/tokens.css) and the Dengue Drill night palette. */
   :root {
-    --ink: #14211B; --muted: #5B6B63; --bg: #ECEFED; --accent: #12804A; --accent-2: #1FA463; --deep: #062417;
-    --warn: #D23B30; --watch: #EE8A2A; --above: #F2C14E; --normal: #D3DBD6; --ease: cubic-bezier(.2, .7, .2, 1);
+    --ink: #071711; --paper: #FBFAF4; --paper-2: #F3F2EA; --line: #E4E4D9; --muted: #4A5A51; --soft: #7D8A82;
+    --forest: #08754F; --forest-deep: #055C3E; --forest-soft: #E3F0E7; --amber: #F5A51C;
+    --warn: #F04B2A; --watch: #F58220; --above: #F7C928; --normal: #0C7A55;
+    --night: #0B1630; --night-2: #142250; --night-line: #2E3F7A; --night-text: #EEF2FF; --night-muted: #A3B0DB; --teal: #2FD6C3;
+    --ease: cubic-bezier(.22, 1, .36, 1);
   }
   * { box-sizing: border-box; margin: 0; }
-  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--deep); }
-  body { font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif; color: #fff; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+  body { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; color: var(--night-text); -webkit-font-smoothing: antialiased; }
+  canvas.spr { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
   .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; overflow: hidden; }
-  .scene.on { opacity: 1; visibility: visible; animation: sceneIn .9s var(--ease) both; }
-  .scene.off { visibility: visible; animation: sceneOut .8s var(--ease) both; }
-  @keyframes sceneIn { from { opacity: 0; transform: scale(1.04); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
-  @keyframes sceneOut { from { opacity: 1; transform: none; filter: none; } to { opacity: 0; transform: scale(.97); filter: blur(8px); } }
+  .scene.on { opacity: 1; visibility: visible; animation: sceneIn .8s var(--ease) both; }
+  .scene.off { visibility: visible; animation: sceneOut .7s var(--ease) both; }
+  @keyframes sceneIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: none; } }
+  @keyframes sceneOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.98); } }
 
-  .dark { background: radial-gradient(120% 90% at 70% 20%, #0E3A26 0%, #062417 55%, #03140C 100%); }
-  .light { background: var(--bg); color: var(--ink); }
-  .green { background: radial-gradient(110% 120% at 85% 10%, #22B06B 0%, #12804A 45%, #0A4F2E 100%); }
+  /* night (Dengue Drill), paper (the app) and forest (the brand) */
+  .dark { background: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 4px, radial-gradient(120% 90% at 70% 0%, #1B2B63, var(--night) 62%); }
+  .light { background: var(--paper); color: var(--ink); }
+  .light::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(rgba(7, 23, 17, .07) 1.5px, transparent 1.5px) 0 0 / 32px 32px; }
+  .green { background: linear-gradient(rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px, linear-gradient(90deg, rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px,
+    radial-gradient(110% 120% at 85% 10%, #0E8C5F 0%, var(--forest) 45%, var(--forest-deep) 100%); color: #fff; }
 
   .a { opacity: 0; }
   .scene.on .a { animation: up 1s var(--ease) calc(var(--d, 0) * 1s) both; }
@@ -33,117 +43,159 @@
   @keyframes fromLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  .kicker { font-size: 22px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .65); }
-  .light .kicker { color: var(--muted); }
-  .h1 { font-size: 112px; font-weight: 700; letter-spacing: -.045em; line-height: 1.02; }
-  .h2 { font-size: 76px; font-weight: 700; letter-spacing: -.04em; line-height: 1.05; }
-  .h3 { font-size: 44px; font-weight: 600; letter-spacing: -.03em; line-height: 1.15; }
-  .muted { color: rgba(255, 255, 255, .55); }
-  .light .muted { color: #8A9891; }
-  .body { font-size: 30px; line-height: 1.45; color: rgba(255, 255, 255, .8); }
+  /* type */
+  .kicker { display: inline-flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+  .kicker::before { content: ""; width: 12px; height: 12px; background: currentColor; flex: none; }
+  .light .kicker { color: var(--forest); }
+  .green .kicker { color: rgba(255, 255, 255, .8); }
+  .h1 { font-size: 112px; font-weight: 800; letter-spacing: -.04em; line-height: 1.02; }
+  .h2 { font-size: 76px; font-weight: 800; letter-spacing: -.035em; line-height: 1.05; }
+  .h3 { font-size: 44px; font-weight: 600; letter-spacing: -.025em; line-height: 1.15; }
+  .muted { color: var(--night-muted); }
+  .light .muted { color: var(--soft); }
+  .body { font-size: 30px; line-height: 1.45; color: rgba(238, 242, 255, .82); }
   .light .body { color: var(--muted); }
   .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px; }
-  .tag { position: absolute; left: 96px; bottom: 80px; display: flex; gap: 14px; align-items: center; font-size: 22px; font-weight: 600; color: rgba(255,255,255,.7); }
-  .tag i { width: 12px; height: 12px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 6px rgba(31,164,99,.25); }
+  .tag { position: absolute; left: 96px; bottom: 80px; display: flex; gap: 16px; align-items: center; font-size: 22px; font-weight: 700; color: var(--night-muted); letter-spacing: .02em; }
+  .tag i { width: 14px; height: 14px; background: var(--teal); box-shadow: 0 0 0 6px rgba(47, 214, 195, .25); animation: blip 1.2s steps(1) infinite; }
+  @keyframes blip { 50% { box-shadow: 0 0 0 6px transparent; } }
 
-  /* rain */
+  /* scene 1: pixel rain, clouds, the village at night, a mosquito */
   .rain { position: absolute; inset: -100px 0 0; pointer-events: none; }
-  .rain b { position: absolute; top: -120px; width: 2px; height: 90px; border-radius: 2px;
-    background: linear-gradient(to bottom, rgba(170, 230, 200, 0), rgba(170, 230, 200, .55)); animation: fall linear infinite; }
+  .rain b { position: absolute; top: -120px; width: 4px; height: 20px; background: #BFE2EC; animation: fall linear infinite; animation-timing-function: steps(26); }
   @keyframes fall { to { transform: translateY(1300px); } }
+  .cloud { position: absolute; filter: brightness(.72) saturate(.9); }
+  .scene.on .cloud { animation: drift 7s steps(14) both; }
+  @keyframes drift { from { transform: translateX(-30px); } to { transform: translateX(50px); } }
+  .village { position: absolute; right: 60px; bottom: 36px; display: flex; align-items: flex-end; gap: 28px; filter: brightness(.5) saturate(.85); }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: #070F22; border-top: 4px solid #16255A; }
+  .fly { position: absolute; left: 1500px; top: 300px; opacity: 0; }
+  .scene.on .fly { animation: flyIn 2.2s steps(18) calc(var(--d) * 1s) both; }
+  .scene.on .fly canvas { animation: bob .5s steps(2) infinite; }
+  @keyframes flyIn { 0% { opacity: 1; transform: translate(520px, 120px); } 100% { opacity: 1; transform: none; } }
+  @keyframes bob { 50% { transform: translateY(-10px); } }
 
-  /* maps */
-  .map { position: absolute; height: 980px; top: 50px; }
-  .map path { stroke-width: 1.2; transform-box: fill-box; transform-origin: center; transition: fill .6s var(--ease); }
-  .dark .map path { fill: rgba(255, 255, 255, .08); stroke: rgba(255, 255, 255, .22); }
-  .light .map path { fill: #DCE3DF; stroke: #fff; }
-  .scene.on .map path.lit { animation: lit .8s var(--ease) calc(var(--d) * 1s) both; }
-  @keyframes lit { 0% { fill-opacity: 0; transform: scale(.4); } 60% { transform: scale(1.15); } 100% { fill-opacity: 1; transform: none; } }
-  .ring { fill: none; stroke: var(--warn); stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
-  .scene.on .ring { animation: ring 2s ease-out calc(var(--d) * 1s) infinite; }
-  @keyframes ring { 0% { opacity: .9; transform: scale(.3); } 100% { opacity: 0; transform: scale(2.4); } }
+  /* maps: provinces drawn as pixels */
+  .map { position: absolute; top: 50px; width: 700px; height: 980px; image-rendering: pixelated; }
 
-  .stat { font-size: 150px; font-weight: 800; letter-spacing: -.05em; line-height: 1; }
-  .stat small { font-size: 60px; color: rgba(255,255,255,.55); font-weight: 700; }
-  .light .stat small { color: #8A9891; }
-  .legend { display: flex; gap: 28px; font-size: 22px; font-weight: 600; }
+  .stat { font-size: 150px; font-weight: 800; letter-spacing: -.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat small { font-size: 60px; color: var(--night-muted); font-weight: 700; letter-spacing: -.03em; }
+  .light .stat small { color: var(--soft); }
+  .legend { display: flex; gap: 28px; font-size: 22px; font-weight: 700; }
   .legend span { display: inline-flex; gap: 10px; align-items: center; }
-  .legend i { width: 16px; height: 16px; border-radius: 50%; }
+  .legend i { width: 18px; height: 18px; }
 
-  /* timeline */
+  /* scene 3: timeline */
   .timeline { position: absolute; left: 160px; right: 160px; top: 360px; display: grid; grid-template-columns: repeat(4, 1fr); }
-  .timeline::before { content: ""; position: absolute; left: 60px; right: 60px; top: 58px; height: 6px; border-radius: 6px; background: rgba(255,255,255,.1); }
-  .timeline .bar { position: absolute; left: 60px; right: 60px; top: 58px; height: 6px; border-radius: 6px; transform-origin: left; transform: scaleX(0);
-    background: linear-gradient(90deg, var(--accent-2), var(--above), var(--watch), var(--warn)); }
-  .scene.on .timeline .bar { animation: grow 4.2s var(--ease) .4s both; }
+  .timeline::before, .timeline .bar { content: ""; position: absolute; left: 64px; right: 60px; top: 58px; height: 12px;
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 22px, transparent 22px 30px); mask: repeating-linear-gradient(90deg, #000 0 22px, transparent 22px 30px); }
+  .timeline::before { background: rgba(255, 255, 255, .1); }
+  .timeline .bar { transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--normal), var(--above), var(--watch), var(--warn)); }
+  .scene.on .timeline .bar { animation: grow 4.2s steps(30) .4s both; }
   @keyframes grow { to { transform: scaleX(1); } }
   .node { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
-  .node .bub { width: 122px; height: 122px; border-radius: 50%; display: grid; place-items: center; background: #0B3321; border: 3px solid rgba(255,255,255,.18); }
-  .node svg { width: 54px; height: 54px; }
-  .node b { font-size: 34px; font-weight: 700; letter-spacing: -.02em; }
-  .node span { font-size: 24px; color: rgba(255,255,255,.6); }
+  .node .tile { width: 128px; height: 128px; display: grid; place-items: center; background: var(--night-2); border: 4px solid var(--night-line);
+    box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .08), inset -4px -4px 0 rgba(0, 0, 0, .3), 8px 8px 0 rgba(0, 0, 0, .3); }
+  .node .tile.first { border-color: var(--amber); background: #24305E; }
+  .node .tile.last { border-color: var(--warn); }
+  .node b { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .node span { font-size: 24px; color: var(--night-muted); font-weight: 600; }
   .bracket { position: absolute; left: 160px; right: 160px; top: 680px; text-align: center; }
-  .bracket .line { height: 26px; margin: 0 60px 0 calc(25% + 60px); border: 3px solid var(--warn); border-top: 0; border-radius: 0 0 18px 18px; }
-  .bracket p { font-size: 40px; font-weight: 700; color: #FF8A80; margin: 22px 0 0 25%; }
+  .bracket .line { height: 28px; margin: 0 60px 0 calc(25% + 64px); border: 4px solid var(--warn); border-top: 0; }
+  .bracket p { font-size: 40px; font-weight: 800; color: #FF7A5C; margin: 22px 0 0 25%; letter-spacing: -.02em; }
 
   /* brand */
-  .logo { width: 220px; height: 220px; border-radius: 64px; background: #fff; display: grid; place-items: center; box-shadow: 0 40px 80px -30px rgba(0,0,0,.5); }
-  .logo path { stroke: var(--accent); stroke-width: 7; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 300; stroke-dashoffset: 300; }
-  .scene.on .logo path { animation: draw 1.6s var(--ease) .5s forwards; }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
-  .wordmark { font-size: 150px; font-weight: 800; letter-spacing: -.05em; }
-  .orbit { position: absolute; border-radius: 50%; border: 2px solid rgba(255,255,255,.14); }
-  .scene.on .orbit { animation: spin 30s linear infinite; }
-  .orbit.dash { border-style: dashed; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .logo-wrap { filter: drop-shadow(14px 14px 0 rgba(7, 23, 17, .35)); }
+  .logo, .logo > div { width: 240px; height: 240px; display: grid; place-items: center; background: var(--paper); --c: 12px; clip-path: polygon(0 calc(var(--c) * 2), var(--c) calc(var(--c) * 2), var(--c) var(--c), calc(var(--c) * 2) var(--c), calc(var(--c) * 2) 0,
+      calc(100% - var(--c) * 2) 0, calc(100% - var(--c) * 2) var(--c), calc(100% - var(--c)) var(--c), calc(100% - var(--c)) calc(var(--c) * 2), 100% calc(var(--c) * 2),
+      100% calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c) * 2) calc(100% - var(--c)), calc(100% - var(--c) * 2) 100%,
+      calc(var(--c) * 2) 100%, calc(var(--c) * 2) calc(100% - var(--c)), var(--c) calc(100% - var(--c)), var(--c) calc(100% - var(--c) * 2), 0 calc(100% - var(--c) * 2)); }
+  .logo > div { width: 216px; height: 216px; background: var(--forest); --c: 10px; }
+  .logo svg g { opacity: 0; }
+  .scene.on .logo svg g { animation: pxIn .05s steps(1, end) calc(.5s + var(--r) * .08s) both; }
+  @keyframes pxIn { from { opacity: 0; } to { opacity: 1; } }
+  .wordmark { font-size: 150px; font-weight: 800; letter-spacing: -.045em; }
+  .pixels { position: absolute; inset: 0; pointer-events: none; }
+  .pixels i { position: absolute; display: block; }
+  .scene.on .pixels i { animation: twinkle var(--t) steps(1) var(--w) infinite; }
+  @keyframes twinkle { 50% { opacity: .25; } }
+  .peek { position: absolute; bottom: 0; }
+  .scene.on .peek { animation: rise 1s steps(6) calc(var(--d) * 1s) both; }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
 
-  /* product */
+  /* product scenes: copy left, the app in a browser window right */
   .copy { position: absolute; left: 110px; top: 0; bottom: 0; width: 600px; display: flex; flex-direction: column; justify-content: center; gap: 26px; }
-  .num { width: 76px; height: 76px; border-radius: 24px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 36px; font-weight: 800;
-    box-shadow: 0 12px 24px -12px rgba(20,33,27,.35); }
-  .device { position: absolute; right: 90px; top: 110px; width: 1110px; height: 860px; border-radius: 28px; background: #fff; overflow: hidden;
-    box-shadow: 0 60px 120px -40px rgba(20, 33, 27, .4), 0 0 0 1px rgba(20, 33, 27, .06); }
-  .device .chrome { height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: #F3F6F4; border-bottom: 1px solid #E2E8E4; }
-  .device .chrome i { width: 13px; height: 13px; border-radius: 50%; background: #D3DBD6; }
-  .device .chrome span { margin-left: 18px; padding: 6px 18px; border-radius: 999px; background: #fff; font-size: 16px; color: var(--muted); }
-  .device .vp { position: absolute; top: 50px; left: 0; right: 0; bottom: 0; overflow: hidden; }
-  .device img { width: 100%; display: block; transform-origin: top center; }
+  .num { width: 80px; height: 80px; background: var(--forest); color: var(--paper); display: grid; place-items: center; font-size: 38px; font-weight: 800;
+    --c: 6px; clip-path: polygon(0 var(--c), var(--c) var(--c), var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c), 100% calc(100% - var(--c)),
+      calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c))); }
+  .device { position: absolute; right: 90px; top: 110px; width: 1110px; height: 860px; border-radius: 14px; background: #fff; overflow: hidden; border: 3px solid var(--ink);
+    box-shadow: 16px 16px 0 #D3E6D9, 0 60px 120px -50px rgba(7, 23, 17, .45); }
+  .device .chrome { position: relative; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: var(--paper-2); border-bottom: 2px solid var(--line); }
+  .device .chrome i { width: 14px; height: 14px; flex: none; }
+  .device .chrome i:nth-child(1) { background: var(--warn); }
+  .device .chrome i:nth-child(2) { background: var(--above); }
+  .device .chrome i:nth-child(3) { background: var(--normal); }
+  .device .chrome span { display: flex; align-items: center; gap: 12px; margin-left: 22px; width: 620px; height: 34px; padding: 0 16px; background: #fff; border: 2px solid var(--line);
+    border-radius: 6px; font-size: 16px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .device .chrome span::before { content: ""; width: 12px; height: 14px; flex: none;
+    background: linear-gradient(var(--forest), var(--forest)) 0 6px / 12px 8px no-repeat, linear-gradient(var(--forest), var(--forest)) 2px 0 / 2px 6px no-repeat,
+      linear-gradient(var(--forest), var(--forest)) 8px 0 / 2px 6px no-repeat, linear-gradient(var(--forest), var(--forest)) 2px 0 / 8px 2px no-repeat; }
+  .device .vp { position: absolute; top: 54px; left: 0; right: 0; bottom: 0; overflow: hidden; background: var(--paper); }
+  .device img { width: 100%; display: block; transform-origin: top left; }
   .scene.on .device img { animation: pan var(--t, 8s) cubic-bezier(.45, 0, .25, 1) .8s both; }
   @keyframes pan { from { transform: translateY(var(--from, 0)) scale(1.0); } to { transform: translateY(var(--to, 0)) scale(var(--zoom, 1.03)); } }
   .scene.on .device { animation: deviceIn 1.1s var(--ease) .1s both; }
-  @keyframes deviceIn { from { opacity: 0; transform: translateY(80px) rotate(1.5deg); } to { opacity: 1; transform: none; } }
-  .callout { position: absolute; z-index: 3; padding: 16px 22px; border-radius: 20px; background: var(--ink); color: #fff; font-size: 24px; font-weight: 700;
-    box-shadow: 0 24px 50px -20px rgba(0,0,0,.5); display: flex; gap: 12px; align-items: center; }
-  .callout i { width: 14px; height: 14px; border-radius: 50%; flex: none; }
-  .callout.g { background: var(--accent); }
+  @keyframes deviceIn { from { opacity: 0; transform: translateY(80px); } to { opacity: 1; transform: none; } }
+  .callout { position: absolute; z-index: 3; padding: 16px 22px; border-radius: 6px; background: var(--ink); color: var(--paper); font-size: 24px; font-weight: 800; letter-spacing: -.01em;
+    box-shadow: 8px 8px 0 rgba(7, 23, 17, .2); display: flex; gap: 14px; align-items: center; }
+  .callout i { width: 14px; height: 14px; flex: none; }
+  .callout.g { background: var(--forest); }
   .feature-list { display: flex; flex-direction: column; gap: 14px; font-size: 26px; color: var(--muted); }
+  .feature-list span { position: relative; padding-left: 30px; }
+  .feature-list span::before { content: ""; position: absolute; left: 0; top: .5em; width: 12px; height: 12px; background: var(--forest); }
   .feature-list b { color: var(--ink); }
+  .frog-top { position: absolute; left: 830px; top: 50px; height: 75px; overflow: hidden; }
+  .frog-top canvas { transform: translateY(75px); }
+  .scene.on .frog-top canvas { animation: perch 1s steps(5) 2s both; }
+  @keyframes perch { from { transform: translateY(75px); } to { transform: none; } }
 
   /* proof cards */
-  .cards { position: absolute; left: 110px; right: 110px; top: 340px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
-  .card { border-radius: 36px; padding: 44px 44px 48px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); }
+  .cards { position: absolute; left: 110px; right: 110px; top: 340px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .card { padding: 44px 44px 48px; background: var(--night-2); border: 4px solid var(--night-line);
+    box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .07), inset -4px -4px 0 rgba(0, 0, 0, .3), 10px 10px 0 rgba(0, 0, 0, .3); }
+  .card::before { content: ""; display: block; width: 72px; height: 10px; margin-bottom: 30px; background: var(--teal);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 14px, transparent 14px 20px); mask: repeating-linear-gradient(90deg, #000 0 14px, transparent 14px 20px); }
   .card .stat { font-size: 120px; }
-  .card p { font-size: 28px; line-height: 1.4; margin-top: 18px; color: rgba(255,255,255,.78); }
-  .card.hi { background: #fff; color: var(--ink); }
+  .card p { font-size: 28px; line-height: 1.4; margin-top: 18px; color: rgba(238, 242, 255, .8); }
+  .card.hi { background: var(--paper); color: var(--ink); border-color: var(--paper); box-shadow: 12px 12px 0 var(--amber); }
+  .card.hi::before { background: var(--forest); }
+  .card.hi .stat span { color: var(--forest); }
   .card.hi p { color: var(--muted); }
-  .card.hi .stat small { color: #8A9891; }
-  .foot { position: absolute; left: 110px; right: 110px; bottom: 90px; font-size: 26px; color: rgba(255,255,255,.6); }
+  .card.hi .stat small { color: var(--soft); }
+  .foot { position: absolute; left: 110px; right: 110px; bottom: 90px; font-size: 26px; line-height: 1.45; color: var(--night-muted); padding-left: 30px; border-left: 6px solid var(--amber); }
 
-  .url { display: inline-flex; gap: 16px; align-items: center; padding: 22px 40px; border-radius: 999px; background: #fff; color: var(--accent); font-size: 40px; font-weight: 800; letter-spacing: -.02em;
-    box-shadow: 0 30px 60px -24px rgba(0,0,0,.45); }
+  .url { display: inline-flex; gap: 20px; align-items: center; padding: 24px 40px; background: var(--paper); color: var(--forest); font-size: 40px; font-weight: 800; letter-spacing: -.02em;
+    box-shadow: 10px 10px 0 var(--ink); }
+  .url svg { width: 30px; height: 30px; }
   .watermark { position: fixed; right: 64px; top: 52px; z-index: 50; display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800;
     letter-spacing: -.02em; opacity: 0; transition: opacity .6s, color .6s; }
   .watermark.show { opacity: 1; }
-  .watermark svg { width: 40px; height: 40px; }
+  .watermark .lg { width: 40px; height: 40px; display: grid; place-items: center; background: var(--forest); border-radius: 10px; }
 </style>
 </head>
 <body>
 
-<div class="watermark" id="wm"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="12" fill="#12804A"/><path d="M7 22h6l3-8 5 14 4-10 2 4h6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>EpiLag-PH</div>
+<div class="watermark" id="wm"><span class="lg" data-logo="2"></span>EpiLag-PH</div>
 
 <!-- 1 · the rains -->
 <section class="scene dark" data-dur="7" data-wm="0">
+  <div class="ground"></div>
+  <div class="village"><canvas class="spr" data-s="props" data-f="tree" data-x="5"></canvas><canvas class="spr" data-s="props" data-f="house" data-x="5"></canvas><canvas class="spr" data-s="props" data-f="house" data-x="4" data-flip></canvas><canvas class="spr" data-s="props" data-f="tree" data-x="4"></canvas></div>
   <div class="rain" id="rain"></div>
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="7" style="left:120px;top:30px"></canvas>
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="5" style="left:860px;top:-20px;animation-duration:9s"></canvas>
+  <canvas class="spr cloud" data-s="props" data-f="cloud" data-x="7" data-flip style="left:1500px;top:50px"></canvas>
+  <div class="fly" style="--d:3"><canvas class="spr" data-s="mosquito" data-f="fly1,fly2" data-fps="12" data-x="5" data-flip></canvas></div>
   <div class="center">
     <div class="kicker a" style="--d:.3">Philippines · June 2019</div>
     <div class="h1 a" style="--d:1.2">The rains arrive.</div>
@@ -154,7 +206,7 @@
 
 <!-- 2 · the surge -->
 <section class="scene dark" data-dur="9" data-wm="0">
-  <svg class="map" id="map-actual" viewBox="0 0 1000 1400" style="right:170px"></svg>
+  <canvas class="map" id="map-actual" style="right:170px"></canvas>
   <div style="position:absolute;left:110px;top:250px;width:860px;display:flex;flex-direction:column;gap:26px">
     <div class="kicker a" style="--d:.2">Four weeks later</div>
     <div class="h2 a" style="--d:.7">Dengue surges<br><span class="muted">across the country.</span></div>
@@ -162,29 +214,28 @@
       <div class="body" style="margin-top:12px">crossed the epidemic threshold in a single week.</div></div>
     <div class="legend a fade" style="--d:3"><span><i style="background:var(--warn)"></i>Above epidemic threshold</span></div>
   </div>
-  <div class="tag a fade" style="--d:.5"><i style="background:var(--warn);box-shadow:0 0 0 6px rgba(210,59,48,.3)"></i>Week 4 · 30 Jun 2019</div>
+  <div class="tag a fade" style="--d:.5"><i style="background:var(--warn);box-shadow:0 0 0 6px rgba(240,75,42,.3)"></i>Week 4 · 30 Jun 2019</div>
 </section>
 
 <!-- 3 · why responses come late -->
 <section class="scene dark" data-dur="9" data-wm="0">
-  <div style="position:absolute;left:160px;top:150px" class="h2 a" data-x="">Why do we always act <span style="color:#FF8A80">late?</span></div>
+  <div style="position:absolute;left:160px;top:150px" class="h2 a" data-x="">Why do we always act <span style="color:#FF7A5C">late?</span></div>
   <div class="timeline">
     <div class="bar"></div>
-    <div class="node a pop" style="--d:.5"><div class="bub" style="background:var(--accent);border-color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/></svg></div><b>Rain and heat</b><span>week 0</span></div>
-    <div class="node a pop" style="--d:1.5"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9M9 7.13v-1a3 3 0 1 1 6 0v1M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg></div><b>Mosquitoes multiply</b><span>+1–2 weeks</span></div>
-    <div class="node a pop" style="--d:2.5"><div class="bub"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div><b>People get sick</b><span>+2–4 weeks</span></div>
-    <div class="node a pop" style="--d:3.5"><div class="bub" style="border-color:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v4M14 14h-4M14 18h-4M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/></svg></div><b>Hospitals report</b><span>+4–8 weeks</span></div>
+    <div class="node a pop" style="--d:.5"><div class="tile first"><canvas class="spr" data-s="props" data-f="cloud" data-x="3"></canvas></div><b>Rain and heat</b><span>week 0</span></div>
+    <div class="node a pop" style="--d:1.5"><div class="tile"><canvas class="spr" data-s="mosquito" data-f="fly1,fly2" data-fps="10" data-x="3"></canvas></div><b>Mosquitoes multiply</b><span>+1–2 weeks</span></div>
+    <div class="node a pop" style="--d:2.5"><div class="tile"><canvas class="spr" data-s="props" data-f="people" data-x="2"></canvas></div><b>People get sick</b><span>+2–4 weeks</span></div>
+    <div class="node a pop" style="--d:3.5"><div class="tile last"><canvas class="spr" data-s="props" data-f="hospital" data-x="2"></canvas></div><b>Hospitals report</b><span>+4–8 weeks</span></div>
   </div>
   <div class="bracket a fade" style="--d:4.6"><div class="line"></div><p>Reports arrive after the outbreak has begun.</p></div>
 </section>
 
 <!-- 4 · brand -->
 <section class="scene green" data-dur="6" data-wm="0">
-  <div class="orbit" style="width:1100px;height:1100px;right:-300px;top:-420px"></div>
-  <div class="orbit dash" style="width:760px;height:760px;right:-140px;top:-250px"></div>
-  <div class="orbit" style="width:900px;height:900px;left:-420px;bottom:-560px"></div>
+  <div class="pixels" data-n="34" data-seed="4"></div>
+  <canvas class="spr peek" data-s="frog" data-f="peek" data-x="8" style="right:220px;--d:2.4"></canvas>
   <div class="center">
-    <div class="logo a pop" style="--d:.1"><svg width="150" height="150" viewBox="0 0 40 40"><path d="M5 22h7l3-9 5 15 4-11 2 5h9" style="stroke-width:2.8"/></svg></div>
+    <div class="logo-wrap a pop" style="--d:.1"><div class="logo"><div data-logo="12"></div></div></div>
     <div class="wordmark a" style="--d:1.2">EpiLag-PH</div>
     <div class="h3 a" style="--d:2.1">See dengue coming. <span style="color:rgba(255,255,255,.7)">Act weeks earlier.</span></div>
   </div>
@@ -192,14 +243,14 @@
 
 <!-- 5 · rewind: what EpiLag said on 2 June -->
 <section class="scene light" data-dur="12" data-wm="1">
-  <svg class="map" id="map-forecast" viewBox="0 0 1000 1400" style="right:200px"></svg>
+  <canvas class="map" id="map-forecast" style="right:200px"></canvas>
   <div style="position:absolute;left:110px;top:200px;width:820px;display:flex;flex-direction:column;gap:26px">
     <div class="kicker a" style="--d:.2">Replay · forecast made 2 June 2019</div>
-    <div class="h2 a" style="--d:.6">What if you had<br>known <span style="color:var(--accent)">4 weeks earlier?</span></div>
+    <div class="h2 a" style="--d:.6">What if you had<br>known <span style="color:var(--forest)">4 weeks earlier?</span></div>
     <div class="legend a fade" style="--d:1.6;color:var(--muted)"><span><i style="background:var(--warn)"></i>Outbreak warning</span><span><i style="background:var(--watch)"></i>Watch</span><span><i style="background:var(--above)"></i>Above usual</span></div>
-    <div class="a" style="--d:5.2;margin-top:30px;padding:40px 44px;border-radius:36px;background:var(--ink);color:#fff;box-shadow:0 40px 80px -30px rgba(20,33,27,.5)">
-      <div class="stat"><span data-count="30" data-delay="5.4">0</span> <small style="margin-left:.15em">of <span id="crossed" style="margin-left:.12em">32</span></small></div>
-      <div class="body" style="margin-top:14px;color:rgba(255,255,255,.75)">provinces that crossed the epidemic threshold were flagged <b style="color:#fff">4 weeks ahead</b>, by models trained only on earlier years.</div>
+    <div class="a" style="--d:5.2;margin-top:30px;padding:40px 44px;border-radius:6px;background:var(--ink);color:var(--paper);box-shadow:14px 14px 0 var(--forest)">
+      <div class="stat"><span data-count="30" data-delay="5.4">0</span> <small style="margin-left:.15em;color:#9DBDAC">of <span id="crossed" style="margin-left:.12em">32</span></small></div>
+      <div class="body" style="margin-top:14px;color:rgba(251,250,244,.78)">provinces that crossed the epidemic threshold were flagged <b style="color:var(--amber)">4 weeks ahead</b>, by models trained only on earlier years.</div>
     </div>
   </div>
 </section>
@@ -211,9 +262,10 @@
     <div class="h2 a" style="--d:.5">One screen.<br><span class="muted">Every tool explained.</span></div>
     <div class="body a" style="--d:.9">The overview says what each tool does, why it matters, and what to do this week.</div>
   </div>
+  <div class="frog-top"><canvas class="spr" data-s="frog" data-f="peek" data-x="5"></canvas></div>
   <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web</span></div>
     <div class="vp"><img src="../screenshots/home_replay_2019.png" style="--from:0px;--to:0px;--t:7.5s;--zoom:1.05" alt=""></div></div>
-  <div class="callout g a pop" style="--d:2.4;right:150px;top:330px">What it does · Why it matters · You can</div>
+  <div class="callout g a pop" style="--d:2.4;right:150px;top:890px">What it does · Why it matters · You can</div>
 </section>
 
 <!-- 6 · forecast -->
@@ -253,7 +305,7 @@
   </div>
   <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · Action plan</span></div>
     <div class="vp"><img src="../screenshots/budget_replay_2019.png" style="--from:-100px;--to:-310px;--t:7.5s" alt=""></div></div>
-  <div class="callout g a pop" style="--d:2.8;right:160px;top:220px">₱5M → cases averted, with a range</div>
+  <div class="callout g a pop" style="--d:2.8;right:160px;top:330px">₱5M → cases averted, with a range</div>
 </section>
 
 <!-- 9 · target -->
@@ -265,7 +317,7 @@
   </div>
   <div class="device"><div class="chrome"><i></i><i></i><i></i><span>romeo-04.github.io/epilag/web · QC barangays</span></div>
     <div class="vp"><img src="../screenshots/qc.png" style="--from:0px;--to:-50px;--t:7s;--zoom:1.06" alt=""></div></div>
-  <div class="callout a pop" style="--d:2.6;right:560px;top:600px"><i style="background:var(--accent-2)"></i>Batasan Hills · Payatas · Commonwealth</div>
+  <div class="callout a pop" style="--d:2.6;right:560px;top:880px"><i style="background:var(--normal)"></i>Batasan Hills · Payatas · Commonwealth</div>
 </section>
 
 <!-- 10 · proof -->
@@ -284,59 +336,183 @@
 
 <!-- 11 · close -->
 <section class="scene green" data-dur="10" data-wm="0">
-  <div class="orbit" style="width:1100px;height:1100px;left:-380px;top:-480px"></div>
-  <div class="orbit dash" style="width:700px;height:700px;right:-200px;bottom:-300px"></div>
+  <div class="pixels" data-n="30" data-seed="11"></div>
+  <canvas class="spr peek" data-s="frog" data-f="happy" data-x="7" style="right:120px;--d:4.6"></canvas>
   <div class="center">
     <div class="h2 a" style="--d:.3;color:rgba(255,255,255,.7)">Hospitals see dengue a month late.</div>
     <div class="h1 a" style="--d:1.6">EpiLag-PH sees it now.</div>
-    <div class="a pop" style="--d:3.2;margin-top:30px"><span class="url">romeo-04.github.io/epilag</span></div>
-    <div class="body a fade" style="--d:4.2;color:rgba(255,255,255,.75)">Open source · DOH, UPRI-NOAH and ERA5 data · PJDSC 2026</div>
+    <div class="a pop" style="--d:3.2;margin-top:30px"><span class="url"><svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 1h2v1H6zM7 2h2v1H7zM8 3h2v1H8zM1 5h10v2H1zM9 4h2v1H9zM9 7h2v1H9zM8 8h2v1H8zM7 9h2v1H7zM6 10h2v1H6z"/></svg>romeo-04.github.io/epilag</span></div>
+    <div class="body a fade" style="--d:4.2;color:rgba(255,255,255,.8)">Open source · DOH, UPRI-NOAH and ERA5 data · PJDSC 2026</div>
   </div>
 </section>
 
 <script src="data.js"></script>
 <script>
-  const COLORS = { warning: "#D23B30", watch: "#EE8A2A", above: "#F2C14E", normal: null };
+  const COLORS = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928", normal: null };
+
+  // ---------------------------------------------------------------- pixel art
+  // Sprite poses copied from docs/sprites/*.json (trimmed to their drawn area), so the page needs no fetch over file://.
+  const SPR = {
+    mosquito: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","G":"#3D6B35","H":"#6E9A4A","K":"#071711","L":"#D5E3DA","M":"#A8BFB2","R":"#F04B2A","W":"#FFFFFF"}, poses: {
+      fly1: ["..............KKKKK..........","......K.......KKKKKK.........",".....KKKKKK..KKMMMMKK........","...KKKMKKKKK.KKLLLMKKK.......","...KKMLLLMKKKKMLLLMMKK.......","...KMMLLLLMKKKMLLLLMK....K...","..KKMMLLLLMKKKMLLLLKKK..K....","..KKKMLLLLLMKKMMLLMKKK..K....","...KKMMMLLMMKKMMMLMKKKKK.....","...KKMMMMLKKKKKKMMKKAAAK.....","....KKKKKKKKKKKKKKKAWWKAK....","....KKKKKKKDDDAAKKAWWWKKAK...",".....KKKDBDDDDAADKAWKKKKAK...",".....KKBBBDDDDDDDKAWKKKKAK...","....KKKBBBDDDDDDDKDAWKKADKKKK","....KKBBBBDDBDDDDDKDAAADKK...",".....KBBBDBBBDDDBDDKDDDKKK...",".....KKKKDDBBBBBBHHDKKKKK....",".......KKKKBBBDBBHHDKKKKK....","......K.KKKKKKKBBBKKKKK......",".....K....K..KKKKKKKKK.......",".....K...K...K..K....K.......","....K....K...K..K.....K......","..BBB...K...K....K....BBB....","........K...K....K...........",".......K....K....K...........","......BAB..BBB..BAB.........."],  // 29x27
+      fly2: [".............................",".............................",".............................",".............................","....................K........","....................K....K...",".....................K..K....",".....................K..K....","....................KKKK.....","..........KKKKKK...KAAAK.....","........KKKKKKKKK.KAWWKAK....","......KKKKKDDDAAKKAWWWKKAK...",".....KKKDBDDDDAADKAWKKKKAK...",".....KKBBBDDDDDDDKAWKKKKAK...","....KKKBBBDDDDDDDKDAWKKADKKKK","....KKBBBBDDBDDDDDKDAAADKK...","...KKKBBBDBBBDDDBDDKDDDKKK...",".KKKMKKKKDDBBBBBBHHDKKKKK....",".KMMLMMKKKKBBBDBBHHDKKKKK....",".KMLLLKMKKKKKKKBBBKKKKK......","KKMMLKLLMMKKKKKKKKKKKKK......","KKMMLKMMMKK..KKMKLLLLKKK.....",".KKKKKKKKK...KKKKLLLMKKK.....","..BBBKKKK...K.KKKKKMKKBBB....","...K....K...K..KKKKKKK.......",".......K....K....K..K........","......BAB..BBB..BAB.........."],  // 29x27
+    } },
+    frog: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","G":"#3D6B35","H":"#6E9A4A","K":"#071711","T":"#E5604F","W":"#FFFFFF"}, poses: {
+      peek: ["........KKK..........KKK...........","......KKAAAKK......KKAAAKK.........",".....KKAWWWAKK....KKAWWWAKK........",".....KAWWWWWAK...KKAWWWWWAK........","....KAWWWWWWWAKKKKAWWWWWWWAK.......","....KAWWWWWWWAKKKKAWWWWWWWAK.......","....KKWWKWWWWAKHHKKWWKWWWWAKK......","....KKKKKWWWWAKHHKKKKKWWWWAKKK.....","...KKKKKKWWWWAKHHKKKKKWWWWAKKKKK...","..KKKKKKWWWWAKHHHHKKKWWWWAKGKKKKK..","..KKKKKAWWWAKKHHHHKKAWWWAKKGGKKKK..",".KKKGGKKAAAKKGGGGGGKKAAAKKGGGGGKKK.",".KKGGGGGKKKGGGGGGGGGGKKKGGGGGGGGKK.","KKKGGGGGGGGGGGGKKKGGGGGGGGGGGGGGKKK","KKKGGGGGGGGGGGGKKKGGGGGGGGGGGGGGKKK"],  // 35x15
+      happy: [".................K.....................","...............KKKKKKKKK...............","........BBBBBBBKKKKKBBBBBBB............","........BBBBBBBKKKGKBBBBBBB............",".......BBBKKKBBBGGGBBBKKKBBBK..........",".......BBKKKKKBBGGGBBKKKKKBBKK.........","........KKKKKKKHGGGGKKKKKKKGKKK........","........BBBBBBBHHGGGBBBBBBBGGKK........","........KKHHHHHHHGGGGGGHHHGGGKKK.......",".......KKHHHHHHHGGGGGGGHHHGGGGKKK......",".......KKHHHHHHGGGGGGGGGGGGDDDDKKK.....","......KKKGHHHHGGGGGGGGGGGGDDDDDDKKK....",".....KKKGGHGKKKKKKKKGGGGGGDDDDDDKKKK...","....KKKGGGKKKKKKKKKKKKKGGDDDDDDHHHKK...","...KKKKKGKKKKKBBBBBBKKKKKKDKKKKKHHKKK..","..KKHHHHKKKKBBBBBBBBBBKKKKKHHHHKKHKKK..",".KKHHHHHHKBBBBBBBBBBBBBBBKHHHHHHKKGKKK.",".KKHHHHHHKBBBBBBBBBBBBHBBKHHHHHHKKGKKK.",".KKHHKKKKKKKKBBBBBBBBBHHHKHHHHHHKKDGKKK",".KKKHHHKKKKBBBBBBBBBBBBHHHKHHHHKKDDDKKK",".KKKKKKBBBBBBWWBBBBBBBBHHHHKKKKKDDDDDKK","KKKGDDBBBBBBWWWBBBBBBBBHHHHKKKDDDDDDDKK","KKKGDDDKKKBBWWWBBBBBBBHHHHHKKKDDDDDDDKK",".KKKGDDKKKKBBBBBBBBBBBHHHHHKKKDDDDDDDKK",".KKKKKKKKKKKBBBBBBBBBHHHHHKKKKKKKDDDKKK","..KKKKKKKKKKKKBBBBBBBBHKKKKKKKKKKKKKKK.",".KKKKKKKKKKKKKKKBBBBBBBKKKKKKKKKKKKKK..",".KKKKBBBKKKKKKKKKKBKKKKKKKKBAAKKKKKKKK.","...KKBAAKBBBKKKKKKKKKKKKKKKBAAKKBBBKKKK",".....KAAKBBBKKKKKKKK......KKKKKKBBBKKK."],  // 39x30
+    } },
+    props: { palette: {"A":"#F5A51C","B":"#F2E3B3","D":"#1F3320","F":"#F3EEE0","G":"#3D6B35","H":"#6E9A4A","K":"#071711","L":"#D5E3DA","M":"#A8BFB2","O":"#C8553D","R":"#F04B2A","S":"#BFE2EC","W":"#FFFFFF","s":"#7FB9CB"}, poses: {
+      cloud: [".............KKKKKKKKKKK.............",".............KKKKKKKKKKK.............",".............KKKKKKKKKKKKKKKK........","........KKKKKKKFFFFFFFFKKKKKK........","........KKKKKKKFFFFFFFFKKKKKK........","........KKKFFFFFFFFFFFFFFFFKKKKKK....","....KKKKKKKFFFFFFFFFFFFFFFFKKKKKK....","....KKKFFFFFFFFFFFFFFFFFFFFKKKKKK....","....KKKFFFFFFFFFFFFFFFFFFFFFFFFKK....","....KKKFFFFFFFFFFFFFFFFFFFFFFFFKKKKKK","KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKKKKK","KKKFFFFFFFsssssssFFFFFFFFFFFFFFFFFKKK","KKKFFFFFFFsssssssFFFFFFsssssssssFFKKK","KKKFFsssssssssssssssssssssssssssFFKKK","KKKKKsssssssssssssssssssssssssssKKKKK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK",".....................................",".....................................",".....................................",".....ss..........ss..........ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......",".....ss....ss....ss....ss....ss......","...........ss..........ss............","...........ss..........ss............"],  // 37x26
+      people: [".......D...........D...........D...........","......DDDDDK......DDDDDK......DDDDDK.......",".....DDDDDDDDD...DDDDDDDDD...DDDDDDDDD.....","....DDDDDDDDDD..DDDDDDDDDD..DDDDDDDDDD.....","....KDDDDDDDDDD.KDDDDDDDDDD.KDDDDDDDDDD....","...KKDDDDDDDDDDKKDDDDDDDDDDKKDDDDDDDDDDK...","...KKBBBBBBBBBKKKBBBBBBBBBKKKBBBBBBBBBKK...","...KKBBKKBBBBBKKKBBKKBBBBBKKKBBKKBBBBBKK...","...KKBBKKBBBBBKKKBBKKBBBBBKKKBBKKBBBBBKK...","...KKKBBBBBBBKKKKKBBBBBBBKKKKKBBBBBBBKKK...","....KKBBBBBBBKK.KKBBBBBBBKK.KKBBBBBBBKK....",".....KKKBBBKKK...KKKBBBKKK...KKKBBBKKK.....","......KKKKKKK.....KKKKKKK.....KKKKKKK......",".......KKKKK.......KKKKK.......KKKKK.......","...............K...........K...........K...","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","..KKKKKKKKKKKGKKKKKKKKKKKBKKKKKKKKKKKGKKK..","..KKGGAAAAAAGGKKBBAAAAAABBKKGGBBBBBBGGKKK..",".KKKGGAAAAAAGKKKBBAAAAAABKKKGGBBBBBBGGKKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.","KKKKGGGGGGGGKKKKKBBBKBKBKKKKGGGGGGGGGGGKKK.","KKKKGGGGGGGGKKKKKKBAAAAAKKKKGGGGGGGGGGGKKKK","KKAAAGGGGGGGKKAAAKKAAAAAKKBBBGGGGGGGGGGBBKK","KKAAAGGGGGGGKKAAABKAAAAAKKBBBGGGGGGGGGGBBKK",".KAAAGGGGGGGGKAAABBBBBBBBKBBBGGGGGGGGGGBBK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.",".KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGGGKKK.","..KKKGGGGGGGGGKKKBBBBBBBBBKKKGGGGGGGGGKKK..","..KKKKKKKGKKKKKKKKKKKBKKKKKKKKKKKGKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK...","....KKKKK.KKKKK.KKKKK.KKKKK.KKKKK.KKKKK....","....KKKKK.KKKKK.KKKKK.KKKKK.KKKKK.KKKKK....","....BBBBB.BBBBB.BBBBB.BBBBB.BBBBB.BBBBB....","....BBBBB.BBBBB.BBBBB.BBBBB.BBBBB.BBBBB...."],  // 43x39
+      hospital: ["...................K...................",".................KKKKK.................","................KKKKKKK................","..............KKKKKOKKKKK..............","............KKKKKOOOOOKKKKK............","..........KKKKKOOOOOOOOOKKKKK..........",".........KKKKOOOOOOOOOOOOOKKKK.........",".......KKKKOOOOOOOOOOOOOOOOOKKKK.......",".....KKKKOOOOOOOOOOOOOOOOOOOOOKKKK.....","...KKKKOOOOOOOOOOOOOOOOOOOOOOOOOKKKK...","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFFRRRRRFFFFFFFFFFFFKKK..","..KKKFFKKKKKKKRRRRRRRRRRRKKKKKKKFFKKK..","..KKKFFKKKKKKKRRRRRRRRRRRKKKKKKKFFKKK..","..KKKFFKKSSSSSRRRRRRRRRRRSSSSSKKFFKKK..","..KKKFFKKSSSSSRRRRRRRRRRRSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKSSSSSKKFRRRRRFKKSSSSSKKFFKKK..","..KKKFFKKKKKKKKKFFFFFFFKKKKKKKKKFFKKK..","..KKKFFKKKKKKKKKFFFFFFFKKKKKKKKKFFKKK..","..KKKFFFFFFFFFFFFFFFFFFFFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKKKKKKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKKKKKKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKFFFFFFFFFFFKKBBBBKKFFFFFFFFFFKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.."],  // 39x40
+      house: ["...............K..........................","..............KKK.........................",".............KKKKK........................","............KKKKKKK.......................","...........KKKKOKKKK......................","..........KKKKOOOKKKK.....................",".........KKKKOOOOOKKKK....................","........KKKOOOOOOOOOKKK...................","......KKKKOOOOOOOOOOOKKKK.................",".....KKKKOOOOOOOOOOOOOKKKK................","....KKKKOOOOOOOOOOOOOOOKKKK...............","...KKKOOOOOOOOOOOOOOOOOOOKKK..............","..KKKOOOOOOOOOOOOOOOOOOOOOKKK.............",".KKKKKKKKKKKKKKKKKKKKKKKKKKKKK............","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..KKKK.....","...KKFFFFFFFFFFFFFFFFFFFFFFFKK.KKGGGGKK...","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKKGGGGGGKK..","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKGGGGGGGGKK.","...KKFFFFFFFFFFFFFFFFFFFFFFFKKKGGGGGGGGKK.","...KKFKKKKKKFFFFFFFFFFFAAAFFKKGHHHGGGGGGKK","...KKFKSSSSKFFFFFFFFFFFAAAFFKKHHHHHGGDDGKK","...KKFKSSSSKFFFFFFFFFFFAAAFFKKHHHHHHDDDDKK","...KKFKSSSSKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKSSSSKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKKKKKKFFFFFFFFFFFFFFFFKKHHHHHDDDDDDK","...KKFKKKKKKFFFKKKKKKKFFFFFFKKHHHHHDDDDDD.","...KKFFFFFFFFFFKKKKKKKFFFFFFKKKHHHGDDDDDD.","...KKFFFFFFFFFFKKBBBBKFFFFFFKKKKKGGGDDDD..","...KKFFFFFFFFFFKKBBBBKFFFFFFKK.KKKKKKDD...","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKKKK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBKKBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBKKBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKFFFFFFFFFFKKBBBBKFFFFFFKK..KKBBK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKK..KKBBK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKK..KKBBK....."],  // 42x38
+      tree: [".............K.....................","...........HHHHHKKKKKK.............","........KHHHHHHHHHKKKKKK...........","......KKHHHHHHHHHHHGGKKKK..........",".....KKHHHHHHHHHHHHHGGGGKKK........","....KKKHHHHHHHHHHHHHGGGGGGKK.......","....KKHHHHHHHHHHHHHHHGGGGGGKKK.....","...KKKHHHHHHHHHHHHHHHGGDDDDDKKK....","..KKKKHHHHHHHHHHHHHHHGDDDDDDDKK....",".KKKKGHHHHHHHHHHHHHHHDDDDDDDDDKK...",".KKKGGHHHHHHHHHHHHHHDDDDDDDDDDDK...",".KKKGGGHHHHHHHHHHHHHDDDDDDDDDDDKK..",".KKGGGGHHHHHHHHHHHHDDGGGGGDDDDDDK..",".KKGGGGGHHHHHHHHHHHDDGGGGGDDDDDDKK.","KKKGGGGGGHHHHHHHHHGDDGGGGGDDDDDDKK.","KKKGGGGGGGGHHHHHGGGDDGGGGGDDDDDDKKK","KKKGGGGGGGGGGGGGGGDDDDDDDDDDDDDDKKK","KKKGGGGGGGGGGGGGDDDDDDDDDDDDDDDDKK.","KKKGGGGGGGGGGGGDDDDDDDDDDDDDDDDGKK.",".KKKGGGGGGGGGGDDDDDDDDDDDDDDDDDKKK.","..KKGGGGGGGGGDDDDDDDDDDDDDDDDDGKKK.","...KKGGGGGGGGDDDDDDDDDDDDDDDDDKKK..","...KKKGGGGGGGDDDDDDDDDDDDDDDDDKKK..","....KKKGGGGGGDDDDDDDDDDDDDDDDDKKK..",".....KKKGGGGGDDDDDDDDDDDDDDDDDKK...",".......KKGGGGGDDDDDDDDDDDDDDDK.....",".........KKGGGGDDDDDDDDDDDDDK......","...........KKKGGDDDDDDDDDDD........","............KKKKKKDDDDDDDK.........","............KKKKKKKKKKK............","............KKKBKBBKKKK............","............KKKBBBBKKKK............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKBBBBBKK.............","............KKKKKKKKKKK............","............KKKKKKKKKKK............","............KKKKKKKKKKK............"],  // 35x41
+    } },
+  };
+  // The EpiLag-PH logo (site/src/lib/icons.js): "#" ink line, "+" paper face, "a" amber cheek, on a forest tile.
+  const LOGO = ["..####....####..", ".#++++#..#++++#.", ".#+##+#..#+##+#.", ".#+##+####+##+#.", ".#++++++++++++#.",
+    "#++++++++++++++#", "#+a++++++++++a+#", "#++##########++#", ".#++++++++++++#.", "..############.."];
+  const LOGO_COL = { "#": "#071711", "+": "#FBFAF4", a: "#F5A51C" };
+
+  function logoSVG(cell) {
+    const rows = LOGO.map((row, y) => {
+      let d = {};
+      for (let x = 0; x < row.length;) {
+        const c = row[x]; if (!LOGO_COL[c]) { x++; continue; }
+        let e = x; while (e < row.length && row[e] === c) e++;
+        d[c] = (d[c] || "") + `M${x} ${y + 3}h${e - x}v1h${x - e}z`; x = e;
+      }
+      return `<g style="--r:${y}">` + Object.entries(d).map(([c, p]) => `<path fill="${LOGO_COL[c]}" d="${p}"/>`).join("") + "</g>";
+    });
+    return `<svg width="${16 * cell}" height="${16 * cell}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${rows.join("")}</svg>`;
+  }
+  document.querySelectorAll("[data-logo]").forEach(el => { el.innerHTML = logoSVG(+el.dataset.logo); });
+
+  // sprites: <canvas class="spr" data-s="sheet" data-f="pose[,pose2]" data-x="scale" data-fps data-flip>
+  function bake(sheet, pose, flip) {
+    const rows = SPR[sheet].poses[pose], pal = SPR[sheet].palette, w = rows[0].length, h = rows.length;
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const g = c.getContext("2d");
+    rows.forEach((r, y) => { for (let x = 0; x < w; x++) { const col = pal[r[x]]; if (col) { g.fillStyle = col; g.fillRect(flip ? w - 1 - x : x, y, 1, 1); } } });
+    return c;
+  }
+  document.querySelectorAll("canvas.spr").forEach(cv => {
+    const frames = cv.dataset.f.split(",").map(p => bake(cv.dataset.s, p, cv.hasAttribute("data-flip")));
+    const scale = +(cv.dataset.x || 4);
+    cv.width = frames[0].width; cv.height = frames[0].height;
+    cv.style.width = frames[0].width * scale + "px"; cv.style.height = frames[0].height * scale + "px";
+    const g = cv.getContext("2d");
+    g.drawImage(frames[0], 0, 0);
+    if (frames.length > 1) {
+      let i = 0;
+      setInterval(() => { i = (i + 1) % frames.length; g.clearRect(0, 0, cv.width, cv.height); g.drawImage(frames[i], 0, 0); }, 1000 / (+cv.dataset.fps || 8));
+    }
+  });
+
+  // scattered pixel blocks on the forest scenes (seeded, so every recording is the same)
+  document.querySelectorAll(".pixels").forEach(box => {
+    let s = +box.dataset.seed || 1;
+    const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let k = 0; k < +box.dataset.n; k++) {
+      const i = document.createElement("i"), size = [24, 24, 48, 12][Math.floor(rnd() * 4)];
+      let x = Math.floor(rnd() * 40) * 48, y = Math.floor(rnd() * 22.5) * 48;
+      if (x > 240 && x < 1640 && y > 220 && y < 820) x = rnd() < .5 ? Math.floor(rnd() * 5) * 48 : 1680 + Math.floor(rnd() * 5) * 48;  // keep the words clear
+      Object.assign(i.style, { left: x + "px", top: y + "px", width: size + "px", height: size + "px",
+        background: size === 12 ? "#F5A51C" : `rgba(255,255,255,${(.05 + rnd() * .1).toFixed(2)})` });
+      i.style.setProperty("--t", (1.2 + rnd() * 1.6).toFixed(2) + "s");
+      i.style.setProperty("--w", (-rnd() * 2).toFixed(2) + "s");
+      box.appendChild(i);
+    }
+  });
+
+  // pan each screenshot only as far as it goes (the captures are regenerated, so their heights change)
+  document.querySelectorAll(".device img").forEach(img => {
+    const fit = () => {
+      const s = img.style, max = Math.max(0, img.offsetHeight * (parseFloat(s.getPropertyValue("--zoom")) || 1.03) - img.parentElement.clientHeight);
+      for (const k of ["--from", "--to"]) if (-(parseFloat(s.getPropertyValue(k)) || 0) > max) s.setProperty(k, -Math.round(max) + "px");
+    };
+    if (img.complete) fit(); else img.addEventListener("load", fit);
+  });
 
   // rain
   const rain = document.getElementById("rain");
   for (let i = 0; i < 140; i++) {
     const b = document.createElement("b");
-    b.style.left = (Math.random() * 100) + "%";
+    b.style.left = Math.round(Math.random() * 239) * 8 + "px";
     b.style.animationDuration = (0.55 + Math.random() * 0.6) + "s";
     b.style.animationDelay = (-Math.random() * 2) + "s";
-    b.style.opacity = 0.3 + Math.random() * 0.7;
+    b.style.opacity = 0.25 + Math.random() * 0.55;
     rain.appendChild(b);
   }
 
-  // maps: provinces light up north to south
-  function drawMap(id, key, light) {
-    const svg = document.getElementById(id);
-    const ns = "http://www.w3.org/2000/svg";
+  // maps: provinces as pixels, lighting up north to south (each one dissolves in, cell by cell)
+  const MAP_W = 700, MAP_H = 980, CELL = 7, COLS = MAP_W / CELL, ROWS = MAP_H / CELL, UNIT = MAP_W / 1000;
+  function pixelMap(id, key, light) {
+    const cv = document.getElementById(id);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = MAP_W * dpr; cv.height = MAP_H * dpr;
+    const g = cv.getContext("2d"); g.scale(dpr, dpr);
+
+    // rasterise: each cell belongs to the province that covers most of it
+    const off = document.createElement("canvas"); off.width = COLS; off.height = ROWS;
+    const o = off.getContext("2d", { willReadFrequently: true });
+    o.setTransform(COLS / 1000, 0, 0, ROWS / 1400, 0, 0);
+    const owner = new Int16Array(COLS * ROWS).fill(-1), best = new Uint8Array(COLS * ROWS), peak = [];
+    PH.forEach((p, i) => {
+      o.clearRect(0, 0, 1000, 1400);
+      o.fill(new Path2D(p.d));
+      const a = o.getImageData(0, 0, COLS, ROWS).data;
+      let top = -1, topA = 0;
+      for (let k = 0; k < COLS * ROWS; k++) {
+        const al = a[k * 4 + 3];
+        if (al > topA) { topA = al; top = k; }
+        if (al >= 90 && al > best[k]) { best[k] = al; owner[k] = i; }
+      }
+      peak[i] = top >= 0 ? top : Math.min(ROWS - 1, Math.floor(p.cy * UNIT / CELL)) * COLS + Math.min(COLS - 1, Math.floor(p.cx * UNIT / CELL));
+    });
+    const has = new Set(owner);
+    PH.forEach((p, i) => { if (!has.has(i) && owner[peak[i]] === -1) owner[peak[i]] = i; });  // tiny islands keep one pixel
+
     const lit = PH.filter(p => light ? COLORS[p[key]] : p[key] === "warning").sort((a, b) => a.cy - b.cy);
     const order = new Map(lit.map((p, i) => [p.id, i]));
     const start = light ? 2.0 : 1.2, span = light ? 2.8 : 3.2;
-    for (const p of PH) {
-      const el = document.createElementNS(ns, "path");
-      el.setAttribute("d", p.d);
-      if (order.has(p.id)) {
-        el.classList.add("lit");
-        el.style.fill = COLORS[p[key]];
-        el.style.setProperty("--d", (start + span * order.get(p.id) / lit.length).toFixed(2));
+    const delay = PH.map(p => order.has(p.id) ? start + span * order.get(p.id) / lit.length : Infinity);
+    const color = PH.map(p => COLORS[p[key]]);
+    const cells = [];
+    owner.forEach((i, k) => { if (i >= 0) cells.push({ x: (k % COLS) * CELL, y: Math.floor(k / COLS) * CELL, p: i, r: Math.random() * .6 }); });
+    const rings = light ? [] : lit.filter(p => p[key] === "warning").map(p => ({
+      x: Math.round(p.cx * UNIT / CELL) * CELL + CELL / 2, y: Math.round(p.cy * UNIT / CELL) * CELL + CELL / 2, d: delay[PH.indexOf(p)] + .4 }));
+    const base = light ? "#DFE2D6" : "#1E2D63", flash = light ? "#071711" : "#FFFFFF";
+
+    function draw(t) {
+      g.clearRect(0, 0, MAP_W, MAP_H);
+      for (const c of cells) {
+        let col = base;
+        const k = (t - delay[c.p]) / .7 - c.r;
+        if (k > 0) col = k < .16 ? flash : color[c.p];
+        g.fillStyle = col;
+        g.fillRect(c.x, c.y, CELL - 1, CELL - 1);
       }
-      svg.appendChild(el);
-    }
-    if (!light) {  // pulse rings on the provinces that crossed the threshold
-      for (const p of lit.filter(p => p[key] === "warning")) {
-        const c = document.createElementNS(ns, "circle");
-        c.setAttribute("cx", p.cx); c.setAttribute("cy", p.cy); c.setAttribute("r", 26); c.setAttribute("class", "ring");
-        c.style.setProperty("--d", (start + span * order.get(p.id) / lit.length + 0.4).toFixed(2));
-        svg.appendChild(c);
+      g.lineWidth = 3;
+      for (const r of rings) {  // stepped square pulses on the provinces that crossed the threshold
+        if (t < r.d) continue;
+        const s = Math.floor(((t - r.d) % 2) / 2 * 8) / 8, half = Math.round(CELL * (1 + s * 6));
+        g.strokeStyle = `rgba(240,75,42,${(.9 * (1 - s)).toFixed(2)})`;
+        g.strokeRect(r.x - half, r.y - half, half * 2, half * 2);
       }
     }
+    draw(-1);
+    const section = cv.closest("section");
+    return { section, draw, dur: +section.dataset.dur, t0: null };
   }
-  drawMap("map-actual", "act", false);
-  drawMap("map-forecast", "fc", true);
+  const maps = [pixelMap("map-actual", "act", false), pixelMap("map-forecast", "fc", true)];
+  (function tick(now) {
+    for (const m of maps) {
+      if (m.t0 === null && m.section.classList.contains("on")) m.t0 = now;
+      if (m.t0 !== null && (now - m.t0) / 1000 < m.dur + 1.5) m.draw((now - m.t0) / 1000);
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
   document.getElementById("crossed").textContent = STATS.crossed;
   document.querySelector('[data-count="30"]').dataset.count = STATS.flagged;
   document.querySelector('#map-actual').closest("section").querySelector('[data-count="32"]').dataset.count = STATS.crossed;
@@ -364,7 +540,7 @@
         if (i > 0) { scenes[i - 1].classList.remove("on"); scenes[i - 1].classList.add("off"); }
         el.classList.add("on");
         wm.classList.toggle("show", el.dataset.wm === "1");
-        wm.style.color = el.classList.contains("light") ? "#14211B" : "#fff";
+        wm.style.color = el.classList.contains("light") ? "#071711" : "#fff";
         el.querySelectorAll("[data-count]").forEach(c => countUp(c, +(c.dataset.delay || c.closest(".a")?.style.getPropertyValue("--d") || 0) + 0.2));
       }, t * 1000);
       t += +el.dataset.dur;

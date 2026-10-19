@@ -632,14 +632,20 @@ merged by PR).
   moves, and keyboard-only play works.
 
 ### Phase 7: pages, media, quality
-- [ ] Methodology and open data restyle
-- [ ] Screenshots script rewrite + new screenshots
-- [ ] README update
-- [ ] og image + meta
-- [ ] Film re-record (if D7)
-- [ ] Deck refresh (optional)
-- [ ] `tests/test_site.py` green (phones, reduced motion, keyboard, axe, no console errors)
-- [ ] Retire `docs/web/epilag_app.zip` + stlite shell (D8)
+- [x] Methodology and open data restyle: Vite pages (`site/methodology.html`, `site/data/index.html`), every section,
+      number, anchor and file link kept
+- [x] Screenshots script rewrite (`scripts/screenshots.py` serves `docs/` itself) + new screenshots, desktop and phone
+- [x] README update (website, dashboard, 3D drill, "Run it", data scripts, repository map)
+- [x] og image (`scripts/og_image.py` → `site/public/og.png`) + share meta on every page
+- [x] Film re-record (D7): `docs/film/index.html` restyled (same story, scenes and timings), `docs/demo.mp4` and
+      poster re-recorded
+- [ ] Deck refresh (optional): not done; the deck still shows the earlier design
+- [x] `tests/test_site.py` green: 100 checks (every page and app view, phones, reduced motion, keyboard, axe, no
+      console errors, 2D fallback); with the parity, drill and allocation tests, 129 pass
+- [x] Retire `docs/web/epilag_app.zip` + stlite shell (D8, done in Phase 5)
+- Also in this phase, from feedback: the app became a dashboard (Codex design: sidebar, top-bar filters, less text);
+  the drill became a living 3D world (relief, water, clouds, rain, storms, zoom/pan) with painted backgrounds
+  (Codex) and its own night palette
 - **Done when** all tests are green, Lighthouse accessibility is at least 95 on the landing page and the app, and the
   README links and images all resolve.
 
