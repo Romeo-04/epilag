@@ -51,8 +51,27 @@ const sfx = {
   grade: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, "triangle", 0.06, i * 0.11)),
   thunder: () => { tone(60, 1.2, "sawtooth", 0.05, 0.15, 30); tone(90, 0.8, "triangle", 0.04, 0.1, 40); },
 };
+// rain on the roof: filtered noise whose volume follows the week's rain (and the mute button)
+let rainGain = null;
+function rainSound(level) {
+  try {
+    if (!rainGain) {
+      if (muted || !level) return;
+      ac ||= new (window.AudioContext || window.webkitAudioContext)();
+      const buf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource(), lp = ac.createBiquadFilter();
+      src.buffer = buf; src.loop = true; lp.type = "lowpass"; lp.frequency.value = 1400;
+      rainGain = ac.createGain(); rainGain.gain.value = 0;
+      src.connect(lp).connect(rainGain).connect(ac.destination); src.start();
+    }
+    rainGain.gain.setTargetAtTime(muted ? 0 : level * 0.05, ac.currentTime, 0.6);
+  } catch { /* no audio available */ }
+}
+let rainLevel = 0;
 $("mute").addEventListener("click", () => {
   muted = !muted;
+  rainSound(muted ? 0 : rainLevel);
   $("mute").setAttribute("aria-pressed", String(muted));
   $("mute").setAttribute("aria-label", muted ? "Sound off" : "Sound on");
   $("mute").innerHTML = icon(muted ? "soundOff" : "sound", { size: 24 });
@@ -239,6 +258,8 @@ function refresh({ drop = null, duration = 900 } = {}) {
   const counts = Object.fromEntries(region.provinces.map((p, k) => [p.id, teamsIn(k)]));
   board.setTeams(counts, { drop });
   board.setRain(mm);
+  rainLevel = Math.min(1, mm / 70);
+  rainSound(rainLevel);
   board.setGlow(region.provinces.filter((p) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]).map((p) => p.id));
   if (round === 2) {
     board.setIntel(Object.fromEntries(region.provinces.map((p) => [p.id, p.fc[tw]?.[0] ?? null])),
@@ -306,6 +327,7 @@ const BADGE_ICON = { early: "alert", waste: "check", full: "actionPlan", bot: "d
 function endRound() {
   const s = R.score(plan, region), auto = R.autopilot("epilag", region), g = R.gradeOf(s.mid, region), gc = GRADE_COL[g];
   results[round] = { ...s, grade: g, color: gc };
+  rainSound(0);
   board.setBugs(0, []);
   show("s-report"); sfx.grade();
   $("r-grade").textContent = g; $("r-grade").style.color = gc;
