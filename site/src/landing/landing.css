@@ -209,17 +209,17 @@ h2 + .lead { margin-top: 16px; }
 .cta__credits span { margin: 0 8px; }
 .finale { position: relative; height: 560px; margin-bottom: -40px; }
 .finale__frog { position: absolute; right: -60px; bottom: -20px; z-index: 2; transform-origin: 100% 100%; }
-.finale__slot { position: absolute; left: 10px; top: 40px; width: 150px; height: 140px; --cell: 4; }
-.finale__path { position: absolute; left: -130px; top: -82px; width: 170px; height: 150px; overflow: visible; }
+.finale__slot { position: absolute; left: -100px; top: 66px; width: 150px; height: 140px; --cell: 4; }
+.finale__path { position: absolute; left: -190px; top: -120px; width: 170px; height: 150px; overflow: visible; }
 .finale__path path, .finale__path circle { fill: none; stroke: var(--forest); stroke-width: 3; vector-effect: non-scaling-stroke; }
 .finale__path path { stroke-dasharray: 2 9; stroke-linecap: square; opacity: .7; }
 .finale__path circle { stroke: var(--amber); }
 .finale__tongue { position: absolute; height: 16px; border-radius: 8px; background: #E8846F; box-shadow: inset 0 -4px 0 #C8553D; transform-origin: right center; transform: scaleX(0); z-index: 3; }
 .finale__spark { position: absolute; width: 18px; height: 18px; z-index: 3; transform: scale(0);
   background: linear-gradient(var(--amber) 0 0) 50% 0 / 6px 100% no-repeat, linear-gradient(var(--amber) 0 0) 0 50% / 100% 6px no-repeat; }
-.finale__spark.s1 { left: 170px; top: 66px; }
-.finale__spark.s2 { left: 196px; top: 118px; width: 12px; height: 12px; }
-.finale__spark.s3 { left: 150px; top: 164px; width: 12px; height: 12px; }
+.finale__spark.s1 { left: 60px; top: 72px; }
+.finale__spark.s2 { left: 88px; top: 122px; width: 12px; height: 12px; }
+.finale__spark.s3 { left: 44px; top: 196px; width: 12px; height: 12px; }
 .finale__again { position: absolute; left: 0; bottom: 64px; color: var(--forest); font-weight: 700; opacity: 0; }
 .finale.done .finale__again { opacity: 1; }
 
@@ -277,9 +277,9 @@ h2 + .lead { margin-top: 16px; }
   .action__copy .brief { margin-left: 0; }
   .finale { height: 440px; margin-top: 8px; }
   .finale__frog { transform: scale(.7); right: -40px; }
-  .finale__slot { left: 90px; top: 70px; }
-  .finale__path { left: 0; top: -48px; }
-  .finale__spark.s1 { left: 250px; } .finale__spark.s2 { left: 270px; } .finale__spark.s3 { left: 230px; }
+  .finale__slot { left: -20px; top: 51px; }
+  .finale__path { left: -20px; top: -60px; width: 120px; height: 110px; }
+  .finale__spark.s1 { left: 110px; top: 50px; } .finale__spark.s2 { left: 132px; top: 96px; } .finale__spark.s3 { left: 96px; top: 150px; }
   .mascot-slot { --cell: 4; }
   .hero__slot { width: 140px; height: 140px; right: 4px; --cell: 4; }
   .finale__slot { --cell: 3; }
