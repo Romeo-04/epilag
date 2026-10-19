@@ -332,3 +332,13 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .title__caption span { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #FFE2A6; }
 .title__map { margin: 4px 0 0; height: min(64vh, 600px); background: none; }
 .title__frog { left: 50%; transform: translateX(-50%); bottom: -10px; }
+
+/* the frog peeks out of the river at the bottom of the painted title scene, with ripples around it */
+#s-title { overflow: hidden; }
+.title__pond { position: absolute; left: auto; right: 7%; bottom: 7vh; z-index: 1; width: 144px; height: 120px; pointer-events: none; }
+.title__pond .title__frog { position: absolute; left: 0; bottom: 6px; transform: none; }
+.title__pond i { position: absolute; left: 50%; bottom: 0; width: 120px; height: 14px; margin-left: -60px; border: 3px solid rgba(190, 220, 255, .55);
+  border-radius: 50%; animation: d-ripple 2.4s steps(6) infinite; }
+.title__pond i + i { animation-delay: 1.2s; }
+@keyframes d-ripple { from { transform: scale(.55); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
+@media (max-width: 1000px) { .title__pond { right: 6%; bottom: 2vh; } }
