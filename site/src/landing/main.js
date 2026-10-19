@@ -214,3 +214,17 @@ mm.add({ desk: "(min-width: 1100px) and (prefers-reduced-motion: no-preference)"
   gsap.fromTo(".steps", { "--fill": 0 }, { "--fill": 1, ease: "none", scrollTrigger: { trigger: ".steps", start: "top 80%", end: "bottom 55%", scrub: 0.5 } });
 });
 
+
+// ------------------------------------------------------------------ the film plays, muted, while it is on screen
+// Browsers only autoplay muted video; the controls stay so a viewer can unmute. Once the viewer pauses it themselves,
+// scrolling no longer starts it. Under reduced motion it waits for a click.
+const film = document.querySelector(".film__player video");
+if (film && !reduced()) {
+  let auto = true, ours = false;
+  new IntersectionObserver(([e]) => {
+    if (!auto) return;
+    if (e.intersectionRatio >= 0.5) film.play().catch(() => {});
+    else if (!film.paused) { ours = true; film.pause(); }
+  }, { threshold: [0, 0.5] }).observe(film);
+  film.addEventListener("pause", () => { if (!ours && !film.ended) auto = false; ours = false; });
+}
