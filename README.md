@@ -15,6 +15,15 @@ the game are drawn as 3D pixel art.
 
 ![The EpiLag-PH website](docs/screenshots/landing.png)
 
+## Watch the film
+[![EpiLag-PH film: Quezon City's 2024-25 outbreak, replayed with the forecasts made at the time](docs/film/poster.jpg)](docs/demo.mp4)
+
+**[▶ Watch the film (2:09, MP4)](docs/demo.mp4)**, also on the [website](https://romeo-04.github.io/epilag/#film).
+It follows Quezon City's 2024–25 outbreak, the latest data: 27 weeks above the epidemic line and a peak of 622 cases a
+week in February 2025. Then it replays the forecasts made at the time, which flagged the city 5 weeks before it crossed
+the line, and walks through the barangay shortlist, the Dengue Drill's Quezon City mission, and the 2019 replay as the
+nationwide proof. No voice-over: the on-screen text tells the story.
+
 ## In one minute
 - **Problem:** dengue response usually starts after hospital admissions are already high. Cases are reported after
   people get sick, so clean-up drives and fogging often arrive after the peak. The Philippines reported about
@@ -223,6 +232,8 @@ python scripts/voxel_data.py         # 3D map grids (site/public/geo/)
 python scripts/landing_data.py       # the landing page's 2019 replay numbers
 python scripts/og_image.py           # social card (site/public/og.png)
 python scripts/screenshots.py        # docs/screenshots, from the built site
+python scripts/film_data.py          # the film's maps and Quezon City season (docs/film/data.js)
+python scripts/record_film.py        # docs/demo.mp4, recorded from docs/film/index.html
 ```
 </details>
 
