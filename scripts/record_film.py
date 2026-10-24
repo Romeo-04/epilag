@@ -1,9 +1,11 @@
-"""Record the motion-graphics film (docs/film/index.html) to docs/demo.mp4, with a generated soundtrack.
+"""Record the earlier motion-graphics film (docs/film/index.html) to docs/film/motion_film.mp4, with a generated soundtrack.
 
 Captures Chrome's screencast frames in real time (JPEG, high quality), rebuilds them at a constant 30 fps,
 synthesises an original music bed timed to the scene changes, and encodes H.264 + AAC with ffmpeg
 (pip install imageio-ffmpeg). Needs Chrome, ~600 MB of free disk for the temporary frames, and the
 screenshots in docs/screenshots (python scripts/screenshots.py). No voice-over: the on-screen text tells the story.
+
+The submitted demo video is docs/demo.mp4, edited separately; this script does not touch it.
 
 Usage: python scripts/record_film.py
 """
@@ -23,7 +25,7 @@ from scipy.signal import butter, sosfilt
 
 ROOT = Path(__file__).resolve().parents[1]
 FILM = ROOT / "docs" / "film" / "index.html"
-OUT = ROOT / "docs" / "demo.mp4"
+OUT = ROOT / "docs" / "film" / "motion_film.mp4"  # not docs/demo.mp4, which is the team's demo video
 FPS, SR = 30, 44100
 
 

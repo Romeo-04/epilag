@@ -7,7 +7,7 @@ health office should do this week, and where a limited budget prevents the most 
 Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
-| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Film (2:09)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
+| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Demo video (2:50)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
 | --- | --- | --- | --- | --- | --- | --- |
 
 Everything runs in your browser, with no install or account: the app is ready in about 3 seconds, and the maps and
@@ -15,14 +15,16 @@ the game are drawn as 3D pixel art.
 
 ![The EpiLag-PH website](docs/screenshots/landing.png)
 
-## Watch the film
-[![EpiLag-PH film: Quezon City's 2024-25 outbreak, replayed with the forecasts made at the time](docs/film/poster.jpg)](docs/demo.mp4)
+## Watch the demo
+[![EpiLag-PH demo video: Quezon City, September 2024](docs/demo-poster.jpg)](docs/demo.mp4)
 
-**[▶ Watch the film (2:09, MP4)](docs/demo.mp4)**, also on the [website](https://romeo-04.github.io/epilag/#film).
-It follows Quezon City's 2024–25 outbreak, the latest data: 27 weeks above the epidemic line and a peak of 622 cases a
-week in February 2025. Then it replays the forecasts made at the time, which flagged the city 5 weeks before it crossed
-the line, and walks through the barangay shortlist, the Dengue Drill's Quezon City mission, and the 2019 replay as the
-nationwide proof. No voice-over: the on-screen text tells the story.
+**[▶ Watch the demo video (2:50, MP4)](docs/demo.mp4)**, also on the [website](https://romeo-04.github.io/epilag/#film).
+It opens in Quezon City in September 2024, as the rains arrive and the city's weekly dengue report still looks quiet.
+The outbreak that followed stayed above the epidemic line for 27 weeks and peaked at 622 cases a week in February 2025,
+and the clean-up drives and fogging came only after the wards were full. The video then rewinds to September and
+replays the forecasts EpiLag-PH would have made at the time, tours the app (forecast map, priority list, what to do
+in each area, and the budget plan), explains the model and the 2019 replay, states the limits, and ends with
+Dengue Drill.
 
 ## In one minute
 - **Problem:** dengue response usually starts after hospital admissions are already high. Cases are reported after
@@ -232,8 +234,8 @@ python scripts/voxel_data.py         # 3D map grids (site/public/geo/)
 python scripts/landing_data.py       # the landing page's 2019 replay numbers
 python scripts/og_image.py           # social card (site/public/og.png)
 python scripts/screenshots.py        # docs/screenshots, from the built site
-python scripts/film_data.py          # the film's maps and Quezon City season (docs/film/data.js)
-python scripts/record_film.py        # docs/demo.mp4, recorded from docs/film/index.html
+python scripts/film_data.py          # earlier motion film: maps and Quezon City season (docs/film/data.js)
+python scripts/record_film.py        # earlier motion film, recorded to docs/film/motion_film.mp4 (not the demo video)
 ```
 </details>
 
@@ -241,8 +243,8 @@ python scripts/record_film.py        # docs/demo.mp4, recorded from docs/film/in
 ```
 site/           the website, app and game (Vite): pages, src/app (dashboard), src/drill (3D game),
                 src/landing, src/lib (pixel sprites, voxel maps, motion), public/ (data, sprites, grids)
-docs/           the built site for GitHub Pages, plus open data (data/), film (film/, demo.mp4), deck,
-                figures and screenshots
+docs/           the built site for GitHub Pages, plus the demo video (demo.mp4), open data (data/),
+                the earlier motion film (film/), deck, figures and screenshots
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
 app/            the original Streamlit app and its small data files
 tests/          allocation, JS/Python parity, game rules, site checks (Playwright), Streamlit smoke tests
