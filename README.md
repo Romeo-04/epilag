@@ -234,8 +234,6 @@ python scripts/voxel_data.py         # 3D map grids (site/public/geo/)
 python scripts/landing_data.py       # the landing page's 2019 replay numbers
 python scripts/og_image.py           # social card (site/public/og.png)
 python scripts/screenshots.py        # docs/screenshots, from the built site
-python scripts/film_data.py          # earlier motion film: maps and Quezon City season (docs/film/data.js)
-python scripts/record_film.py        # earlier motion film, recorded to docs/film/motion_film.mp4 (not the demo video)
 ```
 </details>
 
@@ -243,13 +241,13 @@ python scripts/record_film.py        # earlier motion film, recorded to docs/fil
 ```
 site/           the website, app and game (Vite): pages, src/app (dashboard), src/drill (3D game),
                 src/landing, src/lib (pixel sprites, voxel maps, motion), public/ (data, sprites, grids)
-docs/           the built site for GitHub Pages, plus the demo video (demo.mp4), open data (data/),
-                the earlier motion film (film/), deck, figures and screenshots
+docs/           the built site for GitHub Pages, plus the demo video (demo.mp4), open data (data/), deck, figures
+                and screenshots
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
 app/            the original Streamlit app and its small data files
 tests/          allocation, JS/Python parity, game rules, site checks (Playwright), Streamlit smoke tests
 reports/        backtest, early-warning, ablation and SHAP results (CSV)
-scripts/        data for the site, sprites, voxel grids, figures, screenshots, social card, film recording
+scripts/        data for the site, voxel grids, figures, screenshots, social card
 ```
 
 ## References

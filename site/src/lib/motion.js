@@ -1,4 +1,4 @@
-// Motion tokens and small GSAP helpers shared by every page (REDESIGN_PLAN.md section 7).
+// Motion tokens and small GSAP helpers shared by every page.
 // Every helper respects prefers-reduced-motion: it jumps to the end state instead of animating.
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";

@@ -23,10 +23,9 @@ const docsData = {
   },
 };
 
-// Pages move here one by one as they are rebuilt (REDESIGN_PLAN.md, section 14).
+// The site's pages (Vite entry points).
 const PAGES = {
   index: "index.html",
-  kit: "kit.html",
   web: "web/index.html",
   drill: "drill/index.html",
   methodology: "methodology.html",

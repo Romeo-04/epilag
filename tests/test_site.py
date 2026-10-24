@@ -1,4 +1,4 @@
-"""Site checks for the built pages in docs/ (REDESIGN_PLAN.md 13.3), through Playwright.
+"""Site checks for the built pages in docs/, through Playwright.
 
 For the landing page, every app view (both data panels, latest and replay, EN and FIL), the Dengue Drill and the
 methodology and open-data pages:

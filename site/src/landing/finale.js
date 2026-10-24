@@ -5,7 +5,7 @@
 // mascot) it shows the end pose.
 import { gsap, reduced } from "../lib/motion.js";
 
-const MOUTH = [12, 27]; // frog `strikeUp` mouth, in art pixels (strike without its tongue stub, scripts/sprites.py)
+const MOUTH = [12, 27]; // frog `strikeUp` mouth, in art pixels (strike without its tongue stub)
 const BODY = [16, 18]; // mosquito body centre, in art pixels (its sprite anchor)
 
 export function playFinale(stage, mascot) {

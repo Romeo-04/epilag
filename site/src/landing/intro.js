@@ -1,6 +1,6 @@
 // First-visit intro (once per session, ?intro forces it): coloured pixels gather into the logo tile, the name rises,
 // a badge pops, then the tile flies into the nav logo and the page appears. Any wheel, touch, key or click skips it.
-// Same sequence as getcko.vercel.app's intro (REDESIGN_PLAN.md 3.1).
+// Same sequence as getcko.vercel.app's intro.
 import { gsap, SplitText } from "../lib/motion.js";
 
 const COLORS = ["#08754F", "#0C7A55", "#789373", "#071711", "#F5A51C", "#E3F0E7"];

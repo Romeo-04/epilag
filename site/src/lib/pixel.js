@@ -1,4 +1,4 @@
-// Pixel sprites from text grids (site/public/sprites/*.json, made by scripts/sprites.py).
+// Pixel sprites from text grids (site/public/sprites/*.json).
 // A sprite is { palette: {letter: hex}, size: [w, h], anchor: [x, y], blink: {from: to}, poses: {name: [rows]} }.
 // Poses are drawn once to a 1x canvas and scaled with smoothing off, so every art pixel stays square.
 

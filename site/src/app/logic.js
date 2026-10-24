@@ -1,6 +1,6 @@
 // Forecast logic of the web app, ported from app/streamlit_app.py, src/thresholds.py and src/allocate.py.
 // Pure functions on plain row objects, so tests/test_web_logic.py can call them through Playwright and compare
-// with the Python on the same data (REDESIGN_PLAN.md 13.2). Dates are whole days since 1970-01-01 (UTC).
+// with the Python on the same data. Dates are whole days since 1970-01-01 (UTC).
 
 export const LEVELS = ["normal", "above usual", "watch", "outbreak warning"];
 const DAY = 86400000;
