@@ -9,3 +9,4 @@ reports_streamlit.log
 site/node_modules/
 site/.vite/
 UI mockup/
+.vercel/
