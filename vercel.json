@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'static site, nothing to install'",
+  "buildCommand": "echo 'docs/ is already built'",
+  "outputDirectory": "docs",
   "rewrites": [
     { "source": "/epilag", "destination": "/index.html" },
     { "source": "/epilag/:path*", "destination": "/:path*" }
