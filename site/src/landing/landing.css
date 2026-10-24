@@ -13,7 +13,7 @@ h2 + .lead { margin-top: 16px; }
 .brand--sm .lg { width: 24px; height: 24px; border-radius: 7px; }
 
 /* ------------------------------------------------------------------ hero */
-/* UI mockup hero: copy left; a big mosquito flies over the headline toward a smaller app window that shows
+/* Hero: copy left; a big mosquito flies over the headline toward a smaller app window that shows
    the latest forecast (3D region map, level counts, cases per 100,000, map/table view) */
 .hero { padding: 64px 0 88px; margin-top: -76px; padding-top: 140px; }
 .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: start; }
@@ -245,7 +245,7 @@ h2 + .lead { margin-top: 16px; }
 .proof__more { margin-top: 18px; }
 
 /* ------------------------------------------------------------------ final cta + footer + finale */
-/* UI mockup ending: copy, links and credits on the left; a big frog bottom-right, cut off by the page edge,
+/* Ending: copy, links and credits on the left; a big frog bottom-right, cut off by the page edge,
    whose tongue goes up to the mosquito that flew down the dotted path (see finale.js) */
 .cta { padding: 112px 0 40px; overflow: hidden; }
 .tx-leaves { --sf-img: url(/textures/leaves.svg); --sf-size: 512px 224px; }

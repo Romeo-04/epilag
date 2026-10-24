@@ -2,7 +2,7 @@
 // single Three.js InstancedMesh, rendered at low resolution and scaled up with image-rendering: pixelated.
 // Colour and height come per area (province or region). Renders only when something changes.
 // Patterns adapted from Room TBA's Building3DViewer (github.com/uplbtools/room-tba, MIT): lazy-loaded three,
-// raycast only when the pointer or camera moved, full disposal. See REDESIGN_PLAN.md section 9.
+// raycast only when the pointer or camera moved, full disposal.
 
 const SEA = "#BFE2EC";
 const LAND = "#C9CFC9";

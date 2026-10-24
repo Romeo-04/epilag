@@ -1,4 +1,4 @@
-// Shared copy used by the landing page, the app and the kit. Wording follows UI mockup/ and README.md.
+// Shared copy used by the landing page and the app. Wording follows README.md.
 
 // The six tools, in mockup order. `page` is the app view each card opens.
 export const TOOLS = [

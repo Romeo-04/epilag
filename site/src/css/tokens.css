@@ -1,4 +1,4 @@
-/* Design tokens. Colours and type from UI mockup/ "Visual foundations"; motion from REDESIGN_PLAN.md section 7.1.
+/* Design tokens: colours, type, spacing and motion.
    Rules: ink for all body and interface text, forest for emphasis, weather blue for maps, rain and data graphics only
    (never text). Every alert colour is always paired with its text label. */
 :root {

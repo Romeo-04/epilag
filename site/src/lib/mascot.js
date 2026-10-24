@@ -2,7 +2,7 @@
 // When the section at the middle of the viewport changes, the sprite flies (whole, wings beating, leaving a short
 // pixel trail) from where it was to the new slot, then lands in that slot's pose and hovers. The first time, or
 // after it has been eaten, it forms from pixels falling from above. After landing, the slot's target gets a halo.
-// Same idea as getcko.vercel.app's mascot controller (REDESIGN_PLAN.md 3.1), written for plain JS.
+// Same idea as getcko.vercel.app's mascot controller, written for plain JS.
 import { cells, draw, loadSprite, rows } from "./pixel.js";
 
 const reducedQuery = matchMedia("(prefers-reduced-motion: reduce)");

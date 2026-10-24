@@ -53,8 +53,7 @@ export async function render(el, ctx) {
   const grids = panel === "province" && regionMeta ? await loadGrids("voxel_regions") : await loadGrids("voxel_ph");
   const grid = panel === "province" && regionMeta ? grids[regionMeta.psgc] : panel === "province" ? grids.province : grids.region;
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
-  const create = ctx.map === "maplibre" ? (await import("../../lib/maplibre-map.js")).createMaplibreMap : createVoxelMap;
-  const map = await create(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province", framing: "land",
+  const map = await createVoxelMap(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province", framing: "land",
     onHover(u, e) {
       const r = u && byId.get(u);
       map?.highlight(u);

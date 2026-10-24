@@ -45,7 +45,6 @@ function readUrl() {
     lang: q.get("lang") === "fil" ? "fil" : "en",
     region: q.get("region") || null,
     area: q.get("area") || null,
-    map: q.get("map") === "maplibre" ? "maplibre" : null,
   };
 }
 
@@ -54,7 +53,6 @@ function writeUrl(s, push) {
   if (s.mode === "replay" && s.origin) q.set("origin", s.origin);
   if (s.region) q.set("region", s.region);
   if (s.area) q.set("area", s.area);
-  if (s.map) q.set("map", s.map);
   history[push ? "pushState" : "replaceState"](null, "", `?${q}`);
 }
 

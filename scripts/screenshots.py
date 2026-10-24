@@ -1,9 +1,9 @@
-"""Capture screenshots of the built site for the README, the film and the deck.
+"""Capture the screenshots used in the README and the deck, from the built site.
 
 Serves docs/ on a local port (as GitHub Pages serves it, under /epilag/) and drives Chrome with Playwright:
-the landing page, every app view (latest forecast and the 2 June 2019 replay), and the Dengue Drill (title,
-briefing, round 2 board, round report), at 1440 px, plus a few phone views at 390 px. App pages are captured at
-their full height with the viewport grown to fit, so the sticky sidebar spans the whole image.
+the landing page, the app views (mostly the 2 June 2019 replay) and the Dengue Drill (title and round 2 board),
+at 1440 px. App pages are captured at their full height with the viewport grown to fit, so the sticky sidebar
+spans the whole image.
 Build the site first (cd site && npm run build). Usage: python scripts/screenshots.py [name ...]
 """
 import sys
@@ -22,22 +22,14 @@ REPLAY = "&panel=province&mode=replay&origin=2019-06-02&h=4"
 # name, path, width, full height
 SHOTS = [
     ("landing", "", 1440, False),
-    ("landing_phone", "", 390, False),
     ("home", "web/?page=home", 1440, True),
-    ("home_replay_2019", f"web/?page=home{REPLAY}", 1440, True),
-    ("map_latest", "web/?page=map", 1440, True),
     ("map_replay_2019", f"web/?page=map{REPLAY}", 1440, True),
-    ("unit_latest", "web/?page=unit&region=R_NCR&area=QC", 1440, True),
     ("unit_replay_2019", f"web/?page=unit{REPLAY}", 1440, True),
     ("budget_replay_2019", f"web/?page=budget{REPLAY}", 1440, True),
     ("public", f"web/?page=public{REPLAY}", 1440, True),
-    ("qc", "web/?page=qc&region=R_NCR&area=QC", 1440, True),
     ("proof", "web/?page=proof", 1440, True),
-    ("about", "web/?page=about", 1440, True),
-    ("app_phone", "web/?page=home", 390, False),
-    ("methodology", "methodology.html", 1440, False),
 ]
-DRILL = ["drill_title", "drill_receipt", "drill_round2", "drill_report"]
+DRILL = ["drill_title", "drill_round2"]
 
 
 class _Handler(SimpleHTTPRequestHandler):
@@ -65,14 +57,13 @@ def shoot(browser, base, name, path, width, full):
 
 
 def drill(browser, base, only):
-    """Play into the drill (its first mission, Quezon City): title, the case receipt, round 2 with a few teams out, and the round report."""
+    """Play into the drill (its first mission, Quezon City): the title, then round 2 with a few teams out."""
     page = browser.new_page(viewport={"width": 1440, "height": 900})
     page.goto(base + "drill/", wait_until="networkidle")
     page.wait_for_timeout(4000)
     save = lambda n: (not only or n in only) and (page.screenshot(path=OUT / f"{n}.png"), print("saved", n))
     save("drill_title")
     page.click("#start"); page.wait_for_timeout(2800)
-    save("drill_receipt")
     page.click("#go-r1"); page.wait_for_timeout(2500)
     for _ in range(8):
         page.click("#end"); page.wait_for_timeout(1300)
@@ -88,10 +79,6 @@ def drill(browser, base, only):
     page.click(".prow[data-k='1']"); page.wait_for_timeout(1500)
     page.evaluate("scrollTo(0, 0)")
     save("drill_round2")
-    for _ in range(6):
-        page.click("#end"); page.wait_for_timeout(1300)
-    page.wait_for_timeout(3000)
-    save("drill_report")
     page.close()
 
 

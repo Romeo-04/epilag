@@ -1,5 +1,5 @@
 // Landing page: fills the live parts (3D maps, priority list, drill console) from the 2 Jun 2019 replay data,
-// places the scroll-following mosquito, and runs the scroll animations. Structure: UI mockup/ final landing page.
+// places the scroll-following mosquito, and runs the scroll animations.
 import "../css/tokens.css";
 import "../css/base.css";
 import "../css/surfaces.css";
