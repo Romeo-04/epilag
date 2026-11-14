@@ -46,6 +46,7 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .topbar__title h1 { overflow: hidden; font-size: 24px; font-weight: 750; letter-spacing: -.03em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 .topbar__note { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .topbar__actions { display: flex; flex: none; align-items: center; gap: 8px; }
+.topbar__end { display: flex; flex: none; align-items: center; gap: 8px; }
 .download-menu { position: relative; }
 .download-menu summary { list-style: none; }
 .download-menu summary::-webkit-details-marker { display: none; }
@@ -367,6 +368,8 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
   .topbar__note { max-width: 54vw; }
   .top-download { width: 42px; min-width: 42px; justify-content: center; padding-inline: 9px; }
   .top-download span { display: none; }
+  .topbar__help { width: 42px; min-width: 42px; justify-content: center; padding-inline: 9px; }
+  .topbar__help span { display: none; }
   .top-download .download-menu__chev { display: none; }
   .ctx { flex-direction: column; align-items: stretch; gap: 9px; padding: 9px; }
   .ctx__item, .ctx__item--region, .ctx__item--area, .ctx__item--mode, .ctx__item--origin, .ctx__item--horizon { flex: none; width: 100%; min-width: 0; }

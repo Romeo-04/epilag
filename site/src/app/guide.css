@@ -1,0 +1,53 @@
+/* Onboarding guide: a dimmed page with one area cut out, and a card that explains it. */
+body.guide-open .app-top { position: relative; } /* the sticky header would cover the part being explained */
+.guide { position: fixed; inset: 0; z-index: 200; }
+.guide__catch { position: absolute; inset: 0; }
+.guide__spot { position: fixed; border-radius: 14px; pointer-events: none;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--forest), 0 0 0 200vmax rgba(7, 23, 17, .58); }
+.guide--center .guide__spot { box-shadow: 0 0 0 200vmax rgba(7, 23, 17, .58); }
+
+.guide__card { position: fixed; width: min(384px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; padding: 16px 20px 16px;
+  border-radius: var(--r-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-float), 0 24px 60px rgba(7, 23, 17, .28); overscroll-behavior: contain; }
+.guide__card--wide { width: min(520px, calc(100vw - 24px)); }
+.guide__card > * { animation: guide-in var(--dur-base) var(--ease-out) both; }
+@keyframes guide-in { from { opacity: 0; transform: translateY(4px); } }
+
+.guide__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.guide__step { color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; }
+.guide__close { display: grid; flex: none; place-items: center; width: 36px; height: 36px; margin: -6px -10px -6px 0; border-radius: 10px; color: var(--muted); }
+.guide__close:hover { background: var(--surface-2); color: var(--ink); }
+.guide__title { margin: 0 0 8px; font-size: 19px; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; }
+.guide__title:focus { outline: none; }
+.guide__body { display: grid; gap: 9px; font-size: 14px; line-height: 1.5; }
+.guide__body p, .guide__body ul { margin: 0; }
+.guide__body ul { display: grid; gap: 6px; padding-left: 18px; }
+.guide__body b { font-weight: 700; }
+.guide__note { color: var(--muted); font-size: 13px; }
+
+.guide__levels { grid-template-columns: max-content minmax(0, 1fr); gap: 7px 10px !important; padding: 0 !important; list-style: none; }
+.guide__levels li { display: contents; }
+.guide__levels .lv { justify-self: start; align-self: start; padding: 2px 8px; font-size: 12px; }
+
+.guide__art { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--surface-2); }
+.guide__legend { gap: 7px !important; padding: 0 !important; list-style: none; }
+.guide__legend li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 9px; align-items: start; }
+.guide__key { display: block; width: 22px; height: 14px; margin-top: 4px; border-radius: 3px; background-repeat: no-repeat; background-position: center; }
+.guide__key--actual { background-image: linear-gradient(var(--ink), var(--ink)); background-size: 100% 2.5px; }
+.guide__key--fc { background-image: radial-gradient(circle, var(--forest) 0 4px, transparent 4.6px); }
+.guide__key--band { background: rgba(8, 117, 79, .18); }
+.guide__key--epi { background-image: repeating-linear-gradient(90deg, var(--lv-warning) 0 6px, transparent 6px 9px); background-size: 100% 2px; }
+
+.guide__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.guide__dots { display: flex; gap: 5px; }
+.guide__dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line-strong); }
+.guide__dots i.on { width: 16px; background: var(--forest); }
+.guide__btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
+
+@media (max-width: 720px) {
+  .guide__card, .guide__card--wide { inset: auto 8px 8px; width: auto; max-height: 56vh; padding: 14px 16px; }
+  .guide--center .guide__card { max-height: calc(100dvh - 16px); }
+  .guide__title { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide__card > * { animation: none; }
+}
