@@ -1,11 +1,12 @@
 // Onboarding guide: a short spotlight tour of the Overview that says what each part shows and how to read it,
-// in English and Filipino. It opens on the first visit to the Overview, and any time from "How to use" in the menu.
+// in English and Filipino. It opens by itself once per device, and any time from "How to use" in the top bar.
 // The page behind it is made inert while it is open; Esc closes it and the arrow keys step through it.
 import { icon } from "../lib/icons.js";
 import { esc } from "./ui.js";
 import "./guide.css";
 
-// main.js reads the same key to decide whether to open the guide on a first visit.
+// main.js reads the same key to decide whether to open the guide on a first visit. It is set as soon as the guide
+// opens, so a reload half-way through does not bring it back.
 function remember() { try { localStorage.setItem("el-guide", "done"); } catch { /* storage may be blocked */ } }
 
 const UI = {
@@ -74,6 +75,8 @@ function steps(c) {
         body: `<p>Nakaayos ang mga lugar ayon sa forecast na kaso bawat 100,000 tao, para patas ang paghahambing ng maliit na probinsya at malaking lungsod.</p>` },
       { target: nav, noScroll: true, title: "Tumingin nang mas malalim",
         body: `${mobile ? "<p>Buksan ang menu para sa iba pang pahina:</p>" : ""}<ul>${pages.map((p) => `<li>${b(t[`nav_${p}`])}: ${what[p]}</li>`).join("")}</ul>` },
+      { target: "#guide-top", title: "Ulitin ang tour anumang oras",
+        body: `<p>Isang beses lang kusang bubukas ang tour na ito sa device na ito. Para makita ulit, ${mobile ? `pindutin ang ${b("?")} (${esc(labels.guide)})` : `piliin ang ${b(labels.guide)}`} sa itaas ng anumang pahina.</p>` },
       { title: "Paano basahin ang forecast", wide: true,
         body: `${art(labels.now)}<ul class="guide__legend">
           <li>${key("actual")}<span>${b(t.actual)}: ang iniulat ng mga klinika at ospital bawat linggo.</span></li>
@@ -81,7 +84,7 @@ function steps(c) {
           <li>${key("band")}<span>${b(t.range)}: ginawa ito para masaklaw ang totoong bilang mga 8 sa bawat 10 beses. Kapag mas malapad, mas hindi tiyak.</span></li>
           <li>${key("epi")}<span>${b(t.epi_line)}: ang karaniwang bilang para sa linggong ito ng taon, dagdag ang palugit (mean + 2 SD ng mga nakaraang taon). Kapag lampas dito, outbreak na.</span></li></ul>
           <p>Kapag ang gitnang tantya ay lampas sa pulang linya, ${b(c.levelName("outbreak warning"))} ito. Kapag ang itaas lang ng saklaw ang lampas, ${b(c.levelName("watch"))}.</p>
-          <p class="guide__note">Gabay ang forecast, hindi pangako: gamitin ito kasama ng lokal na ulat at sariling pagpapasya. Mabubuksan ulit ang gabay na ito mula sa ${b(labels.guide)} sa menu.</p>` },
+          <p class="guide__note">Gabay ang forecast, hindi pangako: gamitin ito kasama ng lokal na ulat at sariling pagpapasya.</p>` },
     ];
   }
   const what = { map: "every area at once.", unit: "one area's forecast chart, checklist and the reasons behind the forecast.",
@@ -119,6 +122,8 @@ function steps(c) {
       body: `<p>Areas ranked by forecast cases per 100,000 people, so a small province and a big city can be compared fairly.</p>` },
     { target: nav, noScroll: true, title: "Go deeper",
       body: `${mobile ? "<p>Open the menu for the other pages:</p>" : ""}<ul>${pages.map((p) => `<li>${b(t[`nav_${p}`])}: ${what[p]}</li>`).join("")}</ul>` },
+    { target: "#guide-top", title: "Replay this tour any time",
+      body: `<p>This tour opens by itself only once on this device. To see it again, ${mobile ? `tap the ${b("?")} button (${esc(labels.guide)})` : `select ${b(labels.guide)}`} at the top of any page.</p>` },
     { title: "How to read a forecast", wide: true,
       body: `${art(labels.now)}<ul class="guide__legend">
         <li>${key("actual")}<span>${b(t.actual)}: what clinics and hospitals reported each week.</span></li>
@@ -126,7 +131,7 @@ function steps(c) {
         <li>${key("band")}<span>${b(t.range)}: built to hold the real count about 8 times in 10. The wider it is, the less certain the forecast.</span></li>
         <li>${key("epi")}<span>${b(t.epi_line)}: the usual count for this week of the year, plus a margin (mean + 2 SD of earlier years). Above it counts as an outbreak.</span></li></ul>
         <p>If the middle estimate is above the red line, the area is on ${b(c.levelName("outbreak warning"))}. If only the top of the range is, it is on ${b(c.levelName("watch"))}.</p>
-        <p class="guide__note">A forecast is a guide, not a promise: use it with local reports and your own judgement. Reopen this guide any time from ${b(labels.guide)} in the menu.</p>` },
+        <p class="guide__note">A forecast is a guide, not a promise: use it with local reports and your own judgement.</p>` },
   ];
 }
 
@@ -155,6 +160,7 @@ let open = false;
 export function startGuide(c) {
   if (open) return Promise.resolve();
   open = true;
+  remember();
   const S = steps(c), n = S.length - 1, ui = UI[c.lang] || UI.en;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mobile = () => matchMedia("(max-width: 720px)").matches;
@@ -248,7 +254,6 @@ export function startGuide(c) {
   }
 
   function close(then) {
-    remember();
     token++;
     removeEventListener("scroll", queue, true);
     removeEventListener("resize", queue);

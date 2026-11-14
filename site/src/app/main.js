@@ -58,7 +58,8 @@ function writeUrl(s, push) {
 
 let state = readUrl();
 
-// Onboarding guide: opens by itself on the first visit to the Overview; ?guide=1 forces it, ?guide=0 keeps it closed.
+// Onboarding guide: opens by itself once per device, on the first visit to the Overview, and any time from "How to use"
+// in the top bar. ?guide=1 forces it, ?guide=0 keeps it closed.
 // writeUrl() drops the parameter, so read it once here.
 const guideParam = new URLSearchParams(location.search).get("guide");
 let guideAuto = guideParam === "1" ? "force" : guideParam === "0" ? "off" : "auto";
@@ -105,7 +106,7 @@ function bindShell() {
     if (open) $("mobile-close")?.focus();
   });
   $("mobile-close")?.addEventListener("click", closeMobileNav);
-  $("guide-open")?.addEventListener("click", () => openGuide(matchMedia("(max-width: 720px)").matches ? $("mobile-menu") : $("guide-open")));
+  $("guide-top")?.addEventListener("click", () => openGuide($("guide-top")));
   $("sidebar-toggle")?.addEventListener("click", () => {
     const collapsed = document.body.classList.toggle("sidebar-collapsed");
     $("sidebar-toggle").setAttribute("aria-expanded", String(!collapsed));
@@ -204,8 +205,8 @@ function renderChrome(t, originList, m) {
   $("sidebar-title").textContent = labels.dashboard;
   $("sidebar").querySelector(".sidebar__language .ctx__label")?.replaceChildren(document.createTextNode(t.lang));
   $("sidebar").querySelector("a.sidebar__link .nav-item__text")?.replaceChildren(document.createTextNode(labels.drill));
-  $("guide-open")?.querySelector(".nav-item__text")?.replaceChildren(document.createTextNode(labels.guide));
-  $("guide-open")?.setAttribute("aria-label", labels.guide);
+  $("guide-top")?.querySelector("span")?.replaceChildren(document.createTextNode(labels.guide));
+  $("guide-top")?.setAttribute("aria-label", labels.guide);
   $("sidebar").setAttribute("aria-label", labels.navigation);
   $("mobile-menu")?.setAttribute("aria-label", labels.open_navigation);
   $("mobile-close")?.setAttribute("aria-label", labels.close_navigation);

@@ -8,7 +8,7 @@ methodology and open-data pages:
   - keyboard: Tab reaches the main controls and the focus is visible
   - axe-core: no serious or critical issues (skipped when the CDN cannot be reached)
   - without WebGL the maps fall back to 2D
-  - the onboarding guide opens on a first visit, steps through the Overview on desktop and phone, and can be reopened
+  - the onboarding guide opens once per device, steps through the Overview on desktop and phone, and can be replayed
 Build first: `cd site && npm run build`. Skipped when Playwright or the build is missing.
 """
 import threading
@@ -188,7 +188,7 @@ def guide_step(pg, i, n):
 def walk_guide(pg, phone):
     """Start the tour and step to the end, checking each card fits and rings its part of the page."""
     pg.click(".guide [data-act=next]")
-    targets = GUIDE_TARGETS + ["#mobile-menu" if phone else "#tabs", None]
+    targets = GUIDE_TARGETS + ["#mobile-menu" if phone else "#tabs", "#guide-top", None]
     n = len(targets)
     for i, sel in enumerate(targets, 1):
         guide_step(pg, i, n)
@@ -214,6 +214,23 @@ def test_guide_walks_through_the_overview(base, browser, width):
         pg.reload(wait_until="networkidle")
         pg.wait_for_timeout(600)
         assert pg.query_selector(".guide") is None, "the guide opened again for a returning visitor"
+        pg.click("#guide-top")  # but it can be replayed, on a phone too
+        pg.wait_for_selector(".guide #guide-title")
+        assert errors == []
+    finally:
+        c.close()
+
+
+def test_guide_opens_only_once_per_device(base, browser):
+    c, pg, errors = open_page(browser, base + "web/?page=home", guide=True)
+    try:
+        pg.wait_for_selector(".guide #guide-title")
+        pg.reload(wait_until="networkidle")  # left half-way through: it still counts as seen
+        pg.wait_for_timeout(600)
+        assert pg.query_selector(".guide") is None
+        pg.goto(base + "web/?page=home&lang=fil", wait_until="networkidle")
+        pg.wait_for_timeout(600)
+        assert pg.query_selector(".guide") is None
         assert errors == []
     finally:
         c.close()
@@ -225,16 +242,16 @@ def test_guide_keyboard_and_reopen(base, browser):
         assert pg.query_selector(".guide") is None, "?guide=0 should keep the guide closed"
         pg.click("[data-page=map]")
         pg.wait_for_selector("#view:not([aria-busy])")
-        pg.click("#guide-open")  # from another page: back to the Overview, then the tour
+        pg.click("#guide-top")  # from another page: back to the Overview, then the tour
         pg.wait_for_selector(".guide #guide-title")
         assert "page=home" in pg.url
         pg.keyboard.press("ArrowRight")
-        guide_step(pg, 1, 9)
+        guide_step(pg, 1, 10)
         pg.keyboard.press("ArrowLeft")
         pg.wait_for_function("document.querySelector('#guide-title')?.textContent === 'Welcome to EpiLag-PH'")
         pg.keyboard.press("Escape")
         pg.wait_for_selector(".guide", state="detached")
-        assert pg.evaluate("document.activeElement.id") == "guide-open", "focus did not return to the button"
+        assert pg.evaluate("document.activeElement.id") == "guide-top", "focus did not return to the button"
         assert pg.evaluate("localStorage.getItem('el-guide')") == "done"
         assert errors == []
     finally:
@@ -247,7 +264,7 @@ def test_guide_in_filipino(base, browser):
         pg.wait_for_selector(".guide #guide-title")
         assert pg.text_content("#guide-title") == "Maligayang pagdating sa EpiLag-PH"
         assert pg.text_content(".guide [data-act=next]") == "Simulan ang tour"
-        assert pg.text_content("#guide-open").strip() == "Paano gamitin"
+        assert pg.text_content("#guide-top").strip() == "Paano gamitin"
         assert errors == []
     finally:
         c.close()
@@ -262,8 +279,8 @@ def test_guide_axe_no_serious_issues(base, browser):
         except Exception:  # noqa: BLE001
             pytest.skip("axe-core CDN not reachable")
         found = []
-        for i in [0, 2, 9]:  # welcome, the alert levels, how to read a forecast
-            while pg.text_content(".guide__step") != ("Step 9 of 9" if i == 9 else f"Step {i} of 9") and i:
+        for i in [0, 2, 10]:  # welcome, the alert levels, how to read a forecast
+            while i and pg.text_content(".guide__step") != f"Step {i} of 10":
                 pg.click(".guide [data-act=next]")
                 pg.wait_for_timeout(150)
             pg.wait_for_timeout(400)

@@ -20,7 +20,6 @@ body.app { min-height: 100vh; background: var(--paper); }
 .nav-group__items { display: grid; gap: 3px; }
 .nav-group__items a, .sidebar__link { display: flex; align-items: center; min-height: 44px; gap: 11px; padding: 9px 10px; border-radius: 10px; color: var(--muted); font-size: 14px; font-weight: 650; text-decoration: none; }
 .nav-group__items a:hover, .sidebar__link:hover { background: var(--surface-2); color: var(--ink); }
-button.sidebar__link { width: 100%; font: inherit; font-size: 14px; font-weight: 650; text-align: left; } /* "How to use" opens the guide */
 .nav-group__items a[aria-current="page"] { background: var(--forest-soft); color: var(--forest-deep); box-shadow: inset 3px 0 0 var(--forest); }
 .nav-item__icon { display: grid; flex: none; place-items: center; width: 25px; height: 25px; --i1: currentColor; --i2: transparent; --i3: currentColor; }
 .nav-item__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -47,6 +46,7 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .topbar__title h1 { overflow: hidden; font-size: 24px; font-weight: 750; letter-spacing: -.03em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 .topbar__note { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .topbar__actions { display: flex; flex: none; align-items: center; gap: 8px; }
+.topbar__end { display: flex; flex: none; align-items: center; gap: 8px; }
 .download-menu { position: relative; }
 .download-menu summary { list-style: none; }
 .download-menu summary::-webkit-details-marker { display: none; }
@@ -368,6 +368,8 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
   .topbar__note { max-width: 54vw; }
   .top-download { width: 42px; min-width: 42px; justify-content: center; padding-inline: 9px; }
   .top-download span { display: none; }
+  .topbar__help { width: 42px; min-width: 42px; justify-content: center; padding-inline: 9px; }
+  .topbar__help span { display: none; }
   .top-download .download-menu__chev { display: none; }
   .ctx { flex-direction: column; align-items: stretch; gap: 9px; padding: 9px; }
   .ctx__item, .ctx__item--region, .ctx__item--area, .ctx__item--mode, .ctx__item--origin, .ctx__item--horizon { flex: none; width: 100%; min-width: 0; }
