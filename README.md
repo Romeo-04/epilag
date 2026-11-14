@@ -142,13 +142,14 @@ Every result is out of sample: each test year is forecast only from earlier year
 | Error vs "same week last year", 4 weeks ahead | 36% lower (2019), 89% lower (2020) | 32–70% lower (2019, 2023–2025) |
 | Error vs "same as this week", 4 weeks ahead | 22% / 20% lower | 18–32% lower, except quiet 2023 (4% higher) |
 | 10–90% range coverage (target 80%) | 77–79% | 70–92% |
-| Outbreak starts caught 4 weeks ahead ("watch") | 87% of 211 (2019) | 79–100% |
+| Outbreak starts caught 4 weeks ahead ("watch") | 87%: 179 of 206 with a forecast (2019) | 79–100% |
 | False alarms ("watch") | 46% (2019) | 42–63% |
 
 - **2019 replay (week ending 2 June):** 30 of 32 provinces that later crossed the epidemic threshold were flagged
   4 weeks ahead. For regions and Quezon City it was 11 of 11.
 - **Quezon City, 2024–25:** the record early-year outbreak crossed the epidemic line in the week ending 20 Oct 2024,
-  stayed above it for 27 weeks and peaked at 622 cases in the week ending 23 Feb 2025 (the line was 121). The 4-week
+  dipped just below it the next week, then stayed above it for 27 straight weeks from 3 Nov. It peaked at 622 cases
+  in the week ending 23 Feb 2025 (the line was 120). The 4-week
   forecasts were on *watch* from the one made on 15 Sep 2024 and on *watch* or *outbreak warning* every week after,
   through the peak. They called the outbreak, not its height: for the peak week the forecast was 237 (likely 164–338).
 - **Honest finding on weather:** most of the skill comes from recent cases and the season. Adding rain, heat and
