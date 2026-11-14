@@ -20,6 +20,7 @@ body.app { min-height: 100vh; background: var(--paper); }
 .nav-group__items { display: grid; gap: 3px; }
 .nav-group__items a, .sidebar__link { display: flex; align-items: center; min-height: 44px; gap: 11px; padding: 9px 10px; border-radius: 10px; color: var(--muted); font-size: 14px; font-weight: 650; text-decoration: none; }
 .nav-group__items a:hover, .sidebar__link:hover { background: var(--surface-2); color: var(--ink); }
+button.sidebar__link { width: 100%; font: inherit; font-size: 14px; font-weight: 650; text-align: left; } /* "How to use" opens the guide */
 .nav-group__items a[aria-current="page"] { background: var(--forest-soft); color: var(--forest-deep); box-shadow: inset 3px 0 0 var(--forest); }
 .nav-item__icon { display: grid; flex: none; place-items: center; width: 25px; height: 25px; --i1: currentColor; --i2: transparent; --i3: currentColor; }
 .nav-item__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

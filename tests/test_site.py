@@ -8,6 +8,7 @@ methodology and open-data pages:
   - keyboard: Tab reaches the main controls and the focus is visible
   - axe-core: no serious or critical issues (skipped when the CDN cannot be reached)
   - without WebGL the maps fall back to 2D
+  - the onboarding guide opens on a first visit, steps through the Overview on desktop and phone, and can be reopened
 Build first: `cd site && npm run build`. Skipped when Playwright or the build is missing.
 """
 import threading
@@ -65,10 +66,12 @@ def browser(pw):
     b.close()
 
 
-def open_page(browser, url, width=1440, **ctx):
+def open_page(browser, url, width=1440, guide=False, **ctx):
     c = browser.new_context(viewport={"width": width, "height": 900 if width > 500 else 844}, is_mobile=width < 500,
                             has_touch=width < 500, **ctx)
     c.add_init_script("try { sessionStorage.setItem('el-intro', '1') } catch (e) {}")  # skip the landing intro
+    if not guide:  # a returning visitor: the onboarding guide stays closed
+        c.add_init_script("try { localStorage.setItem('el-guide', 'done') } catch (e) {}")
     pg = c.new_page()
     errors = []
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
@@ -161,3 +164,111 @@ def test_maps_fall_back_to_2d_without_webgl(base, pw):
         assert pg.evaluate("!!document.querySelector('canvas')"), "no 2D map drawn"
     finally:
         b.close()
+
+
+# ------------------------------------------------------------------ onboarding guide
+GUIDE_TARGETS = ["#ctx", "[data-guide=status]", "[data-guide=trend]", "[data-guide=rising]", "[data-guide=do]",
+                 "[data-guide=map]", "[data-guide=priority]"]
+GUIDE_FITS = """([sel, phone]) => {
+  const c = document.querySelector('.guide__card').getBoundingClientRect();
+  const onScreen = c.left >= 0 && c.top >= 0 && c.right <= innerWidth + 0.5 && c.bottom <= innerHeight + 0.5;
+  if (!sel) return onScreen;
+  const t = document.querySelector(sel).getBoundingClientRect(), s = document.querySelector('.guide__spot').getBoundingClientRect();
+  const ringed = s.left <= t.left + 1 && s.top <= t.top + 1 && s.right >= t.right - 1 && s.bottom >= t.bottom - 1;
+  const shown = t.top >= -1 && t.top < (phone ? c.top : innerHeight);
+  const apart = phone || c.bottom <= t.top || c.top >= t.bottom || c.right <= t.left || c.left >= t.right;
+  return onScreen && ringed && shown && apart;
+}"""
+
+
+def guide_step(pg, i, n):
+    pg.wait_for_function("([i, n]) => document.querySelector('.guide__step')?.textContent === `Step ${i} of ${n}`", arg=[i, n])
+
+
+def walk_guide(pg, phone):
+    """Start the tour and step to the end, checking each card fits and rings its part of the page."""
+    pg.click(".guide [data-act=next]")
+    targets = GUIDE_TARGETS + ["#mobile-menu" if phone else "#tabs", None]
+    n = len(targets)
+    for i, sel in enumerate(targets, 1):
+        guide_step(pg, i, n)
+        pg.wait_for_function(GUIDE_FITS, arg=[sel, phone], timeout=6000)
+        assert pg.evaluate("!!document.activeElement.closest('.guide')"), f"focus left the guide at step {i}"
+        if i < n:
+            pg.click(".guide [data-act=next]")
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_guide_walks_through_the_overview(base, browser, width):
+    c, pg, errors = open_page(browser, base + "web/?page=home", width=width, guide=True)
+    try:
+        pg.wait_for_selector(".guide #guide-title")
+        assert pg.text_content("#guide-title") == "Welcome to EpiLag-PH"
+        assert pg.evaluate("document.querySelector('.app-shell').inert"), "the page behind the guide is still usable"
+        walk_guide(pg, phone=width < 500)
+        assert pg.text_content("#guide-title") == "How to read a forecast"
+        assert pg.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        pg.click(".guide [data-act=close]")
+        assert pg.evaluate("!document.querySelector('.guide') && !document.querySelector('.app-shell').inert")
+        assert pg.evaluate("localStorage.getItem('el-guide')") == "done"
+        pg.reload(wait_until="networkidle")
+        pg.wait_for_timeout(600)
+        assert pg.query_selector(".guide") is None, "the guide opened again for a returning visitor"
+        assert errors == []
+    finally:
+        c.close()
+
+
+def test_guide_keyboard_and_reopen(base, browser):
+    c, pg, errors = open_page(browser, base + "web/?page=home&guide=0", guide=True)
+    try:
+        assert pg.query_selector(".guide") is None, "?guide=0 should keep the guide closed"
+        pg.click("[data-page=map]")
+        pg.wait_for_selector("#view:not([aria-busy])")
+        pg.click("#guide-open")  # from another page: back to the Overview, then the tour
+        pg.wait_for_selector(".guide #guide-title")
+        assert "page=home" in pg.url
+        pg.keyboard.press("ArrowRight")
+        guide_step(pg, 1, 9)
+        pg.keyboard.press("ArrowLeft")
+        pg.wait_for_function("document.querySelector('#guide-title')?.textContent === 'Welcome to EpiLag-PH'")
+        pg.keyboard.press("Escape")
+        pg.wait_for_selector(".guide", state="detached")
+        assert pg.evaluate("document.activeElement.id") == "guide-open", "focus did not return to the button"
+        assert pg.evaluate("localStorage.getItem('el-guide')") == "done"
+        assert errors == []
+    finally:
+        c.close()
+
+
+def test_guide_in_filipino(base, browser):
+    c, pg, errors = open_page(browser, base + "web/?page=home&lang=fil", guide=True)
+    try:
+        pg.wait_for_selector(".guide #guide-title")
+        assert pg.text_content("#guide-title") == "Maligayang pagdating sa EpiLag-PH"
+        assert pg.text_content(".guide [data-act=next]") == "Simulan ang tour"
+        assert pg.text_content("#guide-open").strip() == "Paano gamitin"
+        assert errors == []
+    finally:
+        c.close()
+
+
+def test_guide_axe_no_serious_issues(base, browser):
+    c, pg, _ = open_page(browser, base + "web/?page=home&guide=1")
+    try:
+        pg.wait_for_selector(".guide #guide-title")
+        try:
+            pg.add_script_tag(url=AXE)
+        except Exception:  # noqa: BLE001
+            pytest.skip("axe-core CDN not reachable")
+        found = []
+        for i in [0, 2, 9]:  # welcome, the alert levels, how to read a forecast
+            while pg.text_content(".guide__step") != ("Step 9 of 9" if i == 9 else f"Step {i} of 9") and i:
+                pg.click(".guide [data-act=next]")
+                pg.wait_for_timeout(150)
+            pg.wait_for_timeout(400)
+            found += pg.evaluate("async () => (await axe.run('.guide', { resultTypes: ['violations'] })).violations"
+                                 ".filter(v => ['serious', 'critical'].includes(v.impact)).map(v => v.id + ': ' + v.nodes.length)")
+        assert found == []
+    finally:
+        c.close()

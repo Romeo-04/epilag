@@ -58,7 +58,23 @@ function writeUrl(s, push) {
 
 let state = readUrl();
 
-/** Change URL state and re-render. A new page returns focus to the content heading. */
+// Onboarding guide: opens by itself on the first visit to the Overview; ?guide=1 forces it, ?guide=0 keeps it closed.
+// writeUrl() drops the parameter, so read it once here.
+const guideParam = new URLSearchParams(location.search).get("guide");
+let guideAuto = guideParam === "1" ? "force" : guideParam === "0" ? "off" : "auto";
+const guideSeen = () => { try { return localStorage.getItem("el-guide") === "done"; } catch { return true; } };
+
+/** Show the Overview, then start the guide (its code loads only when needed). */
+async function openGuide(returnTo) {
+  closeMobileNav();
+  if (state.page !== "home") await set({ page: "home" });
+  const { startGuide } = await import("./guide.js");
+  if (state.page !== "home") return; // the user moved on while it loaded
+  const lang = state.lang;
+  startGuide({ lang, t: i18n.T[lang], labels: LABELS[lang], levelName: (lv) => i18n.LEVEL_NAME[lang][lv], go: (page) => set({ page }), returnTo });
+}
+
+/** Change URL state and re-render (resolves when the page has rendered). A new page returns focus to the content heading. */
 function set(patch, { push = true } = {}) {
   const next = { ...state, ...patch };
   if (patch.panel && patch.panel !== state.panel && !Object.prototype.hasOwnProperty.call(patch, "area")) next.area = null;
@@ -67,8 +83,9 @@ function set(patch, { push = true } = {}) {
   state = next;
   writeUrl(state, push);
   closeMobileNav();
-  render();
+  const done = render();
   if (pageChanged) { scrollTo({ top: 0 }); $("view").focus({ preventScroll: true }); }
+  return done;
 }
 
 addEventListener("popstate", () => { state = readUrl(); closeMobileNav(); render(); });
@@ -88,6 +105,7 @@ function bindShell() {
     if (open) $("mobile-close")?.focus();
   });
   $("mobile-close")?.addEventListener("click", closeMobileNav);
+  $("guide-open")?.addEventListener("click", () => openGuide(matchMedia("(max-width: 720px)").matches ? $("mobile-menu") : $("guide-open")));
   $("sidebar-toggle")?.addEventListener("click", () => {
     const collapsed = document.body.classList.toggle("sidebar-collapsed");
     $("sidebar-toggle").setAttribute("aria-expanded", String(!collapsed));
@@ -185,7 +203,9 @@ function renderChrome(t, originList, m) {
   $("app-page-note").textContent = panelNote;
   $("sidebar-title").textContent = labels.dashboard;
   $("sidebar").querySelector(".sidebar__language .ctx__label")?.replaceChildren(document.createTextNode(t.lang));
-  $("sidebar").querySelector(".sidebar__link .nav-item__text")?.replaceChildren(document.createTextNode(labels.drill));
+  $("sidebar").querySelector("a.sidebar__link .nav-item__text")?.replaceChildren(document.createTextNode(labels.drill));
+  $("guide-open")?.querySelector(".nav-item__text")?.replaceChildren(document.createTextNode(labels.guide));
+  $("guide-open")?.setAttribute("aria-label", labels.guide);
   $("sidebar").setAttribute("aria-label", labels.navigation);
   $("mobile-menu")?.setAttribute("aria-label", labels.open_navigation);
   $("mobile-close")?.setAttribute("aria-label", labels.close_navigation);
@@ -299,6 +319,7 @@ async function render() {
     hydrateIcons(view);
     hydrateCounts(view);
     view.removeAttribute("aria-busy");
+    if (state.page === "home" && (guideAuto === "force" || (guideAuto === "auto" && !guideSeen()))) { guideAuto = "off"; openGuide(); }
   } catch (err) {
     if (id !== renderId) return;
     console.error(err);

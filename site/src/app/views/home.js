@@ -28,7 +28,7 @@ export async function render(el, ctx) {
   const saveBrief = () => download("epilag_action_brief.md", briefMarkdown(shown, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf }), "text/markdown");
 
   el.innerHTML = `
-    <section class="card status-strip" aria-labelledby="home-act-title">
+    <section class="card status-strip" data-guide="status" aria-labelledby="home-act-title">
       <div class="status-strip__lead"><span class="home-eyebrow" id="home-act-title">${esc(labels.act_now)}</span><div class="status-strip__total">${count(nWarn + nWatch)}<span>${esc(labels.on_alert)}</span></div></div>
       <div class="status-strip__levels" aria-label="${esc(labels.act_now)}">
         ${levelStat(LEVELS[3], "warning", nWarn, t)}${levelStat(LEVELS[2], "watch", nWatch, t)}${levelStat(LEVELS[1], "above", nAbove, t)}
@@ -37,30 +37,30 @@ export async function render(el, ctx) {
     </section>
 
     <div class="overview-insights">
-      <section class="card">
+      <section class="card" data-guide="trend">
         ${cardTitle("areaDetail", labels.trend, labels.trend_sub)}
         ${change == null ? "" : `<div class="trend-head" data-dir="${change > 0 ? "up" : "down"}"><b class="nums">${change > 0 ? "▲" : "▼"} ${Math.abs(Math.round(change * 100))}%</b><span>${esc(labels.vs_now.replace("{h}", horizon))}</span></div>`}
         <div id="home-trend" class="chart-box"></div>
       </section>
-      <section class="card">
+      <section class="card" data-guide="rising">
         ${cardTitle("alert", labels.rising, labels.rising_sub)}
         ${rising.length ? `<ol class="priority-list">${rising.map((r, i) => riseRow(r, i, ctx)).join("")}</ol>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(labels.no_rising)}</div></div>`}
       </section>
-      <section class="card">
+      <section class="card" data-guide="do">
         ${cardTitle("check", labels.do_week)}
         ${shown.length ? `<div class="do-list">${shown.slice(0, 3).map((r) => doRow(r, ctx)).join("")}</div>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(labels.quiet)}</div></div>`}
       </section>
     </div>
 
     <div class="overview-grid" aria-label="${esc(t.nav_map)}">
-      <section class="card overview-map">
+      <section class="card overview-map" data-guide="map">
         ${cardTitle("forecastMap", t.nav_map)}
         <div class="home-map" id="home-map" role="img" aria-label="${esc(t.nav_map)}"><div class="home-map__tip" id="home-map-tip" hidden></div></div>
         <div class="map-footer"><ul class="home-legend">${LEVELS.map((lv) => `<li data-lv="${LV[lv]}"><span class="sq sq--round"></span>${esc(ctx.levelName(lv))}</li>`).join("")}</ul>
           <a class="inline-link" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </section>
 
-      <aside class="card overview-priority">
+      <aside class="card overview-priority" data-guide="priority">
         ${cardTitle("alert", t.rank)}
         ${priority.length ? `<ol class="priority-list" id="home-priority">${priority.map((r, i) => priorityRow(r, i, ctx)).join("")}</ol>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(labels.quiet)}</div></div>`}
         <div class="priority-list__footer"><a class="inline-link" href="?page=map" data-go="map">${esc(labels.all_areas)} <i data-icon="arrowRight" data-size="18"></i></a></div>

@@ -1,5 +1,5 @@
-import{f as e,i as t,r as n,s as r,t as i}from"./logic-B3QEs7v5.js";import{r as a,t as o}from"./voxel-CGR-sNJU.js";import{s}from"./data-BEtu4ex9.js";import{d as c,i as ee,l,m as u,n as te,o as d,r as f,s as p,t as m,u as ne}from"./ui-DnmqvsTN.js";import{t as re}from"./chart-B41LSN13.js";async function h(e,l){let{t:h,labels:b,lang:oe,i18n:x,fc:S,fcH:C,horizon:w,mode:se,panel:T,area:E,regionMeta:D}=l,O=Math.max(...C.map(e=>e.week)),k=e=>C.filter(t=>t.level===e).length,A=k(i[3]),j=k(i[2]),ce=k(i[1]),M=t(S,C),N=M.filter(e=>e.level===i[2]||e.level===i[3]).slice(0,4),P=N.length?N:M.filter(e=>e.level===i[1]).slice(0,3),F=[...M].sort((e,t)=>t.q50_per100k-e.q50_per100k).slice(0,6),le=se===`replay`?ie(b,w,C):A+j===0?ae(h,b):``,I=new Set(C.map(e=>e.unit_id)),L=new Map((await s(T,`history`)).filter(e=>e.week===O&&I.has(e.unit_id)&&e.cases!=null).map(e=>[e.unit_id,e.cases])),R=[...new Set(S.map(e=>e.horizon))].sort((e,t)=>e-t),z=e=>S.filter(t=>t.horizon===e).reduce((e,t)=>e+t.q50,0),B=[...L.values()].reduce((e,t)=>e+t,0),V=L.size?z(w)/Math.max(B,1)-1:null,H=C.filter(e=>(L.get(e.unit_id)??0)>=5).map(e=>({...e,now:L.get(e.unit_id),pct:e.q50/L.get(e.unit_id)-1})).filter(e=>e.pct>0).sort((e,t)=>t.pct-e.pct).slice(0,5);e.innerHTML=`
-    <section class="card status-strip" aria-labelledby="home-act-title">
+import{f as e,i as t,r as n,s as r,t as i}from"./logic-B3QEs7v5.js";import{r as a,t as o}from"./voxel-CGR-sNJU.js";import{s}from"./data-BEtu4ex9.js";import{d as c,i as ee,l,m as u,n as te,o as d,r as f,s as p,t as m,u as ne}from"./ui-C6r3hqxX.js";import{t as re}from"./chart-B41LSN13.js";async function h(e,l){let{t:h,labels:b,lang:oe,i18n:x,fc:S,fcH:C,horizon:w,mode:se,panel:T,area:E,regionMeta:D}=l,O=Math.max(...C.map(e=>e.week)),k=e=>C.filter(t=>t.level===e).length,A=k(i[3]),j=k(i[2]),ce=k(i[1]),M=t(S,C),N=M.filter(e=>e.level===i[2]||e.level===i[3]).slice(0,4),P=N.length?N:M.filter(e=>e.level===i[1]).slice(0,3),F=[...M].sort((e,t)=>t.q50_per100k-e.q50_per100k).slice(0,6),le=se===`replay`?ie(b,w,C):A+j===0?ae(h,b):``,I=new Set(C.map(e=>e.unit_id)),L=new Map((await s(T,`history`)).filter(e=>e.week===O&&I.has(e.unit_id)&&e.cases!=null).map(e=>[e.unit_id,e.cases])),R=[...new Set(S.map(e=>e.horizon))].sort((e,t)=>e-t),z=e=>S.filter(t=>t.horizon===e).reduce((e,t)=>e+t.q50,0),B=[...L.values()].reduce((e,t)=>e+t,0),V=L.size?z(w)/Math.max(B,1)-1:null,H=C.filter(e=>(L.get(e.unit_id)??0)>=5).map(e=>({...e,now:L.get(e.unit_id),pct:e.q50/L.get(e.unit_id)-1})).filter(e=>e.pct>0).sort((e,t)=>t.pct-e.pct).slice(0,5);e.innerHTML=`
+    <section class="card status-strip" data-guide="status" aria-labelledby="home-act-title">
       <div class="status-strip__lead"><span class="home-eyebrow" id="home-act-title">${c(b.act_now)}</span><div class="status-strip__total">${p(A+j)}<span>${c(b.on_alert)}</span></div></div>
       <div class="status-strip__levels" aria-label="${c(b.act_now)}">
         ${g(i[3],`warning`,A,h)}${g(i[2],`watch`,j,h)}${g(i[1],`above`,ce,h)}
@@ -8,30 +8,30 @@ import{f as e,i as t,r as n,s as r,t as i}from"./logic-B3QEs7v5.js";import{r as 
     </section>
 
     <div class="overview-insights">
-      <section class="card">
+      <section class="card" data-guide="trend">
         ${d(`areaDetail`,b.trend,b.trend_sub)}
         ${V==null?``:`<div class="trend-head" data-dir="${V>0?`up`:`down`}"><b class="nums">${V>0?`▲`:`▼`} ${Math.abs(Math.round(V*100))}%</b><span>${c(b.vs_now.replace(`{h}`,w))}</span></div>`}
         <div id="home-trend" class="chart-box"></div>
       </section>
-      <section class="card">
+      <section class="card" data-guide="rising">
         ${d(`alert`,b.rising,b.rising_sub)}
         ${H.length?`<ol class="priority-list">${H.map((e,t)=>v(e,t,l)).join(``)}</ol>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${c(b.no_rising)}</div></div>`}
       </section>
-      <section class="card">
+      <section class="card" data-guide="do">
         ${d(`check`,b.do_week)}
         ${P.length?`<div class="do-list">${P.slice(0,3).map(e=>y(e,l)).join(``)}</div>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${c(b.quiet)}</div></div>`}
       </section>
     </div>
 
     <div class="overview-grid" aria-label="${c(h.nav_map)}">
-      <section class="card overview-map">
+      <section class="card overview-map" data-guide="map">
         ${d(`forecastMap`,h.nav_map)}
         <div class="home-map" id="home-map" role="img" aria-label="${c(h.nav_map)}"><div class="home-map__tip" id="home-map-tip" hidden></div></div>
         <div class="map-footer"><ul class="home-legend">${i.map(e=>`<li data-lv="${m[e]}"><span class="sq sq--round"></span>${c(l.levelName(e))}</li>`).join(``)}</ul>
           <a class="inline-link" href="?page=map" data-go="map">${c(h.open_map)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </section>
 
-      <aside class="card overview-priority">
+      <aside class="card overview-priority" data-guide="priority">
         ${d(`alert`,h.rank)}
         ${F.length?`<ol class="priority-list" id="home-priority">${F.map((e,t)=>_(e,t,l)).join(``)}</ol>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${c(b.quiet)}</div></div>`}
         <div class="priority-list__footer"><a class="inline-link" href="?page=map" data-go="map">${c(b.all_areas)} <i data-icon="arrowRight" data-size="18"></i></a></div>
