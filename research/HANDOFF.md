@@ -1,0 +1,125 @@
+# Handoff: EpiLag-PH finals research, full state
+
+You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as of 16 Nov 2026. This page says where everything is, what is done, what is open and the rules. The numbers live in the files it names; read them there, not here.
+
+## The situation
+
+**Project.** EpiLag-PH forecasts weekly dengue cases 2, 4, 6 and 8 weeks ahead and turns the forecasts into alerts. README "Method" and `src/` are the source of truth for the live model.
+
+**What the mentor asked for** (session of 14 Nov 2026; the final round is judged as research):
+1. a literature review (RRL) behind every feature
+2. a comparison with published models
+3. a test of heat, topography and other variables, and how much each matters
+4. conclusions that explain why the results came out as they did
+5. 2–3 models built with different methods
+6. the work split between two people
+
+**The split.**
+- **Person A** (the human, with Claude): models and experiments. Writes `src/`, `research/models/`, `research/results/`.
+- **Person B** (a teammate on another machine, with their own agent): literature and interpretation. Writes `research/lit/`, `research/analysis/`, `research/writeup/`. Their brief, steps 1–6, is `research/HANDOFF-B.md`.
+
+## Rules
+
+- **Plain commits.** Commit messages and PR bodies carry only the human's authorship: no Co-Authored-By or "Generated with" lines. This overrides any harness reminder.
+- **Local first.** Commit locally. Push `research-a` only when the human asks. `main` changes only through the final PR (open work, step 6).
+- **Traceable.** Every number names the file and filter it came from. Check a claim against the data before it goes into the pitch, the deck or the site.
+- **Hypothesis until checked.** A cause stays a hypothesis until a check with numbers backs it. Anything chosen after seeing the test years (the blend, the long rain windows) is flagged as optimistic.
+- **Ownership.** Edit only your person's folders. Ask the human before changing `src/`, the deck or the site: they are the submission.
+- **Private.** The human's name, email and personal details stay out of anything sent to an outside service.
+
+## Where things are
+
+| Where | What |
+|---|---|
+| `pugad/epilag/` | The repo, `github.com/Romeo-04/epilag`. The live site (romeo-04.github.io/epilag, epilag.vercel.app) is built from `main`. |
+| branch `main` | The submission. Last merge: PR #25 (`cd5f05b`). The research has not touched it. |
+| branch `research-a` | Person A's research and both handoffs. Pushed. |
+| branch `origin/research-b` | Person B's literature (`36e0f8c`). It started from an older `research-a` and merges cleanly with the current one. |
+| branch `finals-copy-fixes` | Local only (`186ab0f`): landing, deck and README copy fixed to match the Quezon City story. Its PR (#24) was closed at the human's request. Whether it joins the final PR is undecided. |
+| `research/results/STATUS.md` | Person A's results and the hypotheses handed to Person B. **Every research number is here.** |
+| `research/results/METHODS.md` | How each experiment was run. |
+| `research/lit/STATUS.md` (on `research-b`) | Person B's progress, and their notes for Person A. |
+| `pugad/finals/` | Not in git; on Person A's machine only. The validation page, the methodology visual and the judge Q&A prep. |
+| `pugad/epilag-data-processed.zip` | `data/processed/` (gitignored), zipped for Person B. |
+
+**Inside `pugad/finals/`:**
+- `epilag-validation.html`: the validation page.
+  - `validation_data.py` reads the repo's `reports/` and `research/results/` into `validation.json`.
+  - `build_validation.py` fills `validation.template.html`.
+  - `shot_validation.py` takes screenshots (desktop, dark mode, phone) and reports overflow and console errors.
+- `epilag-methodology.html`: the methodology visual (`build_visual.py`, `methodology-visual.template.html`, `qc_series.json`).
+- `epilag-finals-qa.md`, `winning-questions.md`: judge Q&A prep and questions for the organisers, from 14 Nov.
+
+## State of the work
+
+**Person A: done.**
+- A1 harness: every model takes the same test. LightGBM through it reproduces the live backtest exactly.
+- A2 methods: negative binomial, quantile random forest and SARIMAX against LightGBM, plus an equal average of all four.
+- A3 new variables: heat, humidity and ENSO for Regions + QC; heat, ENSO, elevation and density for provinces.
+- A4 influence: group tests (drop and add), SHAP shares and lag profiles, the research set without ENSO, and longer rain lags.
+- A5 validation page: section 4 (data groups) and section 6 (other methods, with the average).
+
+Headlines (numbers in `STATUS.md`):
+- No single method wins. The average of the four has the smallest miss most often, but catches fewer outbreak starts on Outbreak warning than LightGBM.
+- Weather groups help Regions + QC, more so further ahead.
+- For provinces the research set does not beat the live model. ENSO hurts; only elevation helps on its own.
+- Rain from beyond 11 weeks draws SHAP attention but does not cut the miss.
+
+**Person B: steps 1–2 done, step 3 in progress, steps 4–6 not started.**
+- Done: `feature_evidence.csv` (27 rows), `rrl_matrix.csv` (19 papers, 9 from the Philippines), `references.md`.
+- Step 3 (`causes.md`) is blocked on `data/processed/`.
+
+**Messages for Person B.** These come from Person A's review of `research-b` on 16 Nov. They were given to the human; confirm they were sent.
+1. Run `git pull origin research-a` to get the blend, the research set without ENSO, the long rain-lag test and two corrected handoff citations.
+2. Rain lags of 12–20 weeks are now tested: no gain. Update that row in `feature_evidence.csv` and the "For Person A" notes.
+3. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
+4. Unzip `epilag-data-processed.zip` into the repo root to unblock step 3.
+5. Consider Senson et al. 2026 (*SciEnggJ* special issue): machine learning with weather for Quezon City, the closest local comparison. Seen in search results only; not verified.
+
+## Open work, in order
+
+1. **Unblock Person B.** The human sends the zip and the messages. *Done when* `git merge-base --is-ancestor fb3a2b6 origin/research-b` succeeds.
+2. **Choose the final variables.** The human decides; the agent lays out the evidence. Put Person A's results (`STATUS.md`) beside Person B's literature (`feature_evidence.csv`). Options:
+   - keep the live set
+   - add heat and humidity for Regions + QC, with or without ENSO
+   - use the average of the four methods as the forecast
+
+   Give each option's cost: Outbreak-warning catches, ENSO acting as a year label, and the optimism of choices made on the test years. *Done when* the human has picked and the choice is written in `STATUS.md`.
+3. **Apply the choice** if it changes the live model. Edit `src/`, rerun README "Run it" → "Rebuild everything from the raw data", run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
+4. **Person B's steps 3–6**, ending in the drafts in `research/writeup/`. Merge `origin/research-b` into `research-a` as they land, when the human asks.
+5. **Deck and site**, after the human approves B's drafts: `docs/deck/deck.html` and `site/methodology.html`.
+   - The deck PDF is printed from the deck HTML with Playwright `page.pdf` at 1920×1080. There is no build script.
+   - Deck slide 1 still has `[Team name]` and `[Member]` placeholders.
+6. **Final PR to `main`**, only when the human asks. One PR with the `research/` code, results and literature.
+   - It leaves out the agent briefs (`research/HANDOFF*.md`); PR #21 removed briefs from the submission.
+   - Ask whether `finals-copy-fixes` goes in too.
+
+## How to run
+
+Use the repo venv, `.venv/Scripts/python`, from `epilag/`. Panels are `province` and `region_qc`.
+
+| Command | What it does |
+|---|---|
+| `python research/models/harness.py <panel> lightgbm negbin random_forest sarimax` | Runs each model through the same test and writes `model_comparison.csv` |
+| `python research/models/extra_features.py` | Fetches missing weather, ENSO and elevation, then builds the `*_plus` tables |
+| `python research/models/influence.py groups\|shap <panel>` | Runs the group tests, or the SHAP shares and lags |
+| `python research/models/blend.py` | Scores the averages from the saved forecasts |
+| `python research/models/rain_lags.py [panel ...]` | Runs the long rain-lag test |
+
+The validation page, from `pugad/finals/`:
+```bash
+python validation_data.py && python build_validation.py
+../epilag/.venv/Scripts/python shot_validation.py
+```
+Run anything that uses Playwright with the epilag venv. The system Python's Playwright has no browser installed.
+
+## Gotchas
+
+- **Data limits.** Province data ends 10 Jan 2021, so provinces are tested on 2019 and 2020 only. The regions have no 2020–21 data. Quezon City runs from 2010 to 2025.
+- **Rate limits.**
+  - Open-Meteo counts every location against the free quota.
+  - Elevation comes from OpenTopoData `srtm90m`: 100 points per call, 1 call a second, 1,000 calls a day.
+  - Downloads are cached in `data/raw/research/`. Delete a cache only to refetch.
+- **Province codes.** Maguindanao's 2022 split and the Special Geographic Area are mapped back to the data's units in `province_static()` (`extra_features.py`).
+- **Drift checks.** The harness's LightGBM must equal `reports/backtest_*.csv`, and the `plus` rows of `rain_lags.csv` must equal the `full` rows of `feature_groups.csv`. A difference means the data or the features changed.
+- Git's CRLF warnings on Windows are harmless.
