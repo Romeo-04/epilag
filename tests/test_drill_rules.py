@@ -70,6 +70,25 @@ def test_honest_summary(page, data):
     assert page.evaluate("window.drill.R.honest()") == {"better": 11, "tie": 1, "worse": 5}
 
 
+def test_models(page, data):
+    """Round 2's models (site/public/drill/models.json): five to pick from, the submitted one equal to the game's own
+    forecasts, so a bot on it scores as before, and each other model's bot scored on that model's forecasts."""
+    models = json.loads((DOCS / "drill" / "models.json").read_text(encoding="utf-8"))
+    assert [m["id"] for m in models["models"]] == ["lightgbm", "negbin", "random_forest", "sarimax", "average"]
+    assert page.evaluate("window.drill.models.map(m => m.id)") == [m["id"] for m in models["models"]]
+    for region in data["regions"]:
+        for p in region["provinces"]:
+            assert models["missions"]["2019"]["lightgbm"][p["id"]] == p["fc"]
+            assert all(set(models["missions"]["2019"][m["id"]][p["id"]]) == set(data["turns"]) for m in models["models"])
+    js = page.evaluate("""() => { const { D, R, models } = window.drill;
+        return D.regions.map(r => models.map(m => R.autopilot("epilag", r, m.id).mid)); }""")
+    for row, region in zip(js, data["regions"]):
+        assert row[0] == pytest.approx(drill_data.play(region, data["weeks"], data["turns"], drill_data.epilag), rel=1e-12)
+        for m, mid in zip(models["models"][1:], row[1:]):
+            other = {**region, "provinces": [{**p, "fc": models["missions"]["2019"][m["id"]][p["id"]]} for p in region["provinces"]]}
+            assert mid == pytest.approx(drill_data.play(other, data["weeks"], data["turns"], drill_data.epilag), rel=1e-12)
+
+
 def test_one_team_scores_like_python(page, data):
     """A single team in each province on each turn: the game's score equals drill_data.averted()."""
     region = data["regions"][5]

@@ -1,8 +1,8 @@
-// Dengue Drill: command a dengue response twice (round 1: case reports only; round 2: with EpiLag-PH's 4-week
-// forecasts) on a 3D pixel board, scored on the real cases (rules.js, the same rules as scripts/drill_data.py).
+// Dengue Drill: command a dengue response twice (round 1: case reports only; round 2: with 4-week forecasts from
+// a model the player picks: EpiLag-PH or one of the research's other methods) on a 3D pixel board, scored on the real cases (rules.js, the same rules as scripts/drill_data.py).
 // Missions: Quezon City in 2024-25 (the latest data, barangay by barangay, estimated from the city's weekly cases;
 // scripts/qc_drill_data.py) and the 17 regions in 2019, province by province (scripts/drill_data.py).
-// Flow: title -> receipt -> round 1 -> report -> round 2 -> report -> debrief.
+// Flow: title -> receipt -> round 1 -> report -> choose a model -> round 2 -> report -> debrief (-> another model).
 import "../css/tokens.css";
 import "../css/base.css";
 import "../css/surfaces.css";
@@ -16,7 +16,12 @@ import { rules } from "./rules.js";
 import { createBoard } from "./board.js";
 
 const json = (f) => fetch(`${import.meta.env.BASE_URL}drill/${f}`).then((r) => r.json());
-const [D2019, DQ, boards2019, boardsQC] = await Promise.all([json("data.json"), json("qc.json"), loadGrids("voxel_regions"), loadGrids("voxel_qc")]);
+const [D2019, DQ, MODELS_DATA, boards2019, boardsQC] = await Promise.all([json("data.json"), json("qc.json"), json("models.json"), loadGrids("voxel_regions"), loadGrids("voxel_qc")]);
+// every model's forecasts (scripts/drill_models.py) beside each area's own "fc", which is the submitted model's
+const MODELS = MODELS_DATA.models, DEFAULT_MODEL = MODELS_DATA.default;
+[[D2019, "2019"], [DQ, "qc"]].forEach(([D, key]) => D.regions.forEach((r) => r.provinces.forEach((p) => {
+  p.fcs = Object.fromEntries(MODELS.map((m) => [m.id, MODELS_DATA.missions[key][m.id][p.id] || {}]));
+})));
 const R2019 = rules(D2019);
 const byTotal = (reg, R) => [...reg.provinces].sort((a, b) => R.total(b) - R.total(a));
 // Quezon City first (the latest data), then the 17 regions of 2019
@@ -36,11 +41,15 @@ const cap = (s) => s[0].toUpperCase() + s.slice(1);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const short = (name) => name.replace(/ \(.+\)/, "");
 // for tests/test_drill_rules.py (parity with scripts/drill_data.py through Playwright)
-window.drill = { D: D2019, R: R2019, missions: MISSIONS };
+window.drill = { D: D2019, R: R2019, missions: MISSIONS, models: MODELS };
 
 let regionIdx = 0;
 useMission(MISSIONS[0]);
 let region, round, turn, kits, plan, sel = null, results = {}, board = null;
+// the model whose forecasts guide round 2 (the player's last choice is remembered)
+let model = DEFAULT_MODEL;
+const modelOf = (id = model) => MODELS.find((m) => m.id === id);
+const fcAt = (p, tw) => R.fcOf(p, model)[tw];
 
 // ------------------------------------------------------------------ sound (synthesised, no audio files)
 let ac = null, muted = false;
@@ -101,7 +110,7 @@ const TOUR = [
   { at: "#end", wait: "end", text: () => "End the turn. Two weeks pass and new reports come in." },
   { at: "#h-timeline", text: () => `Teams take 2 weeks to show, so send them before cases peak. You have ${TURNS.length} turns.` },
 ];
-const TIP2 = [{ at: "#board", text: () => "Blue rings are forecasts for 4 weeks ahead. Use them to get in early." }];
+const TIP2 = [{ at: "#board", text: () => `Blue rings are ${modelOf().short}'s forecasts for 4 weeks ahead. Use them to get in early.` }];
 const coach = (() => {
   const el = $("coach"), ring = $("coach-ring");
   let steps = TOUR, step = -1, key = null, timer = 0;
@@ -252,7 +261,7 @@ function hudSpark(i) {
 function renderList() {
   const i = idx(TURNS[turn]), tw = TURNS[turn];
   $("plist").innerHTML = region.provinces.map((p, k) => {
-    const f = round === 2 ? p.fc[tw] : null, n = teamsIn(k);
+    const f = round === 2 ? fcAt(p, tw) : null, n = teamsIn(k);
     return `<div class="prow${sel === k ? " on" : ""}" data-k="${k}"><button type="button" class="prow__pick" aria-pressed="${sel === k}">
       <span class="prow__heat" style="background:${R.heat(p, i)}"></span><span class="prow__nm">${p.name}</span>
       ${f && f[0] !== "normal" ? `<span class="prow__fc" data-lv="${f[0]}">▲${fmt(f[2])}</span>` : ""}
@@ -275,7 +284,7 @@ function recall(k) {
 function renderDetail() {
   const tw = TURNS[turn], i = idx(tw);
   if (sel == null) { $("detail").innerHTML = `<div class="empty">Pick a ${M.unit[0]} on the map or in the list.</div>`; return; }
-  const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = round === 2 ? p.fc[tw] : null, now = (plan[sel] || {})[turn] || 0;
+  const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = round === 2 ? fcAt(p, tw) : null, now = (plan[sel] || {})[turn] || 0;
   const trend = c != null && prev ? Math.round((c / prev - 1) * 100) : null;
   $("detail").innerHTML = `<div class="detail__head"><h3>${p.name}</h3><span class="sub">${fmt(p.pop)} people</span></div>
     <div class="chart-surface">${spark(p, i, { fc: f })}</div>
@@ -317,7 +326,7 @@ function renderLog() {
   const nSent = sent.reduce((s, x) => s + x[1], 0);
   const spent = ps.reduce((s, _, k) => s + Object.entries(plan[k] || {}).reduce((a, [tt, n]) => a + (+tt < t ? n : 0), 0), 0);
   const tag = (p) => {
-    const f = round === 2 ? p.fc[tw] : null;
+    const f = round === 2 ? fcAt(p, tw) : null;
     if (f && (f[0] === "warning" || f[0] === "watch")) return `<span class="log__tag" data-lv="${f[0]}">${f[0] === "warning" ? "Forecast: outbreak" : "Forecast: watch"}</span>`;
     return crossed.includes(p) ? `<span class="log__tag" data-lv="warning">New outbreak</span>` : over(p, i) ? `<span class="log__tag" data-lv="watch">Outbreak</span>` : "";
   };
@@ -419,8 +428,8 @@ function refresh({ drop = null, duration = 900 } = {}) {
   board.setGlow(region.provinces.filter((p) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]).map((p) => p.id));
   if (round === 2) {
     // with 142 barangays, mark only the 12 with the highest forecast, so the board stays readable
-    const flagged = region.provinces.filter((p) => p.fc[tw] && p.fc[tw][0] !== "normal").sort((a, b) => b.fc[tw][2] - a.fc[tw][2]).slice(0, M.estimated ? 12 : Infinity);
-    board.setIntel(Object.fromEntries(flagged.map((p) => [p.id, p.fc[tw][0]])), Object.fromEntries(flagged.map((p) => [p.id, `▲${fmt(p.fc[tw][2])}`])));
+    const flagged = region.provinces.filter((p) => fcAt(p, tw) && fcAt(p, tw)[0] !== "normal").sort((a, b) => fcAt(b, tw)[2] - fcAt(a, tw)[2]).slice(0, M.estimated ? 12 : Infinity);
+    board.setIntel(Object.fromEntries(flagged.map((p) => [p.id, fcAt(p, tw)[0]])), Object.fromEntries(flagged.map((p) => [p.id, `▲${fmt(fcAt(p, tw)[2])}`])));
   } else board.setIntel(null);
   // mosquitoes: more after rain; more over provinces with more cases (same formula as before)
   const anchors = [];
@@ -434,8 +443,8 @@ function tick(msg) { const t = $("ticker"); t.textContent = msg; t.style.animati
 function headline() {
   const i = idx(TURNS[turn]), tw = TURNS[turn];
   if (round === 2) {
-    const w = region.provinces.filter((p) => p.fc[tw] && p.fc[tw][0] === "warning");
-    if (w.length) return `EpiLag intel: ${w.map((p) => p.name).join(", ")} flagged OUTBREAK WARNING for the week of ${day(WEEKS[i + 4])}.`;
+    const w = region.provinces.filter((p) => fcAt(p, tw) && fcAt(p, tw)[0] === "warning");
+    if (w.length) return `${modelOf().short} forecast: ${M.estimated ? "the city is" : `${w.map((p) => p.name).join(", ")}`} flagged OUTBREAK WARNING for the week of ${day(WEEKS[i + 4])}.`;
   }
   const crossed = region.provinces.filter((p) => p.cases[i] > p.epi[i] && !(p.cases[i - 2] > p.epi[i - 2]));
   if (crossed.length) { sfx.alarm(); return `Alert: ${crossed.map((p) => p.name).join(", ")} crossed the epidemic line this week.`; }
@@ -450,7 +459,7 @@ function warp(text, sub, then) {
 }
 async function startRound(r) {
   round = r; turn = 0; kits = K.kits; plan = {}; sel = null; logTurn = 0; setTab("areas"); $("log-dot").hidden = true;
-  $("mode").textContent = r === 1 ? "Round 1 · No intel" : "Round 2 · EpiLag intel";
+  $("mode").textContent = r === 1 ? "Round 1 · No intel" : `Round 2 · ${modelOf().short} intel`;
   $("mode").classList.toggle("chip--intel", r === 2);
   show("s-game"); sfx.turn();
   if (!board || board.regionId !== region.id) {
@@ -462,7 +471,7 @@ async function startRound(r) {
   }
   board.select(null);
   board.resetView();
-  warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : "EpiLag-PH intel online", () => { refresh({ duration: 0 }); tick(headline()); if (r === 1) coach.start(); else coach.tip2(); });
+  warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : `${modelOf().name} forecasts online`, () => { refresh({ duration: 0 }); tick(headline()); if (r === 1) coach.start(); else coach.tip2(); });
 }
 let confirmEnd = false;
 $("end").addEventListener("click", () => {
@@ -493,14 +502,14 @@ $("end").addEventListener("click", () => {
 // ------------------------------------------------------------------ round report and debrief
 const BADGE_ICON = { early: "alert", waste: "check", full: "actionPlan", bot: "didItWork", saved: "residents" };
 function endRound() {
-  const s = R.score(plan, region), auto = R.autopilot("epilag", region), g = R.gradeOf(s.mid, region), gc = GRADE_COL[g];
-  results[round] = { ...s, grade: g, color: gc };
+  const s = R.score(plan, region), auto = R.autopilot("epilag", region, round === 2 ? model : DEFAULT_MODEL), g = R.gradeOf(s.mid, region), gc = GRADE_COL[g];
+  results[round] = { ...s, grade: g, color: gc, model: round === 2 ? model : null };
   rainSound(0);
   board.setBugs(0, []);
   show("s-report"); sfx.grade();
   $("r-grade").textContent = g; $("r-grade").style.color = gc;
   frogReacts($("r-frog"), g);
-  $("r-chip").textContent = `Mission report · Round ${round} · ${round === 1 ? "no intel" : "EpiLag intel"}`;
+  $("r-chip").textContent = `Mission report · Round ${round} · ${round === 1 ? "no intel" : `${modelOf().short} intel`}`;
   $("r-title").innerHTML = `${fmt(s.mid)} cases averted. <span>${g === "S" || g === "A" ? "Outstanding command." : g === "B" ? "Solid response." : "The outbreak got ahead of you."}</span>`;
   $("r-lead").textContent = `Likely between ${fmt(s.lo)} and ${fmt(s.hi)}. Graded against two computer players.`;
   // one bar for all the teams: in time (4+ weeks before a peak), too late, sent where no outbreak came, never sent
@@ -511,7 +520,7 @@ function endRound() {
     <div class="sub">In time means 4 or more weeks before the peak.</div>`;
   const badges = [
     ["early", "Early bird", "3+ teams 4 weeks before a peak", s.onTime >= 3], ["waste", "No waste", "No team where no outbreak came", s.used > 0 && s.noOutbreak === 0],
-    ["full", "All in", `Sent all ${K.kits} teams`, s.used === K.kits], ["bot", "Beat the bot", "More than EpiLag's autopilot", s.mid > auto.mid],
+    ["full", "All in", `Sent all ${K.kits} teams`, s.used === K.kits], ["bot", "Beat the bot", `More than the bot that follows ${round === 2 ? modelOf().short : "EpiLag-PH"}`, s.mid > auto.mid],
     ["saved", "Life saver", "Averted 100+ cases", s.mid >= 100],
   ];
   $("r-badges").innerHTML = badges.map(([ic, n, d, got], j) => `<div class="badge${got ? " got" : ""}" title="${d}" style="animation-delay:${0.5 + j * 0.12}s">${icon(BADGE_ICON[ic], { size: ic === "early" || ic === "waste" ? 36 : 48 })}<b>${n}</b><span class="sr-only">${got ? d : `Locked: ${d}`}</span></div>`).join("");
@@ -526,32 +535,72 @@ function endRound() {
     Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ts.push(+t); });
     return `<div class="panel"><b>${p.name}</b><small>${pk == null ? "No outbreak" : `Peaked ${day(WEEKS[pk])}`} · ${ts.length} team${ts.length === 1 ? "" : "s"}</small>${spark(p, WEEKS.length - 1, { teams: ts, peak: pk, cls: "" })}</div>`;
   }).join("");
-  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · with forecasts" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
-  $("next-r").onclick = () => (round === 1 ? startRound(2) : versus());
+  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · choose a forecaster" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
+  $("next-r").onclick = () => (round === 1 ? chooseModel() : versus());
 }
 /** The frog reacts to the grade: S/A strike then smile, B watches, C/D peeks. */
 function frogReacts(el, g) {
   if (g === "S" || g === "A") { el.setAttribute("pose", "strike"); setTimeout(() => el.setAttribute("pose", "happy"), reduce ? 0 : 900); }
   else el.setAttribute("pose", g === "B" ? "watch" : "peek");
 }
+// ------------------------------------------------------------------ round 2: choose whose forecasts to follow
+/** The forecaster screen: one card per model, with its record over the research's 24 tests. */
+function chooseModel() {
+  const saved = store.get("drill-model");
+  if (!results[2] && modelOf(saved)) model = saved; // a first visit to this screen opens on the last model used
+  const tw = TURNS[0], count = (id, lv) => region.provinces.filter((p) => (R.fcOf(p, id)[tw] || [])[0] === lv).length;
+  $("mo-title").textContent = results[2] ? "Try another forecaster." : "Whose forecast do you trust?";
+  $("models").innerHTML = MODELS.map((m) => {
+    const flagged = count(m.id, "warning") + count(m.id, "watch");
+    const tag = m.id === DEFAULT_MODEL ? "Submitted model" : m.id === "average" ? "Approximate" : results[2] && results[2].model === m.id ? "Just played" : "";
+    return `<button type="button" class="model${m.id === model ? " sel" : ""}" role="radio" aria-checked="${m.id === model}" data-id="${m.id}">
+      <span class="model__top"><b>${m.name}</b>${tag ? `<span class="model__tag">${tag}</span>` : ""}</span>
+      <span class="model__line">${m.line}</span>
+      <span class="model__stats"><span><b class="nums">${m.beat_same_as_this_week}<small> of ${m.checks}</small></b>tests beating "same as this week"</span>
+        <span><b class="nums">${m.warning_caught_pct}<small>%</small></b>of outbreak starts caught by Outbreak warning</span></span>
+      <span class="model__now">${M.estimated ? `Opens on ${LEVEL[(R.fcOf(region.provinces[0], m.id)[tw] || ["normal"])[0]]} for the city` : `Flags ${flagged} of ${region.provinces.length} ${M.unit[1]} at turn 1`}</span></button>`;
+  }).join("");
+  show("s-models");
+  $("models").querySelector(".sel")?.focus({ preventScroll: true });
+}
+function pickModel(id) {
+  if (!modelOf(id) || id === model) return;
+  model = id; sfx.click();
+  $("models").querySelectorAll(".model").forEach((b) => { const on = b.dataset.id === id; b.classList.toggle("sel", on); b.setAttribute("aria-checked", on); if (on) b.focus({ preventScroll: true }); });
+}
+$("models").addEventListener("click", (e) => { const b = e.target.closest(".model"); if (b) pickModel(b.dataset.id); });
+$("models").addEventListener("keydown", (e) => {
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  const k = MODELS.findIndex((m) => m.id === model);
+  pickModel(MODELS[(k + step + MODELS.length) % MODELS.length].id);
+});
+$("go-r2").addEventListener("click", () => { store.set("drill-model", model); startRound(2); });
+$("try-model").addEventListener("click", () => { sfx.click(); chooseModel(); });
+
 function versus() {
-  const a = results[1], b = results[2], auto = R.autopilot("epilag", region), react = R.autopilot("react", region);
+  const a = results[1], b = results[2], mo = modelOf(), react = R.autopilot("react", region);
   $("vs-region").textContent = region.name;
   $("vs-title").textContent = b.mid > a.mid * 1.02 ? "Intel made the difference." : b.mid < a.mid * 0.98 ? "Your instincts won this time." : "Dead heat.";
   const card = (lab, r, win) => `<div class="panel vs__card${win ? " win" : ""}"><div class="k">${lab}</div><div class="g" style="color:${r.color}">${r.grade}</div><div class="v nums">${fmt(r.mid)} cases averted</div><div class="sub">${r.onTime} of ${r.used} teams in 4+ weeks before a peak</div></div>`;
-  $("vs").innerHTML = card("Round 1 · no intel", a, a.mid > b.mid) + `<div class="vs__x">VS</div>` + card("Round 2 · EpiLag intel", b, b.mid >= a.mid);
-  const rows = [["You · no intel", a.mid, "#9DBDAC"], ["You · EpiLag intel", b.mid, "#6FD6FF"], ["Bot · reacts to reported outbreaks", react.mid, "#1E5A40"], ["Bot · follows EpiLag alerts", auto.mid, "#34D27B"]];
+  $("vs").innerHTML = card("Round 1 · no intel", a, a.mid > b.mid) + `<div class="vs__x">VS</div>` + card(`Round 2 · ${mo.short} intel`, b, b.mid >= a.mid);
+  // you, the bot that reacts to reports, then a bot on each model's alerts (yours marked)
+  const rows = [["You · no intel", a.mid, "#9DBDAC", ""], [`You · ${mo.short} intel`, b.mid, "#6FD6FF", ""], ["Bot · reacts to reported outbreaks", react.mid, "#1E5A40", ""],
+    ...MODELS.map((m) => [`Bot · follows ${m.short}`, R.autopilot("epilag", region, m.id).mid, m.id === model ? "#34D27B" : "#2A7A55", m.id === model ? " bar--yours" : ""])];
   const max = Math.max(1, ...rows.map((r) => r[1]));
-  $("vs-bars").innerHTML = rows.map(([n, v, c], j) => `<div class="bar"><span>${n}</span><div class="bar__track"><div class="bar__fill" style="width:${(v / max) * 100}%;background:${c};animation-delay:${j * 0.12}s"></div></div><b class="nums">${fmt(v)}</b></div>`).join("");
-  const h = R2019.honest();
+  $("vs-bars").innerHTML = rows.map(([n, v, c, cls], j) => `<div class="bar${cls}"><span>${n}${cls ? ` <i class="bar__tag">your model</i>` : ""}</span><div class="bar__track"><div class="bar__fill" style="width:${(v / max) * 100}%;background:${c};animation-delay:${j * 0.08}s"></div></div><b class="nums">${fmt(v)}</b></div>`).join("");
+  const h = R2019.honest(model);
   $("vs-honest").textContent = (M.estimated
-    ? "Quezon City's barangay numbers are estimates: weekly reports exist only for the whole city, so each barangay gets the city's weekly cases × its share of the city's 2025 cases, an epidemic line from its 2022–2025 share, and EpiLag-PH's real city forecast shared out the same way. "
-    : "") + `In the 2019 missions, across all ${D2019.regions.length} regions, the bot that follows EpiLag's alerts averted more cases than the bot that reacts to reports in ${h.better}, about the same in ${h.tie}, and fewer in ${h.worse}. `
+    ? `Quezon City's barangay numbers are estimates: weekly reports exist only for the whole city, so each barangay gets the city's weekly cases × its share of the city's 2025 cases, an epidemic line from its 2022–2025 share, and the model's real city forecast shared out the same way. Every barangay gets the same alert level, so the bots on different models pick the same barangays here; the models differ in the level they show. `
+    : "") + `In the 2019 missions, across all ${D2019.regions.length} regions, the bot that follows ${mo.name}'s alerts averted more cases than the bot that reacts to reports in ${h.better}, about the same in ${h.tie}, and fewer in ${h.worse}. `
+    + "Every model made its forecasts from earlier years only. "
+    + (model === "average" ? "The average of the four is approximate: it is computed from the four models' rounded forecasts. " : "")
     + "How scoring works: a team covers about 33,000 people (up to 30% of a province) and prevents a share of the cases reported 2 to 9 weeks later, since people already infected still fall sick. "
     + "The share uses cautious effects for clean-ups with container covers (10–50%, central 30%; Bowman et al. 2016), so treat the numbers as estimates.";
   show("s-vs"); sfx.grade();
 }
-$("again").addEventListener("click", () => { show("s-title"); renderMissions(); });
+$("again").addEventListener("click", () => { results = {}; show("s-title"); renderMissions(); });
 
 hydrateIcons();
 $("mute").innerHTML = icon("sound", { size: 24 });
