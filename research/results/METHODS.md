@@ -47,3 +47,29 @@ Code: `research/models/`. The live model in `src/` is unchanged apart from one o
 **Why not Regions + QC for topography and density:** with 18 areas, a fixed per-area value has 18 distinct values, which works like an area label rather than a measured effect.
 
 **Daily temperature range:** left out. It needs daily minimum temperature, and the cached province weather lacks it.
+
+## How much each variable group matters (`influence.py`)
+
+**Groups** come from feature-name prefixes (`GROUPS` in `extra_features.py`): cases, season, rain, heat, humidity, enso, topography, population.
+
+**Group tests** (`feature_groups.csv`). LightGBM goes through the same harness on the research table:
+- `full` uses every feature.
+- `base` uses recent cases plus the time of year.
+- `drop` is the full set minus one group.
+- `add` is the base plus one group.
+
+Each test reports:
+- `change_pct`: error against its reference (full for `drop`, base for `add`), minus 1.
+- Effect of having a group: base→add for `add`, drop→full for `drop`. Negative means the group helped.
+
+**SHAP** (`shap_groups.csv`, `shap_lags.csv`):
+- The 50th-percentile LightGBM model is fit on all usable rows, as `src/train_final.py` does, once for the live feature set (`current`) and once for the research table (`plus`).
+- Mean |SHAP| is taken over a fixed sample of 4,000 area-weeks (seed 0).
+- A group's share is its features' summed mean |SHAP| over the total.
+- Lag profiles keep the per-lag values for `rain_lag*`, `temp_lag*` and `rh_lag*`.
+
+## Blend check (`blend.py`, exploratory)
+
+- Equal average, in log space, of saved middle forecasts: LightGBM + negative binomial, and all four.
+- No refitting and no tuned weights.
+- Scores the middle forecast only; ranges and alerts are not calibrated for the blend.
