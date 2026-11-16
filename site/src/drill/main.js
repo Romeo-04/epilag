@@ -14,9 +14,12 @@ import { loadGrids } from "../lib/voxel.js";
 import { createWorld } from "./world.js";
 import { rules } from "./rules.js";
 import { createBoard } from "./board.js";
+import { createAudio } from "./audio.js";
+import { createBackdrop } from "./backdrop.js";
 
 const json = (f) => fetch(`${import.meta.env.BASE_URL}drill/${f}`).then((r) => r.json());
 const [D2019, DQ, MODELS_DATA, boards2019, boardsQC] = await Promise.all([json("data.json"), json("qc.json"), json("models.json"), loadGrids("voxel_regions"), loadGrids("voxel_qc")]);
+const nation = (await loadGrids("voxel_ph")).province_coarse;
 // every model's forecasts (scripts/drill_models.py) beside each area's own "fc", which is the submitted model's
 const MODELS = MODELS_DATA.models, DEFAULT_MODEL = MODELS_DATA.default;
 [[D2019, "2019"], [DQ, "qc"]].forEach(([D, key]) => D.regions.forEach((r) => r.provinces.forEach((p) => {
@@ -38,7 +41,6 @@ const fmt = (n) => Math.round(n).toLocaleString("en");
 const day = (s) => new Date(`${s}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 const dayY = (s) => `${day(s)} ${s.slice(0, 4)}`;
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const short = (name) => name.replace(/ \(.+\)/, "");
 // for tests/test_drill_rules.py (parity with scripts/drill_data.py through Playwright)
 window.drill = { D: D2019, R: R2019, missions: MISSIONS, models: MODELS };
@@ -51,57 +53,82 @@ let model = DEFAULT_MODEL;
 const modelOf = (id = model) => MODELS.find((m) => m.id === id);
 const fcAt = (p, tw) => R.fcOf(p, model)[tw];
 
-// ------------------------------------------------------------------ sound (synthesised, no audio files)
-let ac = null, muted = false;
-function tone(freq, dur, type = "sine", vol = 0.06, when = 0, slide = 0) {
-  if (muted) return;
-  try {
-    ac ||= new (window.AudioContext || window.webkitAudioContext)();
-    const t0 = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
-    o.type = type; o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
-    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur);
-  } catch { /* no audio available */ }
+// ------------------------------------------------------------------ settings and sound (audio.js; synthesised, no audio files)
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } } };
+const calmer = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// volumes are 0 to 100; a reader who asked their device for less motion starts with motion reduced and no flashes
+const DEFAULTS = { sound: true, music: true, musicVol: 50, sfx: true, sfxVol: 80, rain: true, rainVol: 70, labels: true, flashes: !calmer, motion: calmer };
+const S = { ...DEFAULTS };
+try { const saved = JSON.parse(store.get("drill-settings") || "{}"); for (const k in DEFAULTS) if (typeof saved[k] === typeof DEFAULTS[k]) S[k] = saved[k]; } catch { /* a damaged save: keep the defaults */ }
+const audio = createAudio(S), sfx = audio.sfx;
+Object.assign(window.drill, { audio, settings: S }); // for the tests
+let reduce = S.motion;
+/** Put the settings into effect: sound levels, motion, map names, and the dialog's own controls. */
+function applySettings({ save = true } = {}) {
+  if (save) store.set("drill-settings", JSON.stringify(S));
+  reduce = S.motion;
+  document.documentElement.dataset.motion = S.motion ? "less" : "full"; // board.js and world.js read this too
+  $("board").classList.toggle("no-names", !S.labels);
+  audio.apply(); backdrop.refresh();
+  $("mute").setAttribute("aria-pressed", String(!S.sound));
+  $("mute").setAttribute("aria-label", S.sound ? "Sound on" : "Sound off");
+  $("mute").innerHTML = icon(S.sound ? "sound" : "soundOff", { size: 24 });
+  for (const el of document.querySelectorAll("[data-set]")) {
+    const k = el.dataset.set, part = k.replace("Vol", "");
+    if (el.type === "range") { el.value = S[k]; el.disabled = !S.sound || !S[part]; $(`set-o-${k}`).textContent = `${S[k]}%`; }
+    else { el.setAttribute("aria-checked", String(S[k])); el.disabled = k !== "sound" && k in { music: 1, sfx: 1, rain: 1 } && !S.sound; }
+  }
 }
-const sfx = {
-  click: () => tone(880, 0.06, "square", 0.025),
-  deploy: () => { tone(330, 0.09, "square", 0.04); tone(660, 0.14, "square", 0.04, 0.08); },
-  recall: () => tone(440, 0.12, "square", 0.035, 0, 220),
-  turn: () => { tone(120, 0.5, "sawtooth", 0.035, 0, 60); tone(300, 0.35, "sine", 0.03, 0.1, 900); },
-  alarm: () => { tone(740, 0.12, "square", 0.04); tone(740, 0.12, "square", 0.04, 0.18); },
-  grade: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, "triangle", 0.06, i * 0.11)),
-  thunder: () => { tone(60, 1.2, "sawtooth", 0.05, 0.15, 30); tone(90, 0.8, "triangle", 0.04, 0.1, 40); },
-};
-// rain on the roof: filtered noise whose volume follows the week's rain (and the mute button)
-let rainGain = null;
-function rainSound(level) {
-  try {
-    if (!rainGain) {
-      if (muted || !level) return;
-      ac ||= new (window.AudioContext || window.webkitAudioContext)();
-      const buf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate), d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      const src = ac.createBufferSource(), lp = ac.createBiquadFilter();
-      src.buffer = buf; src.loop = true; lp.type = "lowpass"; lp.frequency.value = 1400;
-      rainGain = ac.createGain(); rainGain.gain.value = 0;
-      src.connect(lp).connect(rainGain).connect(ac.destination); src.start();
-    }
-    rainGain.gain.setTargetAtTime(muted ? 0 : level * 0.05, ac.currentTime, 0.6);
-  } catch { /* no audio available */ }
+$("mute").addEventListener("click", () => { S.sound = !S.sound; applySettings(); });
+$("settings").addEventListener("click", (e) => {
+  if (e.target === $("settings")) return $("settings").close(); // a click on the backdrop
+  const sw = e.target.closest(".switch");
+  if (!sw) return;
+  S[sw.dataset.set] = !S[sw.dataset.set]; applySettings(); sfx.click();
+  if (sw.dataset.set === "motion" && board) refresh({ duration: 0 }); // mosquitoes and rain follow at once
+});
+$("settings").addEventListener("input", (e) => { if (e.target.type === "range") { S[e.target.dataset.set] = +e.target.value; applySettings(); } });
+$("settings").addEventListener("change", (e) => { if (e.target.dataset.set === "sfxVol") sfx.deploy(); }); // hear the new level
+function openSettings() {
+  sfx.click();
+  const inGame = $("s-game").classList.contains("on"), seen = !!store.get("drill-tour");
+  $("set-tour").textContent = inGame ? "Replay now" : "Show it again";
+  $("set-tour").disabled = !inGame && !seen;
+  $("set-tour-note").textContent = inGame ? "Practice moves, then your turn is put back" : seen ? "You have already seen it" : "It runs the first time you start round 1";
+  $("settings").showModal();
 }
-let rainLevel = 0;
-$("mute").addEventListener("click", () => {
-  muted = !muted;
-  rainSound(muted ? 0 : rainLevel);
-  $("mute").setAttribute("aria-pressed", String(muted));
-  $("mute").setAttribute("aria-label", muted ? "Sound off" : "Sound on");
-  $("mute").innerHTML = icon(muted ? "soundOff" : "sound", { size: 24 });
+["set-open", "set-open-title"].forEach((id) => $(id).addEventListener("click", openSettings));
+["set-close", "set-ok"].forEach((id) => $(id).addEventListener("click", () => $("settings").close()));
+$("set-reset").addEventListener("click", () => { Object.assign(S, DEFAULTS); applySettings(); sfx.click(); });
+$("set-tour").addEventListener("click", () => {
+  if ($("s-game").classList.contains("on")) { $("settings").close(); coach.start(true); return; }
+  try { localStorage.removeItem("drill-tour"); localStorage.removeItem("drill-tip2"); } catch { /* storage blocked */ }
+  $("set-tour").disabled = true; $("set-tour-note").textContent = "It will run when you next start round 1";
 });
 
-function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 }); if (id !== "s-game") coach.hide(); }
+// ------------------------------------------------------------------ the backdrop: the national map and the season's rain and cases
+const backdrop = createBackdrop($("backdrop-canvas"), nation);
+/** Draw the backdrop for the mission in play. `full`: the whole season's cases (reports); otherwise only up to turn 1. */
+function setBackdrop(full) {
+  const ps = M.region.provinces, sum = (key) => WEEKS.map((_, i) => ps.reduce((s, p) => s + (p[key][i] || 0), 0));
+  const byId = new Map(D2019.regions.flatMap((r) => r.provinces.map((p) => [p.id, p])));
+  // a 2019 mission lights its own provinces; Quezon City lights Metro Manila, with a pin on the city
+  const home = M.estimated ? "PH13" : M.region.id;
+  backdrop.set({
+    lit: (id) => id.startsWith(home), pin: M.estimated ? [51, 79] : null,
+    heat: (id) => { const p = byId.get(id); return p ? R2019.heat(p, R2019.peak(p) ?? R2019.FIRST) : "#2E6B3F"; },
+    rain: M.estimated ? WEEKS.map(() => 0) : sum("rain").map((v) => v / ps.length), cases: sum("cases"), epi: sum("epi"), known: full ? WEEKS.length - 1 : FIRST,
+  });
+  $("backdrop").classList.toggle("backdrop--dry", !!M.estimated);
+}
+function show(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 });
+  backdrop.show(id !== "s-game"); $("backdrop").dataset.scene = id.slice(2);
+  if (id !== "s-game") setBackdrop(id === "s-report" || id === "s-vs");
+  if (id !== "s-game") { coach.hide(); audio.setTrack(id === "s-report" || id === "s-vs" ? "report" : "title"); }
+}
 
 // ------------------------------------------------------------------ walkthrough (first play) and the how-to-play guide
-const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } } };
 // each step points at one control; steps with `wait` move on when the player does the action
 const TOUR = [
   { at: "#board", text: () => `This walkthrough is practice: nothing in it costs you. Each block is a ${M.unit[0]}. Taller and redder means more cases than usual.` },
@@ -185,9 +212,9 @@ async function renderMissions() {
   }).join("");
   useMission(MISSIONS[regionIdx]);
   const r = M.region, n = MISSIONS.length, pad = (v) => String(v).padStart(2, "0");
-  document.querySelector(".title__copy .chip").textContent = `Mission ${M.year} · ${M.place}`;
   $("m-count").innerHTML = `<b>${pad(regionIdx + 1)}</b> / ${pad(n)}`;
   $("m-prev").disabled = regionIdx === 0; $("m-next").disabled = regionIdx === n - 1;
+  setBackdrop(false);
   $("missions").querySelector(".sel").scrollIntoView({ inline: "center", block: "nearest", behavior: reduce ? "auto" : "smooth" });
   $("t-region").textContent = r.name;
   $("t-stats").textContent = `${r.provinces.length} ${M.unit[1]} · ${fmt(totals[regionIdx])} cases in ${M.year}`;
@@ -391,7 +418,7 @@ $("v-left").addEventListener("click", () => board?.rotateBy(-25));
 $("v-right").addEventListener("click", () => board?.rotateBy(25));
 function lightning() {
   sfx.thunder();
-  if (reduce) return;
+  if (reduce || !S.flashes) return;
   $("flash").classList.remove("on"); void $("flash").offsetWidth; $("flash").classList.add("on");
 }
 /** A short banner over the board (two weeks passing), instead of covering the whole screen. */
@@ -420,6 +447,7 @@ function refresh({ drop = null, duration = 900 } = {}) {
   $("h-sky").textContent = sky[1];
   $("board-wrap").dataset.weather = sky[0];
   const pr = R.pressure(region, i);
+  audio.setTense(pr.level === "high" || pr.level === "critical"); // the music tightens when the region is in outbreak
   confirmEnd = false;
   $("end").innerHTML = `${turn === TURNS.length - 1 ? "End season" : "End turn"} ${icon("play", { size: 24 })}`;
   $("end").classList.toggle("pulse", kits === 0); // nothing left to send: the next move is to end the turn
@@ -430,8 +458,7 @@ function refresh({ drop = null, duration = 900 } = {}) {
   const counts = Object.fromEntries(region.provinces.map((p, k) => [p.id, teamsIn(k)]));
   board.setTeams(counts, { drop });
   board.setRain(mm);
-  rainLevel = Math.min(1, mm / 70);
-  rainSound(rainLevel);
+  audio.rain(Math.min(1, mm / 70));
   board.setGlow(region.provinces.filter((p) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]).map((p) => p.id));
   if (round === 2) {
     // with 142 barangays, mark only the 12 with the highest forecast, so the board stays readable
@@ -468,7 +495,7 @@ async function startRound(r) {
   round = r; turn = 0; kits = K.kits; plan = {}; sel = null; logTurn = 0; setTab("areas"); $("log-dot").hidden = true;
   $("mode").textContent = r === 1 ? "Round 1 · No intel" : `Round 2 · ${modelOf().short} intel`;
   $("mode").classList.toggle("chip--intel", r === 2);
-  show("s-game"); sfx.turn();
+  show("s-game"); sfx.turn(); audio.setTrack(r === 1 ? "r1" : "r2"); // each round has its own music
   if (!board || board.regionId !== region.id) {
     board?.dispose();
     $("board").innerHTML = "";
@@ -521,7 +548,7 @@ const BADGE_ICON = { early: "alert", waste: "check", full: "actionPlan", bot: "d
 function endRound() {
   const s = R.score(plan, region), auto = R.autopilot("epilag", region, round === 2 ? model : DEFAULT_MODEL), g = R.gradeOf(s.mid, region), gc = GRADE_COL[g];
   results[round] = { ...s, grade: g, color: gc, model: round === 2 ? model : null };
-  rainSound(0);
+  audio.rain(0);
   board.setBugs(0, []);
   show("s-report"); sfx.grade();
   $("r-grade").textContent = g; $("r-grade").style.color = gc;
@@ -647,5 +674,5 @@ function versus() {
 $("again").addEventListener("click", () => { results = {}; show("s-title"); renderMissions(); });
 
 hydrateIcons();
-$("mute").innerHTML = icon("sound", { size: 24 });
+applySettings({ save: false });
 renderMissions();

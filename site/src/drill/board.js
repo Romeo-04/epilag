@@ -8,7 +8,8 @@ import { createWorld } from "./world.js";
 import { bake, loadSprite, rows } from "../lib/pixel.js";
 
 const LCOL = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928", normal: "#0C7A55" };
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// less motion: the device asks for it, or the player turned it on in the game's settings (main.js)
+const reduced = () => document.documentElement.dataset.motion === "less" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** A crisp texture from a canvas (nearest-neighbour, so pixel art stays square). */
 function texture(T, canvas) {
