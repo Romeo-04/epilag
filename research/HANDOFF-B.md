@@ -201,7 +201,7 @@ When `research/results/` holds the model comparison and feature-group files (for
 - `research/writeup/slides.md`: 2–3 slides covering where EpiLag sits in the literature, the model comparison, and what drives the forecast. For each slide give the text and which chart it uses.
 - `research/writeup/qa.md`: likely judge questions with short answers. Include "why LightGBM", "why not LSTM", "why didn't topography help" and "what went wrong in 2023".
 
-Edit the deck and the site only after your human approves these drafts. The deck is `docs/deck/deck.html` and the methodology page is `site/methodology.html`.
+Paul, a teammate, updates the website (`site/`), working from the approved numbers. Leave `site/` to him. Edit the deck (`docs/deck/deck.html`) only after your human approves these drafts.
 
 **Done when:** all three drafts exist, every number in them is traceable, and Person A has checked Methods and Results against `METHODS.md` and `STATUS.md`.
 

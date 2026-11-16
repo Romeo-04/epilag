@@ -122,6 +122,8 @@ Output: `margin_check.csv`. It gives the margin, coverage before (`coverage_raw`
 **Calibration year.** For `live`, the script repeats the split `conformal_margin` makes: fit on targets before the last training year, then forecast that year. Output: `margin_check_calibration_year.csv`, per test year and lead time:
 - `median_log_error`: median of forecast minus actual, in log(cases + 1). Negative means the forecast ran low.
 - `above_q90`, `below_q10`: the shares of weeks above the 90% forecast and below the 10% forecast.
+- `margin`: the 80% conformal quantile of the misses, as `conformal_margin` computes it.
+- `margin_averages_present`: the same over only the weeks with `y_mean4` and `y_mean12` present. Both are missing in the first weeks after the 2020–21 gap.
 
 One-sided misses mean the forecast level was off. Even misses on both sides mean the range was too narrow.
 

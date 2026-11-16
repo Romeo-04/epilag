@@ -18,7 +18,8 @@ Writes research/results/margin_check.csv: margin, range coverage and error per v
 Also, for the live version, how the calibration step misses on its held-out year (the year before each test
 year): the median log error of the 50% forecast (negative = too low), and the share of weeks above the 90%
 forecast and below the 10% forecast. Lopsided misses mean a shift in level; even misses mean a too-narrow
-range. Writes research/results/margin_check_calibration_year.csv.
+range. It also gives the margin again over only the weeks that have the 4- and 12-week averages, which
+are missing in early 2022, after the gap. Writes research/results/margin_check_calibration_year.csv.
 Usage: python research/models/margin_check.py
 """
 import sys
@@ -86,10 +87,20 @@ def calibration_year(df: pd.DataFrame, feats: list[str]) -> pd.DataFrame:
             cal = df[usable & (target_week >= cal_start) & (target_week < start)]
             q = predict_log(fit_quantiles(fit, feats, target), cal[feats])
             y = cal[target]
+            miss = np.maximum(q.q10 - y, y - q.q90)
+            averages = cal[["y_mean4", "y_mean12"]].notna().all(axis=1)  # missing in the weeks after a gap
             rows.append({"test_year": year, "calibration_year": year - 1, "horizon": h, "n": len(cal),
                          "median_log_error": (q.q50 - y).median(),
-                         "above_q90": (y > q.q90).mean(), "below_q10": (y < q.q10).mean()})
+                         "above_q90": (y > q.q90).mean(), "below_q10": (y < q.q10).mean(),
+                         "margin": margin_of(miss), "n_averages_present": int(averages.sum()),
+                         "margin_averages_present": margin_of(miss[averages])})
     return pd.DataFrame(rows)
+
+
+def margin_of(miss: pd.Series) -> float:
+    """The 80% conformal quantile, as in src/backtest.conformal_margin."""
+    n = len(miss)
+    return float(np.quantile(miss, min(1.0, np.ceil((n + 1) * 0.8) / n)))
 
 
 if __name__ == "__main__":

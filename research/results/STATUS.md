@@ -240,6 +240,7 @@ Checked `research/writeup/paper.md`, `slides.md` and `qa.md` on `origin/research
 - 2023 at 2 / 4 / 6 / 8 weeks: live 0.119 / 0.227 / 0.346 / 0.476; filled 0.110 / 0.216 / 0.329 / 0.453; dropped 0.114 / 0.228 / 0.337 / 0.429.
 - The 2023 range still holds 92% at 4 weeks in all three versions (92.3%, 91.5%, 92.4%).
 - Filling or dropping the feature moves the 2023 margin by 0.01–0.05. It stays more than twice 2024–25's.
+- **The 4- and 12-week averages** (`y_mean4`, `y_mean12`) are also missing in the first weeks of 2022 (`causes.md`, 1b). They are not the cause either. Over only the 2022 weeks that have them (766 of 851 at 4 weeks), the margin is 0.224, against 0.227 over all weeks (`margin_averages_present` in `margin_check_calibration_year.csv`).
 
 **What the margin does follow** (`margin_check_calibration_year.csv`): how the calibration step's model, fit without the last training year, forecast that year.
 
@@ -257,7 +258,7 @@ Checked `research/writeup/paper.md`, `slides.md` and `qa.md` on `origin/research
 
 **Hypothesis, not tested:** the 2018 and 2022 calibration models were fit on regional data that were short (2016–2017) or ended two years before the calibration year (2016–2019, then the 2020–2021 gap). The 2023 and 2024 calibration models had the 2022 season in their fit data and missed less.
 
-**For the paper and Q&A.** Replace the 2023 cause with this result:
+**For `causes.md` 1b, the paper and the Q&A.** Replace the 2023 cause (the 2020–21 gap's missing features) with this result:
 - The calibration model, fit on regional data ending in 2019, forecast 2022 too low.
 - The single margin then widened both ends of the 2023 range, though only the top had missed.
 

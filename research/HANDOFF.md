@@ -85,15 +85,17 @@ Headlines (numbers in `STATUS.md`):
 4. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
 5. Consider Senson et al. 2026 (*SciEnggJ* special issue): machine learning with weather for Quezon City, the closest local comparison. Seen in search results only; not verified.
 6. The final variables are chosen (`STATUS.md`, "Final variables"). The write-up is a paper in IMRADC order, `research/writeup/paper.md` (brief, step 6).
-7. Pull `research-a` again. The review of your drafts and the 2023 margin result are in `STATUS.md`. The missing "same week last year" did not cause the wide 2023 range; update the paper, Q&A and your status file.
+7. Pull `research-a` again. The review of your drafts and the 2023 margin result are in `STATUS.md`. Neither the missing "same week last year" nor the missing 4- and 12-week averages caused the wide 2023 range. Update `causes.md` 1b, the paper, the Q&A and your status file. Paul updates the site; leave `site/` to him.
 
 ## Open work, in order
 
 1. **Unblock Person B.** Done: B merged `14e6eba` into `research-b` (`697c7c1`).
 2. **Choose the final variables.** Done 16 Nov (`STATUS.md`, "Final variables").
 3. **Apply the choice to the live model: only when the human asks.** It changes every number the submission quotes: the README tables, the Quezon City 2024–25 story, the "30 of 32" replay claim (asserted in `tests/test_web_logic.py`), the app, the game and the open data. Edit `src/` (neighbours' cases for provinces; port the region weather fetch from `research/models/extra_features.py`), rerun README "Run it" → "Rebuild everything from the raw data", update the claims the tests assert, run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
-4. **Person B's revisions.** B applies the fixes in `STATUS.md` ("Review of Person B's drafts", "2023 calibration check") and Kish approves. *Done when* `paper.md` no longer gives the missing "same week last year" as the 2023 cause, and the human asks to merge `origin/research-b` into `research-a`.
-5. **Deck and site**, after the human approves B's drafts: `docs/deck/deck.html` and `site/methodology.html`.
+4. **Person B's revisions.** B applies the fixes in `STATUS.md` ("Review of Person B's drafts", "2023 calibration check") and Kish approves. *Done when* `causes.md`, `paper.md` and `qa.md` no longer give the 2020–21 gap's missing features as the 2023 cause, and the human asks to merge `origin/research-b` into `research-a`.
+5. **Deck and site**, after the human approves B's drafts.
+   - **Site** (`site/`, including `site/methodology.html`): Paul, a teammate, updates it. He needs only the data: the approved numbers from `paper.md` and `STATUS.md`, plus the CSVs they cite. Leave `site/` to him.
+   - **Deck:** `docs/deck/deck.html`.
    - The deck PDF is printed from the deck HTML with Playwright `page.pdf` at 1920×1080. There is no build script.
    - Deck slide 1 still has `[Team name]` and `[Member]` placeholders.
 6. **Final PR to `main`**, only when the human asks. One PR with the `research/` code, results and literature.
