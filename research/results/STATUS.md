@@ -13,7 +13,7 @@ How the experiments were run: `METHODS.md`.
 - [x] `candidates.csv`: candidate final sets, scored on every measure. `live` reproduces the live LightGBM exactly (largest difference 1e-14).
 - [x] `extracts/`: the parts of `data/processed/` that Person B's analysis needs (`export_extracts.py`).
 - [x] Validation page: new sections 4 (data groups) and 6 (other methods). The page lives outside the repo, in `pugad/finals/`.
-- [ ] Final variables: the human's choice, from the candidate table below.
+- [x] Final variables chosen (below). Not applied to the live model yet.
 
 ## Ready now: four methods on the same test
 
@@ -143,6 +143,29 @@ How to read it:
 - **Regions + QC: heat and humidity without ENSO** is a small, steady gain (13 of 16, worst +2.1%) that keeps Outbreak warning nearly level (99 against 101). With ENSO the gain is bigger, mostly in 2023 (−5% to −14%), and hypothesis 1 says ENSO may be acting as a year label.
 - **Caveats.** Neighbours, the blend and dropping ENSO were all chosen after seeing these test years, so every gain here is optimistic. Provinces have only two test years, 2019 and 2020, and both were unusual.
 
+## Final variables (chosen 16 Nov)
+
+The human delegated the choice to Person A's recommendation:
+- **Provinces:** the live features + neighbours' cases (`live_neighbours` in `candidates.csv`).
+- **Regions + QC:** the live features + heat and humidity, without ENSO (`research_no_enso`).
+
+Together, against the live model over the 24 checks:
+- **Miss:** better in 21 of 24, median −1.4% (−6.1% to +2.1%); by lead time −1.8% / −2.6% / −0.9% / −1.1%. Worse in three: Regions + QC 2019 at 2 and 4 weeks (+2.1%, +0.4%) and 2025 at 6 weeks (+1.6%).
+- **Beat "same as this week":** 21 of 24, against 19. The two new ones are Regions + QC 2023 at 2 and 4 weeks, the year the live model lost.
+- **Range held:** mean 80% for both.
+- **Alerts:** Watch caught 1,050 outbreak starts against 1,049 (of 1,260), false alarms 58% for both. Outbreak warning caught 473 against 458, false alarms 30% for both.
+
+**Why these.** They cut the miss without losing outbreak starts on either rule. ENSO was left out: its extra gain is mostly Regions + QC 2023, it costs 10 Outbreak-warning catches (89 against 99), and it may be acting as a label for the year (hypothesis 1). The average of the four methods was not chosen because it catches the fewest starts on Outbreak warning.
+
+**Not applied to the live model.** `src/` and `reports/` still hold the submitted model. Applying the choice (`HANDOFF.md`, open work 3) means:
+- `src/`: neighbours' cases for provinces, and the research weather pipeline (region temperature and humidity from Open-Meteo) for Regions + QC.
+- Rebuilding every output: README numbers, the Quezon City 2024–25 story, the "30 of 32" replay claim (checked in `tests/test_web_logic.py`), the app, the game and the open data.
+- Then the validation page, the deck and the site.
+
+**For the write-up:** report the submitted model as the main result, and the chosen sets as what the research found.
+
+**Caveat.** Both choices were made after seeing the test years, and no year outside the tests is left to score them on: province data ends in January 2021, Regions + QC data in December 2025. Treat the gain as optimistic until a new season is scored.
+
 ## For Person B
 
 **Get the files.** `git pull origin research-a`. The extracts in `research/results/extracts/` replace `data/processed/` for steps 3 and 5 (`HANDOFF-B.md`, "Data"). The zip is only needed to rerun the models.
@@ -151,7 +174,7 @@ How to read it:
 - Models: `model_comparison.csv` (the four methods and both averages).
 - Variables: `feature_groups.csv`, `proposed_features.csv`, `rain_lags.csv`.
 - Attention: `shap_groups.csv`, `shap_lags.csv`, `rain_lag_shap.csv`.
-- The final choice: `candidates.csv`.
+- The final choice: `candidates.csv`, and "Final variables" above.
 - Fix: the Regions + QC `current` rows of `shap_groups.csv` and `shap_lags.csv` were rerun on 16 Nov (`METHODS.md`). Re-read them if you used them before.
 
 **Answers to your notes for Person A:**
@@ -166,4 +189,4 @@ How to read it:
 3. Elevation helps provinces on its own but not inside the full set. It may stand in for something the other variables already carry (rain, temperature or urbanisation).
 4. Rain's attention peaks 12–15 weeks before week t (14–23 weeks before the target week), but adding those weeks does not cut the miss. Compare with `expected_lag_weeks` in the literature: is a 3–5 month rain-to-dengue lag reported, or is this the rainy season's timing?
 
-Waiting on: the human's choice of final variables, from the candidate table above and `research/lit/feature_evidence.csv` (on `research-b`).
+Waiting on: the human's word on applying the final variables to the live model (`HANDOFF.md`, open work 3).

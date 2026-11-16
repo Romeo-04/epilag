@@ -184,6 +184,7 @@ When `research/results/` holds the model comparison and feature-group files (for
 - **Variables:** a table of expectation against result for each variable group.
   - The expectation comes from your step 1 table; the result comes from Person A's numbers.
   - Mark each row *agrees* or *disagrees*, and explain each disagreement.
+- **Final variables:** the human has chosen (`STATUS.md`, "Final variables"). Explain why they won and what they cost.
 - **Null results:** a group that adds nothing is a finding too. For example, past cases may already reflect an area's level, which would leave static topography nothing to add. Explain why.
 
 **Done when:** every model and every variable group has a sentence explaining its result, with numbers.
@@ -191,13 +192,18 @@ When `research/results/` holds the model comparison and feature-group files (for
 ### 6. Write-up drafts
 
 **Outputs:**
-- `research/writeup/discussion.md`: results, discussion, limitations and conclusion, all traceable.
+- `research/writeup/paper.md`: the research write-up, in IMRADC order (Introduction, Methods, Results, Discussion, Conclusion), all traceable.
+  - **Introduction:** the problem, the literature (`rrl_matrix.csv`, `references.md`) and the gap EpiLag fills (`positioning.md`).
+  - **Methods:** data, features, models and the test design, from README "Method" and `research/results/METHODS.md`.
+  - **Results:** the submitted model (`reports/`), then the four methods, the variable groups, the proposed variables, the candidate sets and the final variables (`research/results/STATUS.md`). The submitted model is the main result; the final variables are what the research found.
+  - **Discussion:** `causes.md` (steps 3 and 5), expectation against result for each variable, and the limitations: where the data ends, the choices made after seeing the test years, and only two province test years.
+  - **Conclusion:** what the evidence supports, and the next step (score the final variables on a new season).
 - `research/writeup/slides.md`: 2–3 slides covering where EpiLag sits in the literature, the model comparison, and what drives the forecast. For each slide give the text and which chart it uses.
 - `research/writeup/qa.md`: likely judge questions with short answers. Include "why LightGBM", "why not LSTM", "why didn't topography help" and "what went wrong in 2023".
 
 Edit the deck and the site only after your human approves these drafts. The deck is `docs/deck/deck.html` and the methodology page is `site/methodology.html`.
 
-**Done when:** all three drafts exist, and every number in them is traceable.
+**Done when:** all three drafts exist, every number in them is traceable, and Person A has checked Methods and Results against `METHODS.md` and `STATUS.md`.
 
 ## What Person A delivers
 

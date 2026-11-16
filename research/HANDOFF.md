@@ -68,6 +68,7 @@ Headlines (numbers in `STATUS.md`):
 - Rain from beyond 11 weeks draws SHAP attention but does not cut the miss.
 - Neighbours' cases is the only proposed variable that helps on top of the research set, and only for provinces (8 of 8 checks).
 - No candidate set wins on every measure: what cuts the miss most for Regions + QC catches fewer outbreak starts on Outbreak warning.
+- **Final variables chosen 16 Nov** (the human delegated to Person A's recommendation): provinces add neighbours' cases; Regions + QC add heat and humidity, without ENSO. Better than the live model in 21 of 24 checks, with no loss of outbreak catches. Not applied to `src/` (open work 3).
 
 **Person B: steps 1–2 done, step 3 in progress, steps 4–6 not started.**
 - Done: `feature_evidence.csv` (27 rows), `rrl_matrix.csv` (19 papers, 9 from the Philippines), `references.md`.
@@ -79,17 +80,13 @@ Headlines (numbers in `STATUS.md`):
 3. If you used the Regions + QC `current` rows of `shap_groups.csv` or `shap_lags.csv`, re-read them: they were rerun on 16 Nov.
 4. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
 5. Consider Senson et al. 2026 (*SciEnggJ* special issue): machine learning with weather for Quezon City, the closest local comparison. Seen in search results only; not verified.
+6. The final variables are chosen (`STATUS.md`, "Final variables"). The write-up is a paper in IMRADC order, `research/writeup/paper.md` (brief, step 6).
 
 ## Open work, in order
 
 1. **Unblock Person B.** The human sends the messages. *Done when* `origin/research-b` contains the `research-a` commit that added the extracts (`git log --oneline research-a -- research/results/extracts` names it; check with `git merge-base --is-ancestor <commit> origin/research-b`).
-2. **Choose the final variables.** The human decides from the candidate tables in `STATUS.md` ("Candidate final sets"), beside Person B's literature (`feature_evidence.csv`). Options per panel:
-   - Provinces: keep the live set, or add neighbours' cases.
-   - Regions + QC: keep the live set, or add heat and humidity, with or without ENSO.
-   - Either panel: use the average of the four methods as the forecast.
-
-   Each option's costs are in the tables: Outbreak-warning catches, ENSO acting as a year label, and the optimism of choices made on the test years. *Done when* the human has picked and the choice is written in `STATUS.md`.
-3. **Apply the choice** if it changes the live model. Edit `src/`, rerun README "Run it" → "Rebuild everything from the raw data", run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
+2. **Choose the final variables.** Done 16 Nov (`STATUS.md`, "Final variables").
+3. **Apply the choice to the live model: only when the human asks.** It changes every number the submission quotes: the README tables, the Quezon City 2024–25 story, the "30 of 32" replay claim (asserted in `tests/test_web_logic.py`), the app, the game and the open data. Edit `src/` (neighbours' cases for provinces; port the region weather fetch from `research/models/extra_features.py`), rerun README "Run it" → "Rebuild everything from the raw data", update the claims the tests assert, run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
 4. **Person B's steps 3–6**, ending in the drafts in `research/writeup/`. Merge `origin/research-b` into `research-a` as they land, when the human asks.
 5. **Deck and site**, after the human approves B's drafts: `docs/deck/deck.html` and `site/methodology.html`.
    - The deck PDF is printed from the deck HTML with Playwright `page.pdf` at 1920×1080. There is no build script.
