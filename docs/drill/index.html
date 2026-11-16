@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/epilag/assets/build/drill-Cmiue8Ev.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/drill-DhksGwTG.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-Cpq0GuxT.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
@@ -27,7 +27,7 @@
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-CGR-sNJU.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/rules-V9QtZgne.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-F21s_2Zp.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-DhbN9Et9.css">
 </head>
 <body class="drill">
   <!-- ============================================================ title -->
@@ -38,8 +38,7 @@
       <div class="title__copy">
         <span class="chip chip--night">Mission 2019 · Philippines</span>
         <h1 id="t-title" class="logo-mark">Dengue <span>Drill</span></h1>
-        <p class="tagline">The rains are coming. You command the dengue response for your region with <b>₱5 million</b> and <b>8 turns</b>.
-          Round 1, you see only case reports. Round 2, you get <b>EpiLag-PH intel</b>. The real cases keep score.</p>
+        <p class="tagline">Get ahead of a real dengue season. <b>10 teams</b>, <b>8 turns</b>, and the real cases keep score.</p>
         <div class="mission-head">
           <span class="kicker">Choose your mission</span>
           <div class="rail-ctl"><output id="m-count" aria-live="polite"></output>
@@ -47,8 +46,8 @@
             <button class="arrow" id="m-next" type="button" aria-label="Next region"><i data-icon="chevronRight" data-size="24"></i></button></div>
         </div>
         <div class="missions" id="missions" role="listbox" aria-label="Region" tabindex="0"></div>
-        <div class="btn-row"><button class="btn btn--go" id="start" type="button">Start mission <i data-icon="play" data-size="24"></i></button></div>
-        <ol class="how"><li><b>01</b>Pick an area</li><li><b>02</b>Deploy response teams</li><li><b>03</b>End turn: 2 weeks pass</li></ol>
+        <div class="btn-row"><button class="btn btn--go" id="start" type="button">Start mission <i data-icon="play" data-size="24"></i></button>
+          <button class="btn btn--dark-ghost" id="how" type="button">How to play</button></div>
       </div>
       <div class="title__stage">
         <div class="title__caption"><b id="t-region">Region</b><span id="t-stats"></span></div>
@@ -63,14 +62,9 @@
       <div class="briefing__copy">
         <span class="chip chip--night" id="brief-chip">Intel briefing</span>
         <h2 id="b-title">The rain is free.<br><span>The dengue bill comes later.</span></h2>
-        <p>This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.</p>
-        <ol class="objectives">
-          <li class="console"><span class="objectives__ic"><i data-icon="residents" data-size="32"></i></span><div><b>Objective 1</b><span>Avert as many cases as you can.</span></div></li>
-          <li class="console"><span class="objectives__ic"><i data-icon="calendarGap" data-size="24"></i></span><div><b>Objective 2</b><span>Get teams in 4+ weeks before an outbreak peaks.</span></div></li>
-          <li class="console"><span class="objectives__ic"><i data-icon="check" data-size="24"></i></span><div><b>Objective 3</b><span>Don't waste teams where no outbreak comes.</span></div></li>
-        </ol>
-        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Deploy · Round 1: no intel <i data-icon="play" data-size="24"></i></button>
-          <span class="sub">10 teams · ₱500K each · 8 turns of 2 weeks</span></div>
+        <p>Teams cut the bill only if they arrive before the cases do.</p>
+        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Start round 1 <i data-icon="play" data-size="24"></i></button>
+          <span class="sub">10 teams · 8 turns · case reports only</span></div>
       </div>
       <div class="briefing__receipt"><div class="receipt" id="receipt"></div><pixel-sprite class="briefing__mosq" sprite="mosquito" pose="clipboard" scale="4"></pixel-sprite></div>
     </div>
@@ -82,8 +76,9 @@
       <header class="hud console">
         <div class="hud__who"><span class="chip chip--night" id="mode">Round 1 · No intel</span><b id="h-region">Region</b></div>
         <ol class="timeline" id="h-timeline" aria-label="Turns"></ol>
-        <div class="hud__budget"><span class="k">Budget</span><b class="v nums" id="h-budget">₱5.0M</b><span class="pips pips--tokens" id="h-tokens"></span></div>
-        <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false"></button>
+        <div class="hud__budget"><span class="k">Budget left</span><b class="v nums" id="h-budget">₱5.0M</b><span class="hud__spent nums" id="h-spent"></span><span class="pips pips--tokens" id="h-tokens"></span></div>
+        <div class="hud__btns"><button class="mute" id="help" type="button" aria-label="How to play">?</button>
+          <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false"></button></div>
       </header>
       <div class="field">
         <div class="board-wrap" id="board-wrap" data-weather="clear">
@@ -93,7 +88,6 @@
           <div class="stats">
             <div class="stat"><span class="k">Cases this week</span><b class="nums" id="h-cases">0</b><span class="d" id="h-change"></span><span class="stat__spark" id="h-spark"></span></div>
             <div class="stat"><span class="k">Rain</span><b class="nums" id="h-rain">0 mm</b><span class="d" id="h-sky"></span></div>
-            <div class="stat"><span class="k">Outbreak pressure</span><b id="h-press">Low</b><span class="meter"><i id="h-meter"></i></span></div>
           </div>
           <div class="controls" role="group" aria-label="View">
             <button type="button" id="v-in" aria-label="Zoom in">+</button>
@@ -102,18 +96,24 @@
             <button type="button" id="v-right" aria-label="Turn right">⟳</button>
             <button type="button" id="reset-view" aria-label="Reset view"><i data-icon="close" data-size="24"></i></button>
           </div>
-          <div class="board__legend"><span>Cases vs epidemic line</span><span class="grad"></span><span id="legend-intel"></span></div>
-          <p class="board__hint">Drag to turn · right-drag to move · scroll or pinch to zoom</p>
+          <div class="board__legend"><span>Usual</span><span class="grad"></span><span>Outbreak</span><span id="legend-intel"></span></div>
           <div class="toast" id="toast" aria-live="polite"></div>
         </div>
         <aside class="side console">
-          <div class="side__head"><span class="k">Provinces</span><span class="k" id="side-sub"></span></div>
-          <div class="plist" id="plist" role="listbox" aria-label="Provinces" tabindex="0"></div>
-          <div id="detail" class="detail" aria-live="polite"></div>
+          <div class="tabs" role="tablist" aria-label="Side panel">
+            <button type="button" class="tab" role="tab" id="tab-areas" aria-selected="true" aria-controls="pane-areas">Provinces</button>
+            <button type="button" class="tab" role="tab" id="tab-log" aria-selected="false" aria-controls="pane-log">Turn report<i class="tab__dot" id="log-dot" hidden></i></button>
+          </div>
+          <div class="pane" id="pane-areas" role="tabpanel" aria-labelledby="tab-areas">
+            <div class="side__head"><span class="k" id="side-sub"></span></div>
+            <div class="plist" id="plist" role="group" aria-label="Provinces"></div>
+            <div id="detail" class="detail" aria-live="polite"></div>
+          </div>
+          <div class="pane log" id="pane-log" role="tabpanel" aria-labelledby="tab-log" hidden></div>
         </aside>
       </div>
       <footer class="bottom console">
-        <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker">Select an area.</span></div>
+        <div class="ticker"><span class="live">Live</span><span class="msg" id="ticker"></span></div>
         <button class="btn btn--go" id="end" type="button">End turn <i data-icon="play" data-size="24"></i></button>
       </footer>
     </div>
@@ -128,7 +128,7 @@
       </div>
       <div class="scores" id="r-scores"></div>
       <div class="badges" id="r-badges"></div>
-      <div class="kicker">How the season actually went · your teams ▲ · the peak |</div>
+      <div class="kicker">The real season · ▲ your teams · | the peak</div>
       <div class="replay" id="r-replay"></div>
       <div class="btn-row" id="r-actions"></div>
     </div>
@@ -142,7 +142,7 @@
       <div class="vs" id="vs"></div>
       <div class="kicker">Estimated cases averted (central estimate)</div>
       <div class="bars" id="vs-bars"></div>
-      <p class="honest" id="vs-honest"></p>
+      <details class="honest"><summary>How the scoring works</summary><p id="vs-honest"></p></details>
       <div class="btn-row">
         <button class="btn btn--go" id="again" type="button">New mission <i data-icon="play" data-size="24"></i></button>
         <a class="btn btn--dark-ghost" href="../web/">Open the EpiLag-PH app</a>
@@ -150,6 +150,32 @@
       </div>
     </div>
   </section>
+
+  <!-- ============================================================ walkthrough and guide -->
+  <div class="coach-ring" id="coach-ring" hidden aria-hidden="true"></div>
+  <div class="coach" id="coach" role="status" hidden>
+    <span class="coach__n" id="coach-n"></span>
+    <p id="coach-text"></p>
+    <div class="coach__row"><button type="button" class="coach__skip" id="coach-skip">Skip</button>
+      <button type="button" class="btn btn--go btn--sm" id="coach-next">Next</button></div>
+  </div>
+  <dialog class="guide" id="guide" aria-labelledby="g-title">
+    <div class="guide__head"><h2 id="g-title">How to play</h2>
+      <button type="button" class="mute" id="guide-close" aria-label="Close"><i data-icon="close" data-size="24"></i></button></div>
+    <ol class="guide__steps">
+      <li><span class="guide__art guide__art--map" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <b>Read the map</b><span>Tall, red blocks have more cases than usual.</span></li>
+      <li><span class="guide__art guide__art--team" aria-hidden="true"><i></i><i></i><i></i></span>
+        <b>Send teams</b><span>You get 10 for the season. Press + on an area.</span></li>
+      <li><span class="guide__art guide__art--turn" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <b>End the turn</b><span>Two weeks pass. A season is 8 turns.</span></li>
+      <li><span class="guide__art guide__art--early" aria-hidden="true"><svg viewBox="0 0 120 56" width="120" height="56"><polyline points="2,50 24,48 44,42 62,26 78,8 94,24 118,44" fill="none" stroke="#EEF2FF" stroke-width="2.5" stroke-linejoin="round"/><line x1="78" x2="78" y1="2" y2="54" stroke="#F04B2A" stroke-width="2"/><path d="M38 56L44 46L50 56Z" fill="#2FD6C3"/></svg></span>
+        <b>Be early</b><span>A team cuts cases 2 to 9 weeks later. Arrive 4+ weeks before the peak.</span></li>
+    </ol>
+    <p class="guide__note">You play each season twice: first with case reports only, then with EpiLag forecasts. After each turn, the Turn report tab lists what changed. Drag the map to turn it, scroll or pinch to zoom.</p>
+    <div class="btn-row"><button type="button" class="btn btn--go" id="guide-ok">Got it</button>
+      <button type="button" class="btn btn--dark-ghost" id="guide-tour" hidden>Replay the walkthrough</button></div>
+  </dialog>
 
   <div class="warp" id="warp" aria-live="assertive"><div><span id="warp-text">2 weeks later</span><small id="warp-sub"></small></div></div>
 
