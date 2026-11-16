@@ -242,7 +242,7 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 - **Olana et al. 2025**, *Transboundary and Emerging Diseases*, Philippines at national scale. DOI 10.1155/tbed/7480710. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12543447/
   - Compared SARIMA, NNAR, random forest, LSTM, TBATS and Prophet.
 - **Ba Ria–Vung Tau, Vietnam, 2024**, *Tropical Medicine and Infectious Disease* 9(10):250. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11511084/
-  - Negative binomial regression had the lowest error, beating SARIMAX, XGBoost and LSTM.
+  - The authors favour negative binomial regression, but its results table shows SARIMAX with a lower MAE (checked by Person B). Don't cite it as proof that negative binomial wins.
   - Climate lagged 2–20 weeks helped.
 - **Iguchi, Seposo & Honda 2018**, *BMC Public Health*, Davao. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5952851/
   - Distributed-lag model; rain and dew point effects.
@@ -255,6 +255,6 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 - **Lowe et al. 2014**, *Lancet Infectious Diseases* 14(7):619. DOI 10.1016/S1473-3099(14)70781-9
   - A Bayesian early-warning system for Brazil, up to 3 months ahead.
 - **Elevation in the Philippines** (mixed evidence):
-  - A nationwide study links low elevation and density to infection, but not to reported cases: https://pmc.ncbi.nlm.nih.gov/articles/PMC8898531
+  - A nationwide study links low elevation and density to infection, but not to reported cases: Sy et al. 2026, *PLOS NTD* 20(5) e0014356, https://doi.org/10.1371/journal.pntd.0014356 (PMC8898531 is a different paper, Edillo 2022, on mosquito eggs)
   - A Mandaue City study found weak links with elevation and slope: https://publish.mersin.edu.tr/index.php/igd/article/view/1262
 - **Already cited in the README:** Romano et al. 2019 (conformalized quantile regression), Undurraga et al. 2017, Bowman et al. 2016, and Pelitro et al. 2026 (the UPRI-NOAH dataset).
