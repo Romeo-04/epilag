@@ -108,6 +108,23 @@ Named feature sets scored on every measure (error, range, both alert rules) for 
 
 A proposed group joins the candidates (`PROPOSED`) only if it cut the miss when added to the full research set. Only neighbours, for provinces, did. **Drift check:** `live` must equal the `lightgbm` rows of `model_comparison.csv`; the script prints the largest difference.
 
+## The 2023 calibration check (`margin_check.py`)
+
+Person B's question: is the wide 2023 Regions + QC range caused by `y_lastyear` missing in 2022, the calibration year?
+
+**Backtest, three ways.** Regions + QC, every test year, LightGBM with the live features and `src/backtest.py`'s steps:
+- `live` must reproduce `reports/backtest_region_qc.csv`; the script prints the largest difference.
+- `fill_gap`: a missing `y_lastyear` takes the same week 156 weeks earlier, so 2022 gets 2019, the latest year before the gap. Training, calibration and test all use the filled column.
+- `no_lastyear`: `y_lastyear` removed from the features.
+
+Output: `margin_check.csv`. It gives the margin, coverage before (`coverage_raw`) and after (`coverage_10_90`) calibration, and error per version, year and lead time, on the rows `backtest.score` uses.
+
+**Calibration year.** For `live`, the script repeats the split `conformal_margin` makes: fit on targets before the last training year, then forecast that year. Output: `margin_check_calibration_year.csv`, per test year and lead time:
+- `median_log_error`: median of forecast minus actual, in log(cases + 1). Negative means the forecast ran low.
+- `above_q90`, `below_q10`: the shares of weeks above the 90% forecast and below the 10% forecast.
+
+One-sided misses mean the forecast level was off. Even misses on both sides mean the range was too narrow.
+
 ## Extracts for analysis (`export_extracts.py`)
 
 `data/processed/` is gitignored, so the parts the analysis needs are exported to `research/results/extracts/`. The script's docstring lists each file and its columns. Calibrated coverage in `calibration.csv` matches `reports/backtest_<panel>.csv` exactly.
