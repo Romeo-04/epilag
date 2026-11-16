@@ -33,8 +33,8 @@ You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as 
 |---|---|
 | `pugad/epilag/` | The repo, `github.com/Romeo-04/epilag`. The live site (romeo-04.github.io/epilag, epilag.vercel.app) is built from `main`. |
 | branch `main` | The submission. Last merge: PR #25 (`cd5f05b`). The research has not touched it. |
-| branch `research-a` | Person A's research and both handoffs. Pushed. |
-| branch `origin/research-b` | Person B's literature, analysis and write-up drafts (`d62a1f7`). Merges cleanly with `research-a`. |
+| branch `research-a` | All the research: Person A's models and results, Person B's literature, analysis and write-up (merged 16 Nov, `006226a`), and both handoffs. Pushed. |
+| branch `origin/research-b` | Person B's branch. Fully merged into `research-a` at `006226a`. |
 | branch `finals-copy-fixes` | Local only (`186ab0f`): landing, deck and README copy fixed to match the Quezon City story. Its PR (#24) was closed at the human's request. Whether it joins the final PR is undecided. |
 | `research/results/STATUS.md` | Person A's results and the hypotheses handed to Person B. **Every research number is here.** |
 | `research/results/METHODS.md` | How each experiment was run. |
@@ -72,7 +72,7 @@ Headlines (numbers in `STATUS.md`):
 - **Final variables chosen 16 Nov** (the human delegated to Person A's recommendation): provinces add neighbours' cases; Regions + QC add heat and humidity, without ENSO. Better than the live model in 21 of 24 checks, with no loss of outbreak catches. Not applied to `src/` (open work 3).
 - The wide 2023 Regions + QC range is not from the missing "same week last year". The calibration model forecast 2022 too low, and the single margin widened both ends of the range.
 
-**Person B: steps 1–6 drafted and pushed to `origin/research-b` (`d62a1f7`), waiting on Kish's approval.**
+**Person B: steps 1–6 done, approved by Kish and merged into `research-a` on 16 Nov (`006226a`).**
 - Literature: `feature_evidence.csv`, `rrl_matrix.csv`, `references.md`, `positioning.md`.
 - Analysis: `causes.md`, `step3_checks.py`, `figures/`, `out/`.
 - Write-up: `paper.md` (IMRADC), `slides.md`, `qa.md`.
@@ -92,7 +92,7 @@ Headlines (numbers in `STATUS.md`):
 1. **Unblock Person B.** Done: B merged `14e6eba` into `research-b` (`697c7c1`).
 2. **Choose the final variables.** Done 16 Nov (`STATUS.md`, "Final variables").
 3. **Apply the choice to the live model: only when the human asks.** It changes every number the submission quotes: the README tables, the Quezon City 2024–25 story, the "30 of 32" replay claim (asserted in `tests/test_web_logic.py`), the app, the game and the open data. Edit `src/` (neighbours' cases for provinces; port the region weather fetch from `research/models/extra_features.py`), rerun README "Run it" → "Rebuild everything from the raw data", update the claims the tests assert, run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
-4. **Person B's revisions.** B applies the fixes in `STATUS.md` ("Review of Person B's drafts", "2023 calibration check") and Kish approves. *Done when* `causes.md`, `paper.md` and `qa.md` no longer give the 2020–21 gap's missing features as the 2023 cause, and the human asks to merge `origin/research-b` into `research-a`.
+4. **Person B's revisions.** Done: B applied the review, Kish approved, and `research-b` was merged into `research-a` (`006226a`).
 5. **Deck and site**, after the human approves B's drafts.
    - **Site** (`site/`, including `site/methodology.html`): Paul, a teammate, updates it. He needs only the data: the approved numbers from `paper.md` and `STATUS.md`, plus the CSVs they cite. Leave `site/` to him.
    - **Deck:** `docs/deck/deck.html`.

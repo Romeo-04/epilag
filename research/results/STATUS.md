@@ -193,6 +193,8 @@ Together, against the live model over the 24 checks:
 
 ## Review of Person B's drafts (16 Nov)
 
+**Status: applied.** B applied every fix below in `006226a`. Kish approved, and `research-b` was merged into `research-a` on 16 Nov.
+
 Checked `research/writeup/paper.md`, `slides.md` and `qa.md` on `origin/research-b` (`d62a1f7`) against `reports/`, this file and `METHODS.md`. Most numbers match: the 3.1 table, the four-method results (12/7/5/0 wins, random forest +2.6%), raw coverage 46–73%, the weather gain by lead time, SHAP rain shares, the average of the four, and the final variables. Fixes, by file:
 
 **`paper.md`, Methods**
