@@ -154,6 +154,9 @@ Every result is out of sample: each test year is forecast only from earlier year
 - **Honest finding on weather:** most of the skill comes from recent cases and the season. Adding rain, heat and
   humidity changed the error by about −12% to +11% depending on year and horizon (about +2% on average for regions,
   about 0% for provinces). See `reports/` and the app's *Did it work?* page.
+- **Tested further after the first round:** a literature review, three other methods on the same test (LightGBM had
+  the lowest error in 12 of 24 checks; no other method in more than 7) and the cause of every loss. See the
+  [research page](https://romeo-04.github.io/epilag/research.html) and [`research/`](research/README.md).
 
 ![Did it work? page](docs/screenshots/proof.png)
 

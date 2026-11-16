@@ -29,6 +29,7 @@ const PAGES = {
   web: "web/index.html",
   drill: "drill/index.html",
   methodology: "methodology.html",
+  research: "research.html",
   data: "data/index.html",
 };
 

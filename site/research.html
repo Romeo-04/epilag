@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Research</title>
+  <meta name="description" content="What we found when we tested EpiLag-PH after the first round: 19 studies reviewed, three other methods on the same test, and the cause of every loss.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="EpiLag-PH research: what held up, and what did not">
+  <meta property="og:description" content="A literature review, four methods on one test, and the cause of every loss.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/research.html">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="./"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span><small class="brand__sub">Research</small></a>
+      <div class="nav__links" data-spy>
+        <a href="#literature">Literature</a><a href="#methods">Methods</a><a href="#drivers">Drivers</a><a href="#losses">Losses</a><a href="#found">Findings</a><a href="#limits">Limits</a>
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Every number in a data-k element comes from research/results/ or research/analysis/out/.
+         scripts/research_numbers.py recomputes them and tests/test_research_page.py checks this page against it. -->
+
+    <!-- ============================================================ hero -->
+    <section class="pg-hero surface tone-paper tx-field sf-subtle" aria-labelledby="title">
+      <div class="wrap">
+        <div class="pg-hero__grid">
+          <div>
+            <div class="label">Research · after the first round · November 2026</div>
+            <h1 id="title">We tested our own model. <span class="em">Here is what held up.</span></h1>
+            <p class="lead">After the PJDSC 2026 first round we reviewed the published work, ran three other methods through the same test,
+              and traced every loss to its cause. The submitted model is unchanged; this page reports what we learned about it.</p>
+            <ul class="chips">
+              <li class="chip"><b><span data-k="studies">19</span></b> studies reviewed</li><li class="chip"><b>4</b> methods, one test</li><li class="chip"><b>9</b> new variable groups</li><li class="chip"><b>24</b> checks: 6 test years × 4 lead times</li>
+            </ul>
+            <div class="btn-row pg-hero__cta">
+              <a class="btn btn--primary" href="https://github.com/Romeo-04/epilag/blob/main/research/EpiLag-PH-research-summary.pdf">Read the 8-page summary <i data-icon="external" data-size="24"></i></a>
+              <a class="btn btn--ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/writeup/paper.md">Full write-up</a>
+            </div>
+          </div>
+          <pixel-sprite class="pg-hero__sprite" sprite="frog" pose="watch" scale="5"></pixel-sprite>
+        </div>
+
+        <div class="stats stats--hero">
+          <div class="stat stat--dark" data-reveal><b class="nums"><span data-k="wins-lightgbm">12</span> <small>of 24</small></b><p>checks where the submitted model had the lowest error of four methods</p></div>
+          <div class="stat" data-reveal><b class="nums">5 <small>of 6</small></b><p>test years where it beat both simple rules, 4 weeks ahead</p></div>
+          <div class="stat" data-reveal><b class="nums">3</b><p>losses, each traced to a specific cause</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-k="final-better">21</span> <small>of 24</small></b><p>checks improved by a set of variables the research found, not yet proven</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 1 literature -->
+    <section id="literature" class="pg-sec surface tone-white" aria-labelledby="literature-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">1 · Literature review</div><h2 id="literature-title" class="h2-sm">Built on published work, <span class="em">filling a Philippine gap.</span></h2></div>
+          <p>We compared <span data-k="studies">19</span> studies. No Philippine forecasting study among them has all four of these; EpiLag-PH does.</p>
+        </div>
+        <div class="grid g4">
+          <div class="card" data-reveal><h3>Many areas, every week</h3><p>104 areas, 2 to 8 weeks ahead. Earlier Philippine forecasts cover the national total, one metro area or one city.</p></div>
+          <div class="card" data-reveal><h3>Calibrated ranges</h3><p>A likely range for every forecast, with the share of real counts inside it reported for each test year.</p></div>
+          <div class="card" data-reveal><h3>Alerts scored both ways</h3><p>Outbreak starts caught and the share of alerts that were false, not only the hits.</p></div>
+          <div class="card" data-reveal><h3>Several unseen years</h3><p>Including a record epidemic (2019), a reporting collapse (2020) and a flat year (2023).</p></div>
+        </div>
+        <div class="tbl tbl--wide mt" data-reveal role="region" aria-label="EpiLag-PH beside published forecasting studies" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">Study</th><th scope="col">Areas</th><th scope="col">Lead time</th><th scope="col">Calibrated ranges</th><th scope="col">Alerts scored</th><th scope="col">Unseen test years</th></tr></thead>
+            <tbody>
+              <tr class="row-main"><td>EpiLag-PH</td><td>86 provinces, 17 regions and Quezon City, weekly</td><td>2, 4, 6, 8 weeks</td><td><span class="yn yn--y">Yes, coverage reported</span></td><td><span class="yn yn--y">Catches and false alarms</span></td><td><span class="yn yn--y">5 years</span></td></tr>
+              <tr><td>Buczak et al. 2014</td><td>40 provinces, weekly, high or low incidence</td><td>4 weeks</td><td><span class="yn yn--n">No</span></td><td><span class="yn yn--y">Sensitivity and specificity</span></td><td>2011, 2012</td></tr>
+              <tr><td>Carvajal et al. 2018</td><td>Metro Manila, weekly</td><td>None stated</td><td><span class="yn yn--n">No</span></td><td><span class="yn yn--n">No</span></td><td>2013</td></tr>
+              <tr><td>Olana et al. 2025</td><td>National total, monthly</td><td>12 months</td><td><span class="yn yn--n">Intervals, coverage not checked</span></td><td><span class="yn yn--n">No</span></td><td>2024</td></tr>
+              <tr><td>Eligado et al. 2026</td><td>Quezon City, weekly</td><td>Not reported</td><td><span class="yn yn--n">Not reported</span></td><td>Thresholds compared</td><td>Not reported</td></tr>
+              <tr><td>Colón-González et al. 2021</td><td>63 provinces of Vietnam, monthly</td><td>1 to 6 months</td><td><span class="yn yn--y">Probabilistic</span></td><td><span class="yn yn--y">Detection rate</span></td><td><span class="yn yn--y">2007–2016, 2020</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Five of the 10 forecasting studies compared; the full table and each source are in <a href="https://github.com/Romeo-04/epilag/blob/main/research/lit/positioning.md"><code>research/lit/positioning.md</code></a> and <a href="https://github.com/Romeo-04/epilag/blob/main/research/lit/references.md"><code>references.md</code></a>.</p>
+
+        <h3 class="sub-h" data-reveal>What the literature says drives dengue</h3>
+        <div class="grid g3">
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="weatherCell" data-size="36"></i></span><h3>Rain, 5–7 weeks before</h3><p>Risk peaks at moderate amounts, not the heaviest. <cite>Sumi 2017, Carvajal 2018, Iguchi 2018</cite></p></div>
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="observed" data-size="36"></i></span><h3>Humidity, about 4 weeks before</h3><p>The top weather factor in Metro Manila, and linked to the second seasonal peak. <cite>Carvajal 2018, Xu 2020</cite></p></div>
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="derived" data-size="36"></i></span><h3>Temperature, peaking near 27.5 °C</h3><p>Risk rises, peaks, then falls, across 61 Philippine provinces. <cite>Seposo 2023, Mordecai 2017</cite></p></div>
+        </div>
+        <div class="note" data-reveal><span class="disc"><i data-icon="info" data-size="24"></i></span>
+          <span><b>What we do not claim.</b> Errors cannot be compared across studies, because places, scales and case counts differ. So we do not call EpiLag-PH the most accurate dengue model, and we did not test it against an LSTM.</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 2 methods -->
+    <section id="methods" class="pg-sec surface tone-paper" aria-labelledby="methods-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">2 · Four methods, one test</div><h2 id="methods-title" class="h2-sm">No method wins everywhere. <span class="em">LightGBM wins most.</span></h2></div>
+          <p>Negative binomial regression, a quantile random forest and SARIMAX took the same test and the same calibration as the submitted LightGBM model: each test year forecast only from earlier years.</p>
+        </div>
+        <div class="grid g2 split">
+          <figure class="card fig" data-reveal>
+            <figcaption><h3>Lowest error of the four</h3><p>Out of 24 checks: 6 test years × 4 lead times.</p></figcaption>
+            <ul class="hbars"><li class="hbar"><span class="hbar__nm">LightGBM <small>submitted</small></span><span class="hbar__track"><i style="--v:50.0%" class="is-main"></i></span><b class="nums"><span data-k="wins-lightgbm">12</span></b></li><li class="hbar"><span class="hbar__nm">Negative binomial</span><span class="hbar__track"><i style="--v:29.2%"></i></span><b class="nums"><span data-k="wins-negbin">7</span></b></li><li class="hbar"><span class="hbar__nm">SARIMAX</span><span class="hbar__track"><i style="--v:20.8%"></i></span><b class="nums"><span data-k="wins-sarimax">5</span></b></li><li class="hbar"><span class="hbar__nm">Random forest</span><span class="hbar__track"><i style="--v:0.0%"></i></span><b class="nums"><span data-k="wins-random_forest">0</span></b></li></ul>
+          </figure>
+          <div class="grid">
+            <div class="card" data-reveal><h3>Negative binomial won the hard years</h3><p>Flat 2023 at every lead time, and the 2019 epidemic for regions at 2 and 4 weeks. It carries a rise forward where trees cannot.</p></div>
+            <div class="card" data-reveal><h3>SARIMAX won further ahead</h3><p>Regions in 2019 at 6–8 weeks and in 2025 at 4–8 weeks. It caught the most outbreak starts on Watch (<span data-k="watch-n-sarimax">1,102</span> of <span data-k="starts">1,260</span>) but the fewest on Outbreak warning (<span data-k="warn-sarimax">17%</span>).</p></div>
+            <div class="card" data-reveal><h3>Random forest never won</h3><p>It stayed close to LightGBM, at a median of 2.6% higher error.</p></div>
+          </div>
+        </div>
+        <div class="tbl tbl--wide mt" data-reveal role="region" aria-label="Error of each method against the simple rule, 4 weeks ahead" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">Test set</th><th scope="col" class="num">LightGBM</th><th scope="col" class="num">Negative binomial</th><th scope="col" class="num">Random forest</th><th scope="col" class="num">SARIMAX</th><th scope="col" class="num">Average of the four</th></tr></thead>
+            <tbody>
+              <tr><td>Provinces 2019</td><td class="num best" data-th="LightGBM"><span data-k="rel-province-2019-lightgbm">78</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num" data-th="Negative binomial"><span data-k="rel-province-2019-negbin">78</span>%</td><td class="num" data-th="Random forest"><span data-k="rel-province-2019-random_forest">78</span>%</td><td class="num" data-th="SARIMAX"><span data-k="rel-province-2019-sarimax">82</span>%</td><td class="num avg" data-th="Average of the four"><span data-k="rel-province-2019-blend_all4">74</span>%</td></tr>
+              <tr><td>Provinces 2020</td><td class="num best" data-th="LightGBM"><span data-k="rel-province-2020-lightgbm">80</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num" data-th="Negative binomial"><span data-k="rel-province-2020-negbin">98</span>%</td><td class="num" data-th="Random forest"><span data-k="rel-province-2020-random_forest">82</span>%</td><td class="num" data-th="SARIMAX"><span data-k="rel-province-2020-sarimax">97</span>%</td><td class="num avg" data-th="Average of the four"><span data-k="rel-province-2020-blend_all4">83</span>%</td></tr>
+              <tr><td>Regions + QC 2019</td><td class="num" data-th="LightGBM"><span data-k="rel-region_qc-2019-lightgbm">82</span>%</td><td class="num best" data-th="Negative binomial"><span data-k="rel-region_qc-2019-negbin">71</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num" data-th="Random forest"><span data-k="rel-region_qc-2019-random_forest">84</span>%</td><td class="num" data-th="SARIMAX"><span data-k="rel-region_qc-2019-sarimax">74</span>%</td><td class="num avg" data-th="Average of the four"><span data-k="rel-region_qc-2019-blend_all4">73</span>%</td></tr>
+              <tr><td>Regions + QC 2023</td><td class="num over" data-th="LightGBM"><span data-k="rel-region_qc-2023-lightgbm">104</span>%<span class="sr-only"> (worse than the simple rule)</span></td><td class="num best" data-th="Negative binomial"><span data-k="rel-region_qc-2023-negbin">98</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num over" data-th="Random forest"><span data-k="rel-region_qc-2023-random_forest">107</span>%<span class="sr-only"> (worse than the simple rule)</span></td><td class="num over" data-th="SARIMAX"><span data-k="rel-region_qc-2023-sarimax">111</span>%<span class="sr-only"> (worse than the simple rule)</span></td><td class="num avg" data-th="Average of the four"><span data-k="rel-region_qc-2023-blend_all4">97</span>%</td></tr>
+              <tr><td>Regions + QC 2024</td><td class="num best" data-th="LightGBM"><span data-k="rel-region_qc-2024-lightgbm">68</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num" data-th="Negative binomial"><span data-k="rel-region_qc-2024-negbin">83</span>%</td><td class="num" data-th="Random forest"><span data-k="rel-region_qc-2024-random_forest">74</span>%</td><td class="num" data-th="SARIMAX"><span data-k="rel-region_qc-2024-sarimax">74</span>%</td><td class="num avg" data-th="Average of the four"><span data-k="rel-region_qc-2024-blend_all4">71</span>%</td></tr>
+              <tr><td>Regions + QC 2025</td><td class="num" data-th="LightGBM"><span data-k="rel-region_qc-2025-lightgbm">80</span>%</td><td class="num" data-th="Negative binomial"><span data-k="rel-region_qc-2025-negbin">87</span>%</td><td class="num" data-th="Random forest"><span data-k="rel-region_qc-2025-random_forest">85</span>%</td><td class="num best" data-th="SARIMAX"><span data-k="rel-region_qc-2025-sarimax">79</span>%<span class="sr-only"> (lowest of the four)</span></td><td class="num avg" data-th="Average of the four"><span data-k="rel-region_qc-2025-blend_all4">78</span>%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Error 4 weeks ahead, as a share of the error of "same as this week". Below 100% beats that rule. The lowest of the four methods in each row is marked; the average is shown beside them. Source: <code>research/results/model_comparison.csv</code>.</p>
+        <div class="callout callout--wide" data-reveal>
+          <b>Why not average the four?</b> An equal average had the lowest error in <span data-k="blend-lowest">11</span> of 24 checks and beat "same as this week" in all <span data-k="beat-blend_all4">24</span>, against <span data-k="beat-lightgbm">19</span> for LightGBM alone.
+          But it caught fewer outbreak starts on Outbreak warning: <span data-k="warn-blend_all4">30%</span> against <span data-k="warn-lightgbm">36%</span>. For an early-warning tool, missing outbreaks costs more than a small gain in error.
+          The idea of averaging was also picked after seeing these test years.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 3 drivers -->
+    <section id="drivers" class="pg-sec surface tone-sky tx-rain sf-subtle" aria-labelledby="drivers-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">3 · What drives the forecast</div><h2 id="drivers-title" class="h2-sm">Recent cases lead. <span class="em">Weather matters further ahead.</span></h2></div>
+          <p>Recent cases carry <span data-k="cases-share">48–76%</span> of the model's attention. For regions and Quezon City, weather's share grows with every extra week of lead time, which matches the mosquito-cycle lags in the literature.</p>
+        </div>
+        <div class="grid g2">
+          <figure class="card fig" data-reveal>
+            <figcaption><h3>Weather's share of the model's attention</h3><p>Regions + QC, submitted model, by weeks ahead (SHAP).</p></figcaption>
+            <ol class="cols" aria-label="Weather share by weeks ahead"><li><b class="nums"><span data-k="wx-share-2">11%</span></b><i style="--v:36.7px"></i><span>2 wk</span></li><li><b class="nums"><span data-k="wx-share-4">18%</span></b><i style="--v:60.0px"></i><span>4 wk</span></li><li><b class="nums"><span data-k="wx-share-6">22%</span></b><i style="--v:73.3px"></i><span>6 wk</span></li><li><b class="nums"><span data-k="wx-share-8">24%</span></b><i style="--v:80.0px"></i><span>8 wk</span></li></ol>
+          </figure>
+          <figure class="card fig" data-reveal>
+            <figcaption><h3>Error change from adding heat</h3><p>Regions + QC, heat added to cases and season, median of four test years.</p></figcaption>
+            <ol class="cols cols--cut" aria-label="Error change from adding heat, by weeks ahead"><li><b class="nums"><span data-k="heat-2">−2.2%</span></b><i style="--v:24.4px"></i><span>2 wk</span></li><li><b class="nums"><span data-k="heat-4">−3.9%</span></b><i style="--v:43.3px"></i><span>4 wk</span></li><li><b class="nums"><span data-k="heat-6">−4.1%</span></b><i style="--v:45.6px"></i><span>6 wk</span></li><li><b class="nums"><span data-k="heat-8">−7.3%</span></b><i style="--v:81.1px"></i><span>8 wk</span></li></ol>
+          </figure>
+        </div>
+        <div class="tbl tbl--stack mt" data-reveal>
+          <table>
+            <thead><tr><th scope="col">Variable group</th><th scope="col">Regions + QC</th><th scope="col">Provinces</th><th scope="col">Reading</th></tr></thead>
+            <tbody>
+              <tr><td>Rain</td><td data-th="Regions + QC">Helped in <span data-k="add-region_qc-rain">12 of 16</span></td><td data-th="Provinces"><span data-k="add-province-rain">2 of 8</span></td><td data-th="Reading">Helps regions from 6 weeks ahead</td></tr>
+              <tr><td>Heat</td><td data-th="Regions + QC"><span data-k="add-region_qc-heat">14 of 16</span></td><td data-th="Provinces"><span data-k="add-province-heat">3 of 8</span></td><td data-th="Reading">The steadiest regional gain; not in the submitted regional model</td></tr>
+              <tr><td>Humidity</td><td data-th="Regions + QC"><span data-k="add-region_qc-humidity">15 of 16</span></td><td data-th="Provinces"><span data-k="add-province-humidity">4 of 8</span></td><td data-th="Reading">As above</td></tr>
+              <tr><td>El Niño (ENSO)</td><td data-th="Regions + QC"><span data-k="add-region_qc-enso">8 of 16</span></td><td data-th="Provinces"><span data-k="add-province-enso">2 of 8</span>; inside the full set it helped in <span data-k="enso-helped-province">0 of 8</span></td><td data-th="Reading">Five years of province data hold about one El Niño cycle</td></tr>
+              <tr><td>Elevation</td><td data-th="Regions + QC">Not tested</td><td data-th="Provinces"><span data-k="add-province-topography">7 of 8</span> alone; nothing inside the full set</td><td data-th="Reading">Tracks infection, not reported cases (Sy 2026)</td></tr>
+              <tr><td>Neighbours' cases</td><td data-th="Regions + QC"><span data-k="neighbours-region_qc">9 of 16</span>, median <span data-k="neighbours-median-region_qc">−0.1%</span></td><td data-th="Provinces"><span data-k="neighbours-province">8 of 8</span>, median <span data-k="neighbours-median-province">−2.8%</span></td><td data-th="Reading">The one new variable that adds to what provinces already have</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Checks where adding the group to cases and season cut the error (16 for Regions + QC, 8 for provinces). Neighbours' cases were added on top of the full research set. Sources: <code>feature_groups.csv</code>, <code>proposed_features.csv</code>.</p>
+        <div class="note" data-reveal><span class="disc"><i data-icon="weatherCell" data-size="24"></i></span>
+          <span><b>For provinces, weather gave no measurable gain.</b> Likely reasons: both province test years were unusual (2019 and 2020), each province has one weather point, and there are only three training years.</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 4 losses -->
+    <section id="losses" class="pg-sec surface tone-white" aria-labelledby="losses-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">4 · Where it lost, and why</div><h2 id="losses-title" class="h2-sm">Three losses, <span class="em">three causes.</span></h2></div>
+          <p>We report the years the submitted model lost, and checked each explanation against the data before accepting it.</p>
+        </div>
+        <div class="grid g3">
+          <div class="card loss" data-reveal><span class="loss__n nums"><span data-k="lost-2019-2wk">18%</span> <small>worse</small></span><h3>2019, two weeks ahead</h3><p>The record epidemic rose beyond anything in the training years, and tree models cannot forecast past their training range. Negative binomial carried the rise forward instead.</p></div>
+          <div class="card loss" data-reveal><span class="loss__n nums"><span data-k="lost-2023-4wk">4%</span> <small>worse</small></span><h3>2023, the flat year</h3><p>The flattest year in the data: its peak was only <span data-k="peak-to-mean-2023">1.94</span> times its average week. In such a year, "same as this week" is a strong forecast.</p></div>
+          <div class="card loss" data-reveal><span class="loss__n nums"><span data-k="cov-cal-region_qc-2023">92%</span> <small>not 80%</small></span><h3>2023, a range too wide</h3><p>The calibration model ran about 18% low on 2022. Our single margin (<span data-k="margin-2023">0.227</span>, against <span data-k="margin-2024">0.094</span> and <span data-k="margin-2025">0.097</span> in the next two years) then widened both ends of the 2023 range, though only the top had missed.</p></div>
+        </div>
+        <figure class="card fig mt" data-reveal>
+          <figcaption><h3>Share of real counts inside the likely range, before and after calibration</h3><p>Submitted model, 4 weeks ahead. The target is 80%.</p></figcaption>
+          <ul class="bells">
+            <li class="bell"><span class="bell__nm">Provinces 2019</span><span class="bell__track" style="--a:41.7%;--b:61.7%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-province-2019">65%</span> → <b><span data-k="cov-cal-province-2019">77%</span></b></span></li>
+            <li class="bell"><span class="bell__nm">Provinces 2020</span><span class="bell__track" style="--a:38.3%;--b:65.0%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-province-2020">63%</span> → <b><span data-k="cov-cal-province-2020">79%</span></b></span></li>
+            <li class="bell"><span class="bell__nm">Regions + QC 2019</span><span class="bell__track" style="--a:13.3%;--b:50.0%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-region_qc-2019">48%</span> → <b><span data-k="cov-cal-region_qc-2019">70%</span></b></span></li>
+            <li class="bell"><span class="bell__nm">Regions + QC 2023</span><span class="bell__track" style="--a:46.7%;--b:86.7%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-region_qc-2023">68%</span> → <b><span data-k="cov-cal-region_qc-2023">92%</span></b></span></li>
+            <li class="bell"><span class="bell__nm">Regions + QC 2024</span><span class="bell__track" style="--a:48.3%;--b:66.7%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-region_qc-2024">69%</span> → <b><span data-k="cov-cal-region_qc-2024">80%</span></b></span></li>
+            <li class="bell"><span class="bell__nm">Regions + QC 2025</span><span class="bell__track" style="--a:40.0%;--b:63.3%"><i class="bell__line"></i><i class="bell__dot bell__dot--raw"></i><i class="bell__dot bell__dot--cal"></i></span><span class="bell__val nums"><span data-k="cov-raw-region_qc-2025">64%</span> → <b><span data-k="cov-cal-region_qc-2025">78%</span></b></span></li>
+          </ul>
+          <div class="bell-axis" aria-hidden="true"><span style="--p:0%">40%</span><span style="--p:33.3%">60%</span><span class="is-target" style="--p:66.7%">80% target</span><span style="--p:100%">100%</span></div>
+          <p class="fig__key"><span class="key key--raw">Before calibration</span><span class="key key--cal">After calibration</span></p>
+        </figure>
+        <p class="caption">Before calibration the range is too narrow in every test year. Calibration fixes that in five of six; in 2023 it overshoots. Ruled out as causes: an unusual 2022, and the missing 2020–21 data. Details: <a href="https://github.com/Romeo-04/epilag/blob/main/research/analysis/causes.md"><code>research/analysis/causes.md</code></a>.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 5 found -->
+    <section id="found" class="pg-sec surface tone-paper" aria-labelledby="found-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">5 · What the research found</div><h2 id="found-title" class="h2-sm">A better set of variables, <span class="em">not yet proven.</span></h2></div>
+          <p>Adding <b>neighbours' cases</b> for provinces, and <b>heat and humidity</b> for regions and Quezon City, beat the submitted model in <span data-k="final-better">21</span> of 24 checks, at a median of <span data-k="final-median">−1.4%</span> error.</p>
+        </div>
+        <div class="grid g2 split">
+          <figure class="card fig" data-reveal>
+            <figcaption><h3>Error against the submitted model</h3><p>Each check, by weeks ahead. Negative is better.</p></figcaption>
+            <div class="tiles-wrap">
+              <table class="tiles">
+                <thead><tr><td></td><th scope="col">2 wk</th><th scope="col">4 wk</th><th scope="col">6 wk</th><th scope="col">8 wk</th></tr></thead>
+                <tbody>
+              <tr><th scope="row">Provinces 2019</th><td class="tile tile--better" data-th="2 weeks"><span data-k="final-province-2019-2">−0.7%</span><span class="sr-only"> better</span></td><td class="tile tile--better2" data-th="4 weeks"><span data-k="final-province-2019-4">−3.1%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="6 weeks"><span data-k="final-province-2019-6">−1.3%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="8 weeks"><span data-k="final-province-2019-8">−0.5%</span><span class="sr-only"> better</span></td></tr>
+              <tr><th scope="row">Provinces 2020</th><td class="tile tile--better" data-th="2 weeks"><span data-k="final-province-2020-2">−2.6%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="4 weeks"><span data-k="final-province-2020-4">−2.3%</span><span class="sr-only"> better</span></td><td class="tile tile--better2" data-th="6 weeks"><span data-k="final-province-2020-6">−3.5%</span><span class="sr-only"> better</span></td><td class="tile tile--better2" data-th="8 weeks"><span data-k="final-province-2020-8">−6.1%</span><span class="sr-only"> better</span></td></tr>
+              <tr><th scope="row">Regions + QC 2019</th><td class="tile tile--worse" data-th="2 weeks"><span data-k="final-region_qc-2019-2">+2.1%</span><span class="sr-only"> worse</span></td><td class="tile tile--worse" data-th="4 weeks"><span data-k="final-region_qc-2019-4">+0.4%</span><span class="sr-only"> worse</span></td><td class="tile tile--better" data-th="6 weeks"><span data-k="final-region_qc-2019-6">−0.2%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="8 weeks"><span data-k="final-region_qc-2019-8">−0.8%</span><span class="sr-only"> better</span></td></tr>
+              <tr><th scope="row">Regions + QC 2023</th><td class="tile tile--better2" data-th="2 weeks"><span data-k="final-region_qc-2023-2">−3.7%</span><span class="sr-only"> better</span></td><td class="tile tile--better2" data-th="4 weeks"><span data-k="final-region_qc-2023-4">−5.4%</span><span class="sr-only"> better</span></td><td class="tile tile--better2" data-th="6 weeks"><span data-k="final-region_qc-2023-6">−4.8%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="8 weeks"><span data-k="final-region_qc-2023-8">−1.5%</span><span class="sr-only"> better</span></td></tr>
+              <tr><th scope="row">Regions + QC 2024</th><td class="tile tile--better" data-th="2 weeks"><span data-k="final-region_qc-2024-2">−1.1%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="4 weeks"><span data-k="final-region_qc-2024-4">−2.9%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="6 weeks"><span data-k="final-region_qc-2024-6">−0.5%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="8 weeks"><span data-k="final-region_qc-2024-8">−0.2%</span><span class="sr-only"> better</span></td></tr>
+              <tr><th scope="row">Regions + QC 2025</th><td class="tile tile--better" data-th="2 weeks"><span data-k="final-region_qc-2025-2">−2.7%</span><span class="sr-only"> better</span></td><td class="tile tile--better" data-th="4 weeks"><span data-k="final-region_qc-2025-4">−0.4%</span><span class="sr-only"> better</span></td><td class="tile tile--worse" data-th="6 weeks"><span data-k="final-region_qc-2025-6">+1.6%</span><span class="sr-only"> worse</span></td><td class="tile tile--better2" data-th="8 weeks"><span data-k="final-region_qc-2025-8">−3.6%</span><span class="sr-only"> better</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="fig__key"><span class="key key--better">Better</span><span class="key key--better2">Better by 3% or more</span><span class="key key--worse">Worse</span></p>
+          </figure>
+          <div class="grid">
+            <div class="card" data-reveal><h3>No outbreak catches lost</h3><p>Watch caught <span data-k="final-watch">1,050</span> outbreak starts against <span data-k="live-watch">1,049</span>, of <span data-k="starts">1,260</span>. Outbreak warning caught <span data-k="final-warn">473</span> against <span data-k="live-warn">458</span>.</p></div>
+            <div class="card" data-reveal><h3>Two more wins over the simple rule</h3><p>It beat "same as this week" in <span data-k="final-beat">21</span> of 24 checks, against <span data-k="live-beat">19</span>. The two new ones are Regions + QC 2023 at 2 and 4 weeks, the year the submitted model lost.</p></div>
+            <div class="note note--flush" data-reveal><span class="disc"><i data-icon="alert" data-size="24"></i></span>
+              <span><b>Why it is not the submitted model.</b> These variables were chosen after seeing the test years, and no unseen year is left to score them on. The gain is optimistic until a new season is scored, so the app, the open data and Dengue Drill still run the submitted model.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 limits + end -->
+    <section id="limits" class="pg-sec surface tone-soft" aria-labelledby="limits-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">6 · Limits and next steps</div><h2 id="limits-title" class="h2-sm">What this does not show, <span class="em">and what comes next.</span></h2></div>
+          <p>Each limit below is one we can name a fix for.</p>
+        </div>
+        <div class="grid g2">
+          <div class="card" data-reveal>
+            <h3>Limits</h3>
+            <ul class="list">
+              <li><b>Where the data end.</b> Province data stop in January 2021, so provinces have two test years, both unusual. Regional data skip 2020–2021.</li>
+              <li><b>Reports, not infections.</b> The model forecasts reported cases, which undercount infections.</li>
+              <li><b>Watch raises many false alarms</b> (42–63%). Outbreak warning is stricter but catches fewer outbreak starts.</li>
+              <li><b>Calibration rests on one year</b>, with one margin for both ends of the range.</li>
+            </ul>
+          </div>
+          <div class="card" data-reveal>
+            <h3>Next steps</h3>
+            <ol class="list list--n">
+              <li>Score the new variables on a season they have not seen.</li>
+              <li>Calibrate on more than one year, or set the lower and upper margins separately.</li>
+              <li>Test an average of the methods that keeps Outbreak-warning catches.</li>
+              <li>Add weekly province data after 2021.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="end surface tone-night tx-rain" data-reveal>
+          <h2 class="h2-sm">Every number here is in the repository. <span class="em">Check it.</span></h2>
+          <p>The experiment code is in <code>research/models/</code>, every result is a CSV in <code>research/results/</code>, and each source is listed with what we verified on it.</p>
+          <div class="btn-row"><a class="btn btn--light" href="https://github.com/Romeo-04/epilag/blob/main/research/EpiLag-PH-research-summary.pdf">Summary (PDF) <i data-icon="external" data-size="24"></i></a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/writeup/paper.md">Full write-up</a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/results/README.md">All results</a><a class="btn btn--dark-ghost" href="methodology.html">How the model works</a></div>
+          <pixel-sprite class="end__frog" sprite="frog" pose="peek" scale="3"></pixel-sprite>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pg-foot">
+    <div class="wrap foot">
+      <nav class="foot__links" aria-label="More">
+        <a href="./">Overview</a><a href="web/">App</a><a href="drill/">Dengue Drill</a><a href="methodology.html">Methodology</a><a href="data/">Open data</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </nav>
+      <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
+      <span>EpiLag-PH · PJDSC 2026</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/pages/research.js"></script>
+</body>
+</html>

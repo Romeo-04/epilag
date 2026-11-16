@@ -27,7 +27,7 @@
     <nav class="nav" aria-label="Main">
       <a class="brand" href="./"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span><small class="brand__sub">Methodology</small></a>
       <div class="nav__links" data-spy>
-        <a href="#data">Data</a><a href="#features">Features</a><a href="#model">Model</a><a href="#evaluation">Evaluation</a><a href="#action">Action</a><a href="#why">Why</a>
+        <a href="#data">Data</a><a href="#features">Features</a><a href="#model">Model</a><a href="#evaluation">Evaluation</a><a href="#action">Action</a><a href="#why">Why</a><a href="research.html">Research</a>
       </div>
       <a class="btn btn--primary btn--sm nav__cta" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
     </nav>
@@ -104,7 +104,7 @@
           </div>
           <div class="grid">
             <div class="card" data-reveal><h3>Recent cases</h3><p>Each of the last 4 weeks; 4- and 12-week averages; trend; same week last year.</p></div>
-            <div class="card" data-reveal><h3>Heat, humidity, season, population</h3><p>Lagged temperature and humidity; week of the year as a cycle, so late December sits next to early January; log population, so large and small areas share one model.</p></div>
+            <div class="card" data-reveal><h3>Heat, humidity, season, population</h3><p>Lagged temperature and humidity for provinces (the regional model's weather is rain only); week of the year as a cycle, so late December sits next to early January; log population, so large and small areas share one model.</p></div>
             <div class="card" data-reveal><h3>Targets</h3><p>Cases 2, 4, 6 and 8 weeks ahead, on a log scale so large outbreaks do not dominate training.</p></div>
           </div>
         </div>
@@ -156,6 +156,7 @@
         <p class="caption">Error = mean absolute error in cases per area-week, 4 weeks ahead; the lowest in each row is marked. Caught and false alarms are for the watch level.</p>
         <div class="note" data-reveal><span class="disc"><i data-icon="weatherCell" data-size="24"></i></span>
           <span><b>Weather test.</b> Retraining without any weather inputs changed error by −12% to +11%: about +2% on average for regions, about 0% for provinces. Most of the skill comes from recent cases and season, and we report that openly.</span></div>
+        <div class="callout mt" data-reveal><b>Tested further after the first round.</b> Three other methods (negative binomial, random forest, SARIMAX) took this same test: LightGBM had the lowest error in 12 of 24 checks, and no other method in more than 7. For regions, weather helps more the further ahead the forecast. <a href="research.html">Read the research</a>.</div>
       </div>
     </section>
 
@@ -188,7 +189,7 @@
           <p>Past PJDSC champions won with models like XGBoost and K-means used well, not with deep learning.</p>
         </div>
         <div class="grid g3">
-          <div class="card" data-reveal><h3>Explainable over exotic</h3><p>LightGBM with SHAP can be defended in front of judges and health officers.</p></div>
+          <div class="card" data-reveal><h3>Explainable over exotic</h3><p>LightGBM with SHAP can be defended in front of judges and health officers, and it held up against three other methods on the same test.</p></div>
           <div class="card" data-reveal><h3>Ranges over single numbers</h3><p>A health office stocks supplies for the high case.</p></div>
           <div class="card" data-reveal><h3>No peeking</h3><p>Every result comes from years the model never saw, compared with simple rules, with false alarms and the weak weather effect reported.</p></div>
         </div>
@@ -205,7 +206,7 @@
   <footer class="pg-foot">
     <div class="wrap foot">
       <nav class="foot__links" aria-label="More">
-        <a href="./">Overview</a><a href="web/">App</a><a href="drill/">Dengue Drill</a><a href="data/">Open data</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+        <a href="./">Overview</a><a href="web/">App</a><a href="drill/">Dengue Drill</a><a href="research.html">Research</a><a href="data/">Open data</a><a href="https://github.com/Romeo-04/epilag">Code</a>
       </nav>
       <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
       <span>EpiLag-PH · PJDSC 2026</span>

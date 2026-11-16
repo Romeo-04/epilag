@@ -1,7 +1,7 @@
 """Site checks for the built pages in docs/, through Playwright.
 
 For the landing page, every app view (both data panels, latest and replay, EN and FIL), the Dengue Drill and the
-methodology and open-data pages:
+methodology, research and open-data pages:
   - loads with no console errors and no failed requests
   - no horizontal scroll at 390 px and 1440 px
   - with reduced motion, nothing is left hidden by an entrance animation
@@ -27,7 +27,7 @@ AXE = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
 VIEWS = ["home", "map", "unit", "budget", "public", "qc", "proof", "about"]
 APP = [f"web/?page={v}&panel={p}&mode={m}&lang={l}" for v in VIEWS for p in ("region_qc", "province")
        for m in ("latest", "replay") for l in ("en", "fil")]
-PAGES = ["", "drill/", "methodology.html", "data/"]
+PAGES = ["", "drill/", "methodology.html", "research.html", "data/"]
 
 
 class _Handler(SimpleHTTPRequestHandler):
