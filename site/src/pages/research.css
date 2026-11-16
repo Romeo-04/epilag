@@ -97,3 +97,21 @@
 .loss__n { display: block; margin-bottom: 12px; font-size: 40px; line-height: 1; font-weight: 800; letter-spacing: -.04em; color: var(--ink); }
 .loss__n small { font-size: 16px; letter-spacing: 0; font-weight: 700; color: #8A3A00; }
 .loss { border-top: 6px solid var(--amber); }
+
+/* the reader: a research document in a dialog over the page */
+.reader { width: min(980px, calc(100vw - 24px)); height: min(92vh, 1100px); max-width: none; max-height: none; margin: auto; padding: 0; border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg); background: var(--paper); color: var(--ink); box-shadow: var(--shadow-float); overflow: hidden; }
+.reader[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.reader::backdrop { background: rgba(7, 23, 17, .6); }
+.reader__head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 12px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.reader__head h2 { flex: 1; min-width: 0; margin: 0; font-size: 18px; line-height: 1.2; }
+.reader__head .btn--sm { min-height: 40px; padding: 8px 14px; font-size: 14px; white-space: nowrap; }
+.reader__close { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--surface); --i1: currentColor; }
+.reader__close:hover { border-color: var(--ink); }
+.reader__frame { width: 100%; height: 100%; border: 0; background: var(--paper); }
+@media (max-width: 640px) {
+  .reader { width: 100vw; height: 100%; border-radius: 0; border: 0; }
+  .reader__head { flex-wrap: wrap; padding: 10px 12px 10px 16px; }
+  .reader__head h2 { flex-basis: calc(100% - 50px); order: -2; }
+  .reader__close { order: -1; }
+}

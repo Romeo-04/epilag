@@ -32,3 +32,24 @@ const spy = new IntersectionObserver((entries) => entries.forEach((e) => {
   });
 }), { rootMargin: "-40% 0px -55% 0px" });
 document.querySelectorAll("section[id]").forEach((s) => spy.observe(s));
+
+// the reader: links marked data-doc open their document in a dialog instead of leaving the page (without
+// JavaScript they are plain links to the same pages, which are still on this site)
+const reader = document.getElementById("reader"), frame = document.getElementById("reader-frame");
+function openDoc(a) {
+  document.getElementById("reader-title").textContent = a.dataset.docTitle;
+  document.getElementById("reader-pdf").hidden = a.dataset.doc !== "summary";
+  document.getElementById("reader-tab").href = a.href;
+  frame.title = a.dataset.docTitle;
+  frame.src = a.href;
+  reader.showModal();
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-doc]");
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; // a modified click still opens a tab
+  e.preventDefault();
+  openDoc(a);
+});
+document.getElementById("reader-close").addEventListener("click", () => reader.close());
+reader.addEventListener("click", (e) => { if (e.target === reader) reader.close(); }); // a click on the backdrop
+reader.addEventListener("close", () => { frame.src = "about:blank"; });

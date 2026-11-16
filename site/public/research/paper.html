@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full write-up · EpiLag-PH research</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0 auto;max-width:860px;padding:28px 24px 56px;font:400 16px/1.6 "Inter Tight","Helvetica Neue",Arial,system-ui,sans-serif;color:#071711;background:#FBFAF4;overflow-wrap:break-word}
+h1{font-size:30px;line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+h2{font-size:23px;line-height:1.2;margin:40px 0 10px;padding-top:18px;border-top:1px solid #CFD2C4}
+h3{font-size:18px;margin:26px 0 8px}h4{font-size:16px;margin:20px 0 6px}
+p,ul,ol{margin:0 0 12px}ul,ol{padding-left:22px}li{margin-bottom:5px}
+a{color:#055C3E;text-underline-offset:3px}
+code{font:500 .86em ui-monospace,"JetBrains Mono",Consolas,monospace;background:#F3F2EA;padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+.tbl{overflow-x:auto;margin:0 0 16px;border:1px solid #E4E4D9;border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #E4E4D9}
+th{background:#F3F2EA;font-weight:700;white-space:nowrap}tr:last-child td{border-bottom:0}
+blockquote{margin:0 0 12px;padding:10px 16px;background:#E3F0E7;border-radius:10px;color:#055C3E}
+hr{border:0;border-top:1px solid #CFD2C4;margin:28px 0}
+@media (max-width:560px){body{padding:20px 16px 40px;font-size:15px}h1{font-size:25px}h2{font-size:20px}}
+</style>
+</head>
+<body>
+<h1>EpiLag-PH: Weekly dengue forecasts with calibrated ranges for Philippine provinces, regions and Quezon City</h1>
+<p>Research write-up for the PJDSC 2026 final round, in IMRADC order (Introduction, Methods, Results, Discussion, Conclusion). A shorter summary is <code>research/EpiLag-PH-research-summary.pdf</code>.</p>
+<p><strong>Sources.</strong></p>
+<ul>
+<li>Every number traces to <code>reports/</code>, <code>research/results/</code>, or <code>research/analysis/out/</code>, written by <code>research/analysis/step3_checks.py</code>.</li>
+<li>Citations are keys in <code>research/lit/references.md</code>; study details are in <code>research/lit/rrl_matrix.csv</code>.</li>
+<li>Unless stated, results are 4 weeks ahead.</li>
+</ul>
+<h2>1. Introduction</h2>
+<p><strong>The problem.</strong></p>
+<ul>
+<li>Dengue is endemic in the Philippines. The Department of Health declared a national dengue epidemic on 6 August 2019 [doh2019epidemic].</li>
+<li>Response usually starts after cases are already high, because reports arrive after people fall ill. Reported cases also undercount infections, about 4.7 times in one Cebu City study [undurraga2017].</li>
+<li>A forecast weeks ahead gives a health office time to act.</li>
+</ul>
+<p><strong>What the literature says drives dengue.</strong> Climate acts with a delay, through the mosquito life cycle and the virus's incubation:</p>
+<ul>
+<li>Rain matters 5–7 weeks before cases [sumi2017, carvajal2018], with risk peaking at moderate amounts [iguchi2018].</li>
+<li>Humidity matters about 4 weeks before. It was the top weather factor in Metro Manila [carvajal2018] and the only factor linked to the second seasonal peak [xu2020].</li>
+<li>Temperature risk follows an inverted U, peaking near 27.5 °C in 61 Philippine provinces [seposo2023], within the 26–29 °C transmission optimum [mordecai2017].</li>
+<li>Multi-year cycles across Southeast Asia move with El Niño [vanpanhuis2015].</li>
+<li>Elevation and density are linked to infection rates in the Philippines, but not to reported cases [sy2026].</li>
+</ul>
+<p>The full evidence for each feature is in <code>research/lit/feature_evidence.csv</code>.</p>
+<p><strong>Forecasting work so far.</strong> In the 9 Philippine studies we reviewed, the forecasts cover:</p>
+<ul>
+<li>the national total by month [olana2025]</li>
+<li>one metro area, with no stated lead time [carvajal2018]</li>
+<li>one city [eligado2026]</li>
+<li>high-or-low incidence classes by province, 4 weeks ahead [buczak2014]</li>
+</ul>
+<p>Elsewhere in the region, probabilistic forecasts with tested alerts exist at monthly scale [colongonzalez2021, lowe2014], and as weekly national forecasts with intervals [shi2016].</p>
+<p><strong>The gap</strong> (<code>research/lit/positioning.md</code>). No Philippine study in the matrix has all four of these:</p>
+<ul>
+<li>weekly forecasts for many areas at several lead times</li>
+<li>calibrated ranges with coverage reported</li>
+<li>alerts scored for both catches and false alarms</li>
+<li>testing on several unseen years, including unusual ones</li>
+</ul>
+<p>EpiLag-PH sets out to fill that gap.</p>
+<h2>2. Methods</h2>
+<p><strong>Data</strong> (README &quot;Data&quot;):</p>
+<ul>
+<li><strong>Cases:</strong> weekly reported cases for 86 province-level units, 2016 to January 2021 (DOH Epidemiology Bureau via HDX). Also 17 regions (2016–2019 and 2022–2025) and Quezon City (2010–2025), from the UPRI-NOAH dataset [pelitro2026].</li>
+<li><strong>Weather:</strong> ERA5 daily weather via Open-Meteo.</li>
+<li><strong>Population:</strong> PSA-based population.</li>
+</ul>
+<p><strong>Features</strong> (<code>src/features.py</code>):</p>
+<ul>
+<li>recent cases (last 4 weeks, 4- and 12-week averages, trend, same week last year)</li>
+<li>weekly rain for 12 weeks, with 4/8/12-week totals and heavy-rain days</li>
+<li>humidity and temperature lags. These are in the submitted model for provinces only; for Regions + QC its weather is rain only, and temperature and humidity are research inputs.</li>
+<li>week of year and population</li>
+</ul>
+<p><strong>Model</strong> (README &quot;Method&quot;):</p>
+<ul>
+<li>For each lead time (2, 4, 6, 8 weeks), three LightGBM quantile models are fit separately, one each for the 10th, 50th and 90th percentiles.</li>
+<li>The 10–90% range is widened by conformalized quantile regression [romano2019] (<code>conformal_margin</code> in <code>src/backtest.py</code>):
+<ul>
+<li>A copy of the model is fit without the last training year.</li>
+<li>Its misses on that year set the margin: the 80% conformal quantile of the misses, in log space.</li>
+<li>The same margin is added to both ends of the range.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Alerts</strong> (<code>src/alerts.py</code>, <code>src/thresholds.py</code>):</p>
+<ul>
+<li>The epidemic line for week w of the year is the mean + 2 SD of weeks w−2 to w+2 in earlier years only (<code>src/thresholds.py</code>).</li>
+<li>An outbreak start is the first week of a run of 2 or more weeks above the epidemic line (<code>src/alerts.py</code>). Every alert number below counts outbreak starts.</li>
+<li><strong>Watch:</strong> the 90th percentile crosses the line.</li>
+<li><strong>Outbreak warning:</strong> the median crosses it.</li>
+</ul>
+<p><strong>Test design</strong> (<code>src/backtest.py</code>, <code>research/results/METHODS.md</code>):</p>
+<ul>
+<li>Each test year is forecast by a model trained only on earlier years.</li>
+<li>Test years: provinces 2019 and 2020; Regions + QC 2019, 2023, 2024 and 2025. That makes 6 panel-years × 4 lead times = 24 checks.</li>
+<li>Baselines: &quot;same as this week&quot; (persistence) and &quot;same week last year&quot; (seasonal naive).</li>
+</ul>
+<p><strong>Comparison methods</strong> (<code>research/results/METHODS.md</code>). Each goes through the same test and the same calibration:</p>
+<ul>
+<li>negative binomial regression</li>
+<li>quantile random forest</li>
+<li>SARIMAX</li>
+<li>an equal average of all four. It gets no calibration of its own: its range is the average of the four calibrated ranges (<code>research/results/METHODS.md</code>).</li>
+</ul>
+<p><strong>Variable tests</strong> (<code>research/results/METHODS.md</code>):</p>
+<ul>
+<li>Each variable group was added to cases + season, and removed from the full research set.</li>
+<li>The new variables were heat, humidity, ENSO, elevation, density, neighbours' cases, heatwave days, a rain anomaly, and rain 12–23 weeks back.</li>
+<li>Candidate final sets were scored on error, coverage and alerts.</li>
+</ul>
+<p><strong>Why this model:</strong></p>
+<ul>
+<li>The literature's drivers are non-linear, as above. Boosted trees learn such shapes from data, train fast [ke2017], and explain each forecast through SHAP.</li>
+<li>Tree models have done well for dengue elsewhere [carvajal2018, rahman2025].</li>
+<li>The comparison below tests that choice directly.</li>
+</ul>
+<h2>3. Results</h2>
+<h3>3.1 The submitted model</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Regions + QC</th>
+<th>Provinces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Error vs &quot;same as this week&quot;</td>
+<td>18% lower (2019), 32% (2024), 20% (2025); <strong>4% higher (2023)</strong></td>
+<td>22% lower (2019), 20% (2020)</td>
+</tr>
+<tr>
+<td>Error vs &quot;same week last year&quot;</td>
+<td>32–70% lower</td>
+<td>36% (2019), 89% (2020) lower</td>
+</tr>
+<tr>
+<td>Share of weeks inside the 10–90% range (target 80%)</td>
+<td>70–92%</td>
+<td>77–79%</td>
+</tr>
+<tr>
+<td>Outbreak starts caught by Watch</td>
+<td>79–100%</td>
+<td>87% (2019); 19 of 23, 83% (2020)</td>
+</tr>
+<tr>
+<td>False alarms on Watch</td>
+<td>42–63%</td>
+<td>46% (2019); 87% (2020)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Sources: <code>reports/backtest_&lt;panel&gt;.csv</code> (horizon 4) and <code>reports/alerts_&lt;panel&gt;.csv</code> (rule <code>warn_upper</code>, horizon 4).</p>
+<h3>3.2 Four methods on the same test</h3>
+<p>Lowest error among the four, out of 24 checks (<code>research/results/model_comparison.csv</code>):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>LightGBM</th>
+<th>Negative binomial</th>
+<th>SARIMAX</th>
+<th>Random forest</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td>7</td>
+<td>5</td>
+<td>0</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p><strong>Negative binomial</strong> won Regions + QC 2023 at every lead, Regions + QC 2019 at 2 and 4 weeks, and Provinces 2019 at 2 weeks.</p>
+</li>
+<li>
+<p><strong>SARIMAX</strong> won Regions + QC 2019 at 6–8 weeks and 2025 at 4–8 weeks. It caught the most outbreak starts on Watch (88%), but the fewest on Outbreak warning (17%).</p>
+</li>
+<li>
+<p><strong>Random forest</strong> stayed close to LightGBM, at a median of 2.6% higher error.</p>
+</li>
+<li>
+<p><strong>Calibration:</strong></p>
+<ul>
+<li>Before calibration, LightGBM's range held 46–73% of weeks, the narrowest of the four.</li>
+<li>After calibration, all four held about 80%.</li>
+</ul>
+</li>
+<li>
+<p><strong>The average of the four</strong> (<code>blend_all4</code>):</p>
+<ul>
+<li>lowest error in 11 of 24 checks against the four methods</li>
+<li>error below LightGBM's in 17 of 24, median −2.6%</li>
+<li>beat &quot;same as this week&quot; in 24 of 24</li>
+<li>but caught 30% of outbreak starts on Outbreak warning, against 36% for LightGBM</li>
+</ul>
+<p>The idea of blending was picked after seeing these test years (<code>research/results/README.md</code>).</p>
+</li>
+</ul>
+<h3>3.3 What each variable group adds</h3>
+<p><strong>Recent cases.</strong> Removing them makes the error 21–303% worse (<code>research/results/feature_groups.csv</code>, mode drop). They carry 48–76% of SHAP attention (<code>research/results/README.md</code>).</p>
+<p><strong>Weather, Regions + QC.</strong> The submitted model's weather for this panel is rain only; temperature and humidity are research inputs. Heat, humidity and rain each helped when added to cases + season, in 14, 15 and 12 of 16 checks. The gain grows with lead time (<code>research/analysis/out/f3_weather_by_horizon.csv</code>):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Weeks ahead</th>
+<th>2</th>
+<th>4</th>
+<th>6</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Error change from weather (rain only), live model (median)</td>
+<td>+0.5%</td>
+<td>0.0%</td>
+<td>−2.2%</td>
+<td>−4.9%</td>
+</tr>
+<tr>
+<td>Weather's (rain's) share of SHAP attention, live model</td>
+<td>11%</td>
+<td>18%</td>
+<td>22%</td>
+<td>24%</td>
+</tr>
+<tr>
+<td>Heat added to cases + season (median)</td>
+<td>−2.2%</td>
+<td>−3.9%</td>
+<td>−4.1%</td>
+<td>−7.3%</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Weather, provinces.</strong> No measurable gain at any lead.</p>
+<p><strong>ENSO.</strong> It hurt province forecasts in all 8 checks. For Regions + QC it was mixed: it helped in 8 of 16 checks, median +1% / −2% / −3% / −4% at 2 / 4 / 6 / 8 weeks, and carries most of the research set's 2023 gain at 6–8 weeks (<code>research/results/README.md</code>).</p>
+<p><strong>Elevation (provinces).</strong> It helped when added alone (7 of 8 checks, −1.9%), but not inside the full set.</p>
+<p><strong>Proposed variables</strong> (<code>research/results/proposed_features.csv</code>, <code>rain_lags.csv</code>):</p>
+<ul>
+<li>Neighbours' cases helped provinces in all 8 checks on top of the research set, at a median of −2.8%.</li>
+<li>Heatwave days, the rain anomaly and rain 12–23 weeks back added nothing on top.</li>
+</ul>
+<h3>3.4 Final variables</h3>
+<p><code>research/results/README.md</code>, &quot;Final variables&quot;; <code>candidates.csv</code>.</p>
+<ul>
+<li><strong>Provinces:</strong> the live features plus neighbours' cases.</li>
+<li><strong>Regions + QC:</strong> the live features plus heat and humidity, without ENSO.</li>
+</ul>
+<p><strong>Against the live model:</strong></p>
+<ul>
+<li>better in 21 of 24 checks, median −1.4% (range −6.1% to +2.1%)</li>
+<li>beat &quot;same as this week&quot; in 21 of 24, against 19. The two new wins are Regions + QC 2023 at 2 and 4 weeks.</li>
+<li>range held 80%</li>
+<li>Watch caught 1,050 outbreak starts against 1,049; Outbreak warning caught 473 against 458</li>
+</ul>
+<p>These are research findings. The submitted model in <code>src/</code> and <code>reports/</code> is unchanged.</p>
+<h2>4. Discussion</h2>
+<p>Details and checks are in <code>research/analysis/causes.md</code>.</p>
+<p><strong>Why EpiLag usually wins.</strong></p>
+<ul>
+<li>The drivers are non-linear (Introduction), and boosted trees fit those shapes.</li>
+<li>LightGBM won every province check at 4 weeks or more, and all of Regions + QC 2024: a large, on-schedule season.</li>
+</ul>
+<p><strong>Where it lost, and why.</strong></p>
+<ul>
+<li><strong>2019 at 2 weeks: 18% worse than &quot;same as this week&quot;.</strong>
+<ul>
+<li>The record epidemic rose beyond anything in the training years. Trees can't forecast past their training range [olana2025].</li>
+<li>The log-linear negative binomial carried the rise forward instead.</li>
+<li>Margins and level shifts are in <code>causes.md</code>, finding 5 and part 2.</li>
+</ul>
+</li>
+<li><strong>2023: 4% worse than &quot;same as this week&quot;.</strong>
+<ul>
+<li>It was the flattest year in the data, with the lowest peak-to-mean ratio (1.94) and the lowest 4-week volatility (0.40; <code>out/f1_region_year_shape.csv</code>). In such a year, &quot;same as this week&quot; is a strong forecast.</li>
+</ul>
+</li>
+<li><strong>2023's range was too wide (92%).</strong>
+<ul>
+<li>The raw range was normal (68%), but the calibration margin, fit on 2022, was 0.227, against 0.176 for 2019 and 0.094–0.097 for 2024–25 (<code>research/results/extracts/calibration.csv</code>).</li>
+<li>The calibration model, fit on regional data ending in 2019, forecast 2022 about 18% too low. 38% of weeks were above its 90% forecast, and 9% below its 10% forecast (<code>research/results/margin_check_calibration_year.csv</code>).</li>
+<li>The single margin then widened both ends of the 2023 range, though only the top had missed.</li>
+<li>Ruled out: an unusual 2022 (its case level and rain were ordinary), and the inputs missing because of the 2020–21 gap. Filling or dropping &quot;same week last year&quot; left the margin at 0.216–0.228 (<code>research/results/margin_check.csv</code>).</li>
+<li>Why the calibration model ran low is a hypothesis, not tested: its fit data were short or two years old.</li>
+</ul>
+</li>
+<li><strong>&quot;Same week last year&quot; in 2020.</strong>
+<ul>
+<li>It copied the 2019 epidemic into a year 79% lower nationally, and lower in every one of the 86 provinces, with the drop starting in late March 2020 (<code>out/f2_*</code>).</li>
+<li>The 89% skill in 2020 shows that baseline failing. It isn't typical skill.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Why weather helps more further ahead.</strong></p>
+<ul>
+<li>Published lags are about 4 weeks for humidity [carvajal2018, shi2016], 5–7 weeks for rain [sumi2017], and 10–18 weeks for temperature [mordecai2017, seposo2023].</li>
+<li>A 2-week forecast is made after most of that weather has already shown up in cases.</li>
+<li>Weather's added value and attention rise steadily to 8 weeks.</li>
+</ul>
+<p><strong>Weather does not help most in unusual years.</strong></p>
+<ul>
+<li>It helped most in 2024 (−9% at 4 weeks), whose wet-season rain was within 10% of normal.</li>
+<li>It helped little in very wet 2025 (+33%) and dry 2019 (−21%) (<code>out/f4_rain_anomaly_vs_weather_gain.csv</code>).</li>
+<li>Extreme years sit outside the training range, and very wet conditions lower dengue risk [ith2025].</li>
+</ul>
+<p><strong>Expectation against result for each variable</strong> (<code>causes.md</code>, part 2):</p>
+<ul>
+<li><strong>Agree with the literature:</strong> cases, season, and weather for Regions + QC.</li>
+<li><strong>Disagree:</strong> weather for provinces. Likely causes: unusual test years, one weather point per province, and only 3 training years, against the 10 years behind the published effects [seposo2023, xu2020].</li>
+<li><strong>ENSO:</strong> behaves as the literature predicts. It acts on 2–5 year cycles [vanpanhuis2015], and five years of province data hold about one cycle.</li>
+<li><strong>Elevation:</strong> also as predicted. It tracks infection, not reported cases [sy2026], and recent cases already carry each area's level.</li>
+<li><strong>Neighbours' cases:</strong> helped provinces more than the weak evidence suggested [buczak2014, vanpanhuis2015].</li>
+</ul>
+<p><strong>Limitations.</strong></p>
+<ul>
+<li><strong>Where the data end.</strong> Province data stop in January 2021, so provinces have only two test years, both unusual (2019 and 2020). Regional data skip 2020–2021.</li>
+<li><strong>Choices made after seeing the test years:</strong> the average of the four, neighbours' cases, and dropping ENSO. Their gains are optimistic, and no unseen year is left to score them.</li>
+<li><strong>Reports, not infections.</strong> The model forecasts reported cases, which undercount infections [undurraga2017].</li>
+<li><strong>One weather point per area.</strong></li>
+<li><strong>Watch has a high false-alarm share (42–63%).</strong> Outbreak warning is stricter, but catches fewer outbreak starts.</li>
+<li><strong>Calibration rests on one year, with one margin for both ends.</strong> A calibration model that runs low in that year widens the whole next year's range, the bottom as well as the top (2023: 92% held, against an 80% target).</li>
+<li><strong>Unverified sources:</strong> makridakis2022, the Mandaue study and senson2026 are unverified, and none of them supports a claim here (<code>references.md</code>).</li>
+</ul>
+<h2>5. Conclusion</h2>
+<p><strong>What the evidence supports.</strong></p>
+<ul>
+<li>The submitted LightGBM quantile model, with conformal calibration, beat both simple baselines in 5 of 6 test years. It had the lowest error of four methods in 12 of 24 checks, and ranges that held about 80% after calibration.</li>
+<li>Its losses have specific causes: a record year beyond the training range, a flat year, and a calibration year whose model ran low, which the single margin carried into both ends of the next year's range.</li>
+<li>Weather helps the regional model at 6–8 weeks, matching the mosquito-cycle lags in the literature. Elevation and ENSO add little, also as the literature predicts.</li>
+<li>The research found a better set of variables: neighbours' cases for provinces, and heat and humidity for regions. It was better in 21 of 24 checks. It was chosen after seeing the test years, so the gain is optimistic until it is scored on a new season.</li>
+</ul>
+<p><strong>Next steps.</strong></p>
+<ol>
+<li>Score the final variables on a new season they haven't seen.</li>
+<li>Calibrate on more than one year, or set the lower and upper margins separately [romano2019]. Untested.</li>
+<li>Test a calibrated average of the methods that keeps Outbreak-warning catches.</li>
+<li>Add province data after 2021.</li>
+</ol>
+</body>
+</html>

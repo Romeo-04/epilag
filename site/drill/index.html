@@ -54,8 +54,8 @@
         <span class="chip chip--night" id="brief-chip">Intel briefing</span>
         <h2 id="b-title">The rain is free.<br><span>The dengue bill comes later.</span></h2>
         <p>Teams cut the bill only if they arrive before the cases do.</p>
-        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Start round 1 <i data-icon="play" data-size="24"></i></button>
-          <span class="sub">10 teams · 8 turns · case reports only</span></div>
+        <div class="briefing__go"><button class="btn btn--go" id="go-r1" type="button">Choose your model <i data-icon="play" data-size="24"></i></button>
+          <span class="sub">10 teams · 8 turns. Round 1 has case reports only. Round 2 adds your model's forecasts.</span></div>
       </div>
       <div class="briefing__receipt"><div class="receipt" id="receipt"></div><pixel-sprite class="briefing__mosq" sprite="mosquito" pose="clipboard" scale="4"></pixel-sprite></div>
     </div>
@@ -128,13 +128,13 @@
   <!-- ============================================================ round 2: choose a forecaster -->
   <section class="screen" id="s-models" aria-labelledby="mo-title">
     <div class="wrap report">
-      <span class="chip chip--night chip--intel">Round 2 · choose your forecaster</span>
+      <span class="chip chip--night chip--intel" id="mo-chip">Choose your forecaster</span>
       <h2 id="mo-title">Whose forecast do you trust?</h2>
-      <p class="lead">Five models forecast this season 4 weeks ahead, each trained only on earlier years. Pick one to guide round 2.</p>
+      <p class="lead" id="mo-lead"></p>
       <div class="models" id="models" role="radiogroup" aria-labelledby="mo-title"></div>
       <p class="models__note">The two figures are each model's record over the research's 24 tests. The average is computed here from the four models' rounded forecasts, so it is approximate.</p>
-      <div class="btn-row"><button class="btn btn--go" id="go-r2" type="button">Start round 2 <i data-icon="play" data-size="24"></i></button>
-        <a class="btn btn--dark-ghost" href="../research.html">How the models compare</a></div>
+      <div class="btn-row"><button class="btn btn--go" id="go-r2" type="button"></button>
+        <button class="btn btn--dark-ghost" id="cmp-open" type="button">How the models compare</button></div>
     </div>
   </section>
 
@@ -164,6 +164,16 @@
     <div class="coach__row"><button type="button" class="coach__skip" id="coach-skip">Skip</button>
       <button type="button" class="btn btn--go btn--sm" id="coach-next">Next</button></div>
   </div>
+  <dialog class="guide cmp" id="cmp" aria-labelledby="cmp-title">
+    <div class="guide__head"><h2 id="cmp-title">How the models compare</h2>
+      <button type="button" class="mute" id="cmp-close" aria-label="Close"><i data-icon="close" data-size="24"></i></button></div>
+    <p class="guide__note">The first two columns are each model's record over the research's 24 tests on years it had not seen. The last is how often it raises an alert in this mission. Press a row to pick that model.</p>
+    <div class="cmp__scroll"><table class="cmp__table">
+      <thead><tr><th scope="col">Model</th><th scope="col">Beat "same as this week"</th><th scope="col">Outbreak starts caught by Outbreak warning</th><th scope="col" id="cmp-here">Alerts in this mission</th></tr></thead>
+      <tbody id="cmp-rows"></tbody></table></div>
+    <div class="btn-row"><button type="button" class="btn btn--go" id="cmp-ok">Done</button>
+      <a class="cmp__more" href="../research.html" target="_blank" rel="noopener">Full research page (new tab)</a></div>
+  </dialog>
   <dialog class="guide" id="guide" aria-labelledby="g-title">
     <div class="guide__head"><h2 id="g-title">How to play</h2>
       <button type="button" class="mute" id="guide-close" aria-label="Close"><i data-icon="close" data-size="24"></i></button></div>

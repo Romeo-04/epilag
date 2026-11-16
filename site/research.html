@@ -50,8 +50,8 @@
               <li class="chip"><b><span data-k="studies">19</span></b> studies reviewed</li><li class="chip"><b>4</b> methods, one test</li><li class="chip"><b>9</b> new variable groups</li><li class="chip"><b>24</b> checks: 6 test years × 4 lead times</li>
             </ul>
             <div class="btn-row pg-hero__cta">
-              <a class="btn btn--primary" href="https://github.com/Romeo-04/epilag/blob/main/research/EpiLag-PH-research-summary.pdf">Read the 8-page summary <i data-icon="external" data-size="24"></i></a>
-              <a class="btn btn--ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/writeup/paper.md">Full write-up</a>
+              <a class="btn btn--primary" href="research/summary.html" data-doc="summary" data-doc-title="Research summary">Read the 8-page summary</a>
+              <a class="btn btn--ghost" href="research/paper.html" data-doc="paper" data-doc-title="Full write-up">Full write-up</a>
             </div>
           </div>
           <pixel-sprite class="pg-hero__sprite" sprite="frog" pose="watch" scale="5"></pixel-sprite>
@@ -92,7 +92,7 @@
             </tbody>
           </table>
         </div>
-        <p class="caption">Five of the 10 forecasting studies compared; the full table and each source are in <a href="https://github.com/Romeo-04/epilag/blob/main/research/lit/positioning.md"><code>research/lit/positioning.md</code></a> and <a href="https://github.com/Romeo-04/epilag/blob/main/research/lit/references.md"><code>references.md</code></a>.</p>
+        <p class="caption">Five of the 10 forecasting studies compared; the full table and each source are in <a href="research/positioning.html" data-doc="positioning" data-doc-title="Where EpiLag-PH sits in the literature"><code>research/lit/positioning.md</code></a> and <a href="research/references.html" data-doc="references" data-doc-title="References"><code>references.md</code></a>.</p>
 
         <h3 class="sub-h" data-reveal>What the literature says drives dengue</h3>
         <div class="grid g3">
@@ -206,7 +206,7 @@
           <div class="bell-axis" aria-hidden="true"><span style="--p:0%">40%</span><span style="--p:33.3%">60%</span><span class="is-target" style="--p:66.7%">80% target</span><span style="--p:100%">100%</span></div>
           <p class="fig__key"><span class="key key--raw">Before calibration</span><span class="key key--cal">After calibration</span></p>
         </figure>
-        <p class="caption">Before calibration the range is too narrow in every test year. Calibration fixes that in five of six; in 2023 it overshoots. Ruled out as causes: an unusual 2022, and the missing 2020–21 data. Details: <a href="https://github.com/Romeo-04/epilag/blob/main/research/analysis/causes.md"><code>research/analysis/causes.md</code></a>.</p>
+        <p class="caption">Before calibration the range is too narrow in every test year. Calibration fixes that in five of six; in 2023 it overshoots. Ruled out as causes: an unusual 2022, and the missing 2020–21 data. Details: <a href="research/causes.html" data-doc="causes" data-doc-title="Causes: why each result came out as it did"><code>research/analysis/causes.md</code></a>.</p>
       </div>
     </section>
 
@@ -275,7 +275,7 @@
         <div class="end surface tone-night tx-rain" data-reveal>
           <h2 class="h2-sm">Every number here is in the repository. <span class="em">Check it.</span></h2>
           <p>The experiment code is in <code>research/models/</code>, every result is a CSV in <code>research/results/</code>, and each source is listed with what we verified on it.</p>
-          <div class="btn-row"><a class="btn btn--light" href="https://github.com/Romeo-04/epilag/blob/main/research/EpiLag-PH-research-summary.pdf">Summary (PDF) <i data-icon="external" data-size="24"></i></a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/writeup/paper.md">Full write-up</a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag/blob/main/research/results/README.md">All results</a><a class="btn btn--dark-ghost" href="methodology.html">How the model works</a></div>
+          <div class="btn-row"><a class="btn btn--light" href="research/summary.html" data-doc="summary" data-doc-title="Research summary">Summary</a><a class="btn btn--dark-ghost" href="research/paper.html" data-doc="paper" data-doc-title="Full write-up">Full write-up</a><a class="btn btn--dark-ghost" href="research/results.html" data-doc="results" data-doc-title="All results">All results</a><a class="btn btn--dark-ghost" href="methodology.html">How the model works</a></div>
           <pixel-sprite class="end__frog" sprite="frog" pose="peek" scale="3"></pixel-sprite>
         </div>
       </div>
@@ -291,6 +291,17 @@
       <span>EpiLag-PH · PJDSC 2026</span>
     </div>
   </footer>
+
+  <!-- the reader: research documents open here, so nobody leaves the site (pages from scripts/research_docs.py) -->
+  <dialog class="reader" id="reader" aria-labelledby="reader-title">
+    <header class="reader__head">
+      <h2 id="reader-title"></h2>
+      <a class="btn btn--ghost btn--sm" id="reader-pdf" href="research/EpiLag-PH-research-summary.pdf" download hidden>Download PDF</a>
+      <a class="btn btn--ghost btn--sm" id="reader-tab" target="_blank" rel="noopener">Open in a new tab</a>
+      <button type="button" class="reader__close" id="reader-close" aria-label="Close"><i data-icon="close" data-size="24"></i></button>
+    </header>
+    <iframe class="reader__frame" id="reader-frame" title="Research document"></iframe>
+  </dialog>
 
   <script type="module" src="/src/pages/research.js"></script>
 </body>

@@ -238,6 +238,7 @@ python scripts/make_figures.py
 python scripts/drill_data.py         # Dengue Drill season data (site/public/drill/data.json)
 python scripts/qc_drill_data.py      # Dengue Drill Quezon City mission (site/public/drill/qc.json, geo/voxel_qc.json)
 python scripts/drill_models.py       # Dengue Drill round 2: every model's forecasts (site/public/drill/models.json)
+python scripts/research_docs.py      # Research page reader: the research documents as pages (site/public/research/)
 python scripts/export_open_data.py   # open forecast files (docs/data/)
 python scripts/build_web.py          # app data and EN/FIL copy
 python scripts/voxel_data.py         # 3D map grids (site/public/geo/)

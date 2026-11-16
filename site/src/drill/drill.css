@@ -538,3 +538,26 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .model__now { font-size: 13px; font-weight: 700; color: #7FE4FF; }
 .models__note { color: var(--night-muted); font-size: 13.5px; line-height: 1.5; margin-top: 14px; max-width: 80ch; }
 .bar__tag { margin-left: 6px; }
+
+/* how the models compare: a table in a dialog over the chooser */
+.cmp { width: min(980px, calc(100vw - 24px)); }
+.cmp .guide__note { margin: 12px 0 14px; }
+.cmp__scroll { overflow-x: auto; margin-bottom: 18px; }
+.cmp__table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 14px; }
+.cmp__table thead th { padding: 0 12px 8px; text-align: left; vertical-align: bottom; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--night-muted); }
+.cmp__table tbody tr { border-top: 1.5px solid var(--night-line); cursor: pointer; }
+.cmp__table tbody tr:hover { background: rgba(255, 255, 255, .04); }
+.cmp__table tbody tr.sel { background: rgba(245, 165, 28, .12); box-shadow: inset 3px 0 0 var(--d-amber); }
+.cmp__table td, .cmp__table tbody th { padding: 10px 12px; text-align: left; vertical-align: middle; font-weight: 400; }
+.cmp__table td { width: 21%; }
+.cmp__pick { display: grid; gap: 2px; text-align: left; color: var(--night-text); }
+.cmp__pick b { font-size: 15px; }
+.cmp__pick span { font-size: 12.5px; line-height: 1.35; color: var(--night-muted); }
+.cmp__pick:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.cmp__bar { display: flex; height: 8px; margin-bottom: 5px; background: rgba(255, 255, 255, .1); }
+.cmp__bar i { background: var(--d-teal); }
+.cmp__bar--split i { background: var(--c); }
+.cmp__table td b { font-size: 15px; font-weight: 800; white-space: nowrap; }
+.cmp__table td small { font-size: 12px; font-weight: 600; color: var(--night-muted); }
+.cmp__more { font-size: 13.5px; color: var(--night-muted); }
+.cmp__more:hover { color: var(--night-text); }

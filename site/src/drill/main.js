@@ -104,16 +104,16 @@ function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classL
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } } };
 // each step points at one control; steps with `wait` move on when the player does the action
 const TOUR = [
-  { at: "#board", text: () => `Each block is a ${M.unit[0]}. Taller and redder means more cases than usual.` },
+  { at: "#board", text: () => `This walkthrough is practice: nothing in it costs you. Each block is a ${M.unit[0]}. Taller and redder means more cases than usual.` },
   { at: "#plist", wait: "pick", text: () => `Pick a ${M.unit[0]} on the map or in this list.` },
   { at: "#deploy", wait: "deploy", text: () => `Send a team. One team protects about ${fmt(Math.round(R.PEOPLE / 1000) * 1000)} people.` },
   { at: "#end", wait: "end", text: () => "End the turn. Two weeks pass and new reports come in." },
-  { at: "#h-timeline", text: () => `Teams take 2 weeks to show, so send them before cases peak. You have ${TURNS.length} turns.` },
+  { at: "#h-timeline", text: () => `Teams take 2 weeks to show, so send them before cases peak. You have ${TURNS.length} turns. Practice is over: your budget and turn are back to where they were.` },
 ];
 const TIP2 = [{ at: "#board", text: () => `Blue rings are ${modelOf().short}'s forecasts for 4 weeks ahead. Use them to get in early.` }];
 const coach = (() => {
   const el = $("coach"), ring = $("coach-ring");
-  let steps = TOUR, step = -1, key = null, timer = 0;
+  let steps = TOUR, step = -1, key = null, timer = 0, saved = null;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   function place() {
     const t = document.querySelector(steps[step]?.at);
@@ -146,13 +146,19 @@ const coach = (() => {
     clearInterval(timer); timer = setInterval(place, 150); // the target moves as panels re-render and the page scrolls
   }
   function hide() { clearInterval(timer); step = -1; el.hidden = true; ring.hidden = true; }
-  function finish() { if (key) store.set(key, "1"); hide(); }
+  // the walkthrough is practice: the team it has the player send and the turn it ends are undone when it closes
+  function finish() {
+    if (key) store.set(key, "1");
+    const back = steps === TOUR ? saved : null;
+    saved = null; hide();
+    if (back) restore(back);
+  }
   $("coach-next").addEventListener("click", () => { sfx.click(); go(step + 1); });
   $("coach-skip").addEventListener("click", finish);
   return {
     hide,
     /** The first-play walkthrough; `force` replays it from the guide. */
-    start(force = false) { if (!force && store.get("drill-tour")) return; setTab("areas"); steps = TOUR; key = "drill-tour"; go(0); },
+    start(force = false) { if (!force && store.get("drill-tour")) return; setTab("areas"); steps = TOUR; key = "drill-tour"; saved = snapshot(); go(0); },
     /** One pointer the first time round 2 starts. */
     tip2() { if (store.get("drill-tip2")) return; steps = TIP2; key = "drill-tip2"; go(0); },
     /** The player did `what` (pick, deploy, end): move on if the current step was waiting for it. */
@@ -231,7 +237,8 @@ $("start").addEventListener("click", () => {
     + `<div class="stamp">UNPAID · ACT EARLIER</div>`;
   show("s-brief");
 });
-$("go-r1").addEventListener("click", () => startRound(1));
+// the model is chosen first: each model is its own simulation, round 1 without its forecasts and round 2 with them
+$("go-r1").addEventListener("click", () => { sfx.click(); chooseModel(); });
 
 // ------------------------------------------------------------------ the game
 const teamsIn = (k) => R.teamsIn(plan, k);
@@ -499,6 +506,16 @@ $("end").addEventListener("click", () => {
   } else warp("Season over", `Counting the real ${M.year} cases`, endRound);
 });
 
+/** The round as it stands, and putting it back (the walkthrough's practice moves are undone with these). */
+function snapshot() { return { round, turn, kits, plan: JSON.parse(JSON.stringify(plan)) }; }
+function restore(st) {
+  if (st.round !== round || !$("s-game").classList.contains("on")) return;
+  const changed = st.turn !== turn || st.kits !== kits;
+  ({ turn, kits, plan } = st); logTurn = turn; confirmEnd = false; $("log-dot").hidden = true;
+  refresh({ duration: 600 }); tick(headline());
+  if (changed) toast("Practice over", `Budget back to ₱${((kits * K.pesos) / 1e6).toFixed(1)}M`);
+}
+
 // ------------------------------------------------------------------ round report and debrief
 const BADGE_ICON = { early: "alert", waste: "check", full: "actionPlan", bot: "didItWork", saved: "residents" };
 function endRound() {
@@ -535,8 +552,8 @@ function endRound() {
     Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ts.push(+t); });
     return `<div class="panel"><b>${p.name}</b><small>${pk == null ? "No outbreak" : `Peaked ${day(WEEKS[pk])}`} · ${ts.length} team${ts.length === 1 ? "" : "s"}</small>${spark(p, WEEKS.length - 1, { teams: ts, peak: pk, cls: "" })}</div>`;
   }).join("");
-  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · choose a forecaster" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
-  $("next-r").onclick = () => (round === 1 ? chooseModel() : versus());
+  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? `Round 2 · with ${modelOf().short} forecasts` : "Debrief"} ${icon("play", { size: 24 })}</button>`;
+  $("next-r").onclick = () => (round === 1 ? startRound(2) : versus());
 }
 /** The frog reacts to the grade: S/A strike then smile, B watches, C/D peeks. */
 function frogReacts(el, g) {
@@ -549,7 +566,13 @@ function chooseModel() {
   const saved = store.get("drill-model");
   if (!results[2] && modelOf(saved)) model = saved; // a first visit to this screen opens on the last model used
   const tw = TURNS[0], count = (id, lv) => region.provinces.filter((p) => (R.fcOf(p, id)[tw] || [])[0] === lv).length;
-  $("mo-title").textContent = results[2] ? "Try another forecaster." : "Whose forecast do you trust?";
+  // before round 1 the choice opens the simulation; after a debrief it replays round 2 against the same round 1
+  const again = !!results[1];
+  $("mo-chip").textContent = again ? "Round 2 · try another forecaster" : `${region.name} · choose your forecaster`;
+  $("mo-title").textContent = again ? "Try another forecaster." : "Whose forecast do you trust?";
+  $("mo-lead").textContent = again ? "Round 1 had no forecasts, so your result stands. Pick another model and replay round 2 with it."
+    : "Five models forecast this season 4 weeks ahead, each trained only on earlier years. Pick one. You play round 1 without it and round 2 with it, to see what it adds.";
+  $("go-r2").innerHTML = `${again ? "Start round 2" : "Start round 1"} ${icon("play", { size: 24 })}`;
   $("models").innerHTML = MODELS.map((m) => {
     const flagged = count(m.id, "warning") + count(m.id, "watch");
     const tag = m.id === DEFAULT_MODEL ? "Submitted model" : m.id === "average" ? "Approximate" : results[2] && results[2].model === m.id ? "Just played" : "";
@@ -576,7 +599,28 @@ $("models").addEventListener("keydown", (e) => {
   const k = MODELS.findIndex((m) => m.id === model);
   pickModel(MODELS[(k + step + MODELS.length) % MODELS.length].id);
 });
-$("go-r2").addEventListener("click", () => { store.set("drill-model", model); startRound(2); });
+// how the models compare, as a dialog over the chooser: the research record, and how often each alerts in this mission
+function renderCompare() {
+  const n = region.provinces.length * TURNS.length;
+  const count = (id, lv) => region.provinces.reduce((s, p) => s + TURNS.filter((tw) => (R.fcOf(p, id)[tw] || [])[0] === lv).length, 0);
+  $("cmp-here").textContent = `Alerts in this mission (${fmt(n)} ${M.unit[0]}-turns)`;
+  $("cmp-rows").innerHTML = MODELS.map((m) => {
+    const watch = count(m.id, "watch"), warn = count(m.id, "warning");
+    return `<tr class="${m.id === model ? "sel" : ""}" data-id="${m.id}"><th scope="row"><button type="button" class="cmp__pick" aria-pressed="${m.id === model}"><b>${m.name}</b><span>${m.line}</span></button></th>
+      <td><span class="cmp__bar"><i style="width:${(m.beat_same_as_this_week / m.checks) * 100}%"></i></span><b class="nums">${m.beat_same_as_this_week}<small> of ${m.checks}</small></b></td>
+      <td><span class="cmp__bar"><i style="width:${m.warning_caught_pct}%"></i></span><b class="nums">${m.warning_caught_pct}<small>%</small></b></td>
+      <td><span class="cmp__bar cmp__bar--split"><i data-lv="watch" style="width:${(watch / n) * 100}%"></i><i data-lv="warning" style="width:${(warn / n) * 100}%"></i></span>
+        <b class="nums">${fmt(watch)}<small> Watch · </small>${fmt(warn)}<small> Outbreak warning</small></b></td></tr>`;
+  }).join("");
+}
+$("cmp-open").addEventListener("click", () => { sfx.click(); renderCompare(); $("cmp").showModal(); });
+["cmp-close", "cmp-ok"].forEach((id) => $(id).addEventListener("click", () => $("cmp").close()));
+$("cmp").addEventListener("click", (e) => {
+  if (e.target === $("cmp")) return $("cmp").close(); // a click on the backdrop
+  const row = e.target.closest("tr[data-id]");
+  if (row) { pickModel(row.dataset.id); renderCompare(); $("cmp-rows").querySelector(".sel .cmp__pick")?.focus(); }
+});
+$("go-r2").addEventListener("click", () => { store.set("drill-model", model); startRound(results[1] ? 2 : 1); });
 $("try-model").addEventListener("click", () => { sfx.click(); chooseModel(); });
 
 function versus() {
