@@ -7,6 +7,7 @@ import "../css/components.css";
 import "./pages.css";
 import { hydrateIcons } from "../lib/icons.js";
 import "../lib/pixel.js";
+import "../lib/nav.js";
 import { gsap, countUp, reduced, reveal } from "../lib/motion.js";
 
 hydrateIcons();

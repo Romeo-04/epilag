@@ -6,6 +6,7 @@ import "../css/surfaces.css";
 import "../css/components.css";
 import "./pages.css";
 import { hydrateIcons } from "../lib/icons.js";
+import "../lib/nav.js";
 import { reveal } from "../lib/motion.js";
 
 hydrateIcons();
