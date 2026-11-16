@@ -27,9 +27,11 @@ def onsets(actual: pd.DataFrame) -> pd.DataFrame:
     return a[a.start][["unit_id", "week"]].rename(columns={"week": "onset_week"})
 
 
-def evaluate(panel: str) -> pd.DataFrame:
+def evaluate(panel: str, preds: pd.DataFrame | None = None) -> pd.DataFrame:
+    """preds: backtest rows with q50/q90; defaults to this panel's saved backtest."""
     table = pd.read_parquet(PROC / f"model_table_{panel}.parquet")[["unit_id", "week", "cases"]]
-    preds = pd.read_parquet(PROC / f"backtest_{panel}.parquet")
+    if preds is None:
+        preds = pd.read_parquet(PROC / f"backtest_{panel}.parquet")
     results = []
     for year in sorted(preds.test_year.unique()):
         thr = thresholds(table[table.week < f"{year}-01-01"])
