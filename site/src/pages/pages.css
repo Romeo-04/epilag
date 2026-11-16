@@ -197,3 +197,4 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 .foot__links { display: flex; flex-wrap: wrap; gap: 8px 22px; font-weight: 600; color: var(--ink); }
 .foot__links a { text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 4px; }
 .foot__links a:hover { color: var(--forest); text-decoration-color: var(--forest); }
+.callout a { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }

@@ -57,6 +57,12 @@ says so: each barangay gets the city's weekly cases times its share of the city'
 the real city forecast made that week, shared out the same way. There is no city rain series, so that mission has no
 rain.
 
+You play each season twice: round 1 with case reports only, then round 2 with 4-week forecasts from a model you
+choose: EpiLag-PH's submitted model, one of the research's three other methods (negative binomial, random forest,
+SARIMAX), or the average of the four. The debrief shows how a computer player on each model's alerts would have done, and
+you can replay round 2 with another model. The average is approximate: it is computed from the four models' rounded
+forecasts (`scripts/drill_models.py`).
+
 | | |
 | --- | --- |
 | ![Dengue Drill title screen: the Quezon City mission first, then 17 regions](docs/screenshots/drill_title.png) | ![Round 2: EpiLag-PH forecasts on the 3D board](docs/screenshots/drill_round2.png) |
@@ -154,6 +160,9 @@ Every result is out of sample: each test year is forecast only from earlier year
 - **Honest finding on weather:** most of the skill comes from recent cases and the season. Adding rain, heat and
   humidity changed the error by about −12% to +11% depending on year and horizon (about +2% on average for regions,
   about 0% for provinces). See `reports/` and the app's *Did it work?* page.
+- **Tested further after the first round:** a literature review, three other methods on the same test (LightGBM had
+  the lowest error in 12 of 24 checks; no other method in more than 7) and the cause of every loss. See the
+  [research page](https://romeo-04.github.io/epilag/research.html) and [`research/`](research/README.md).
 
 ![Did it work? page](docs/screenshots/proof.png)
 
@@ -228,6 +237,8 @@ python src/export_app_data.py
 python scripts/make_figures.py
 python scripts/drill_data.py         # Dengue Drill season data (site/public/drill/data.json)
 python scripts/qc_drill_data.py      # Dengue Drill Quezon City mission (site/public/drill/qc.json, geo/voxel_qc.json)
+python scripts/drill_models.py       # Dengue Drill round 2: every model's forecasts (site/public/drill/models.json)
+python scripts/research_docs.py      # Research page reader: the research documents as pages (site/public/research/)
 python scripts/export_open_data.py   # open forecast files (docs/data/)
 python scripts/build_web.py          # app data and EN/FIL copy
 python scripts/voxel_data.py         # 3D map grids (site/public/geo/)

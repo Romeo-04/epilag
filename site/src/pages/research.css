@@ -1,0 +1,117 @@
+/* Research page: charts and layout on top of pages.css. Text stays in ink; colour marks carry a label or a sign. */
+.pg-hero__cta { margin-top: 26px; }
+.stats--hero { margin: 44px 0 0; }
+.sub-h { margin: 48px 0 16px; font-size: var(--fs-h3); }
+.split { align-items: start; }
+.card cite { display: block; margin-top: 8px; font-size: 13px; font-style: normal; color: var(--soft); }
+.caption a { color: var(--forest-deep); text-underline-offset: 3px; }
+.callout--wide { margin-top: 16px; padding: 20px 22px; font-size: 16px; }
+.note--flush { margin-top: 0; }
+
+.list { display: grid; gap: 12px; margin-top: 12px; padding-left: 20px; font-size: 15px; color: var(--muted); }
+.list b { color: var(--ink); }
+
+/* figures: a card with a title, a note and a chart */
+.fig { margin: 0; }
+.fig figcaption { margin-bottom: 18px; }
+.fig figcaption p { font-size: 14px; }
+.fig__key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 16px; font-size: 13px; color: var(--muted); }
+.card .fig__key { font-size: 13px; }
+.key { display: inline-flex; align-items: center; gap: 8px; }
+.key::before { content: ""; width: 12px; height: 12px; flex: none; }
+.key--raw::before { border-radius: 50%; border: 2px solid var(--ink); background: var(--surface); }
+.key--cal::before { border-radius: 50%; background: var(--forest); }
+.key--better::before { background: var(--forest-soft); border: 1px solid #B9D9C4; }
+.key--better2::before { background: var(--forest); }
+.key--worse::before { background: var(--amber); }
+
+/* horizontal bars: one row per method */
+.hbars { display: grid; gap: 14px; padding: 0; list-style: none; }
+.hbar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 2ch; gap: 14px; align-items: center; font-size: 15px; font-weight: 600; }
+.hbar__nm small { display: block; font-size: 12px; font-weight: 600; color: var(--soft); }
+.hbar__track { height: 20px; background: var(--surface-2); }
+.hbar__track i { display: block; width: var(--v); height: 100%; background: var(--sage); }
+.hbar__track i.is-main { background: var(--forest); }
+.hbar b { font-size: 20px; font-weight: 800; text-align: right; }
+@media (max-width: 480px) { .hbar { grid-template-columns: 104px minmax(0, 1fr) 2ch; gap: 10px; font-size: 14px; } }
+
+/* columns: one bar per lead time, its value on top, the lead time under the baseline */
+.cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; height: 180px; margin-bottom: 30px; padding: 0; list-style: none;
+  border-bottom: 4px solid var(--ink); }
+.cols li { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
+.cols li b { font-size: 18px; font-weight: 800; }
+.cols li i { display: block; flex: none; width: min(72px, 100%); height: calc(var(--v) * 1.3); background: #5FA9BD; }
+.cols--cut li i { background: var(--forest); }
+.cols li > span { position: absolute; top: calc(100% + 10px); font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+/* dumbbells: range held before (ring) and after (dot) calibration, on a 40-100% scale */
+.bells { display: grid; gap: 4px; padding: 0; list-style: none; }
+.bell { display: grid; grid-template-columns: 160px minmax(0, 1fr) 96px; gap: 16px; align-items: center; font-size: 15px; }
+.bell__nm { font-weight: 600; }
+.bell__track { position: relative; height: 32px; background:
+  linear-gradient(var(--line), var(--line)) 0 50% / 100% 2px no-repeat,
+  linear-gradient(var(--ink), var(--ink)) 66.7% 0 / 2px 100% no-repeat; }
+.bell__line { position: absolute; top: calc(50% - 2px); left: var(--a); width: calc(var(--b) - var(--a)); height: 4px; background: var(--forest); }
+.bell__dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); }
+.bell__dot--raw { left: var(--a); background: var(--surface); border: 2px solid var(--ink); }
+.bell__dot--cal { left: var(--b); background: var(--forest); }
+.bell__val { font-size: 14px; color: var(--muted); text-align: right; white-space: nowrap; }
+.bell__val b { color: var(--ink); }
+.bell-axis { position: relative; height: 20px; margin: 6px 112px 0 176px; font-size: 12px; color: var(--muted); }
+.bell-axis span { position: absolute; left: var(--p); transform: translateX(-50%); white-space: nowrap; }
+.bell-axis span:first-child { transform: none; }
+.bell-axis span:last-child { transform: translateX(-100%); }
+.bell-axis .is-target { color: var(--ink); font-weight: 700; }
+@media (max-width: 640px) {
+  .bell { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 8px 0; }
+  .bell__track { grid-column: 1 / -1; grid-row: 2; }
+  .bell-axis { margin: 6px 0 0; }
+}
+
+/* tiles: one cell per check, the sign in the text and the direction in the fill */
+.tiles-wrap { overflow-x: auto; }
+.tiles { width: 100%; border-collapse: separate; border-spacing: 4px; font-size: 14px; }
+.tiles th { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 4px; }
+.tiles tbody th { text-align: left; text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; padding-right: 10px; }
+.tile { padding: 12px 6px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tile--better { background: var(--forest-soft); color: var(--ink); }
+.tile--better2 { background: var(--forest); color: #fff; }
+.tile--worse { background: var(--amber); color: var(--ink); }
+@media (max-width: 480px) { .tiles tbody th { white-space: normal; } .tile { padding: 10px 2px; font-size: 13px; } }
+
+/* literature table: yes / no marks, always with their words */
+.yn { display: inline-flex; align-items: baseline; gap: 8px; }
+.yn::before { content: ""; flex: none; width: 10px; height: 10px; transform: translateY(1px); }
+.yn--y::before { background: var(--forest); }
+.yn--n::before { border: 2px solid var(--line-strong); }
+.yn--n { color: var(--muted); }
+.tbl .row-main td { background: var(--forest-soft); font-weight: 600; }
+.tbl--wide .row-main td:first-child { background: var(--forest-soft); }
+
+/* method table: values over 100% lost to the simple rule; the average sits apart */
+.tbl .over { color: #8A3A00; font-weight: 700; }
+.tbl .over::after { content: " ▲"; font-size: 10px; vertical-align: 2px; }
+.tbl .avg { border-left: 2px solid var(--line-strong); color: var(--muted); }
+
+/* losses */
+.loss__n { display: block; margin-bottom: 12px; font-size: 40px; line-height: 1; font-weight: 800; letter-spacing: -.04em; color: var(--ink); }
+.loss__n small { font-size: 16px; letter-spacing: 0; font-weight: 700; color: #8A3A00; }
+.loss { border-top: 6px solid var(--amber); }
+
+/* the reader: a research document in a dialog over the page */
+.reader { width: min(980px, calc(100vw - 24px)); height: min(92vh, 1100px); max-width: none; max-height: none; margin: auto; padding: 0; border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg); background: var(--paper); color: var(--ink); box-shadow: var(--shadow-float); overflow: hidden; }
+.reader[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.reader::backdrop { background: rgba(7, 23, 17, .6); }
+.reader__head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 12px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.reader__head h2 { flex: 1; min-width: 0; margin: 0; font-size: 18px; line-height: 1.2; }
+.reader__head .btn--sm { min-height: 40px; padding: 8px 14px; font-size: 14px; white-space: nowrap; }
+.reader__close { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--surface); --i1: currentColor; }
+.reader__close:hover { border-color: var(--ink); }
+.reader__frame { width: 100%; height: 100%; border: 0; background: var(--paper); }
+@media (max-width: 640px) {
+  .reader { width: 100vw; height: 100%; border-radius: 0; border: 0; }
+  .reader__head { flex-wrap: wrap; padding: 10px 12px 10px 16px; }
+  .reader__head h2 { flex-basis: calc(100% - 50px); order: -2; }
+  .reader__close { order: -1; }
+}

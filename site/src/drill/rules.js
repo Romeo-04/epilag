@@ -2,6 +2,8 @@
 // A team (one "kit", PHP 500,000) covers kit.pesos / kit.per_person people, up to kit.max_share of a province, and
 // prevents a share (kit.effect: low, central, high) of the cases reported 2 to 9 weeks after its turn, since people
 // already infected still fall sick. Pure functions of the data (window.DRILL shape: weeks, turns, kit, regions).
+// Forecasts: each area's `fc` is the submitted model's; `fcs[model]` (when the game has loaded models.json) holds
+// the same for every model the player can pick. Functions that take `model` use that model's forecasts.
 
 export function rules(D) {
   const K = D.kit, WEEKS = D.weeks, TURNS = D.turns, PEOPLE = K.pesos / K.per_person;
@@ -32,42 +34,46 @@ export function rules(D) {
     return { lo, mid, hi, onTime, late, noOutbreak, used };
   }
 
-  /** The plan a computer player makes: two teams a turn, by a fixed rule ("epilag" alerts or "react" to reports). */
-  function autoplan(rule, reg) {
+  /** An area's forecasts by turn: a named model's, or the submitted model's. */
+  const fcOf = (p, model) => (model && p.fcs && p.fcs[model]) || p.fc;
+
+  /** The plan a computer player makes: two teams a turn, by a fixed rule ("epilag": follow a model's alerts; "react" to reports). */
+  function autoplan(rule, reg, model) {
     const planned = {};
     let left = K.kits;
     TURNS.forEach((tw, t) => {
       const i = idx(tw);
       let picks = reg.provinces.map((p, k) => ({ p, k }));
-      if (rule === "epilag") picks = picks.filter(({ p }) => p.fc[tw] && ["watch", "warning"].includes(p.fc[tw][0])).sort((a, b) => b.p.fc[tw][2] / b.p.pop - a.p.fc[tw][2] / a.p.pop);
+      if (rule === "epilag") picks = picks.map((x) => ({ ...x, f: fcOf(x.p, model)[tw] })).filter(({ f }) => f && ["watch", "warning"].includes(f[0])).sort((a, b) => b.f[2] / b.p.pop - a.f[2] / a.p.pop);
       else picks = picks.filter(({ p }) => p.cases[i] != null && p.epi[i] != null && p.cases[i] > p.epi[i]);
       picks.slice(0, Math.min(2, left)).forEach(({ k }) => { (planned[k] ||= {})[t] = 1; left--; });
     });
     return planned;
   }
-  const autopilot = (rule, reg) => score(autoplan(rule, reg), reg);
+  const autopilot = (rule, reg, model) => score(autoplan(rule, reg, model), reg);
   /** Reported cases over the season, from the first turn on. */
   const total = (p) => p.cases.slice(FIRST).reduce((a, c) => a + (c || 0), 0);
 
-  /** Grade against the better of the two computer players. */
+  /** Grade against the better of the two computer players (the one on alerts follows the submitted model, whichever model the player picked). */
   function gradeOf(mid, reg) {
     const best = Math.max(1, autopilot("epilag", reg).mid, autopilot("react", reg).mid), r = mid / best;
     return r >= 1.1 ? "S" : r >= 0.85 ? "A" : r >= 0.65 ? "B" : r >= 0.4 ? "C" : "D";
   }
 
-  /** Across all regions: where the EpiLag bot averted more, about the same (within 5%), or fewer than the reactive bot. */
-  function honest() {
+  /** Across all regions: where the bot on a model's alerts averted more, about the same (within 5%), or fewer than the reactive bot. */
+  function honest(model) {
     let better = 0, tie = 0, worse = 0;
     D.regions.forEach((r) => {
-      const x = autopilot("epilag", r).mid, y = autopilot("react", r).mid;
+      const x = autopilot("epilag", r, model).mid, y = autopilot("react", r).mid;
       if (Math.abs(x - y) <= 0.05 * Math.max(x, y, 1)) tie++; else if (x > y) better++; else worse++;
     });
     return { better, tie, worse };
   }
 
   const teamsIn = (plan, k) => Object.values(plan[k] || {}).reduce((a, b) => a + b, 0);
-  /** Would one more team in province k pass the max coverage? */
-  const capped = (plan, k, reg) => ((teamsIn(plan, k) + 1) * PEOPLE) / reg.provinces[k].pop > K.max_share + 1e-9;
+  /** Would one more team in province k pass the max coverage? A first team can always go: in an area smaller than
+   *  one team's reach (most Quezon City barangays) it covers the max share, which is how score() counts it. */
+  const capped = (plan, k, reg) => teamsIn(plan, k) > 0 && ((teamsIn(plan, k) + 1) * PEOPLE) / reg.provinces[k].pop > K.max_share + 1e-9;
 
   /** Cases this week against the epidemic line, as a colour (the old board's heat ramp). */
   function heat(p, i) {
@@ -86,5 +92,5 @@ export function rules(D) {
     return { value: pr, level: pr < 0.6 ? "low" : pr < 1 ? "rising" : pr < 1.6 ? "high" : "critical" };
   }
 
-  return { K, WEEKS, TURNS, PEOPLE, FIRST, idx, peak, score, autoplan, autopilot, gradeOf, honest, teamsIn, capped, heat, pressure, total };
+  return { K, WEEKS, TURNS, PEOPLE, FIRST, idx, peak, score, fcOf, autoplan, autopilot, gradeOf, honest, teamsIn, capped, heat, pressure, total };
 }
