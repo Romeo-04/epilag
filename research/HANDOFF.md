@@ -40,7 +40,8 @@ You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as 
 | `research/results/METHODS.md` | How each experiment was run. |
 | `research/lit/STATUS.md` (on `research-b`) | Person B's progress, and their notes for Person A. |
 | `pugad/finals/` | Not in git; on Person A's machine only. The validation page, the methodology visual and the judge Q&A prep. |
-| `pugad/epilag-data-processed.zip` | `data/processed/` (gitignored), zipped for Person B. |
+| `research/results/extracts/` | What Person B's analysis needs from `data/processed/` (gitignored): per-week backtest predictions, calibration coverage, weekly series, rain by year. Written by `export_extracts.py`. |
+| `pugad/epilag-data-processed.zip` | `data/processed/`, zipped. Only needed to rerun the models; the extracts cover the analysis. |
 
 **Inside `pugad/finals/`:**
 - `epilag-validation.html`: the validation page.
@@ -58,33 +59,36 @@ You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as 
 - A3 new variables: heat, humidity and ENSO for Regions + QC; heat, ENSO, elevation and density for provinces.
 - A4 influence: group tests (drop and add), SHAP shares and lag profiles, the research set without ENSO, and longer rain lags.
 - A5 validation page: section 4 (data groups) and section 6 (other methods, with the average).
+- A6 Person B's proposed variables (neighbours' cases, heatwave days, rain anomaly), candidate final sets, and the extracts that replace `data/processed/` for Person B.
 
 Headlines (numbers in `STATUS.md`):
 - No single method wins. The average of the four has the smallest miss most often, but catches fewer outbreak starts on Outbreak warning than LightGBM.
 - Weather groups help Regions + QC, more so further ahead.
 - For provinces the research set does not beat the live model. ENSO hurts; only elevation helps on its own.
 - Rain from beyond 11 weeks draws SHAP attention but does not cut the miss.
+- Neighbours' cases is the only proposed variable that helps on top of the research set, and only for provinces (8 of 8 checks).
+- No candidate set wins on every measure: what cuts the miss most for Regions + QC catches fewer outbreak starts on Outbreak warning.
 
 **Person B: steps 1–2 done, step 3 in progress, steps 4–6 not started.**
 - Done: `feature_evidence.csv` (27 rows), `rrl_matrix.csv` (19 papers, 9 from the Philippines), `references.md`.
-- Step 3 (`causes.md`) is blocked on `data/processed/`.
+- Step 3 (`causes.md`) was blocked on `data/processed/`. The extracts in `research/results/extracts/` unblock it once B pulls `research-a`.
 
-**Messages for Person B.** These come from Person A's review of `research-b` on 16 Nov. They were given to the human; confirm they were sent.
-1. Run `git pull origin research-a` to get the blend, the research set without ENSO, the long rain-lag test and two corrected handoff citations.
-2. Rain lags of 12–20 weeks are now tested: no gain. Update that row in `feature_evidence.csv` and the "For Person A" notes.
-3. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
-4. Unzip `epilag-data-processed.zip` into the repo root to unblock step 3.
+**Messages for Person B.** Answers to B's notes are in `STATUS.md`, "For Person B". The human relays these; confirm they were sent.
+1. Run `git pull origin research-a`. It brings the extracts (no `data/processed/` needed), the proposed-variable tests, the candidate sets, and the updated brief.
+2. Update `feature_evidence.csv` from the test results: rain lags of 12–20 weeks, heatwave days, drought and neighbours' cases are tested (`STATUS.md`). Minimum temperature and daily temperature range are untested.
+3. If you used the Regions + QC `current` rows of `shap_groups.csv` or `shap_lags.csv`, re-read them: they were rerun on 16 Nov.
+4. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
 5. Consider Senson et al. 2026 (*SciEnggJ* special issue): machine learning with weather for Quezon City, the closest local comparison. Seen in search results only; not verified.
 
 ## Open work, in order
 
-1. **Unblock Person B.** The human sends the zip and the messages. *Done when* `git merge-base --is-ancestor fb3a2b6 origin/research-b` succeeds.
-2. **Choose the final variables.** The human decides; the agent lays out the evidence. Put Person A's results (`STATUS.md`) beside Person B's literature (`feature_evidence.csv`). Options:
-   - keep the live set
-   - add heat and humidity for Regions + QC, with or without ENSO
-   - use the average of the four methods as the forecast
+1. **Unblock Person B.** The human sends the messages. *Done when* `origin/research-b` contains the `research-a` commit that added the extracts (`git log --oneline research-a -- research/results/extracts` names it; check with `git merge-base --is-ancestor <commit> origin/research-b`).
+2. **Choose the final variables.** The human decides from the candidate tables in `STATUS.md` ("Candidate final sets"), beside Person B's literature (`feature_evidence.csv`). Options per panel:
+   - Provinces: keep the live set, or add neighbours' cases.
+   - Regions + QC: keep the live set, or add heat and humidity, with or without ENSO.
+   - Either panel: use the average of the four methods as the forecast.
 
-   Give each option's cost: Outbreak-warning catches, ENSO acting as a year label, and the optimism of choices made on the test years. *Done when* the human has picked and the choice is written in `STATUS.md`.
+   Each option's costs are in the tables: Outbreak-warning catches, ENSO acting as a year label, and the optimism of choices made on the test years. *Done when* the human has picked and the choice is written in `STATUS.md`.
 3. **Apply the choice** if it changes the live model. Edit `src/`, rerun README "Run it" → "Rebuild everything from the raw data", run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
 4. **Person B's steps 3–6**, ending in the drafts in `research/writeup/`. Merge `origin/research-b` into `research-a` as they land, when the human asks.
 5. **Deck and site**, after the human approves B's drafts: `docs/deck/deck.html` and `site/methodology.html`.
@@ -105,6 +109,9 @@ Use the repo venv, `.venv/Scripts/python`, from `epilag/`. Panels are `province`
 | `python research/models/influence.py groups\|shap <panel>` | Runs the group tests, or the SHAP shares and lags |
 | `python research/models/blend.py` | Scores the averages from the saved forecasts |
 | `python research/models/rain_lags.py [panel ...]` | Runs the long rain-lag test |
+| `python research/models/proposed_features.py [panel ...]` | Builds and tests Person B's proposed variables (neighbours, heatwave days, rain anomaly) |
+| `python research/models/candidates.py [panel ...]` | Scores the candidate final sets; prints the drift check and a summary |
+| `python research/models/export_extracts.py` | Rewrites `research/results/extracts/` from `data/processed/` |
 
 The validation page, from `pugad/finals/`:
 ```bash
@@ -121,5 +128,6 @@ Run anything that uses Playwright with the epilag venv. The system Python's Play
   - Elevation comes from OpenTopoData `srtm90m`: 100 points per call, 1 call a second, 1,000 calls a day.
   - Downloads are cached in `data/raw/research/`. Delete a cache only to refetch.
 - **Province codes.** Maguindanao's 2022 split and the Special Geographic Area are mapped back to the data's units in `province_static()` (`extra_features.py`).
-- **Drift checks.** The harness's LightGBM must equal `reports/backtest_*.csv`, and the `plus` rows of `rain_lags.csv` must equal the `full` rows of `feature_groups.csv`. A difference means the data or the features changed.
+- **Drift checks.** The harness's LightGBM must equal `reports/backtest_*.csv`; the `plus` rows of `rain_lags.csv` must equal the `full` rows of `feature_groups.csv`; the `live` rows of `candidates.csv` must equal the `lightgbm` rows of `model_comparison.csv`. A difference means the data or the features changed.
+- **Live features.** `src/features.feature_columns()` picks columns by name prefix. On a research table it also takes the research weather (`temp_lag*`, `rh_lag*`, `tmax_max4`) and any new `rain_*` column. Get the live list from `live_features()` in `influence.py`, which reads the live table.
 - Git's CRLF warnings on Windows are harmless.

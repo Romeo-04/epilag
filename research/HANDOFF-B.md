@@ -40,9 +40,13 @@ The code is the source of truth for the details: `src/features.py` (features), `
 
 **Python.** Use Person A's venv (`../epilag/.venv/Scripts/python`) or make your own from `requirements.txt`.
 
-**Data.** `data/processed/` is gitignored.
-- Same machine: copy it from `../epilag/data/processed`.
-- Otherwise: ask your human for the files, or rebuild them with the steps in README "Run it". The weather download waits out a free-tier limit, so expect an hour or more.
+**Data.** `data/processed/` is gitignored. You don't need it: what the analysis uses is exported to `research/results/extracts/` (committed on `research-a`; the docstring of `research/models/export_extracts.py` lists every column).
+- `backtest_predictions.csv.gz`: every test week of the live backtest, with and without weather (`weather` column). Actual cases, the 10/50/90% forecasts before and after calibration, the margin, and both baselines.
+- `calibration.csv`: per panel, test year and lead time, the margin and the range coverage before and after calibration.
+- `weekly_series.csv.gz`: cases, population, rain, temperature and humidity for every area-week.
+- `rain_by_year.csv`: each area's rain per year and per rainy season (June–November), and its % difference from the area's other years.
+
+To rerun the models themselves you would need `data/processed/`: copy it from Person A's machine (`epilag-data-processed.zip`) or rebuild it with README "Run it" (the weather download takes an hour or more).
 
 **File ownership.**
 - **You write:** `research/lit/`, `research/analysis/`, `research/writeup/`.
@@ -128,7 +132,7 @@ Where the evidence is mixed, record both sides. Elevation is mixed for the Phili
 
 For each finding below, write the **hypothesis**, run a **check** that produces numbers, and give a **conclusion**.
 
-The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweather.csv`, `reports/alerts_<panel>.csv` and `reports/shap_<panel>.csv`. Per-week predictions, including the calibration margin, are in `data/processed/backtest_<panel>.parquet`. All numbers are at 4 weeks ahead unless stated.
+The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweather.csv`, `reports/alerts_<panel>.csv` and `reports/shap_<panel>.csv`. Per-week predictions, including the calibration margin, are in `research/results/extracts/backtest_predictions.csv.gz`. All numbers are at 4 weeks ahead unless stated.
 
 **1. Regions + QC 2023.** EpiLag lost to "same as this week" (error 58.0 vs 55.6). Its range was also too wide: 92% of weeks fell inside, against an 80% target.
 - *Hypothesis:* the calibration year, 2022, was an unusual post-pandemic year. Its margin of 0.227 is the largest of the six tests. In 2024 and 2025 the margins were about 0.09 and coverage landed near 80%.
@@ -143,11 +147,11 @@ The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweat
 
 **4. Weather helped in Regions + QC 2024** (error 101.2 vs 111.3 without weather) **but not in 2019, 2023 or 2025.**
 - *Hypothesis:* weather adds the most when a year departs from its usual season.
-- Check each year's rain anomaly against the gain from weather.
+- Check each year's rain anomaly (`extracts/rain_by_year.csv`) against the gain from weather.
 
 **5. Before calibration, the 10–90% ranges caught only 48–69% of real weeks.**
 - *Hypothesis:* each new year differs from the training years, so the raw model is overconfident.
-- `../finals/validation_data.py` shows how the raw coverage is computed, if that folder is on your machine.
+- `research/results/extracts/calibration.csv` has the coverage before and after calibration. Before calibration it is given as a low and a high bound, because a 10% forecast clipped at 0 can't be turned back into its raw value.
 
 **Done when:**
 - Every finding has a check that was run, with numbers, a chart where it helps, and a verdict.
@@ -228,11 +232,13 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 
 **`shap_groups.csv`**: each group's share of the model's attention.
 
-`panel, horizon, group, share`
+`panel, feature_set, horizon, group, share` (`feature_set`: `current` is the live features, `plus` the research set)
 
 **`shap_lags.csv`**: which weeks back matter, for rain, temperature and humidity.
 
-`panel, horizon, variable, lag_weeks, mean_abs_shap`
+`panel, feature_set, horizon, variable, lag_weeks, mean_abs_shap`
+
+**Also delivered** (formats in `research/results/METHODS.md`): `rain_lags.csv` and `rain_lag_shap.csv` (rain 12–23 weeks back), `proposed_features.csv` (your proposed variables), `candidates.csv` (candidate final sets, scored like `model_comparison.csv`).
 
 ## Starting papers (verified 2026-11-16, add to `references.md`)
 
