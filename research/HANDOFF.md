@@ -34,7 +34,7 @@ You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as 
 | `pugad/epilag/` | The repo, `github.com/Romeo-04/epilag`. The live site (romeo-04.github.io/epilag, epilag.vercel.app) is built from `main`. |
 | branch `main` | The submission. Last merge: PR #25 (`cd5f05b`). The research has not touched it. |
 | branch `research-a` | Person A's research and both handoffs. Pushed. |
-| branch `origin/research-b` | Person B's literature (`36e0f8c`). It started from an older `research-a` and merges cleanly with the current one. |
+| branch `origin/research-b` | Person B's literature, analysis and write-up drafts (`d62a1f7`). Merges cleanly with `research-a`. |
 | branch `finals-copy-fixes` | Local only (`186ab0f`): landing, deck and README copy fixed to match the Quezon City story. Its PR (#24) was closed at the human's request. Whether it joins the final PR is undecided. |
 | `research/results/STATUS.md` | Person A's results and the hypotheses handed to Person B. **Every research number is here.** |
 | `research/results/METHODS.md` | How each experiment was run. |
@@ -60,6 +60,7 @@ You are picking up the research for EpiLag-PH, a PJDSC 2026 top-10 finalist, as 
 - A4 influence: group tests (drop and add), SHAP shares and lag profiles, the research set without ENSO, and longer rain lags.
 - A5 validation page: section 4 (data groups) and section 6 (other methods, with the average).
 - A6 Person B's proposed variables (neighbours' cases, heatwave days, rain anomaly), candidate final sets, and the extracts that replace `data/processed/` for Person B.
+- A7 review of B's write-up, and B's 2023 margin check (`margin_check.py`).
 
 Headlines (numbers in `STATUS.md`):
 - No single method wins. The average of the four has the smallest miss most often, but catches fewer outbreak starts on Outbreak warning than LightGBM.
@@ -69,10 +70,13 @@ Headlines (numbers in `STATUS.md`):
 - Neighbours' cases is the only proposed variable that helps on top of the research set, and only for provinces (8 of 8 checks).
 - No candidate set wins on every measure: what cuts the miss most for Regions + QC catches fewer outbreak starts on Outbreak warning.
 - **Final variables chosen 16 Nov** (the human delegated to Person A's recommendation): provinces add neighbours' cases; Regions + QC add heat and humidity, without ENSO. Better than the live model in 21 of 24 checks, with no loss of outbreak catches. Not applied to `src/` (open work 3).
+- The wide 2023 Regions + QC range is not from the missing "same week last year". The calibration model forecast 2022 too low, and the single margin widened both ends of the range.
 
-**Person B: steps 1–2 done, step 3 in progress, steps 4–6 not started.**
-- Done: `feature_evidence.csv` (27 rows), `rrl_matrix.csv` (19 papers, 9 from the Philippines), `references.md`.
-- Step 3 (`causes.md`) was blocked on `data/processed/`. The extracts in `research/results/extracts/` unblock it once B pulls `research-a`.
+**Person B: steps 1–6 drafted and pushed to `origin/research-b` (`d62a1f7`), waiting on Kish's approval.**
+- Literature: `feature_evidence.csv`, `rrl_matrix.csv`, `references.md`, `positioning.md`.
+- Analysis: `causes.md`, `step3_checks.py`, `figures/`, `out/`.
+- Write-up: `paper.md` (IMRADC), `slides.md`, `qa.md`.
+- Person A reviewed the write-up and ran B's one requested check (the 2023 margin). Both are in `STATUS.md`, "Review of Person B's drafts" and "2023 calibration check".
 
 **Messages for Person B.** Answers to B's notes are in `STATUS.md`, "For Person B". The human relays these; confirm they were sent.
 1. Run `git pull origin research-a`. It brings the extracts (no `data/processed/` needed), the proposed-variable tests, the candidate sets, and the updated brief.
@@ -81,14 +85,17 @@ Headlines (numbers in `STATUS.md`):
 4. Fix the counts in `research/lit/STATUS.md`: 12 current features (not 13), 16 fully verified matrix rows (not 17), 28 references (not 26).
 5. Consider Senson et al. 2026 (*SciEnggJ* special issue): machine learning with weather for Quezon City, the closest local comparison. Seen in search results only; not verified.
 6. The final variables are chosen (`STATUS.md`, "Final variables"). The write-up is a paper in IMRADC order, `research/writeup/paper.md` (brief, step 6).
+7. Pull `research-a` again. The review of your drafts and the 2023 margin result are in `STATUS.md`. Neither the missing "same week last year" nor the missing 4- and 12-week averages caused the wide 2023 range. Update `causes.md` 1b, the paper, the Q&A and your status file. Paul updates the site; leave `site/` to him.
 
 ## Open work, in order
 
-1. **Unblock Person B.** The human sends the messages. *Done when* `origin/research-b` contains the `research-a` commit that added the extracts (`git log --oneline research-a -- research/results/extracts` names it; check with `git merge-base --is-ancestor <commit> origin/research-b`).
+1. **Unblock Person B.** Done: B merged `14e6eba` into `research-b` (`697c7c1`).
 2. **Choose the final variables.** Done 16 Nov (`STATUS.md`, "Final variables").
 3. **Apply the choice to the live model: only when the human asks.** It changes every number the submission quotes: the README tables, the Quezon City 2024–25 story, the "30 of 32" replay claim (asserted in `tests/test_web_logic.py`), the app, the game and the open data. Edit `src/` (neighbours' cases for provinces; port the region weather fetch from `research/models/extra_features.py`), rerun README "Run it" → "Rebuild everything from the raw data", update the claims the tests assert, run `pytest tests`, then rebuild the validation page. *Done when* the tests pass and every number on the page matches the new `reports/`.
-4. **Person B's steps 3–6**, ending in the drafts in `research/writeup/`. Merge `origin/research-b` into `research-a` as they land, when the human asks.
-5. **Deck and site**, after the human approves B's drafts: `docs/deck/deck.html` and `site/methodology.html`.
+4. **Person B's revisions.** B applies the fixes in `STATUS.md` ("Review of Person B's drafts", "2023 calibration check") and Kish approves. *Done when* `causes.md`, `paper.md` and `qa.md` no longer give the 2020–21 gap's missing features as the 2023 cause, and the human asks to merge `origin/research-b` into `research-a`.
+5. **Deck and site**, after the human approves B's drafts.
+   - **Site** (`site/`, including `site/methodology.html`): Paul, a teammate, updates it. He needs only the data: the approved numbers from `paper.md` and `STATUS.md`, plus the CSVs they cite. Leave `site/` to him.
+   - **Deck:** `docs/deck/deck.html`.
    - The deck PDF is printed from the deck HTML with Playwright `page.pdf` at 1920×1080. There is no build script.
    - Deck slide 1 still has `[Team name]` and `[Member]` placeholders.
 6. **Final PR to `main`**, only when the human asks. One PR with the `research/` code, results and literature.
@@ -109,6 +116,7 @@ Use the repo venv, `.venv/Scripts/python`, from `epilag/`. Panels are `province`
 | `python research/models/proposed_features.py [panel ...]` | Builds and tests Person B's proposed variables (neighbours, heatwave days, rain anomaly) |
 | `python research/models/candidates.py [panel ...]` | Scores the candidate final sets; prints the drift check and a summary |
 | `python research/models/export_extracts.py` | Rewrites `research/results/extracts/` from `data/processed/` |
+| `python research/models/margin_check.py` | B's 2023 margin question: the Regions + QC backtest with `y_lastyear` as is, gap-filled and dropped, and the calibration model's misses in its held-out year |
 
 The validation page, from `pugad/finals/`:
 ```bash
@@ -125,6 +133,6 @@ Run anything that uses Playwright with the epilag venv. The system Python's Play
   - Elevation comes from OpenTopoData `srtm90m`: 100 points per call, 1 call a second, 1,000 calls a day.
   - Downloads are cached in `data/raw/research/`. Delete a cache only to refetch.
 - **Province codes.** Maguindanao's 2022 split and the Special Geographic Area are mapped back to the data's units in `province_static()` (`extra_features.py`).
-- **Drift checks.** The harness's LightGBM must equal `reports/backtest_*.csv`; the `plus` rows of `rain_lags.csv` must equal the `full` rows of `feature_groups.csv`; the `live` rows of `candidates.csv` must equal the `lightgbm` rows of `model_comparison.csv`. A difference means the data or the features changed.
+- **Drift checks.** The harness's LightGBM must equal `reports/backtest_*.csv`; the `plus` rows of `rain_lags.csv` must equal the `full` rows of `feature_groups.csv`; the `live` rows of `candidates.csv` must equal the `lightgbm` rows of `model_comparison.csv`; the `live` rows of `margin_check.csv` must equal `reports/backtest_region_qc.csv`. A difference means the data or the features changed.
 - **Live features.** `src/features.feature_columns()` picks columns by name prefix. On a research table it also takes the research weather (`temp_lag*`, `rh_lag*`, `tmax_max4`) and any new `rain_*` column. Get the live list from `live_features()` in `influence.py`, which reads the live table.
 - Git's CRLF warnings on Windows are harmless.

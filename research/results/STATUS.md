@@ -14,6 +14,8 @@ How the experiments were run: `METHODS.md`.
 - [x] `extracts/`: the parts of `data/processed/` that Person B's analysis needs (`export_extracts.py`).
 - [x] Validation page: new sections 4 (data groups) and 6 (other methods). The page lives outside the repo, in `pugad/finals/`.
 - [x] Final variables chosen (below). Not applied to the live model yet.
+- [x] Person B's write-up checked against these results (below, "Review of Person B's drafts").
+- [x] `margin_check.csv`: Person B's 2023 question. The missing "same week last year" is not why the 2023 range was wide (below).
 
 ## Ready now: four methods on the same test
 
@@ -188,5 +190,78 @@ Together, against the live model over the 24 checks:
 2. Weather groups help Regions + QC more than provinces. Region weather is one population-weighted point per region, while province weather is one point per province. Region counts are larger and smoother, too. Or the province test years (2019 record epidemic, 2020 COVID) are unusual.
 3. Elevation helps provinces on its own but not inside the full set. It may stand in for something the other variables already carry (rain, temperature or urbanisation).
 4. Rain's attention peaks 12–15 weeks before week t (14–23 weeks before the target week), but adding those weeks does not cut the miss. Compare with `expected_lag_weeks` in the literature: is a 3–5 month rain-to-dengue lag reported, or is this the rainy season's timing?
+
+## Review of Person B's drafts (16 Nov)
+
+Checked `research/writeup/paper.md`, `slides.md` and `qa.md` on `origin/research-b` (`d62a1f7`) against `reports/`, this file and `METHODS.md`. Most numbers match: the 3.1 table, the four-method results (12/7/5/0 wins, random forest +2.6%), raw coverage 46–73%, the weather gain by lead time, SHAP rain shares, the average of the four, and the final variables. Fixes, by file:
+
+**`paper.md`, Methods**
+- "One LightGBM quantile model per lead time" → three per lead time (10th, 50th and 90th percentile), each fit separately.
+- Say how the margin is set: a copy of the model is fit without the last training year, and the margin is the 80% conformal quantile of its misses on that year.
+- Define an outbreak start, which every alert number counts: the first week of a run of 2 or more weeks above the epidemic line. The line for week w uses weeks w−2 to w+2 of earlier years.
+- The average of the four gets no calibration of its own; its range is the average of four calibrated ranges.
+
+**`paper.md`, Results**
+- 3.1: add Provinces 2020 next to 2019: Watch caught 19 of 23 outbreak starts (83%), with 87% false alarms (`reports/alerts_province.csv`, 4 weeks).
+- 3.2: negative binomial's 7 wins include Provinces 2019 at 2 weeks, not only Regions + QC.
+- 3.3: ENSO for Regions + QC is mixed, not neutral. It helped in 8 of 16 checks, median +1% / −2% / −3% / −4% by lead time, and carries most of the 2023 gain at 6–8 weeks.
+- 3.3: the live Regions + QC model's weather is rain only. Temperature and humidity are research inputs for that panel.
+
+**`paper.md`, Discussion**
+- "79% lower in every province" → 79% lower nationally, and lower in every one of the 86 provinces.
+- The 2023 margin: compare 0.227 with 2019's 0.176 as well as 2024–25's 0.094–0.097.
+- The 2023 cause: the missing "same week last year" is ruled out (next section). Replace it, and update Conclusion item 2 and the calibration limitation to match.
+
+**`slides.md`:** the rain lag is "4–12 weeks" on the slide and "5–7 weeks" in the paper. Use one, with its sources.
+
+**`qa.md`**
+- Elevation "likely because temperature and humidity carry the same signal" → "may", as in hypothesis 3. It is untested.
+- The 2023 answer gives the calibration gap as the cause. Replace it with the result below.
+
+**`research/lit/STATUS.md`:** "Nothing from steps 3–6 is committed yet" is out of date. They are committed and pushed (`d62a1f7`, `f9ccbf1`, `ced441e`); only Kish's approval is pending.
+
+## 2023 calibration check (Person B's question)
+
+**Question.** Is the wide 2023 range for Regions + QC (it held 92% of weeks, against an 80% target) caused by `y_lastyear` missing in 2022, the calibration year? The regions have no 2020–2021 data, so "same week last year" is missing for 17 of 18 areas in 2022.
+
+**Test** (`margin_check.py`, `margin_check.csv`). The Regions + QC backtest three ways, every test year:
+- `live`: as `src/backtest.py`. Reproduces `reports/backtest_region_qc.csv` exactly.
+- `fill_gap`: a missing `y_lastyear` takes the same week 3 years earlier (2022 gets 2019).
+- `no_lastyear`: `y_lastyear` dropped.
+
+**Result: not the cause.**
+
+| Margin, 4 weeks ahead | 2019 | 2023 | 2024 | 2025 |
+|---|---|---|---|---|
+| live | 0.176 | 0.227 | 0.094 | 0.097 |
+| gap filled | 0.188 | 0.216 | 0.092 | 0.091 |
+| dropped | 0.185 | 0.228 | 0.095 | 0.082 |
+
+- 2023 at 2 / 4 / 6 / 8 weeks: live 0.119 / 0.227 / 0.346 / 0.476; filled 0.110 / 0.216 / 0.329 / 0.453; dropped 0.114 / 0.228 / 0.337 / 0.429.
+- The 2023 range still holds 92% at 4 weeks in all three versions (92.3%, 91.5%, 92.4%).
+- Filling or dropping the feature moves the 2023 margin by 0.01–0.05. It stays more than twice 2024–25's.
+- **The 4- and 12-week averages** (`y_mean4`, `y_mean12`) are also missing in the first weeks of 2022 (`causes.md`, 1b). They are not the cause either. Over only the 2022 weeks that have them (766 of 851 at 4 weeks), the margin is 0.224, against 0.227 over all weeks (`margin_averages_present` in `margin_check_calibration_year.csv`).
+
+**What the margin does follow** (`margin_check_calibration_year.csv`): how the calibration step's model, fit without the last training year, forecast that year.
+
+| Calibration year (test year) | Median log error, 4 / 8 weeks | Weeks above the 90% forecast, 4 weeks | Weeks below the 10% forecast, 4 weeks | Margin, 4 weeks |
+|---|---|---|---|---|
+| 2018 (2019) | −0.16 / −0.27 | 36% | 8% | 0.176 |
+| 2022 (2023) | −0.20 / −0.41 | 38% | 9% | 0.227 |
+| 2023 (2024) | −0.07 / −0.11 | 20% | 12% | 0.094 |
+| 2024 (2025) | −0.07 / −0.07 | 22% | 8% | 0.097 |
+
+- **The calibration model forecast 2022 too low:** the median forecast was 18% under at 4 weeks (−0.20 in log), and the shortfall grows with lead time. So its misses were one-sided: 38% of weeks were above the 90% forecast and 9% below the 10%. 2018 shows the same pattern.
+- **The margin is one number added to both ends** (`conformal_margin` in `src/backtest.py` takes the larger of the two misses per week). A forecast that ran low in the calibration year therefore also widens the bottom of the range, where nothing was missed.
+- **The 2023 test model was not running low:** its range before calibration held 68% at 4 weeks, like 2024 (69%) and 2025 (64%). So the full margin widened it to 92%.
+- **2019 had the same calibration pattern** (margin 0.176), but the record epidemic used up the extra width: its range held 70%.
+
+**Hypothesis, not tested:** the 2018 and 2022 calibration models were fit on regional data that were short (2016–2017) or ended two years before the calibration year (2016–2019, then the 2020–2021 gap). The 2023 and 2024 calibration models had the 2022 season in their fit data and missed less.
+
+**For `causes.md` 1b, the paper and the Q&A.** Replace the 2023 cause (the 2020–21 gap's missing features) with this result:
+- The calibration model, fit on regional data ending in 2019, forecast 2022 too low.
+- The single margin then widened both ends of the 2023 range, though only the top had missed.
+
+Conclusion item 2 becomes "calibrate on more than one year, or set the lower and upper margins separately". Romano et al. 2019 give a version with separate margins. Neither has been tested here.
 
 Waiting on: the human's word on applying the final variables to the live model (`HANDOFF.md`, open work 3).
