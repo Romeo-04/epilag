@@ -9,7 +9,7 @@ Step 3 of the Person B handoff. All numbers are 4 weeks ahead unless stated.
 - Out-of-sample forecasts come from `site/public/web/data/<panel>_backtest.json`, which holds horizons 4 and 8. Both files are built from `data/processed/` by `scripts/build_web.py`.
 - Recomputed from these files, the Regions + QC errors and coverage at 4 weeks match `reports/backtest_region_qc.csv` exactly (`out/f1_region_qc_h4_by_year.csv`). For example, 2023 gives EpiLag 57.96, persistence 55.57 and coverage 0.923.
 - Margins, raw coverage and rain anomalies come from Person A's extracts in `research/results/extracts/` (`calibration.csv`, `rain_by_year.csv`), exported from `data/processed/` by `research/models/export_extracts.py`.
-- Rerunning a model needs `data/processed/`, which is not on this machine. Checks that need a rerun are marked **needs a rerun**.
+- Rerunning a model needs `data/processed/`, which is not on this machine. The one rerun this analysis needed was done by Person A (`research/models/margin_check.py`).
 
 **Verdicts.**
 - *Supported*: a check with numbers backs the hypothesis.
@@ -62,22 +62,34 @@ Chart: `figures/f1_regions_weekly_total.png`.
 
 **Check 2: the range width.** The median log width of the 10–90% range was 1.07 in 2023, against 0.79 in 2024 and 0.82 in 2025 (`out/f1_region_qc_h4_by_year.csv`).
 
-**Check 3: a mechanism found in the data layout.**
-- The regional series skip 2020 and 2021. `region_qc_history.json` has 18 areas in 2016–2019 and 2022–2025, but only Quezon City in 2020–2021. `src/features.py` (`region_qc_panel`) says the same.
-- `conformal_margin` in `src/backtest.py` fits on targets before 2022 and measures misses on 2022.
-- In 2022, every region's "same week last year" (`y_lastyear`, a 52-week shift) is missing, because 2021 is missing.
-- The early weeks of 2022 also lack the 4- and 12-week averages.
-- So the calibration model forecast 2022 with less information than it will have in any later year. Its misses were larger, and the 2023 range was widened by more than 2023 needed.
-- No other test year has this problem. 2024 calibrates on 2023, which has 2022 behind it, and 2025 calibrates on 2024.
+**Check 3: missing features from the 2020–21 gap: ruled out by Person A's rerun.**
+- The regional series skip 2020 and 2021, so in the 2022 calibration year "same week last year" (`y_lastyear`) is missing for 17 of 18 areas, and the first weeks lack the 4- and 12-week averages.
+- Person A reran the Regions + QC backtest with the gap filled (`y_lastyear` taken from 3 years earlier) and with `y_lastyear` dropped (`research/models/margin_check.py`, `research/results/margin_check.csv`). The 2023 margin at 4 weeks stayed at 0.216 (filled) and 0.228 (dropped), against 0.227 live, and the 2023 range still held 91.5–92.4%.
+- Over only the 2022 weeks that have the 4- and 12-week averages (766 of 851 at 4 weeks), the margin is 0.224 (`margin_averages_present` in `research/results/margin_check_calibration_year.csv`).
+- **Not supported.** An earlier draft of this file gave the missing features as the likely cause; the rerun rules it out.
 
 **Check 4: was 2022 unusual?**
 - **Case level:** the median shift of each region's yearly mean (log scale) from all earlier years is 0.51 for 2022. That is in the middle of the range: 2019 is 0.82, 2024 is 0.66, and 2023 is 0.35 (`out/f1_region_year_shape.csv`).
 - **Rain:** 2022's wet-season rain was +1.0% against the areas' other years, the median over Regions + QC areas (`research/results/extracts/rain_by_year.csv`, panel region_qc, year 2022).
 
-**Verdict: supported** that calibration on 2022 caused the over-wide range: the raw range was normal, the 2022 margin was the largest, and calibration overshot.
-- The "unusual post-pandemic year" explanation is *not supported*. 2022's case level and rain were both ordinary.
-- The likelier cause is the missing 2020–2021 data, which leaves the calibration year without last-year and long-average features. This is a *hypothesis* until Person A reruns `conformal_margin` for 2023 with `y_lastyear` dropped, or with the gap filled (**needs a rerun**).
-- The extracts can't test it, because they hold forecasts for the test years, not for the calibration year.
+**Check 5: how the calibration model forecast its year** (`research/results/margin_check_calibration_year.csv`, from Person A). The margin comes from a copy of the model fit without the last training year, scored on that year:
+
+| Calibration year (test year) | Median log error, 4 / 8 weeks | Weeks above the 90% forecast, 4 weeks | Weeks below the 10% forecast, 4 weeks | Margin, 4 weeks |
+|---|---|---|---|---|
+| 2018 (2019) | −0.16 / −0.27 | 36% | 8% | 0.176 |
+| 2022 (2023) | −0.20 / −0.41 | 38% | 9% | 0.227 |
+| 2023 (2024) | −0.07 / −0.11 | 20% | 12% | 0.094 |
+| 2024 (2025) | −0.07 / −0.07 | 22% | 8% | 0.097 |
+
+- The calibration model forecast 2022 about 18% too low at 4 weeks (median log error −0.20), and the shortfall grew with lead time. Its misses were one-sided: 38% of weeks above the 90% forecast, 9% below the 10%.
+- `conformal_margin` in `src/backtest.py` adds one margin to both ends of the range (it takes the larger of the two misses per week). So a calibration model that ran low also widened the bottom of the 2023 range, where nothing had been missed.
+- The 2023 test model was not running low: its raw range held 68%, like 2024 and 2025 (Check 1). The full margin therefore pushed it to 92%.
+- 2019 had the same calibration pattern (margin 0.176), but the record epidemic used up the extra width: its range held 70%.
+
+**Verdict: supported** that calibration on 2022 caused the over-wide range: the raw range was normal, the 2022 margin was the largest of 2023–2025 (0.227 against 0.094–0.097; 2019's was 0.176), and calibration overshot.
+- **Mechanism, supported:** the calibration model forecast 2022 too low, and the single, symmetric margin widened both ends of the 2023 range, though only the top had missed.
+- **Not supported:** an unusual 2022 (its case level and rain were ordinary), and the missing features from the 2020–21 gap (Check 3).
+- **Why the calibration model ran low is a *hypothesis*, not tested** (Person A): its fit data were short (2016–2017, for the 2018 calibration) or ended two years before the calibration year (2016–2019, for 2022). The 2023 and 2024 calibration models had the 2022 season in their fit data and missed less.
 
 **Supporting detail.** The no-weather model shows the same over-coverage in 2023 (0.935, `reports/backtest_region_qc_noweather.csv`). So the cause isn't the weather features.
 
@@ -229,13 +241,13 @@ Chart: `figures/f5_coverage_before_after.png`.
 | Finding | Verdict | Main source |
 |---|---|---|
 | 1a. 2023 was flat | Supported | `out/f1_region_year_shape.csv` |
-| 1b. Too-wide range came from calibrating on 2022 | Supported (2022 margin largest from 4 weeks: 0.227 against 0.094–0.176). Cause: likely the 2020–21 data gap, not an unusual 2022 (hypothesis, needs a rerun) | `extracts/calibration.csv`, `model_comparison.csv`, `src/backtest.py` |
+| 1b. Too-wide range came from calibrating on 2022 | Supported (margin 0.227 against 0.094–0.097 for 2024–25). Cause: the calibration model forecast 2022 too low, and the one symmetric margin widened both ends. The 2020–21 gap is ruled out; why it ran low is untested | `extracts/calibration.csv`, `results/margin_check*.csv`, `src/backtest.py` |
 | 2. Seasonal naive copied the 2019 epidemic into 2020 | Supported. The drop starts in late March 2020 | `out/f2_*` |
 | 3. Weather matters more at longer leads | Supported for Regions + QC, not for provinces | `out/f3_weather_by_horizon.csv`, `shap_groups.csv`, `feature_groups.csv` |
 | 4. Weather helps most in unusual years | Not supported: on rain and on case shape, weather helped most in the most ordinary year (2024) | `out/f4_rain_anomaly_vs_weather_gain.csv`, `out/f4_season_departure.csv` |
 | 5. Raw ranges too narrow because years differ | Partly supported: also a LightGBM-specific narrowness | `model_comparison.csv`, `extracts/calibration.csv` |
 
-**Still needs a model rerun (Person A):** the 2023 calibration without `y_lastyear` (finding 1b).
+**Answered by Person A's rerun:** the 2023 calibration without `y_lastyear` (finding 1b, Check 3). Still untested: why the 2018 and 2022 calibration models ran low.
 
 
 ---

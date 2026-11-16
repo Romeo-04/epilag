@@ -49,15 +49,19 @@ EpiLag-PH sets out to fill that gap.
 **Features** (`src/features.py`):
 - recent cases (last 4 weeks, 4- and 12-week averages, trend, same week last year)
 - weekly rain for 12 weeks, with 4/8/12-week totals and heavy-rain days
-- humidity and temperature lags (provinces only in the submitted model)
+- humidity and temperature lags. These are in the submitted model for provinces only; for Regions + QC its weather is rain only, and temperature and humidity are research inputs.
 - week of year and population
 
 **Model** (README "Method"):
-- One LightGBM quantile model per lead time (2, 4, 6, 8 weeks) gives the 10th, 50th and 90th percentiles.
-- The 10–90% range is widened by conformalized quantile regression [romano2019], fit on the last training year.
+- For each lead time (2, 4, 6, 8 weeks), three LightGBM quantile models are fit separately, one each for the 10th, 50th and 90th percentiles.
+- The 10–90% range is widened by conformalized quantile regression [romano2019] (`conformal_margin` in `src/backtest.py`):
+  - A copy of the model is fit without the last training year.
+  - Its misses on that year set the margin: the 80% conformal quantile of the misses, in log space.
+  - The same margin is added to both ends of the range.
 
 **Alerts** (`src/alerts.py`, `src/thresholds.py`):
-- The epidemic line is the mean + 2 SD for each area and week of year, from earlier years only.
+- The epidemic line for week w of the year is the mean + 2 SD of weeks w−2 to w+2 in earlier years only (`src/thresholds.py`).
+- An outbreak start is the first week of a run of 2 or more weeks above the epidemic line (`src/alerts.py`). Every alert number below counts outbreak starts.
 - **Watch:** the 90th percentile crosses the line.
 - **Outbreak warning:** the median crosses it.
 
@@ -70,7 +74,7 @@ EpiLag-PH sets out to fill that gap.
 - negative binomial regression
 - quantile random forest
 - SARIMAX
-- an equal average of all four
+- an equal average of all four. It gets no calibration of its own: its range is the average of the four calibrated ranges (`research/results/METHODS.md`).
 
 **Variable tests** (`research/results/METHODS.md`):
 - Each variable group was added to cases + season, and removed from the full research set.
@@ -91,8 +95,8 @@ EpiLag-PH sets out to fill that gap.
 | Error vs "same as this week" | 18% lower (2019), 32% (2024), 20% (2025); **4% higher (2023)** | 22% lower (2019), 20% (2020) |
 | Error vs "same week last year" | 32–70% lower | 36% (2019), 89% (2020) lower |
 | Share of weeks inside the 10–90% range (target 80%) | 70–92% | 77–79% |
-| Outbreak starts caught by Watch | 79–100% | 87% (2019) |
-| False alarms on Watch | 42–63% | 46% (2019) |
+| Outbreak starts caught by Watch | 79–100% | 87% (2019); 19 of 23, 83% (2020) |
+| False alarms on Watch | 42–63% | 46% (2019); 87% (2020) |
 
 Sources: `reports/backtest_<panel>.csv` (horizon 4) and `reports/alerts_<panel>.csv` (rule `warn_upper`, horizon 4).
 
@@ -104,7 +108,7 @@ Lowest error among the four, out of 24 checks (`research/results/model_compariso
 |---|---|---|---|
 | 12 | 7 | 5 | 0 |
 
-- **Negative binomial** won Regions + QC 2023 at every lead, and 2019 at 2 and 4 weeks.
+- **Negative binomial** won Regions + QC 2023 at every lead, Regions + QC 2019 at 2 and 4 weeks, and Provinces 2019 at 2 weeks.
 - **SARIMAX** won Regions + QC 2019 at 6–8 weeks and 2025 at 4–8 weeks. It caught the most outbreak starts on Watch (88%), but the fewest on Outbreak warning (17%).
 - **Random forest** stayed close to LightGBM, at a median of 2.6% higher error.
 - **Calibration:**
@@ -122,17 +126,17 @@ Lowest error among the four, out of 24 checks (`research/results/model_compariso
 
 **Recent cases.** Removing them makes the error 21–303% worse (`research/results/feature_groups.csv`, mode drop). They carry 48–76% of SHAP attention (`research/results/STATUS.md`).
 
-**Weather, Regions + QC.** Heat, humidity and rain each helped when added to cases + season, in 14, 15 and 12 of 16 checks. The gain grows with lead time (`research/analysis/out/f3_weather_by_horizon.csv`):
+**Weather, Regions + QC.** The submitted model's weather for this panel is rain only; temperature and humidity are research inputs. Heat, humidity and rain each helped when added to cases + season, in 14, 15 and 12 of 16 checks. The gain grows with lead time (`research/analysis/out/f3_weather_by_horizon.csv`):
 
 | Weeks ahead | 2 | 4 | 6 | 8 |
 |---|---|---|---|---|
-| Error change from weather, live model (median) | +0.5% | 0.0% | −2.2% | −4.9% |
-| Weather's share of SHAP attention, live model | 11% | 18% | 22% | 24% |
+| Error change from weather (rain only), live model (median) | +0.5% | 0.0% | −2.2% | −4.9% |
+| Weather's (rain's) share of SHAP attention, live model | 11% | 18% | 22% | 24% |
 | Heat added to cases + season (median) | −2.2% | −3.9% | −4.1% | −7.3% |
 
 **Weather, provinces.** No measurable gain at any lead.
 
-**ENSO.** It hurt province forecasts in all 8 checks. For Regions + QC it was neutral: 8 of 16.
+**ENSO.** It hurt province forecasts in all 8 checks. For Regions + QC it was mixed: it helped in 8 of 16 checks, median +1% / −2% / −3% / −4% at 2 / 4 / 6 / 8 weeks, and carries most of the research set's 2023 gain at 6–8 weeks (`research/results/STATUS.md`).
 
 **Elevation (provinces).** It helped when added alone (7 of 8 checks, −1.9%), but not inside the full set.
 
@@ -170,11 +174,13 @@ Details and checks are in `research/analysis/causes.md`.
 - **2023: 4% worse than "same as this week".**
   - It was the flattest year in the data, with the lowest peak-to-mean ratio (1.94) and the lowest 4-week volatility (0.40; `out/f1_region_year_shape.csv`). In such a year, "same as this week" is a strong forecast.
 - **2023's range was too wide (92%).**
-  - The raw range was normal (68%), but the calibration margin, fit on 2022, was the largest (0.227 against 0.094–0.097; `research/results/extracts/calibration.csv`).
-  - 2022's case level and rain were ordinary.
-  - The regional data skip 2020–2021, so the 2022 calibration year had no "same week last year" input. This is a hypothesis, pending Person A's rerun.
+  - The raw range was normal (68%), but the calibration margin, fit on 2022, was 0.227, against 0.176 for 2019 and 0.094–0.097 for 2024–25 (`research/results/extracts/calibration.csv`).
+  - The calibration model, fit on regional data ending in 2019, forecast 2022 about 18% too low. 38% of weeks were above its 90% forecast, and 9% below its 10% forecast (`research/results/margin_check_calibration_year.csv`).
+  - The single margin then widened both ends of the 2023 range, though only the top had missed.
+  - Ruled out: an unusual 2022 (its case level and rain were ordinary), and the inputs missing because of the 2020–21 gap. Filling or dropping "same week last year" left the margin at 0.216–0.228 (`research/results/margin_check.csv`).
+  - Why the calibration model ran low is a hypothesis, not tested: its fit data were short or two years old.
 - **"Same week last year" in 2020.**
-  - It copied the 2019 epidemic into a year 79% lower in every province, with the drop starting in late March 2020 (`out/f2_*`).
+  - It copied the 2019 epidemic into a year 79% lower nationally, and lower in every one of the 86 provinces, with the drop starting in late March 2020 (`out/f2_*`).
   - The 89% skill in 2020 shows that baseline failing. It isn't typical skill.
 
 **Why weather helps more further ahead.**
@@ -200,19 +206,19 @@ Details and checks are in `research/analysis/causes.md`.
 - **Reports, not infections.** The model forecasts reported cases, which undercount infections [undurraga2017].
 - **One weather point per area.**
 - **Watch has a high false-alarm share (42–63%).** Outbreak warning is stricter, but catches fewer outbreak starts.
-- **Calibration rests on one year**, so a gap or an unusual year carries into the next test year.
+- **Calibration rests on one year, with one margin for both ends.** A calibration model that runs low in that year widens the whole next year's range, the bottom as well as the top (2023: 92% held, against an 80% target).
 - **Unverified sources:** makridakis2022, the Mandaue study and senson2026 are unverified, and none of them supports a claim here (`references.md`).
 
 ## 5. Conclusion
 
 **What the evidence supports.**
 - The submitted LightGBM quantile model, with conformal calibration, beat both simple baselines in 5 of 6 test years. It had the lowest error of four methods in 12 of 24 checks, and ranges that held about 80% after calibration.
-- Its losses have specific causes: a record year beyond the training range, a flat year, and a calibration year after a data gap.
+- Its losses have specific causes: a record year beyond the training range, a flat year, and a calibration year whose model ran low, which the single margin carried into both ends of the next year's range.
 - Weather helps the regional model at 6–8 weeks, matching the mosquito-cycle lags in the literature. Elevation and ENSO add little, also as the literature predicts.
 - The research found a better set of variables: neighbours' cases for provinces, and heat and humidity for regions. It was better in 21 of 24 checks.
 
 **Next steps.**
 1. Score the final variables on a new season they haven't seen.
-2. Fix the calibration-year gap, and calibrate on more than one year.
+2. Calibrate on more than one year, or set the lower and upper margins separately [romano2019]. Untested.
 3. Test a calibrated average of the methods that keeps Outbreak-warning catches.
 4. Add province data after 2021.

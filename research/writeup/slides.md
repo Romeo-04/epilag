@@ -8,7 +8,7 @@ These go into `docs/deck/deck.html` only after Kish approves.
 
 **Text:**
 - **Features from the literature.**
-  - Rain matters 4–12 weeks before cases [sumi2017, carvajal2018].
+  - Rain matters 5–7 weeks before cases [sumi2017, carvajal2018].
   - Humidity matters about 4 weeks before; it was Metro Manila's top weather factor [carvajal2018, xu2020].
   - Temperature risk peaks near 27.5 °C [seposo2023, mordecai2017].
 - **Philippine forecasts so far.** They cover the national total by month [olana2025], one metro area [carvajal2018], one city [eligado2026], or high/low classes by province [buczak2014].

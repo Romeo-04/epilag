@@ -17,11 +17,12 @@ Numbers and sources as in `research/writeup/paper.md`.
 **Why didn't topography help?**
 - A nationwide Philippine study found elevation linked to infection rates, but not to reported cases [sy2026]. Our model forecasts reported cases.
 - Elevation is fixed per area, and recent cases already tell the model each area's level.
-- Added on its own, elevation helped slightly (7 of 8 checks, −1.9%). In the full model it added nothing, likely because temperature and humidity carry the same signal.
+- Added on its own, elevation helped slightly (7 of 8 checks, −1.9%). In the full model it added nothing. That may be because temperature and humidity carry the same signal, but this is untested (Person A's hypothesis 3).
 
 **What went wrong in 2023?**
 - 2023 was the flattest year in the data, so "same as this week" was hard to beat. We lost by 4%: 58.0 against 55.6 cases.
-- The range was too wide (92%, against an 80% target) because calibration used 2022. The regional data have no 2020–2021, so 2022 lacked last year's numbers and calibration overshot.
+- The range was too wide (92%, against an 80% target) because of calibration. The calibration model, fit on regional data ending in 2019, forecast 2022 about 18% too low. Our one margin then widened both ends of the 2023 range, though only the top had missed (`research/results/margin_check_calibration_year.csv`).
+- It wasn't the missing 2020–21 data: filling or dropping "same week last year" left the margin at 0.216–0.228, against 0.227 (`research/results/margin_check.csv`).
 - Negative binomial did better that year. Combining methods is our next step.
 
 **Why does "Watch" raise so many false alarms?**
@@ -45,7 +46,7 @@ Numbers and sources as in `research/writeup/paper.md`.
 
 **What would you do next?**
 1. Score the final variables on a new season.
-2. Fix the calibration-year gap, and calibrate on more than one year.
+2. Calibrate on more than one year, or set the lower and upper margins separately [romano2019]. Untested.
 3. Test an average of the methods that keeps Outbreak-warning catches.
 4. Add weekly province data after 2021.
 
