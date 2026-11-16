@@ -15,7 +15,7 @@ Every number from the model experiments, with the file it comes from. How each e
 | `proposed_features.csv` | The variables proposed by the literature review: neighbours' cases, heatwave days, rain anomaly |
 | `candidates.csv` | Candidate final sets, scored on every measure |
 | `margin_check.csv`, `margin_check_calibration_year.csv` | The 2023 calibration check |
-| `extracts/` | Per-week backtest forecasts, calibration coverage, weekly series and rain by year, used by `research/analysis/` |
+| `extracts/` | Per-week backtest forecasts, calibration coverage, weekly series and rain by year, used by `research/analysis/`. Also `game_forecasts.json`: all four models' 4-week forecasts in Dengue Drill's format |
 
 ## Four methods on the same test
 
