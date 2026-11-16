@@ -6,7 +6,8 @@
 // with image-rendering: pixelated, like the other voxel maps (src/lib/voxel.js, whose grid decoder it reuses).
 import { decode } from "../lib/voxel.js";
 
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// less motion: the device asks for it, or the player turned it on in the game's settings (main.js)
+const reduced = () => document.documentElement.dataset.motion === "less" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
 function vnoise(x, y) { // smooth value noise

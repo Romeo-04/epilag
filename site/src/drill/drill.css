@@ -561,3 +561,54 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .cmp__table td small { font-size: 12px; font-weight: 600; color: var(--night-muted); }
 .cmp__more { font-size: 13.5px; color: var(--night-muted); }
 .cmp__more:hover { color: var(--night-text); }
+
+/* settings: sound, display and help in one dialog; "reduce motion" there does what the device setting does */
+[data-motion="less"] .drill *, [data-motion="less"] .drill *::before, [data-motion="less"] .drill *::after { animation: none !important; transition: none !important; }
+.no-names .board__label:not(.on) .board__name { visibility: hidden; }
+#set-open svg { display: block; }
+.set { width: min(820px, calc(100vw - 24px)); }
+.set__cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 32px; margin: 18px 0 22px; }
+.set__group { display: grid; align-content: start; gap: 0; }
+.set__group h3 { padding-bottom: 6px; border-bottom: 1.5px solid var(--night-line); }
+.set__group h3:not(:first-child) { margin-top: 22px; }
+.set__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 52px; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, .07); }
+.set__row--vol { grid-template-columns: minmax(0, 110px) minmax(0, 1fr) 44px; min-height: 40px; padding: 4px 0 10px 14px; }
+.set__lab { display: grid; gap: 1px; min-width: 0; }
+.set__lab b { font-size: 15.5px; color: var(--night-text); }
+.set__lab span { font-size: 12.5px; line-height: 1.35; color: var(--night-muted); }
+.set__row output { font-size: 13px; font-weight: 700; text-align: right; color: var(--night-muted); }
+.switch { position: relative; flex: none; width: 52px; height: 28px; border: 2px solid var(--night-line); background: rgba(255, 255, 255, .05); }
+.switch i { position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: var(--night-muted); transition: transform .12s steps(3); }
+.switch[aria-checked="true"] { border-color: var(--d-teal); background: rgba(47, 214, 195, .18); }
+.switch[aria-checked="true"] i { transform: translateX(24px); background: var(--d-teal); }
+.switch:disabled, .set input:disabled { opacity: .35; cursor: not-allowed; }
+.switch:focus-visible, .set input:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.set input[type="range"] { width: 100%; height: 24px; accent-color: var(--d-amber); cursor: pointer; }
+@media (max-width: 680px) { .set__cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* ------------------------------------------------------------------ the backdrop (backdrop.js): the national map with the mission's
+   region lit, and the season's rain and cases along the bottom. It replaces the painted village and sky behind these screens. */
+.backdrop { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #0B1630; }
+.backdrop canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+/* a shade so text reads over the map: darker where each screen puts its words */
+.backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 14, 36, .72) 0%, rgba(8, 14, 36, .45) 48%, rgba(8, 14, 36, 0) 78%); }
+/* the long screens scroll over the backdrop, so there it is only a faint texture and the key is hidden */
+.backdrop[data-scene="models"]::after, .backdrop[data-scene="report"]::after, .backdrop[data-scene="vs"]::after { background: rgba(8, 14, 36, .8); }
+.backdrop[data-scene="models"] .backdrop__key, .backdrop[data-scene="report"] .backdrop__key, .backdrop[data-scene="vs"] .backdrop__key { display: none; }
+/* the key: a short column at the right edge, above the season strip */
+.backdrop__key { position: absolute; z-index: 1; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(18% + 16px); display: grid; gap: 5px; margin: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--night-muted); }
+.bk::before { content: ""; display: inline-block; width: 12px; height: 8px; margin-right: 6px; vertical-align: -1px; background: rgba(47, 214, 195, .55); }
+.bk--cases::before { height: 3px; vertical-align: 2px; background: #F5A51C; }
+.bk--epi::before { height: 0; vertical-align: 3px; background: none; border-top: 2px dashed #F04B2A; }
+.backdrop--dry .bk--rain { display: none; }
+#s-title, #s-brief, #s-models, #s-report, #s-vs { background: none; }
+/* room for the season strip under each screen's content */
+#s-title .title, #s-brief .briefing { padding-bottom: 26vh; }
+.title__pond { display: none; }
+@media (max-width: 1000px) {
+  /* on a phone every screen scrolls, so the backdrop stays a faint texture behind the content */
+  .backdrop::after, .backdrop[data-scene]::after { background: rgba(8, 14, 36, .84); }
+  .backdrop__key { display: none; }
+  #s-title .title, #s-brief .briefing { padding-bottom: 40px; }
+}
