@@ -6,6 +6,9 @@ requests
 lightgbm>=4.0
 scikit-learn
 shap
+matplotlib             # scripts/make_figures.py; research/analysis charts
+statsmodels>=0.14      # research/models: SARIMAX, negative binomial
+quantile-forest>=1.5   # research/models: quantile random forest
 streamlit>=1.40
 plotly
 pytest

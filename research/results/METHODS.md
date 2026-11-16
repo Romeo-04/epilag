@@ -64,12 +64,50 @@ Each test reports:
 
 **SHAP** (`shap_groups.csv`, `shap_lags.csv`):
 - The 50th-percentile LightGBM model is fit on all usable rows, as `src/train_final.py` does, once for the live feature set (`current`) and once for the research table (`plus`).
+- `current` is read off the live table (`live_features()`). `src/features.feature_columns()` picks columns by name prefix, so on the research table it would also take the research weather (`temp_lag*`, `rh_lag*`, `tmax_max4`). The Regions + QC `current` rows had this fault until they were rerun on 16 Nov.
 - Mean |SHAP| is taken over a fixed sample of 4,000 area-weeks (seed 0).
 - A group's share is its features' summed mean |SHAP| over the total.
 - Lag profiles keep the per-lag values for `rain_lag*`, `temp_lag*` and `rh_lag*`.
 
-## Blend check (`blend.py`, exploratory)
+## Blends (`blend.py`)
 
-- Equal average, in log space, of saved middle forecasts: LightGBM + negative binomial, and all four.
-- No refitting and no tuned weights.
-- Scores the middle forecast only; ranges and alerts are not calibrated for the blend.
+- **What:** each method's saved, calibrated 10%, 50% and 90% forecasts, averaged in log(cases + 1) space, quantile by quantile ("quantile averaging", Lichtendahl, Grushka-Cockayne and Winkler 2013).
+- **Blends:** `blend_all4` (all four methods) and `blend_lgb_negbin` (LightGBM + negative binomial). Equal weights.
+- **No fitting:** nothing is refit, no weight is tuned, and the blend gets no calibration of its own. Its range is the average of the four ranges, each calibrated on the last training year.
+- **Scoring:** the harness's `score()`, so error, range and both alert rules are directly comparable with the single methods in `model_comparison.csv`.
+
+## Longer rain lags (`rain_lags.py`)
+
+- **Features:** `rain_win12_15`, `rain_win16_19`, `rain_win20_23`: weekly rain summed over 12–15, 16–19 and 20–23 weeks before week t, per area. All four weeks are needed; otherwise the value is missing, which LightGBM handles.
+- **Test:** LightGBM through the harness on the research set (`plus`) and on the research set plus the three windows (`plus_long_rain`). The `plus` run reproduces the `full` rows of `feature_groups.csv` exactly.
+- **SHAP:** as in `influence.py`, on the extended set. Rows are per rain feature, with `weeks_back` grouping weekly lags into 4-week blocks (0–3, 4–7, 8–11) to compare with the new windows. Totals (`rain_sum*`) are kept as their own rows.
+
+## Person B's proposed variables (`proposed_features.py`)
+
+The three `proposed` rows of `research/lit/feature_evidence.csv`. Thresholds and baselines use data before 2019, the first test year, so no test year informs them.
+
+| Group | Features | Built from |
+|---|---|---|
+| neighbours | `nb_inc_log`: pooled incidence (log cases per 100,000) of the nearest areas this week. `nb_inc_log_mean4`: its 4-week mean. `nb_growth`: its change over 3 weeks | Nearest areas by distance between centres: 4 for provinces, 3 for Regions + QC. Quezon City's nearest is NCR, which contains it. Known at forecast time, like the area's own cases |
+| heatwave | `heat_wave4`: heatwave days in the last 4 weeks; `heat_wave4_lag4`, `heat_wave4_lag8`: the same 4 and 8 weeks earlier | A heatwave day is in a run of 2 or more days with maximum temperature above the area's own 95th percentile (ith2025). Same daily ERA5 as the other heat features |
+| drought | `rain_anom12`: the 12-week rain total as a z-score against the same time of year (within 4 weeks) in the area's own past; `rain_anom12_lag8` | Stands in for ith2025's drought index (scPDSI), which is not available per area. The spread is floored at a quarter of the area's overall spread, so a dry-season window with almost no spread does not blow up |
+
+**Tests:** each group is added to cases + season (`add_to_base`, reference: the `base` rows of `feature_groups.csv`) and to the full research set (`add_to_plus`, reference: the `full` rows). LightGBM, same harness. Output: `proposed_features.csv`, same columns as `feature_groups.csv`.
+
+## Candidate final sets (`candidates.py`)
+
+Named feature sets scored on every measure (error, range, both alert rules) for the choice of final variables. LightGBM, same harness, on the table extended with the proposed variables. Output: `candidates.csv`, with the set name in `model`.
+
+| Set | Features | Panels |
+|---|---|---|
+| `live` | today's features, read off the live table (`live_features()` in `influence.py`) | both |
+| `research` | the full research set | both |
+| `research_no_enso` | the research set minus ENSO | both |
+| `live_topography` | live + elevation and density | provinces |
+| `live_neighbours`, `research_no_enso_neighbours` | live, or the research set minus ENSO, + the neighbour group | provinces |
+
+A proposed group joins the candidates (`PROPOSED`) only if it cut the miss when added to the full research set. Only neighbours, for provinces, did. **Drift check:** `live` must equal the `lightgbm` rows of `model_comparison.csv`; the script prints the largest difference.
+
+## Extracts for analysis (`export_extracts.py`)
+
+`data/processed/` is gitignored, so the parts the analysis needs are exported to `research/results/extracts/`. The script's docstring lists each file and its columns. Calibrated coverage in `calibration.csv` matches `reports/backtest_<panel>.csv` exactly.

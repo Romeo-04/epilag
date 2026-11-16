@@ -40,9 +40,13 @@ The code is the source of truth for the details: `src/features.py` (features), `
 
 **Python.** Use Person A's venv (`../epilag/.venv/Scripts/python`) or make your own from `requirements.txt`.
 
-**Data.** `data/processed/` is gitignored.
-- Same machine: copy it from `../epilag/data/processed`.
-- Otherwise: ask your human for the files, or rebuild them with the steps in README "Run it". The weather download waits out a free-tier limit, so expect an hour or more.
+**Data.** `data/processed/` is gitignored. You don't need it: what the analysis uses is exported to `research/results/extracts/` (committed on `research-a`; the docstring of `research/models/export_extracts.py` lists every column).
+- `backtest_predictions.csv.gz`: every test week of the live backtest, with and without weather (`weather` column). Actual cases, the 10/50/90% forecasts before and after calibration, the margin, and both baselines.
+- `calibration.csv`: per panel, test year and lead time, the margin and the range coverage before and after calibration.
+- `weekly_series.csv.gz`: cases, population, rain, temperature and humidity for every area-week.
+- `rain_by_year.csv`: each area's rain per year and per rainy season (June–November), and its % difference from the area's other years.
+
+To rerun the models themselves you would need `data/processed/`: copy it from Person A's machine (`epilag-data-processed.zip`) or rebuild it with README "Run it" (the weather download takes an hour or more).
 
 **File ownership.**
 - **You write:** `research/lit/`, `research/analysis/`, `research/writeup/`.
@@ -128,7 +132,7 @@ Where the evidence is mixed, record both sides. Elevation is mixed for the Phili
 
 For each finding below, write the **hypothesis**, run a **check** that produces numbers, and give a **conclusion**.
 
-The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweather.csv`, `reports/alerts_<panel>.csv` and `reports/shap_<panel>.csv`. Per-week predictions, including the calibration margin, are in `data/processed/backtest_<panel>.parquet`. All numbers are at 4 weeks ahead unless stated.
+The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweather.csv`, `reports/alerts_<panel>.csv` and `reports/shap_<panel>.csv`. Per-week predictions, including the calibration margin, are in `research/results/extracts/backtest_predictions.csv.gz`. All numbers are at 4 weeks ahead unless stated.
 
 **1. Regions + QC 2023.** EpiLag lost to "same as this week" (error 58.0 vs 55.6). Its range was also too wide: 92% of weeks fell inside, against an 80% target.
 - *Hypothesis:* the calibration year, 2022, was an unusual post-pandemic year. Its margin of 0.227 is the largest of the six tests. In 2024 and 2025 the margins were about 0.09 and coverage landed near 80%.
@@ -143,11 +147,11 @@ The sources are `reports/backtest_<panel>.csv`, `reports/backtest_<panel>_noweat
 
 **4. Weather helped in Regions + QC 2024** (error 101.2 vs 111.3 without weather) **but not in 2019, 2023 or 2025.**
 - *Hypothesis:* weather adds the most when a year departs from its usual season.
-- Check each year's rain anomaly against the gain from weather.
+- Check each year's rain anomaly (`extracts/rain_by_year.csv`) against the gain from weather.
 
 **5. Before calibration, the 10–90% ranges caught only 48–69% of real weeks.**
 - *Hypothesis:* each new year differs from the training years, so the raw model is overconfident.
-- `../finals/validation_data.py` shows how the raw coverage is computed, if that folder is on your machine.
+- `research/results/extracts/calibration.csv` has the coverage before and after calibration. Before calibration it is given as a low and a high bound, because a 10% forecast clipped at 0 can't be turned back into its raw value.
 
 **Done when:**
 - Every finding has a check that was run, with numbers, a chart where it helps, and a verdict.
@@ -180,6 +184,7 @@ When `research/results/` holds the model comparison and feature-group files (for
 - **Variables:** a table of expectation against result for each variable group.
   - The expectation comes from your step 1 table; the result comes from Person A's numbers.
   - Mark each row *agrees* or *disagrees*, and explain each disagreement.
+- **Final variables:** the human has chosen (`STATUS.md`, "Final variables"). Explain why they won and what they cost.
 - **Null results:** a group that adds nothing is a finding too. For example, past cases may already reflect an area's level, which would leave static topography nothing to add. Explain why.
 
 **Done when:** every model and every variable group has a sentence explaining its result, with numbers.
@@ -187,13 +192,18 @@ When `research/results/` holds the model comparison and feature-group files (for
 ### 6. Write-up drafts
 
 **Outputs:**
-- `research/writeup/discussion.md`: results, discussion, limitations and conclusion, all traceable.
+- `research/writeup/paper.md`: the research write-up, in IMRADC order (Introduction, Methods, Results, Discussion, Conclusion), all traceable.
+  - **Introduction:** the problem, the literature (`rrl_matrix.csv`, `references.md`) and the gap EpiLag fills (`positioning.md`).
+  - **Methods:** data, features, models and the test design, from README "Method" and `research/results/METHODS.md`.
+  - **Results:** the submitted model (`reports/`), then the four methods, the variable groups, the proposed variables, the candidate sets and the final variables (`research/results/STATUS.md`). The submitted model is the main result; the final variables are what the research found.
+  - **Discussion:** `causes.md` (steps 3 and 5), expectation against result for each variable, and the limitations: where the data ends, the choices made after seeing the test years, and only two province test years.
+  - **Conclusion:** what the evidence supports, and the next step (score the final variables on a new season).
 - `research/writeup/slides.md`: 2–3 slides covering where EpiLag sits in the literature, the model comparison, and what drives the forecast. For each slide give the text and which chart it uses.
 - `research/writeup/qa.md`: likely judge questions with short answers. Include "why LightGBM", "why not LSTM", "why didn't topography help" and "what went wrong in 2023".
 
 Edit the deck and the site only after your human approves these drafts. The deck is `docs/deck/deck.html` and the methodology page is `site/methodology.html`.
 
-**Done when:** all three drafts exist, and every number in them is traceable.
+**Done when:** all three drafts exist, every number in them is traceable, and Person A has checked Methods and Results against `METHODS.md` and `STATUS.md`.
 
 ## What Person A delivers
 
@@ -228,11 +238,13 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 
 **`shap_groups.csv`**: each group's share of the model's attention.
 
-`panel, horizon, group, share`
+`panel, feature_set, horizon, group, share` (`feature_set`: `current` is the live features, `plus` the research set)
 
 **`shap_lags.csv`**: which weeks back matter, for rain, temperature and humidity.
 
-`panel, horizon, variable, lag_weeks, mean_abs_shap`
+`panel, feature_set, horizon, variable, lag_weeks, mean_abs_shap`
+
+**Also delivered** (formats in `research/results/METHODS.md`): `rain_lags.csv` and `rain_lag_shap.csv` (rain 12–23 weeks back), `proposed_features.csv` (your proposed variables), `candidates.csv` (candidate final sets, scored like `model_comparison.csv`).
 
 ## Starting papers (verified 2026-11-16, add to `references.md`)
 
@@ -242,7 +254,7 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 - **Olana et al. 2025**, *Transboundary and Emerging Diseases*, Philippines at national scale. DOI 10.1155/tbed/7480710. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12543447/
   - Compared SARIMA, NNAR, random forest, LSTM, TBATS and Prophet.
 - **Ba Ria–Vung Tau, Vietnam, 2024**, *Tropical Medicine and Infectious Disease* 9(10):250. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11511084/
-  - Negative binomial regression had the lowest error, beating SARIMAX, XGBoost and LSTM.
+  - The authors favour negative binomial regression, but its results table shows SARIMAX with a lower MAE (checked by Person B). Don't cite it as proof that negative binomial wins.
   - Climate lagged 2–20 weeks helped.
 - **Iguchi, Seposo & Honda 2018**, *BMC Public Health*, Davao. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5952851/
   - Distributed-lag model; rain and dew point effects.
@@ -255,6 +267,6 @@ All of this lands in `research/results/`, with `STATUS.md` noting what changed. 
 - **Lowe et al. 2014**, *Lancet Infectious Diseases* 14(7):619. DOI 10.1016/S1473-3099(14)70781-9
   - A Bayesian early-warning system for Brazil, up to 3 months ahead.
 - **Elevation in the Philippines** (mixed evidence):
-  - A nationwide study links low elevation and density to infection, but not to reported cases: https://pmc.ncbi.nlm.nih.gov/articles/PMC8898531
+  - A nationwide study links low elevation and density to infection, but not to reported cases: Sy et al. 2026, *PLOS NTD* 20(5) e0014356, https://doi.org/10.1371/journal.pntd.0014356 (PMC8898531 is a different paper, Edillo 2022, on mosquito eggs)
   - A Mandaue City study found weak links with elevation and slope: https://publish.mersin.edu.tr/index.php/igd/article/view/1262
 - **Already cited in the README:** Romano et al. 2019 (conformalized quantile regression), Undurraga et al. 2017, Bowman et al. 2016, and Pelitro et al. 2026 (the UPRI-NOAH dataset).

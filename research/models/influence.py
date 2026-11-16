@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from extra_features import OUT, group_of  # noqa: E402
+from extra_features import OUT, PROC, group_of  # noqa: E402
 from harness import RESULTS, run, score, upsert  # noqa: E402
 from models import lightgbm  # noqa: E402
 
@@ -27,6 +27,15 @@ BASE = ("cases", "season")
 def load(panel: str) -> tuple[pd.DataFrame, list[str]]:
     return (pd.read_parquet(OUT / f"model_table_{panel}_plus.parquet"),
             json.loads((OUT / f"features_{panel}_plus.json").read_text()))
+
+
+def live_features(panel: str) -> list[str]:
+    """The live model's features, read off the live table. src/features.feature_columns() picks columns by
+    name prefix, so on a research table it would also take the research weather (temp_lag*, rh_lag*,
+    tmax_max4) and any new rain_* column."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    from features import feature_columns
+    return feature_columns(pd.read_parquet(PROC / f"model_table_{panel}.parquet"))
 
 
 def groups(panel: str) -> pd.DataFrame:
@@ -57,11 +66,11 @@ def shap_shares(panel: str) -> None:
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
     from backtest import PARAMS
-    from features import HORIZONS, feature_columns
+    from features import HORIZONS
 
     table, plus = load(panel)
     g_rows, l_rows = [], []
-    for name, feats in (("current", feature_columns(table)), ("plus", plus)):
+    for name, feats in (("current", live_features(panel)), ("plus", plus)):
         for h in HORIZONS:
             target = f"target_h{h}"
             train = table[table[target].notna() & table.y_lag0.notna()]
@@ -79,8 +88,12 @@ def shap_shares(panel: str) -> None:
                                    "lag_weeks": int(m_[2]), "mean_abs_shap": v})
             print(f"{panel} {name} h={h}: " + ", ".join(f"{g} {v:.0%}" for g, v in share.sort_values(
                 ascending=False).items()), flush=True)
-    upsert(RESULTS / "shap_groups.csv", pd.DataFrame(g_rows), ["panel", "feature_set", "horizon", "group"])
-    upsert(RESULTS / "shap_lags.csv", pd.DataFrame(l_rows), ["panel", "feature_set", "horizon", "variable", "lag_weeks"])
+    for name, rows, keys in (("shap_groups.csv", g_rows, ["panel", "feature_set", "horizon", "group"]),
+                             ("shap_lags.csv", l_rows, ["panel", "feature_set", "horizon", "variable", "lag_weeks"])):
+        if (RESULTS / name).exists():  # replace the panel's rows whole, so no group from an older run lingers
+            old = pd.read_csv(RESULTS / name)
+            old[old.panel != panel].to_csv(RESULTS / name, index=False)
+        upsert(RESULTS / name, pd.DataFrame(rows), keys)
 
 
 if __name__ == "__main__":
