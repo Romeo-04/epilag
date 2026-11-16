@@ -1,8 +1,10 @@
-"""Exploratory: does an equal average of the methods' middle forecasts beat LightGBM alone?
+"""Blends: an equal average of several methods' forecasts, scored like any other model.
 
-Uses the saved harness forecasts (data/processed/research/<panel>_<model>.parquet), so nothing is refit
-and no weight is tuned on the test years. Scores the middle forecast only; the blend's 10-90% range and
-alerts are not calibrated here. Writes research/results/blend_check.csv.
+Each method's saved, already calibrated q10/q50/q90 (data/processed/research/<panel>_<model>.parquet) are
+averaged in log space, quantile by quantile ("quantile averaging", Lichtendahl, Grushka-Cockayne and
+Winkler 2013). Nothing is refit, no weight is tuned, and the blend gets no calibration of its own: its
+range is the average of ranges each calibrated on the last training year only. Scores (error, range,
+both alert rules) go into research/results/model_comparison.csv as models blend_lgb_negbin and blend_all4.
 
 Usage: python research/models/blend.py
 """
@@ -13,31 +15,28 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from harness import OUT, RESULTS  # noqa: E402
+from harness import OUT, RESULTS, score, upsert  # noqa: E402
 
-MODELS = ["lightgbm", "negbin", "random_forest", "sarimax"]
 KEY = ["unit_id", "target_week", "horizon", "test_year"]
-BLENDS = {"lightgbm": ["lightgbm"], "negbin": ["negbin"], "lightgbm+negbin": ["lightgbm", "negbin"], "all_four": MODELS}
+QCOLS = ["q10", "q50", "q90", "q10_raw", "q90_raw"]
+BLENDS = {"blend_lgb_negbin": ["lightgbm", "negbin"],
+          "blend_all4": ["lightgbm", "negbin", "random_forest", "sarimax"]}
 
-rows = []
-for panel in ["province", "region_qc"]:
-    d = None
-    for m in MODELS:
-        p = pd.read_parquet(OUT / f"{panel}_{m}.parquet")
-        keep = KEY + (["actual", "persistence", "seasonal_naive"] if d is None else []) + ["q50"]
-        p = p[keep].rename(columns={"q50": m})
-        d = p if d is None else d.merge(p, on=KEY)
-    d = d.dropna(subset=["actual", "persistence", "seasonal_naive"])  # same rows the harness scores
-    for name, ms in BLENDS.items():
-        q50 = np.expm1(np.log1p(d[ms]).mean(axis=1))  # average in log space, like the models' own output
-        err = (q50 - d.actual).abs().groupby([d.test_year, d.horizon]).mean()
-        pers = (d.persistence - d.actual).abs().groupby([d.test_year, d.horizon]).mean()
-        rows += [{"panel": panel, "test_year": y, "horizon": h, "blend": name, "mae": v,
-                  "rel_mae_vs_persistence": v / pers[(y, h)]} for (y, h), v in err.items()]
 
-out = pd.DataFrame(rows)
-out.to_csv(RESULTS / "blend_check.csv", index=False)
-t = out.pivot_table(index=["panel", "test_year", "horizon"], columns="blend", values="mae")
-print(t.round(1).to_string())
-print("smallest miss:", t.idxmin(axis=1).value_counts().to_dict())
-print("median change vs lightgbm:", (t.div(t.lightgbm, axis=0) - 1).median().round(3).to_dict())
+def blend(panel: str, models: list[str]) -> pd.DataFrame:
+    frames = [pd.read_parquet(OUT / f"{panel}_{m}.parquet").sort_values(KEY).reset_index(drop=True) for m in models]
+    for f in frames[1:]:
+        assert f[KEY].equals(frames[0][KEY]), "methods must forecast the same rows"
+    out = frames[0].drop(columns=QCOLS + ["margin"])
+    for c in QCOLS:
+        out[c] = np.expm1(np.mean([np.log1p(f[c].values) for f in frames], axis=0))
+    return out
+
+
+if __name__ == "__main__":
+    scores = [score(blend(panel, ms), panel, name) for panel in ["province", "region_qc"] for name, ms in BLENDS.items()]
+    table = upsert(RESULTS / "model_comparison.csv", pd.concat(scores), ["panel", "model", "test_year", "horizon"])
+    keep = ["lightgbm", "negbin", "random_forest", "sarimax", *BLENDS]
+    t = table[table.model.isin(keep)]
+    for col in ["mae", "coverage_10_90", "caught_watch", "false_share_watch", "caught_warning"]:
+        print(col); print(t.pivot_table(index=["panel", "test_year", "horizon"], columns="model", values=col).round(3).to_string())

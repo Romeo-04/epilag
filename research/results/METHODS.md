@@ -68,8 +68,9 @@ Each test reports:
 - A group's share is its features' summed mean |SHAP| over the total.
 - Lag profiles keep the per-lag values for `rain_lag*`, `temp_lag*` and `rh_lag*`.
 
-## Blend check (`blend.py`, exploratory)
+## Blends (`blend.py`)
 
-- Equal average, in log space, of saved middle forecasts: LightGBM + negative binomial, and all four.
-- No refitting and no tuned weights.
-- Scores the middle forecast only; ranges and alerts are not calibrated for the blend.
+- **What:** each method's saved, calibrated 10%, 50% and 90% forecasts, averaged in log(cases + 1) space, quantile by quantile ("quantile averaging", Lichtendahl, Grushka-Cockayne and Winkler 2013).
+- **Blends:** `blend_all4` (all four methods) and `blend_lgb_negbin` (LightGBM + negative binomial). Equal weights.
+- **No fitting:** nothing is refit, no weight is tuned, and the blend gets no calibration of its own. Its range is the average of the four ranges, each calibrated on the last training year.
+- **Scoring:** the harness's `score()`, so error, range and both alert rules are directly comparable with the single methods in `model_comparison.csv`.

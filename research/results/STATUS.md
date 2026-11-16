@@ -4,7 +4,7 @@ How the experiments were run: `METHODS.md`.
 
 - [x] Harness: every model takes the same test. LightGBM through the harness reproduces `reports/backtest_*.csv` and `reports/alerts_*.csv` exactly, for both panels.
 - [x] `model_comparison.csv`: negbin, random_forest and sarimax against lightgbm and the two baselines, both panels.
-- [x] `blend_check.csv` (exploratory): equal average of the methods' middle forecasts.
+- [x] Blends in `model_comparison.csv` (`blend_all4`, `blend_lgb_negbin`): equal average of the methods' calibrated forecasts, scored like any model (error, range, both alert rules).
 - [x] New variables: heat, humidity and ENSO for Regions + QC; heat, ENSO, elevation and density for provinces (`METHODS.md`).
 - [x] `feature_groups.csv`: each group removed from the full set, and added to cases + season. LightGBM, same test, both panels.
 - [x] `shap_groups.csv`, `shap_lags.csv` (rows with `feature_set = plus` use the research table; `current` is the live feature set).
@@ -34,7 +34,22 @@ How to read it:
 - No method wins everywhere. LightGBM is best most often. In Regions + QC 2023, LightGBM, random forest and SARIMAX all lost to "same as this week" at every lead time; negative binomial did not.
 - LightGBM's raw range is the narrowest, so calibration has to do the most work for it. After calibration, all four hold about 80% on average.
 - SARIMAX catches the most outbreak starts on Watch but the fewest on Outbreak warning (17%). Its middle forecast is not biased low overall (median log error −0.06 to +0.03), so why it rarely crosses the epidemic line early is open: a hypothesis to test, not a finding.
-- **Blend (exploratory, `blend_check.csv`):** averaging all four middle forecasts had the smallest miss in 9 of 24 checks, against 7 for LightGBM alone. Its median miss was 2.6% below LightGBM's, and it was never more than 5% worse. No weights were tuned. Its range and alerts were not calibrated, so this is a lead, not a result.
+
+**Average of the four (`blend_all4`).** An equal average, in log space, of the four methods' calibrated 10/50/90% forecasts. No refitting, no tuned weights (`METHODS.md`).
+
+| | Average of the four | LightGBM alone |
+|---|---|---|
+| Smallest miss, against the four methods | 11 of 24 | 7 (negative binomial 4, SARIMAX 2) |
+| Beat "same as this week" | 24 of 24 | 19 |
+| Miss vs LightGBM, median at 2 / 4 / 6 / 8 weeks | −4% / −4% / −2% / −2% (range −18% to +4%; better in 17 of 24) | 0 |
+| Range held (target 80%) | 73–97%, mean 81% | 70–96%, mean 80% |
+| Watch: caught, pooled / false alarms, average | 87% / 58% | 83% / 58% |
+| Outbreak warning: caught / false alarms | 30% / 27% | 36% / 30% |
+
+- Where it lost to LightGBM: Provinces 2020 (+2% to +4%) and Regions + QC 2024 (0% to +4%).
+- The trade-off is on Outbreak warning: fewer starts caught. SARIMAX, which catches 17% on that rule, is one of the four inputs; whether it is the cause is untested.
+- Averaging only LightGBM and negative binomial (`blend_lgb_negbin`) gains less: median −0.6%, worst +9.8%.
+- Caveat: the idea of blending was picked after seeing these test years. Weights were not, so there is little room to overfit, but a fresh year is the real test.
 
 ## Ready now: what each data group adds
 
