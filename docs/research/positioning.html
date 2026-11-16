@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where EpiLag-PH sits in the literature · EpiLag-PH research</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0 auto;max-width:860px;padding:28px 24px 56px;font:400 16px/1.6 "Inter Tight","Helvetica Neue",Arial,system-ui,sans-serif;color:#071711;background:#FBFAF4;overflow-wrap:break-word}
+h1{font-size:30px;line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+h2{font-size:23px;line-height:1.2;margin:40px 0 10px;padding-top:18px;border-top:1px solid #CFD2C4}
+h3{font-size:18px;margin:26px 0 8px}h4{font-size:16px;margin:20px 0 6px}
+p,ul,ol{margin:0 0 12px}ul,ol{padding-left:22px}li{margin-bottom:5px}
+a{color:#055C3E;text-underline-offset:3px}
+code{font:500 .86em ui-monospace,"JetBrains Mono",Consolas,monospace;background:#F3F2EA;padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+.tbl{overflow-x:auto;margin:0 0 16px;border:1px solid #E4E4D9;border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid #E4E4D9}
+th{background:#F3F2EA;font-weight:700;white-space:nowrap}tr:last-child td{border-bottom:0}
+blockquote{margin:0 0 12px;padding:10px 16px;background:#E3F0E7;border-radius:10px;color:#055C3E}
+hr{border:0;border-top:1px solid #CFD2C4;margin:28px 0}
+@media (max-width:560px){body{padding:20px 16px 40px;font-size:15px}h1{font-size:25px}h2{font-size:20px}}
+</style>
+</head>
+<body>
+<h1>Where EpiLag-PH sits in the published work</h1>
+<p>Every claim about another study points to its row in <code>rrl_matrix.csv</code>, by key; full citations are in <code>references.md</code>. EpiLag numbers come from <code>reports/</code> and <code>research/results/model_comparison.csv</code>.</p>
+<p>Raw errors can't be compared across studies, because places, scales and case counts differ. Skill is therefore given <strong>relative to a simple baseline</strong>, and only where a study reports one.</p>
+<h2>Forecasting studies compared</h2>
+<p>Association-only studies (iguchi2018, seposo2023, sumi2017, xu2020, sy2026, mordecai2017, liuhelmersson2014, vanpanhuis2015, ith2025) don't make forecasts. They back the features (<code>feature_evidence.csv</code>) and are left out here.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Study</th>
+<th>Methods</th>
+<th>Area level</th>
+<th>Lead time</th>
+<th>Ranges given</th>
+<th>Alerts tested</th>
+<th>Tested on unseen years</th>
+<th>Skill vs a simple baseline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EpiLag-PH</strong></td>
+<td>LightGBM quantile regression with conformal calibration; also compared with negative binomial, random forest and SARIMAX</td>
+<td>86 provinces, 17 regions and Quezon City, weekly</td>
+<td>2, 4, 6, 8 weeks</td>
+<td>yes: 10–90%, calibrated to 80% (holds 70–92% across test years at 4 weeks)</td>
+<td>yes: outbreak starts caught (Watch 79–100%) <strong>and</strong> false-alarm share (42–63%)</td>
+<td>yes: 2019, 2020 (provinces); 2019, 2023, 2024, 2025 (regions)</td>
+<td>4 weeks ahead: 18–32% lower error than &quot;same as this week&quot; for regions, except 2023 (+4%); 20–22% lower for provinces. 32–89% lower than &quot;same week last year&quot;</td>
+</tr>
+<tr>
+<td>carvajal2018</td>
+<td>GAM, SARIMAX, random forest, gradient boosting</td>
+<td>Metro Manila, weekly</td>
+<td>none stated</td>
+<td>no</td>
+<td>no</td>
+<td>yes: 2013</td>
+<td>not reported against a naive baseline</td>
+</tr>
+<tr>
+<td>olana2025</td>
+<td>SARIMA, NNAR, random forest, LSTM, TBATS, Prophet</td>
+<td>national, monthly</td>
+<td>12 months</td>
+<td>yes (confidence intervals)</td>
+<td>no</td>
+<td>yes: 2024</td>
+<td>MASE reported; no direct naive comparison</td>
+</tr>
+<tr>
+<td>buczak2014</td>
+<td>fuzzy association rule classifier</td>
+<td>40 provinces, weekly</td>
+<td>4 weeks</td>
+<td>no</td>
+<td>yes: high incidence = mean + 1.5 SD; sensitivity 0.63, specificity 0.97</td>
+<td>yes: 2011 (and 2012)</td>
+<td>better than a seasonal moving average per the page summary (sensitivity 0.31); not seen verbatim</td>
+</tr>
+<tr>
+<td>eligado2026</td>
+<td>DWT-SARMA, DWT-SARMA-LSTM</td>
+<td>Quezon City, weekly</td>
+<td>not reported</td>
+<td>not reported</td>
+<td>yes: model thresholds against a 3-year moving mean</td>
+<td>not reported</td>
+<td>not reported (MAPE 12.4% for the best model)</td>
+</tr>
+<tr>
+<td>shi2016</td>
+<td>LASSO, SARIMA, stepwise regression</td>
+<td>Singapore, weekly</td>
+<td>1–12 weeks</td>
+<td>yes: 95%, coverage checked</td>
+<td>no</td>
+<td>yes: 2011–2012, applied to 2013</td>
+<td>no naive baseline; MAPE 24% against 29% for SARIMA at 3 months</td>
+</tr>
+<tr>
+<td>tuan2024</td>
+<td>negative binomial, SARIMAX, XGBoost, LSTM</td>
+<td>one province (Vietnam), weekly</td>
+<td>not reported</td>
+<td>no</td>
+<td>no</td>
+<td>yes, but dispersion tuned on the test set</td>
+<td>no naive baseline</td>
+</tr>
+<tr>
+<td>colongonzalez2021</td>
+<td>Bayesian superensemble</td>
+<td>63 provinces (Vietnam), monthly</td>
+<td>1–6 months</td>
+<td>yes (probabilistic)</td>
+<td>yes: detection 69% against 54.5% for the baseline</td>
+<td>yes: hindcast 2007–2016 and 2020</td>
+<td>beat a seasonal-average baseline at 1–3 months, not at 4–6</td>
+</tr>
+<tr>
+<td>lowe2014</td>
+<td>hierarchical Bayesian</td>
+<td>553 microregions (Brazil)</td>
+<td>3 months</td>
+<td>yes (probabilistic)</td>
+<td>yes: risk triggers tuned on past Junes</td>
+<td>past Junes assessed</td>
+<td>not reported in the abstract</td>
+</tr>
+<tr>
+<td>johansson2019</td>
+<td>16 team models plus ensembles</td>
+<td>2 cities, weekly</td>
+<td>within season</td>
+<td>yes (probabilistic)</td>
+<td>no</td>
+<td>yes: 4 seasons (summary only)</td>
+<td>the ensemble beat the null model for every target (summary only)</td>
+</tr>
+<tr>
+<td>rahman2025</td>
+<td>random forest, XGBoost, LightGBM, with SHAP</td>
+<td>Bangladesh</td>
+<td>not reported</td>
+<td>not reported</td>
+<td>an early warning tool is described</td>
+<td>not reported</td>
+<td>not reported</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Sources for the EpiLag row.</strong></p>
+<ul>
+<li>Errors: <code>reports/backtest_region_qc.csv</code> and <code>reports/backtest_province.csv</code>, horizon 4 (<code>skill_vs_persistence</code>, <code>skill_vs_seasonal</code>, <code>coverage_10_90</code>).</li>
+<li>Alerts: <code>reports/alerts_region_qc.csv</code>, rule <code>warn_upper</code>, as summarised in the README &quot;Does it work?&quot; table.</li>
+<li>The 2023 exception is explained in <code>research/analysis/causes.md</code>, finding 1.</li>
+</ul>
+<h2>The gap EpiLag fills</h2>
+<ol>
+<li>
+<p><strong>Weekly forecasts for many Philippine areas at once, with lead times a health office can act on.</strong> Among the Philippine forecasting rows:</p>
+<ul>
+<li>olana2025 forecasts the national total by month.</li>
+<li>carvajal2018 forecasts one metro area and states no lead time.</li>
+<li>eligado2026 forecasts one city.</li>
+<li>Only buczak2014 forecasts provinces weekly at a fixed lead (4 weeks), as a high/low classifier.</li>
+</ul>
+<p>EpiLag forecasts 104 areas weekly at four lead times.</p>
+</li>
+<li>
+<p><strong>Calibrated ranges.</strong></p>
+<ul>
+<li>None of the four Philippine forecasting rows reports calibrated ranges. olana2025 shows confidence intervals, but no coverage check.</li>
+<li>Among the others, shi2016 checks 95% coverage, and colongonzalez2021, lowe2014 and johansson2019 are probabilistic.</li>
+<li>EpiLag reports the share of weeks inside its 10–90% range for every test year, before and after calibration (<code>model_comparison.csv</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Alerts scored for both hits and false alarms.</strong></p>
+<ul>
+<li>buczak2014 reports sensitivity and specificity.</li>
+<li>colongonzalez2021 reports detection rates.</li>
+<li>eligado2026 compares thresholds, but no hit rate appears in its abstract.</li>
+<li>EpiLag reports both the share of outbreak starts caught and the share of alerts that were false, at each lead time and test year.</li>
+</ul>
+</li>
+<li>
+<p><strong>Testing on several unseen years, including unusual ones</strong>: a record epidemic (2019) [doh2019epidemic], a reporting collapse (2020), and a flat year (2023).</p>
+<ul>
+<li>Most rows test one held-out year (carvajal2018: 2013; olana2025: 2024) or one period.</li>
+<li>Of the forecasting rows, colongonzalez2021 tests the most, with a hindcast over 2007–2016.</li>
+</ul>
+</li>
+<li>
+<p><strong>Comparison with naive baselines.</strong></p>
+<ul>
+<li>Several rows compare only against other complex models: carvajal2018, shi2016 and tuan2024 have no naive baseline.</li>
+<li>EpiLag reports skill against both &quot;same as this week&quot; and &quot;same week last year&quot;.</li>
+<li>It also reports where it <em>lost</em>: Regions + QC 2023, and the 2-week forecasts for 2019.</li>
+</ul>
+</li>
+</ol>
+<h2>What not to claim</h2>
+<ul>
+<li><strong>&quot;Most accurate dengue model in the Philippines.&quot;</strong> Errors are not comparable across studies, and no shared benchmark exists.</li>
+<li><strong>&quot;Better than LSTM.&quot;</strong> EpiLag did not test an LSTM. olana2025 found NNAR best nationally, while LSTM was best in other countries' studies, as cited within olana2025 (not verified here).</li>
+<li><strong>&quot;Weather drives the forecast.&quot;</strong> In EpiLag, recent cases carry most of the attention, and weather helps only Regions + QC at longer leads (<code>research/analysis/causes.md</code>, finding 3). That is consistent with johansson2019 (summary only: models using climate data did not score higher).</li>
+<li><strong>&quot;Elevation predicts dengue cases.&quot;</strong> sy2026 finds elevation linked to infection rates but not to reported incidence.</li>
+</ul>
+</body>
+</html>
