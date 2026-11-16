@@ -177,9 +177,9 @@ def add_enso(df: pd.DataFrame, oni: pd.DataFrame) -> pd.DataFrame:
 def province_static() -> pd.DataFrame:
     u = pd.read_csv(PROC / "units.csv")
     b = fetch_elevation()
-    cot = u.loc[u.unit_name.str.fullmatch("Cotabato"), "unit_id"].iloc[0]
-    # Maguindanao was split in 2022 (the data keep it whole); the Special Geographic Area left Cotabato in 2019.
-    b["unit_id"] = b.adm2_pcode.replace({"PH19087": "MAG", "PH19088": "MAG", "PH19099": cot})
+    # Maguindanao was split in 2022 (the data keep it whole); the Special Geographic Area left
+    # Cotabato (PH12047) in 2019.
+    b["unit_id"] = b.adm2_pcode.replace({"PH19087": "MAG", "PH19088": "MAG", "PH19099": "PH12047"})
     b = b[b.unit_id.isin(u.unit_id)]
     topo = b.groupby("unit_id").apply(lambda g: pd.Series({
         "topo_elev_mean": np.average(g.elevation_m, weights=g.area_sqkm),
