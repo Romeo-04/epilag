@@ -9,7 +9,11 @@ How the experiments were run: `METHODS.md`.
 - [x] `feature_groups.csv`: each group removed from the full set, and added to cases + season. LightGBM, same test, both panels.
 - [x] `shap_groups.csv`, `shap_lags.csv` (rows with `feature_set = plus` use the research table; `current` is the live feature set).
 - [x] `rain_lags.csv`, `rain_lag_shap.csv`: rain totals 12–23 weeks back added to the research set.
+- [x] `proposed_features.csv`: Person B's proposed variables (neighbours' cases, heatwave days, rain anomaly), tested like the other groups.
+- [x] `candidates.csv`: candidate final sets, scored on every measure. `live` reproduces the live LightGBM exactly (largest difference 1e-14).
+- [x] `extracts/`: the parts of `data/processed/` that Person B's analysis needs (`export_extracts.py`).
 - [x] Validation page: new sections 4 (data groups) and 6 (other methods). The page lives outside the repo, in `pugad/finals/`.
+- [ ] Final variables: the human's choice, from the candidate table below.
 
 ## Ready now: four methods on the same test
 
@@ -74,7 +78,7 @@ Counts are checks where the group helped: 16 for Regions + QC (4 years × 4 lead
 - **Regions + QC:** better in 2023 at every lead time (−5% to −14%) and in 2024 (−1% to −4%); mixed in 2025; slightly worse in 2019 (+1% to +3%). At 4 weeks, 2023 drops from 58.0 to 54.0, which now beats "same as this week" (55.6).
 - **Provinces:** worse in all 8 checks (+0.4% to +9.5%). The largest drop is 2020 at 8 weeks.
 - **Provinces without ENSO** (the research set minus ENSO, from the `drop` runs in `feature_groups.csv`): level with the live model, better in 4 of 8, median 0.0% (−0.7% to +1.6%). ENSO accounts for most of the province gap; the other new province variables (heat, elevation, density) add nothing measurable on top.
-- **Regions + QC without ENSO:** better than the live model in 13 of 16, median −1.0%. Much of the 2023 gain further ahead comes from ENSO: at 6 and 8 weeks the set without ENSO is −4.8% and −1.5% against the live model, against −11.9% and −14.2% with it.
+- **Regions + QC without ENSO:** better than the live model in 13 of 16, median −0.9%. Much of the 2023 gain further ahead comes from ENSO: at 6 and 8 weeks the set without ENSO is −4.8% and −1.5% against the live model, against −11.9% and −14.2% with it.
 - **Overall:** better in 11 of 24 checks, median +0.5%. Watch caught 1,066 outbreak starts, against 1,049 for the live model (of 1,260 across lead times).
 
 **SHAP (final model, research table).**
@@ -92,10 +96,74 @@ Counts are checks where the group helped: 16 for Regions + QC (4 years × 4 lead
 - **Likely reading (not tested):** rain 3–4 months before the forecast week marks where the year is in the rainy season, which the time-of-year features and the existing lags already carry. So it draws attention without improving forecasts. Keep the 0–11-week window.
 - Caveat: these windows were chosen after seeing the SHAP lag profile on all data, so this is a check of one idea, not a search.
 
+## Ready now: Person B's proposed variables
+
+`proposed_features.py`, built as in `METHODS.md`. Each group was added to cases + time of year (`add_to_base`) and to the full research set (`add_to_plus`). Counts are checks where the group cut the miss. Watch is outbreak starts caught, pooled (cases + time of year alone: 270 of 324 for Regions + QC, 807 of 936 for provinces; full research set: 265 and 801).
+
+| Group | Regions + QC, add to base | Regions + QC, add to research set | Provinces, add to base | Provinces, add to research set |
+|---|---|---|---|---|
+| Neighbours' cases | 11 of 16, median −1.8%; Watch 272 | 9 of 16, −0.1%; Watch 258 | 6 of 8, −1.4%; Watch 815 | **8 of 8, −2.8%** (−4.5% to −1.1%); Watch 804 |
+| Heatwave days | 9 of 16, −0.8%; Watch 284 | 9 of 16, −0.1%; Watch 258 | 3 of 8, +1.2%; Watch 801 | 5 of 8, −0.2%; Watch 794 |
+| Rain anomaly (drought) | 10 of 16, −1.3%; Watch 279 | 7 of 16, +0.6%; Watch 271 | 1 of 8, +2.2% (2020: +2% to +12%); Watch 809 | 3 of 8, +0.6%; Watch 797 |
+
+- **Neighbours** is the one proposed group that adds to what the model already has, and only for provinces: better in all 8 checks on top of the research set. It goes into the candidate sets below.
+- **Regions + QC:** each group helps a little on its own, but none adds anything on top of the research set. On their own they help less than humidity (15 of 16) or heat (14 of 16).
+- **Heatwave days and the rain anomaly** hurt provinces in 2020 when added to cases + time of year. 2020 is the COVID year, so this may be a change in reporting rather than in weather.
+- **Not built:** daily minimum temperature and daily temperature range (`candidate` rows in `feature_evidence.csv`). Neither cached daily weather set has a daily minimum; testing them means refetching all daily weather.
+- Caveat: neighbours was carried forward after seeing these test years.
+
+## Ready now: candidate final sets
+
+`candidates.py`, LightGBM, same test. Change is the average miss against the live set; negative is better. Watch and Outbreak warning are outbreak starts caught, pooled over test years and lead times. The average of the four comes from `model_comparison.csv`.
+
+**Regions + QC** (16 checks; 324 outbreak starts)
+
+| Set | Better than live | Median change (worst) | Beat "same as this week" | Range held, mean (min–max) | Watch caught | Outbreak warning caught |
+|---|---|---|---|---|---|---|
+| Live | – | 0 | 11 of 16 | 81% (70–96%) | 270 | 101 |
+| + heat, humidity, ENSO (research set) | 11 of 16 | −2.4% (+2.5%) | 15 | 79% (68–94%) | 265 | 89 |
+| + heat, humidity (no ENSO) | 13 of 16 | −0.9% (+2.1%) | 13 | 81% (73–95%) | 264 | 99 |
+| Average of the four methods | 13 of 16 | −3.4% (+4.4%) | 16 | 83% (75–97%) | 277 | 80 |
+
+**Provinces** (8 checks; 936 outbreak starts)
+
+| Set | Better than live | Median change (worst) | Beat "same as this week" | Range held, mean (min–max) | Watch caught | Outbreak warning caught |
+|---|---|---|---|---|---|---|
+| Live | – | 0 | 8 of 8 | 78% (76–80%) | 779 | 357 |
+| + neighbours' cases | **8 of 8** | −2.4% (−0.5%) | 8 | 79% (76–80%) | 786 | 374 |
+| + elevation, density | 3 of 8 | +0.1% (+0.6%) | 8 | 78% (76–80%) | 783 | 340 |
+| Research set | 0 of 8 | +1.2% (+9.5%) | 8 | 79% (75–82%) | 801 | 337 |
+| Research set, no ENSO | 4 of 8 | 0.0% (+1.6%) | 8 | 78% (74–79%) | 782 | 343 |
+| Research set, no ENSO, + neighbours | 8 of 8 | −2.0% (−0.6%) | 8 | 79% (75–80%) | 789 | 355 |
+| Average of the four methods | 4 of 8 | +0.4% (+4.2%) | 8 | 79% (73–85%) | 820 | 303 |
+
+How to read it:
+- **No set wins on every measure.** The sets that cut the miss most for Regions + QC (the research set, the average) catch fewer outbreak starts on Outbreak warning (89 and 80, against 101).
+- **Provinces: live + neighbours** is better in every check and catches more starts on both rules (+7 on Watch, +17 on Outbreak warning). The neighbours' cases are this week's reports, known when the area's own are.
+- **Regions + QC: heat and humidity without ENSO** is a small, steady gain (13 of 16, worst +2.1%) that keeps Outbreak warning nearly level (99 against 101). With ENSO the gain is bigger, mostly in 2023 (−5% to −14%), and hypothesis 1 says ENSO may be acting as a year label.
+- **Caveats.** Neighbours, the blend and dropping ENSO were all chosen after seeing these test years, so every gain here is optimistic. Provinces have only two test years, 2019 and 2020, and both were unusual.
+
+## For Person B
+
+**Get the files.** `git pull origin research-a`. The extracts in `research/results/extracts/` replace `data/processed/` for steps 3 and 5 (`HANDOFF-B.md`, "Data"). The zip is only needed to rerun the models.
+
+**Inputs for step 5:**
+- Models: `model_comparison.csv` (the four methods and both averages).
+- Variables: `feature_groups.csv`, `proposed_features.csv`, `rain_lags.csv`.
+- Attention: `shap_groups.csv`, `shap_lags.csv`, `rain_lag_shap.csv`.
+- The final choice: `candidates.csv`.
+- Fix: the Regions + QC `current` rows of `shap_groups.csv` and `shap_lags.csv` were rerun on 16 Nov (`METHODS.md`). Re-read them if you used them before.
+
+**Answers to your notes for Person A:**
+- **Rain 12–20 weeks back:** tested, no gain (above, "Longer rain lags"). Better in 9 of 24 checks, median +0.3%. Update that `proposed` row.
+- **Heatwave days, drought index, neighbours' cases:** tested (above, "Person B's proposed variables"). Drought is a rain anomaly standing in for scPDSI, which is not available per area. Only neighbours helps on top of the research set, and only for provinces.
+- **Heat index:** built (`heat_hi4`, the 4-week mean of the daily heat index) but tested only inside the heat group, never on its own. So these results can't say whether it adds anything beyond its parts (temperature and humidity).
+- **Minimum temperature and daily temperature range:** not built. Neither cached daily weather set has a daily minimum. Mark those `candidate` rows as untested.
+
 **Hypotheses for Person B to check against the literature (not findings):**
 1. ENSO hurts provinces because 5 years of province data (2016–2020) hold about one El Niño cycle. The model can use ENSO as a label for the year, and that pattern does not carry over to a new year. For Regions + QC it helped in 2023 and 2024 from 4 weeks ahead, not in 2019, and was mixed in 2025. QC alone has 16 years of data.
 2. Weather groups help Regions + QC more than provinces. Region weather is one population-weighted point per region, while province weather is one point per province. Region counts are larger and smoother, too. Or the province test years (2019 record epidemic, 2020 COVID) are unusual.
 3. Elevation helps provinces on its own but not inside the full set. It may stand in for something the other variables already carry (rain, temperature or urbanisation).
 4. Rain's attention peaks 12–15 weeks before week t (14–23 weeks before the target week), but adding those weeks does not cut the miss. Compare with `expected_lag_weeks` in the literature: is a 3–5 month rain-to-dengue lag reported, or is this the rainy season's timing?
 
-Waiting on: `research/lit/feature_evidence.csv` from Person B (final choice of variables).
+Waiting on: the human's choice of final variables, from the candidate table above and `research/lit/feature_evidence.csv` (on `research-b`).
