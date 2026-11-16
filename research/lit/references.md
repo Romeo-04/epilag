@@ -17,6 +17,7 @@ Keys are used in `feature_evidence.csv` and `rrl_matrix.csv`.
   - Compared SARIMA, NNAR, random forest, LSTM, TBATS and Prophet, scored by MAE, MAPE, MASE and RMSE.
   - NNAR was best. Confidence intervals were shown.
   - Seasonal peaks fall in July to September.
+  - The background notes random forest's main limitation: it cannot predict beyond the range of its training data.
 - **iguchi2018**: Iguchi JA, Seposo XT, Honda Y. (2018). Meteorological factors affecting dengue incidence in Davao, Philippines. *BMC Public Health*, 18, 629. https://doi.org/10.1186/s12889-018-5532-4 (PMC5952851). **Verified** (PMC):
   - Weekly data 2011–2015, quasi-Poisson distributed-lag non-linear model with a maximum lag of 12 weeks.
   - Rain at 32 mm had RR 1.67 (95% CI 1.07–2.62), and risk rose with dew point.
@@ -53,7 +54,9 @@ Keys are used in `feature_evidence.csv` and `rrl_matrix.csv`.
   - Altitude had no significant main effect on the egg traits; temperature, season and island did.
 - **pelitro2026**: Pelitro KJ, et al. (2026). Weekly dengue incidence linked to satellite rainfall at city, regional, and country scales (v1.0.0) [Data set]. Zenodo. https://zenodo.org/records/19448695. The data source for the region and QC panel; cited in the README and not re-checked here.
 - **undurraga2017**: Undurraga EA, Edillo FE, Erasmo JNV, Alera MTP, Yoon IK, Largo FM, Shepard DS. (2017). Disease burden of dengue in the Philippines: Adjusting for underreporting by comparing active and passive dengue surveillance in Punta Princesa, Cebu City. *American Journal of Tropical Medicine and Hygiene*, 96(4), 887–898. https://doi.org/10.4269/ajtmh.16-0488. **Verified** (Europe PMC record).
-- **doh2019epidemic**: The Department of Health declared a national dengue epidemic on 6 August 2019. Reported by Inquirer (https://newsinfo.inquirer.net/1151103/doh-declares-national-dengue-epidemic) and ABS-CBN (https://abs-cbn.com/news/08/06/19/government-declares-national-dengue-epidemic). Seen in search results only, so this is **unverified** until a page is opened.
+- **doh2019epidemic**: Andrade JI. (2019, August 7). DOH declares national dengue epidemic. *Philippine Daily Inquirer*. https://newsinfo.inquirer.net/1151103/doh-declares-national-dengue-epidemic. **Verified** (article page):
+  - The DOH declared a national dengue epidemic on Tuesday, 6 August 2019, three weeks after a national dengue alert.
+  - 146,062 cases were recorded from 1 January to 20 July, 98% more than the same period of 2018.
 
 ## Southeast Asia and landmark work
 
@@ -102,4 +105,5 @@ Keys are used in `feature_evidence.csv` and `rrl_matrix.csv`.
 - **romano2019**: Romano Y, Patterson E, Candès E. (2019). Conformalized quantile regression. *Advances in Neural Information Processing Systems 32*. https://arxiv.org/abs/1905.03222. **Verified** (arXiv page title).
 - **bowman2016**: Bowman LR, Donegan S, McCall PJ. (2016). Is dengue vector control deficient in effectiveness or evidence?: Systematic review and meta-analysis. *PLOS Neglected Tropical Diseases*, 10(3), e0004551. https://doi.org/10.1371/journal.pntd.0004551. **Verified** (Europe PMC record).
 - **makridakis2022**: Makridakis S, Spiliotis E, Assimakopoulos V. (2022). M5 accuracy competition: Results, findings, and conclusions. *International Journal of Forecasting*, 38(4), 1346–1364. https://doi.org/10.1016/j.ijforecast.2021.11.013. **Unverified**: the publisher page blocked automated access. It is the usual citation for LightGBM winning a large forecasting competition; don't use it until someone opens it.
+- **senson2026**: Senson et al. (2026), *SciEnggJ* special issue: machine learning with weather for dengue in Quezon City. Suggested by Person A from search results. **Unverified**: no Europe PMC record found under that author on 2026-11-16, and the page has not been opened. If confirmed, this would be the closest local comparison.
 - **mandaue_elev**: Mandaue City study of dengue against elevation and slope, https://publish.mersin.edu.tr/index.php/igd/article/view/1262. **Unverified**: the site did not resolve.
