@@ -19,15 +19,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/epilag/assets/build/drill-DhksGwTG.js"></script>
+  <script type="module" crossorigin src="/epilag/assets/build/drill-BSbfjfzu.js"></script>
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/components-Dk-hYUvx.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/icons-Cpq0GuxT.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/pixel-DnN2MDR7.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/preload-helper-DgYTTzAH.js">
   <link rel="modulepreload" crossorigin href="/epilag/assets/build/voxel-CGR-sNJU.js">
-  <link rel="modulepreload" crossorigin href="/epilag/assets/build/rules-V9QtZgne.js">
+  <link rel="modulepreload" crossorigin href="/epilag/assets/build/rules-64VCzAXV.js">
   <link rel="stylesheet" crossorigin href="/epilag/assets/build/components-DKz1GV6B.css">
-  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-DhbN9Et9.css">
+  <link rel="stylesheet" crossorigin href="/epilag/assets/build/drill-Ct7owsV2.css">
 </head>
 <body class="drill">
   <!-- ============================================================ title -->
@@ -134,6 +134,19 @@
     </div>
   </section>
 
+  <!-- ============================================================ round 2: choose a forecaster -->
+  <section class="screen" id="s-models" aria-labelledby="mo-title">
+    <div class="wrap report">
+      <span class="chip chip--night chip--intel">Round 2 · choose your forecaster</span>
+      <h2 id="mo-title">Whose forecast do you trust?</h2>
+      <p class="lead">Five models forecast this season 4 weeks ahead, each trained only on earlier years. Pick one to guide round 2.</p>
+      <div class="models" id="models" role="radiogroup" aria-labelledby="mo-title"></div>
+      <p class="models__note">The two figures are each model's record over the research's 24 tests. The average is computed here from the four models' rounded forecasts, so it is approximate.</p>
+      <div class="btn-row"><button class="btn btn--go" id="go-r2" type="button">Start round 2 <i data-icon="play" data-size="24"></i></button>
+        <a class="btn btn--dark-ghost" href="../research.html">How the models compare</a></div>
+    </div>
+  </section>
+
   <!-- ============================================================ debrief -->
   <section class="screen" id="s-vs" aria-labelledby="vs-title">
     <div class="wrap report">
@@ -144,7 +157,8 @@
       <div class="bars" id="vs-bars"></div>
       <details class="honest"><summary>How the scoring works</summary><p id="vs-honest"></p></details>
       <div class="btn-row">
-        <button class="btn btn--go" id="again" type="button">New mission <i data-icon="play" data-size="24"></i></button>
+        <button class="btn btn--go" id="try-model" type="button">Try another model <i data-icon="play" data-size="24"></i></button>
+        <button class="btn btn--dark-ghost" id="again" type="button">New mission</button>
         <a class="btn btn--dark-ghost" href="../web/">Open the EpiLag-PH app</a>
         <a class="btn btn--dark-ghost" href="../methodology.html">How the intel works</a>
       </div>
@@ -172,7 +186,7 @@
       <li><span class="guide__art guide__art--early" aria-hidden="true"><svg viewBox="0 0 120 56" width="120" height="56"><polyline points="2,50 24,48 44,42 62,26 78,8 94,24 118,44" fill="none" stroke="#EEF2FF" stroke-width="2.5" stroke-linejoin="round"/><line x1="78" x2="78" y1="2" y2="54" stroke="#F04B2A" stroke-width="2"/><path d="M38 56L44 46L50 56Z" fill="#2FD6C3"/></svg></span>
         <b>Be early</b><span>A team cuts cases 2 to 9 weeks later. Arrive 4+ weeks before the peak.</span></li>
     </ol>
-    <p class="guide__note">You play each season twice: first with case reports only, then with EpiLag forecasts. After each turn, the Turn report tab lists what changed. Drag the map to turn it, scroll or pinch to zoom.</p>
+    <p class="guide__note">You play each season twice: first with case reports only, then with forecasts from a model you choose. After each turn, the Turn report tab lists what changed. Drag the map to turn it, scroll or pinch to zoom.</p>
     <div class="btn-row"><button type="button" class="btn btn--go" id="guide-ok">Got it</button>
       <button type="button" class="btn btn--dark-ghost" id="guide-tour" hidden>Replay the walkthrough</button></div>
   </dialog>
