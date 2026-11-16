@@ -1,0 +1,1 @@
+var e=document.querySelector(`.top`);if(e){let t=()=>e.toggleAttribute(`data-lifted`,window.scrollY>24);t(),window.addEventListener(`scroll`,t,{passive:!0})}

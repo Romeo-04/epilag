@@ -8,6 +8,7 @@ import "./landing.css";
 import { hydrateIcons, icon } from "../lib/icons.js";
 import { TOOLS } from "../lib/content.js";
 import "../lib/pixel.js";
+import "../lib/nav.js";
 import { Mascot } from "../lib/mascot.js";
 import { gsap, ScrollTrigger, countUp, curtain, reduced, reveal } from "../lib/motion.js";
 import { createVoxelMap, loadGrids } from "../lib/voxel.js";

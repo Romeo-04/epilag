@@ -169,8 +169,20 @@
 /* ------------------------------------------------------------------ nav and footer */
 .brand { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-weight: 800; font-size: 20px; letter-spacing: -.02em; text-decoration: none; }
 .brand .lg { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--forest); --i1: var(--ink); --i2: var(--paper); --i3: var(--amber); }
-.nav { display: flex; align-items: center; gap: 20px; padding: 10px 10px 10px 16px; border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px); border: 1px solid var(--line); }
+/* The nav sits open on the page at the top, then pulls in to a floating pill once the page scrolls
+   (lib/nav.js sets data-lifted on .top). Without the script it stays open. */
+.nav { display: flex; align-items: center; gap: 20px; max-width: 100%; margin-inline: auto; padding: 10px 4px; border-radius: var(--r-pill);
+  background: transparent; border: 1px solid transparent;
+  transition: max-width .3s ease-out, padding .3s ease-out, background-color .3s ease-out, border-color .3s ease-out, box-shadow .3s ease-out, backdrop-filter .3s ease-out; }
+.top { transition: top .3s ease-out; }
+.nav .brand { transition: font-size .3s ease-out; }
+.nav .brand .lg { transition: scale .3s ease-out; }
+.top[data-lifted] { top: 10px; }
+.top[data-lifted] .nav { padding: 8px 8px 8px 14px; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px);
+  border-color: var(--line); box-shadow: var(--shadow-card); }
+.top[data-lifted] .nav .brand { font-size: 18px; }
+.top[data-lifted] .nav .brand .lg { scale: .88; }
+@media (min-width: 961px) { .top[data-lifted] .nav { max-width: calc(100% - 120px); } }
 .nav__links { display: flex; gap: 2px; margin-left: auto; }
 .nav__links a { padding: 8px 12px; border-radius: var(--r-pill); font-size: 15px; font-weight: 500; text-decoration: none; color: var(--muted); }
 .nav__links a:hover, .nav__links a[aria-current] { color: var(--ink); background: var(--surface-2); }
