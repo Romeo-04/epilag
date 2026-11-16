@@ -88,8 +88,8 @@ Counts are checks where the group helped: 16 for Regions + QC (4 years × 4 lead
 **Longer rain lags (`rain_lags.py`).** Three 4-week rain totals, 12–15, 16–19 and 20–23 weeks back, added to the research set. LightGBM, same test.
 - **Error:** no gain. Better in 9 of 24 checks, median +0.3% (−2.7% to +4.8%). Regions + QC: 6 of 16, median +0.9% (better in all of 2019, worse in all of 2023 and 2024). Provinces: 3 of 8, median +0.1%.
 - **Watch:** 2 fewer outbreak starts caught for Regions + QC (263 against 265 of 324), 8 fewer for provinces (793 against 801 of 936).
-- **SHAP (`rain_lag_shap.csv`):** the model does use the new windows. At 4–8 weeks ahead, rain 12–15 weeks back gets the largest share of any 4-week block (Regions + QC 2.6–4.3% of all attention, provinces 1.6–2.7%), and the share falls from 16 weeks on.
-- **Reading:** rain 3–4 months before the forecast week marks where the year is in the rainy season, which the time-of-year features and the existing lags already carry. So it draws attention without improving forecasts. Keep the 0–11-week window.
+- **SHAP (`rain_lag_shap.csv`):** the model does use the new windows. Rain 12–15 weeks back gets more attention than any other 4-week block of rain at 6 and 8 weeks ahead for Regions + QC (3.5% and 4.3% of all attention), and at 4–8 weeks for provinces (1.6–2.7%). The share falls from 16 weeks back.
+- **Likely reading (not tested):** rain 3–4 months before the forecast week marks where the year is in the rainy season, which the time-of-year features and the existing lags already carry. So it draws attention without improving forecasts. Keep the 0–11-week window.
 - Caveat: these windows were chosen after seeing the SHAP lag profile on all data, so this is a check of one idea, not a search.
 
 **Hypotheses for Person B to check against the literature (not findings):**
