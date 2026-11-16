@@ -28,7 +28,6 @@ let M, R, K, WEEKS, TURNS, FIRST, idx;
 function useMission(m) { M = m; R = m.R; ({ K, WEEKS, TURNS, FIRST, idx } = R); }
 const LEVEL = { warning: "Outbreak warning", watch: "Watch", above: "Above usual", normal: "Normal" };
 const GRADE_COL = { S: "#6FD6FF", A: "#34D27B", B: "#F7C928", C: "#F58220", D: "#F04B2A" };
-const PRESS = { low: ["Low", "#34D27B"], rising: ["Rising", "#F7C928"], high: ["High", "#F58220"], critical: ["Critical", "#F04B2A"] };
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.round(n).toLocaleString("en");
 const day = (s) => new Date(`${s}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
@@ -90,7 +89,72 @@ $("mute").addEventListener("click", () => {
   $("mute").innerHTML = icon(muted ? "soundOff" : "sound", { size: 24 });
 });
 
-function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 }); }
+function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 }); if (id !== "s-game") coach.hide(); }
+
+// ------------------------------------------------------------------ walkthrough (first play) and the how-to-play guide
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } } };
+// each step points at one control; steps with `wait` move on when the player does the action
+const TOUR = [
+  { at: "#board", text: () => `Each block is a ${M.unit[0]}. Taller and redder means more cases than usual.` },
+  { at: "#plist", wait: "pick", text: () => `Pick a ${M.unit[0]} on the map or in this list.` },
+  { at: "#deploy", wait: "deploy", text: () => `Send a team. One team protects about ${fmt(Math.round(R.PEOPLE / 1000) * 1000)} people.` },
+  { at: "#end", wait: "end", text: () => "End the turn. Two weeks pass and new reports come in." },
+  { at: "#h-timeline", text: () => `Teams take 2 weeks to show, so send them before cases peak. You have ${TURNS.length} turns.` },
+];
+const TIP2 = [{ at: "#board", text: () => "Blue rings are forecasts for 4 weeks ahead. Use them to get in early." }];
+const coach = (() => {
+  const el = $("coach"), ring = $("coach-ring");
+  let steps = TOUR, step = -1, key = null, timer = 0;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  function place() {
+    const t = document.querySelector(steps[step]?.at);
+    if (!t) { ring.hidden = true; return; }
+    const r = t.getBoundingClientRect(), b = el.getBoundingClientRect(), vw = innerWidth, vh = innerHeight, gap = 18;
+    ring.hidden = false;
+    Object.assign(ring.style, { left: `${r.left - 5}px`, top: `${r.top - 5}px`, width: `${r.width + 10}px`, height: `${r.height + 10}px` });
+    let x = r.left + (r.width - b.width) / 2, y;
+    if (r.width > vw * 0.45 && r.height > vh * 0.35) y = r.top + r.height * 0.6;            // a large target (the board): sit inside it
+    else if (t.closest(".side") && r.left - b.width - gap > 0) { x = r.left - b.width - gap; y = r.top + (r.height - b.height) / 2; } // the side panel: sit beside it
+    else if (r.top - b.height - gap > 0) y = r.top - b.height - gap;
+    else y = r.bottom + gap;
+    el.style.transform = `translate(${Math.round(clamp(x, 8, vw - b.width - 8))}px, ${Math.round(clamp(y, 8, vh - b.height - 8))}px)`;
+  }
+  function go(n) {
+    step = n;
+    // a step whose action is already done (an area is picked) is skipped
+    while (steps[step]?.wait === "pick" && sel != null) step++;
+    if (step >= steps.length) return finish();
+    const s = steps[step];
+    $("coach-n").textContent = steps.length > 1 ? `${step + 1} / ${steps.length}` : "Round 2";
+    $("coach-text").textContent = s.text();
+    $("coach-next").hidden = !!s.wait;
+    $("coach-next").textContent = step === steps.length - 1 ? "Got it" : "Next";
+    $("coach-skip").hidden = steps.length === 1;
+    el.hidden = false;
+    const t = document.querySelector(s.at), r = t?.getBoundingClientRect();
+    if (r && (r.top < 0 || r.bottom > innerHeight)) t.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    place();
+    clearInterval(timer); timer = setInterval(place, 150); // the target moves as panels re-render and the page scrolls
+  }
+  function hide() { clearInterval(timer); step = -1; el.hidden = true; ring.hidden = true; }
+  function finish() { if (key) store.set(key, "1"); hide(); }
+  $("coach-next").addEventListener("click", () => { sfx.click(); go(step + 1); });
+  $("coach-skip").addEventListener("click", finish);
+  return {
+    hide,
+    /** The first-play walkthrough; `force` replays it from the guide. */
+    start(force = false) { if (!force && store.get("drill-tour")) return; setTab("areas"); steps = TOUR; key = "drill-tour"; go(0); },
+    /** One pointer the first time round 2 starts. */
+    tip2() { if (store.get("drill-tip2")) return; steps = TIP2; key = "drill-tip2"; go(0); },
+    /** The player did `what` (pick, deploy, end): move on if the current step was waiting for it. */
+    did(what) { if (step >= 0 && steps[step]?.wait === what) go(step + 1); },
+  };
+})();
+function openGuide() { sfx.click(); $("guide-tour").hidden = !$("s-game").classList.contains("on"); $("guide").showModal(); }
+["how", "help"].forEach((id) => $(id).addEventListener("click", openGuide));
+["guide-close", "guide-ok"].forEach((id) => $(id).addEventListener("click", () => $("guide").close()));
+$("guide").addEventListener("click", (e) => { if (e.target === $("guide")) $("guide").close(); }); // a click on the backdrop
+$("guide-tour").addEventListener("click", () => { $("guide").close(); coach.start(true); });
 
 // ------------------------------------------------------------------ title: region rail and a turning 3D preview
 const totals = MISSIONS.map((m) => m.region.provinces.reduce((s, p) => s + m.R.total(p), 0));
@@ -148,8 +212,8 @@ $("start").addEventListener("click", () => {
   const shown = M.estimated ? items.slice(0, 12) : region.provinces.map((p) => items.find((x) => x.name === p.name));
   $("brief-chip").textContent = `Intel briefing · ${region.name} · ${M.year}`;
   document.querySelector(".briefing__copy p").textContent = M.estimated
-    ? "This is what the 2024–25 season charged Quezon City in reported dengue cases. Weekly reports exist only for the whole city, so each barangay's share is an estimate. Clean-ups cut the bill, but only if teams arrive before the cases do."
-    : "This is what the 2019 rainy season charged your region in reported dengue cases. Clean-ups cut the bill, but only if teams arrive before the cases do.";
+    ? "Teams cut the bill only if they arrive before the cases do. Barangay counts here are estimates from the city's weekly cases."
+    : "Teams cut the bill only if they arrive before the cases do.";
   $("receipt").innerHTML = `<h3>${M.estimated ? "CASE RECEIPT" : "RAIN RECEIPT"}</h3><p class="c">${region.name}</p><p class="c">${dayY(WEEKS[i0])} – ${dayY(WEEKS[i1])}</p><hr>`
     + (M.estimated ? "" : `<div class="ln"><span>Rain (avg per province)</span><span>${fmt(rain.reduce((a, b) => a + b, 0) / rain.length)} mm</span></div><div class="ln"><span>Price of rain</span><span>₱0.00</span></div><hr>`)
     + shown.map((x) => `<div class="ln"><span>${x.name}${x.hit ? " *" : ""}</span><span>${fmt(x.cases)}</span></div>`).join("")
@@ -185,58 +249,124 @@ function hudSpark(i) {
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><polyline points="${tot.map((v, j) => `${X(j)},${Y(v)}`).join(" ")}" fill="none" stroke="#E9F3EC" stroke-width="1.6"/></svg>`;
 }
 
-function roster() {
-  const sent = region.provinces.map((p, k) => [p.name, (plan[k] || {})[turn] || 0]).filter((x) => x[1]);
-  return `<div class="roster"><span class="k">This turn</span> ${sent.length ? sent.map(([n, c]) => `<b>${c}×</b> ${n}`).join(" · ") : "No teams deployed yet."}</div>`;
-}
 function renderList() {
   const i = idx(TURNS[turn]), tw = TURNS[turn];
   $("plist").innerHTML = region.provinces.map((p, k) => {
     const f = round === 2 ? p.fc[tw] : null, n = teamsIn(k);
-    return `<button type="button" class="prow${sel === k ? " on" : ""}" role="option" aria-selected="${sel === k}" data-k="${k}">
+    return `<div class="prow${sel === k ? " on" : ""}" data-k="${k}"><button type="button" class="prow__pick" aria-pressed="${sel === k}">
       <span class="prow__heat" style="background:${R.heat(p, i)}"></span><span class="prow__nm">${p.name}</span>
       ${f && f[0] !== "normal" ? `<span class="prow__fc" data-lv="${f[0]}">▲${fmt(f[2])}</span>` : ""}
-      <span class="prow__n nums">${p.cases[i] == null ? "–" : fmt(p.cases[i])}</span>${n ? `<span class="prow__team">${n}</span>` : ""}</button>`;
+      <span class="prow__n nums">${p.cases[i] == null ? "–" : fmt(p.cases[i])}</span>${n ? `<span class="prow__team">${n}</span>` : ""}</button>
+      <button type="button" class="prow__add" aria-label="Send a team to ${p.name}" ${kits && !capped(k) ? "" : "disabled"}>+</button></div>`;
   }).join("");
+}
+/** Send one team to area k this turn, or take one of this turn's teams back. */
+function deploy(k) {
+  if (!kits || capped(k)) return;
+  const p = region.provinces[k], now = (plan[k] || {})[turn] || 0;
+  (plan[k] ||= {})[turn] = now + 1; kits--; sfx.deploy(); tick(`Team sent to ${p.name}.`); refresh({ drop: p.id });
+  coach.did("deploy");
+}
+function recall(k) {
+  const now = (plan[k] || {})[turn] || 0;
+  if (!now) return;
+  plan[k][turn] = now - 1; kits++; sfx.recall(); refresh();
 }
 function renderDetail() {
   const tw = TURNS[turn], i = idx(tw);
-  if (sel == null) {
-    $("detail").innerHTML = `<div class="empty">Pick a ${M.unit[0]} on the board or in the list to see its reports${round === 2 ? " and EpiLag intel" : ""}, then deploy teams.</div>${roster()}`;
-    return;
-  }
-  const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = p.fc[tw], now = (plan[sel] || {})[turn] || 0;
+  if (sel == null) { $("detail").innerHTML = `<div class="empty">Pick a ${M.unit[0]} on the map or in the list.</div>`; return; }
+  const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = round === 2 ? p.fc[tw] : null, now = (plan[sel] || {})[turn] || 0;
   const trend = c != null && prev ? Math.round((c / prev - 1) * 100) : null;
-  $("detail").innerHTML = `<h3>${p.name}</h3><div class="sub">${fmt(p.pop)} people · ${teamsIn(sel)} team${teamsIn(sel) === 1 ? "" : "s"} deployed</div>
-    <div class="chart-surface">${spark(p, i, { fc: round === 2 ? f : null })}</div>
-    <div class="kv"><div class="panel"><div class="k">Reported this week</div><div class="v nums">${c == null ? "–" : fmt(c)}</div><div class="d">${trend == null ? "" : `${trend >= 0 ? "▲ " : "▼ "}${Math.abs(trend)}% in 2 weeks`}</div></div>
+  $("detail").innerHTML = `<div class="detail__head"><h3>${p.name}</h3><span class="sub">${fmt(p.pop)} people</span></div>
+    <div class="chart-surface">${spark(p, i, { fc: f })}</div>
+    <div class="chart-key"><span class="ck ck--cases">Cases</span><span class="ck ck--line">Epidemic line</span>${f ? `<span class="ck ck--fc">Forecast</span>` : ""}</div>
+    <div class="kv"><div class="panel"><div class="k">This week</div><div class="v nums">${c == null ? "–" : fmt(c)}</div><div class="d">${trend == null ? "" : `${trend >= 0 ? "▲ " : "▼ "}${Math.abs(trend)}% in 2 weeks`}</div></div>
       <div class="panel"><div class="k">Epidemic line</div><div class="v nums">${p.epi[i] == null ? "–" : fmt(p.epi[i])}</div><div class="sub">${M.estimated ? "city line × usual share" : `rain ${p.rain[i] == null ? "–" : `${fmt(p.rain[i])} mm`}`}</div></div></div>
-    ${round === 2 && f ? `<div class="intel-box"><div class="k">EpiLag intel · week of ${day(WEEKS[i + 4])}</div><div class="v">~${fmt(f[2])} cases</div><div class="sub">likely ${fmt(f[1])}–${fmt(f[3])}</div><span class="lv" data-lv="${f[0]}">${LEVEL[f[0]]}</span></div>` : ""}
-    <div class="take"><span class="k">Take action</span>
-      <div class="action"><span class="tick"></span><div><b>Response team</b><small>Clean-up drives · container covers · household info, for ~${fmt(R.PEOPLE)} people</small></div><b>₱500K</b></div>
-      <div class="deploy"><button type="button" class="btn btn--go btn--sm" id="deploy" ${kits && !capped(sel) ? "" : "disabled"}>Deploy team</button>
-        <button type="button" class="btn btn--dark-ghost btn--sm" id="recall" ${now ? "" : "disabled"}>Recall</button></div>
-      <div class="sub">${capped(sel) ? "Max coverage reached (30% of the population)." : kits ? `${kits} team${kits === 1 ? "" : "s"} left.` : "No teams left: end the turn."}</div></div>
-    ${roster()}`;
-  $("deploy").onclick = () => {
-    if (!kits || capped(sel)) return;
-    (plan[sel] ||= {})[turn] = now + 1; kits--; sfx.deploy(); tick(`Team deployed to ${p.name}.`); refresh({ drop: p.id });
-  };
-  $("recall").onclick = () => { if (!now) return; plan[sel][turn] = now - 1; kits++; sfx.recall(); refresh(); };
+    ${f ? `<div class="intel-box"><div class="k">Forecast · week of ${day(WEEKS[i + 4])}</div><div class="intel-box__row"><div class="v">~${fmt(f[2])} cases</div><span class="lv" data-lv="${f[0]}">${LEVEL[f[0]]}</span></div><div class="sub">likely ${fmt(f[1])}–${fmt(f[3])}</div></div>` : ""}
+    <div class="send"><button type="button" class="send__back" id="recall" aria-label="Take a team back" ${now ? "" : "disabled"}>−</button>
+      <div class="send__n"><b class="nums">${now}</b><span>sent this turn</span></div>
+      <button type="button" class="btn btn--go btn--sm" id="deploy" ${kits && !capped(sel) ? "" : "disabled"}>Send team · ₱${K.pesos / 1000}K</button></div>
+    <div class="sub">${capped(sel) ? "Max coverage reached here (30% of the population)." : kits ? `${teamsIn(sel)} here so far · ${kits} left` : "No teams left. End the turn."}</div>`;
+  $("deploy").onclick = () => deploy(sel);
+  $("recall").onclick = () => recall(sel);
 }
+// ------------------------------------------------------------------ the side panel's tabs and the turn report
+let tab = "areas", logTurn = 0;
+function setTab(t) {
+  tab = t;
+  for (const id of ["areas", "log"]) { $(`tab-${id}`).setAttribute("aria-selected", String(id === t)); $(`pane-${id}`).hidden = id !== t; }
+  if (t === "log") { $("log-dot").hidden = true; renderLog(); }
+}
+$("tab-areas").addEventListener("click", () => { sfx.click(); setTab("areas"); });
+$("tab-log").addEventListener("click", () => { sfx.click(); logTurn = turn; setTab("log"); });
+const money = (n) => `₱${((n * K.pesos) / 1e6).toFixed(1)}M`;
+/** What the reports said at turn `logTurn`: the two weeks before it, and the teams sent the turn before. Nothing from the future. */
+function renderLog() {
+  const t = logTurn, tw = TURNS[t], i = idx(tw), ps = region.provinces, live = t === turn;
+  const sum = (j) => ps.reduce((s, p) => s + (p.cases[j] || 0), 0), now = sum(i), was = sum(i - 2);
+  const over = (p, j) => p.cases[j] != null && p.epi[j] != null && p.cases[j] > p.epi[j];
+  const crossed = ps.filter((p) => over(p, i) && !over(p, i - 2)), above = ps.filter((p) => over(p, i)).length;
+  const pct = was ? Math.round((now / was - 1) * 100) : null;
+  const names = (list) => `${list.slice(0, 3).map((p) => short(p.name)).join(", ")}${list.length > 3 ? ` and ${list.length - 3} more` : ""}`;
+  // one sentence for the two weeks, one for where the outbreaks are
+  const head = !t ? "The season begins." : pct == null ? "New reports are in." : pct >= 100 ? "Cases more than doubled." : pct >= 15 ? `Cases are up ${pct}%.` : pct <= -15 ? `Cases are down ${-pct}%.` : "Cases are holding steady.";
+  const next = crossed.length ? `${names(crossed)} crossed the epidemic line.` : above ? `${above} of ${ps.length} ${M.unit[1]} ${above === 1 ? "is" : "are"} above the epidemic line.` : "No outbreaks yet.";
+  const moves = ps.map((p, k) => ({ p, k, c: p.cases[i] || 0, d: (p.cases[i] || 0) - (p.cases[i - 2] || 0) })).sort((a, b) => b.d - a.d).slice(0, 10);
+  const mm = ps.reduce((s, p) => s + (p.rain[i] || 0), 0) / ps.length;
+  const sent = t ? ps.map((p, k) => [short(p.name), (plan[k] || {})[t - 1] || 0]).filter((x) => x[1]) : [];
+  const nSent = sent.reduce((s, x) => s + x[1], 0);
+  const spent = ps.reduce((s, _, k) => s + Object.entries(plan[k] || {}).reduce((a, [tt, n]) => a + (+tt < t ? n : 0), 0), 0);
+  const tag = (p) => {
+    const f = round === 2 ? p.fc[tw] : null;
+    if (f && (f[0] === "warning" || f[0] === "watch")) return `<span class="log__tag" data-lv="${f[0]}">${f[0] === "warning" ? "Forecast: outbreak" : "Forecast: watch"}</span>`;
+    return crossed.includes(p) ? `<span class="log__tag" data-lv="warning">New outbreak</span>` : over(p, i) ? `<span class="log__tag" data-lv="watch">Outbreak</span>` : "";
+  };
+  $("pane-log").innerHTML = `<div class="log__nav"><button type="button" class="log__step" id="log-prev" aria-label="Earlier turn" ${t ? "" : "disabled"}>${icon("chevronLeft", { size: 24 })}</button>
+      <div class="log__when"><b>Turn ${t + 1} of ${TURNS.length}</b><span>${t ? `${day(TURNS[t - 1])} to ${day(tw)}` : day(tw)}${live ? "" : " · past turn"}</span></div>
+      <button type="button" class="log__step" id="log-next" aria-label="Later turn" ${live ? "disabled" : ""}>${icon("chevronRight", { size: 24 })}</button></div>
+    <div class="log__head"><h3>${head}</h3><p>${next}</p></div>
+    <div class="log__stats"><div><b class="nums">${fmt(now)}</b><span>cases this week</span></div>
+      <div><b class="nums">${above}<small>/${ps.length}</small></b><span>in outbreak</span></div>
+      ${M.estimated ? "" : `<div><b class="nums">${fmt(mm)}<small> mm</small></b><span>rain</span></div>`}</div>
+    <div class="log__sec"><div class="log__cols"><span class="k">${cap(M.unit[0])}</span><span class="k">Cases</span><span class="k">2 weeks</span></div>
+      <div class="log__moves">${moves.map(({ p, k, c, d }) => `<div class="log__row" data-k="${k}"><button type="button" class="log__move" aria-label="Open ${p.name}">
+          <span class="prow__heat" style="background:${R.heat(p, i)}"></span><span class="log__nm"><span class="prow__nm">${p.name}</span>${tag(p)}</span>
+          <span class="nums">${fmt(c)}</span><b class="nums ${d > 0 ? "up" : d < 0 ? "down" : ""}">${d > 0 ? "▲ " : d < 0 ? "▼ " : ""}${fmt(Math.abs(d))}</b></button>
+        ${live ? `<button type="button" class="prow__add" aria-label="Send a team to ${p.name}" ${kits && !capped(k) ? "" : "disabled"}>+</button>` : ""}</div>`).join("")}</div>
+      ${ps.length > moves.length ? `<p class="sub">The ${moves.length} biggest rises of ${ps.length} ${M.unit[1]}.</p>` : ""}</div>
+    <div class="log__teams"><span class="k">${t ? "Sent last turn" : "Your teams"}</span>
+      <p>${nSent ? sent.map(([n, c]) => `<span class="log__sent"><i></i><b>${c}×</b> ${n}</span>`).join("") : t ? "No teams sent." : "None sent yet."}</p>
+      <p class="sub">${nSent ? `${money(nSent)} that turn · ` : ""}${money(spent)} spent · ${money(K.kits - spent)} left</p></div>`;
+}
+$("pane-log").addEventListener("click", (e) => {
+  const step = e.target.closest(".log__step"), row = e.target.closest(".log__row");
+  if (step) { sfx.click(); logTurn += step.id === "log-prev" ? -1 : 1; renderLog(); ($(step.id).disabled ? $("pane-log").querySelector(".log__step:not(:disabled)") : $(step.id))?.focus(); return; }
+  if (!row) return;
+  const k = +row.dataset.k;
+  if (e.target.closest(".prow__add")) { deploy(k); $("pane-log").querySelector(`[data-k="${k}"] .prow__add`)?.focus(); } // send from the report
+  else if (e.target.closest(".log__move")) { setTab("areas"); pick(k); } // open that area
+});
 function pick(k) {
   if (k == null || k === sel) return;
   sel = k; sfx.click();
   board?.select(region.provinces[k].id);
+  setTab("areas");
   renderList(); renderDetail();
+  coach.did("pick");
 }
-$("plist").addEventListener("click", (e) => { const b = e.target.closest(".prow"); if (b) pick(+b.dataset.k); });
+$("plist").addEventListener("click", (e) => {
+  const row = e.target.closest(".prow");
+  if (!row) return;
+  const k = +row.dataset.k;
+  pick(k);
+  if (e.target.closest(".prow__add")) { deploy(k); $("plist").querySelector(`[data-k="${k}"] .prow__add`)?.focus(); } // + on a row: pick and send in one press
+});
 $("plist").addEventListener("keydown", (e) => {
   const step = { ArrowDown: 1, ArrowUp: -1 }[e.key];
   if (!step) return;
   e.preventDefault();
   const n = region.provinces.length, k = sel == null ? 0 : (sel + step + n) % n;
-  pick(k); $("plist").querySelector(`[data-k="${k}"]`)?.focus();
+  pick(k); $("plist").querySelector(`[data-k="${k}"] .prow__pick`)?.focus();
 });
 $("reset-view").addEventListener("click", () => board?.resetView());
 $("v-in").addEventListener("click", () => board?.zoomBy(1.35));
@@ -267,16 +397,18 @@ function refresh({ drop = null, duration = 900 } = {}) {
   const mm = region.provinces.reduce((s, p) => s + (p.rain[i] || 0), 0) / region.provinces.length;
   $("h-rain").textContent = M.estimated ? "–" : `${fmt(mm)} mm`;
   const sky = M.estimated ? ["clear", "No rain data"] : mm < 10 ? ["clear", "Mostly dry"] : mm < 30 ? ["rain", "Showers"] : mm < 56 ? ["rain", "Heavy rain"] : ["storm", "Storm"];
-  document.querySelector(".side__head .k").textContent = cap(M.unit[1]);
+  $("tab-areas").textContent = cap(M.unit[1]);
+  $("h-spent").textContent = `${money(K.kits - kits)} spent of ${money(K.kits)}`;
+  if (tab === "log") { logTurn = turn; renderLog(); }
   $("plist").setAttribute("aria-label", cap(M.unit[1]));
   $("h-sky").textContent = sky[1];
   $("board-wrap").dataset.weather = sky[0];
-  const pr = R.pressure(region, i), [lab, col] = PRESS[pr.level];
-  $("h-press").textContent = lab; $("h-press").style.color = col;
-  $("h-meter").style.transform = `scaleX(${Math.min(1, pr.value / 2)})`; $("h-meter").style.background = col;
+  const pr = R.pressure(region, i);
+  confirmEnd = false;
   $("end").innerHTML = `${turn === TURNS.length - 1 ? "End season" : "End turn"} ${icon("play", { size: 24 })}`;
+  $("end").classList.toggle("pulse", kits === 0); // nothing left to send: the next move is to end the turn
   $("side-sub").textContent = `${kits} of ${K.kits} teams left`;
-  $("legend-intel").innerHTML = round === 2 ? `<span class="intel">◯ EpiLag intel: forecast 4 weeks ahead</span>` : "";
+  $("legend-intel").innerHTML = round === 2 ? `<span class="intel">◯ Forecast, 4 weeks ahead</span>` : "";
   // the board
   board.setWeek(Object.fromEntries(region.provinces.map((p) => [p.id, columnOf(p, i)])), { duration });
   const counts = Object.fromEntries(region.provinces.map((p, k) => [p.id, teamsIn(k)]));
@@ -317,7 +449,7 @@ function warp(text, sub, then) {
   setTimeout(() => { $("warp").classList.remove("on"); then?.(); }, reduce ? 50 : 1300);
 }
 async function startRound(r) {
-  round = r; turn = 0; kits = K.kits; plan = {}; sel = null;
+  round = r; turn = 0; kits = K.kits; plan = {}; sel = null; logTurn = 0; setTab("areas"); $("log-dot").hidden = true;
   $("mode").textContent = r === 1 ? "Round 1 · No intel" : "Round 2 · EpiLag intel";
   $("mode").classList.toggle("chip--intel", r === 2);
   show("s-game"); sfx.turn();
@@ -330,9 +462,18 @@ async function startRound(r) {
   }
   board.select(null);
   board.resetView();
-  warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : "EpiLag-PH intel online", () => { refresh({ duration: 0 }); tick(headline()); });
+  warp(r === 1 ? "Round 1" : "Round 2", r === 1 ? "Case reports only" : "EpiLag-PH intel online", () => { refresh({ duration: 0 }); tick(headline()); if (r === 1) coach.start(); else coach.tip2(); });
 }
+let confirmEnd = false;
 $("end").addEventListener("click", () => {
+  // the last turn with teams still unused: ask once before the season ends
+  if (turn === TURNS.length - 1 && kits > 0 && !confirmEnd) {
+    confirmEnd = true; sfx.alarm();
+    $("end").innerHTML = `End with ${kits} unused? ${icon("play", { size: 24 })}`;
+    tick(`${kits} team${kits === 1 ? " is" : "s are"} still unused. Press again to end the season.`);
+    return;
+  }
+  coach.did("end");
   sfx.turn(); board.burst();
   if (turn < TURNS.length - 1) {
     turn++;
@@ -341,6 +482,7 @@ $("end").addEventListener("click", () => {
     setTimeout(() => {
       $("end").disabled = false;
       refresh({ duration: 1400 });
+      if (tab !== "log") $("log-dot").hidden = false; // a new turn report is waiting
       const i = idx(TURNS[turn]);
       board.floaters(region.provinces.map((p) => [p.id, (p.cases[i - 1] || 0) + (p.cases[i] || 0)]));
       tick(headline());
@@ -360,23 +502,31 @@ function endRound() {
   frogReacts($("r-frog"), g);
   $("r-chip").textContent = `Mission report · Round ${round} · ${round === 1 ? "no intel" : "EpiLag intel"}`;
   $("r-title").innerHTML = `${fmt(s.mid)} cases averted. <span>${g === "S" || g === "A" ? "Outstanding command." : g === "B" ? "Solid response." : "The outbreak got ahead of you."}</span>`;
-  $("r-lead").textContent = `Your grade compares you with the better of two fixed strategies for ${region.name}. Range: ${fmt(s.lo)}–${fmt(s.hi)} cases averted.`;
-  $("r-scores").innerHTML = `<div class="panel"><div class="big nums">${fmt(s.mid)}</div><p>cases averted (central estimate)</p></div>
-    <div class="panel"><div class="big nums">${s.onTime}<small>/ ${s.used}</small></div><p>teams in 4+ weeks before a peak</p></div>
-    <div class="panel"><div class="big nums">${s.late}<small>/ ${s.used}</small></div><p>teams too close to the peak, or after</p></div>
-    <div class="panel"><div class="big nums">${s.noOutbreak}<small>/ ${s.used}</small></div><p>teams where no outbreak came</p></div>`;
+  $("r-lead").textContent = `Likely between ${fmt(s.lo)} and ${fmt(s.hi)}. Graded against two computer players.`;
+  // one bar for all the teams: in time (4+ weeks before a peak), too late, sent where no outbreak came, never sent
+  const seg = [["on", s.onTime, "in time"], ["late", s.late, "too late"], ["none", s.noOutbreak, "no outbreak there"], ["idle", K.kits - s.used, "unused"]];
+  $("r-scores").innerHTML = `<div class="k">Where your ${K.kits} teams went</div>
+    <div class="teambar" role="img" aria-label="${seg.map(([, n, l]) => `${n} ${l}`).join(", ")}">${seg.map(([c, n]) => (n ? `<i class="tb--${c}" style="flex:${n}"></i>` : "")).join("")}</div>
+    <div class="teamkey">${seg.map(([c, n, l]) => `<span class="${n ? "" : "zero"}"><i class="tb--${c}"></i><b class="nums">${n}</b> ${l}</span>`).join("")}</div>
+    <div class="sub">In time means 4 or more weeks before the peak.</div>`;
   const badges = [
     ["early", "Early bird", "3+ teams 4 weeks before a peak", s.onTime >= 3], ["waste", "No waste", "No team where no outbreak came", s.used > 0 && s.noOutbreak === 0],
-    ["full", "All in", "Deployed all 10 teams", s.used === K.kits], ["bot", "Beat the bot", "More than EpiLag's autopilot", s.mid > auto.mid],
+    ["full", "All in", `Sent all ${K.kits} teams`, s.used === K.kits], ["bot", "Beat the bot", "More than EpiLag's autopilot", s.mid > auto.mid],
     ["saved", "Life saver", "Averted 100+ cases", s.mid >= 100],
   ];
-  $("r-badges").innerHTML = badges.map(([ic, n, d, got], j) => `<div class="badge${got ? " got" : ""}" style="animation-delay:${0.5 + j * 0.15}s">${icon(BADGE_ICON[ic], { size: ic === "early" || ic === "waste" ? 36 : 48 })}<b>${n}</b><span>${got ? d : `Locked · ${d}`}</span></div>`).join("");
-  $("r-replay").innerHTML = region.provinces.map((p, k) => {
-    const pk = R.peak(p), ts = [];
+  $("r-badges").innerHTML = badges.map(([ic, n, d, got], j) => `<div class="badge${got ? " got" : ""}" title="${d}" style="animation-delay:${0.5 + j * 0.12}s">${icon(BADGE_ICON[ic], { size: ic === "early" || ic === "waste" ? 36 : 48 })}<b>${n}</b><span class="sr-only">${got ? d : `Locked: ${d}`}</span></div>`).join("");
+  // with many areas (Quezon City), replay the ones that got teams, then the busiest, 12 in all
+  let shown = region.provinces.map((_, k) => k);
+  if (shown.length > 12) {
+    const busy = byTotal(region, R).map((p) => region.provinces.indexOf(p));
+    shown = [...new Set([...shown.filter((k) => teamsIn(k)), ...busy])].slice(0, 12);
+  }
+  $("r-replay").innerHTML = shown.map((k) => {
+    const p = region.provinces[k], pk = R.peak(p), ts = [];
     Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ts.push(+t); });
     return `<div class="panel"><b>${p.name}</b><small>${pk == null ? "No outbreak" : `Peaked ${day(WEEKS[pk])}`} · ${ts.length} team${ts.length === 1 ? "" : "s"}</small>${spark(p, WEEKS.length - 1, { teams: ts, peak: pk, cls: "" })}</div>`;
   }).join("");
-  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · with EpiLag intel" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
+  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · with forecasts" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
   $("next-r").onclick = () => (round === 1 ? startRound(2) : versus());
 }
 /** The frog reacts to the grade: S/A strike then smile, B watches, C/D peeks. */
