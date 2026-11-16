@@ -49,6 +49,7 @@ python research/models/proposed_features.py
 python research/models/candidates.py
 python research/models/margin_check.py
 python research/models/export_extracts.py
+python research/models/game_forecasts.py          # all four models' forecasts for Dengue Drill
 python research/analysis/step3_checks.py
 python research/writeup/build_summary.py          # the PDF; needs Playwright with Chromium
 ```
