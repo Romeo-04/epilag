@@ -36,7 +36,7 @@ The code is the source of truth for the details: `src/features.py` (features), `
 
 **Your checkout.** Work in your own checkout so Person A's stays put.
 - Same machine: `git worktree add ../epilag-b -b research-b research-a` from inside `epilag/`.
-- Another machine: a fresh clone, then `git switch -c research-b`.
+- Another machine: clone `https://github.com/Romeo-04/epilag.git`, then `git switch -c research-b origin/research-a`.
 
 **Python.** Use Person A's venv (`../epilag/.venv/Scripts/python`) or make your own from `requirements.txt`.
 
@@ -51,7 +51,7 @@ The code is the source of truth for the details: `src/features.py` (features), `
 
 **Commits.** Commit locally on `research-b`, in small commits with plain messages and no AI attribution lines. Push only when your human says so.
 
-**Getting Person A's results.** Run `git merge research-a` whenever `research/results/STATUS.md` reports new files.
+**Getting Person A's results.** Whenever `research/results/STATUS.md` reports new files, run `git merge research-a` (same machine) or `git pull origin research-a` (another machine).
 
 **Your status.** Keep `research/lit/STATUS.md` current with what is done, what is next, and anything Person A needs to know.
 

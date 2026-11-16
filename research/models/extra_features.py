@@ -7,8 +7,8 @@ humidity    rh_lag* for Regions + QC (provinces already have them).
 enso        Oceanic Nino Index (NOAA CPC) for the 3-month season centred 2 and 5 months before
             week t, so the value was already published at forecast time.
 topography  Provinces only (18 regional units are too few for a fixed per-area value): mean elevation
-            and the share of land below 100 m, from 42,048 barangay centroids (Copernicus DEM
-            GLO-90 via the Open-Meteo elevation API), weighted by barangay area.
+            and the share of land below 100 m, from 42,048 barangay centroids (SRTM 90 m via
+            the OpenTopoData public API), weighted by barangay area.
 population  Log population density (people per km2), provinces only.
 
 Weather for Regions + QC is ERA5 from Open-Meteo, one population-weighted point per region and the
@@ -109,7 +109,9 @@ def fetch_oni() -> pd.DataFrame:
 
 
 def fetch_elevation() -> pd.DataFrame:
-    """Elevation at every barangay centroid, 100 points per request, cached."""
+    """SRTM 90 m elevation at every barangay centroid via the OpenTopoData public API (100 points per call,
+    at most 1 call per second and 1,000 a day), cached. Open-Meteo's elevation API counts every point
+    against its daily quota, too few for 42,048 points. Points SRTM marks as sea count as 0 m."""
     path = RAW / "elevation_barangay.parquet"
     if path.exists():
         return pd.read_parquet(path)
@@ -118,10 +120,10 @@ def fetch_elevation() -> pd.DataFrame:
     elev = []
     for i in range(0, len(b), 100):
         c = b.iloc[i:i + 100]
-        r = _get("https://api.open-meteo.com/v1/elevation",
-                 {"latitude": ",".join(f"{v:.5f}" for v in c.center_lat),
-                  "longitude": ",".join(f"{v:.5f}" for v in c.center_lon)})
-        elev += r.json()["elevation"]
+        r = _get("https://api.opentopodata.org/v1/srtm90m",
+                 {"locations": "|".join(f"{la:.5f},{lo:.5f}" for la, lo in zip(c.center_lat, c.center_lon))})
+        elev += [0.0 if p["elevation"] is None else p["elevation"] for p in r.json()["results"]]
+        time.sleep(1.1)
         if i % 5000 == 0:
             print(f"  elevation {i:,}/{len(b):,}", flush=True)
     b["elevation_m"] = elev

@@ -41,7 +41,7 @@ Code: `research/models/`. The live model in `src/` is unchanged apart from one o
 | heat | `heat_band4`: days with mean temperature in 26–29 °C over the last 4 weeks. `heat_band4_lag4`: the same, 4 weeks earlier. `heat_hot4`: days at or above 34 °C (maximum temperature). `heat_hi4`: 4-week mean heat index (NWS Rothfusz, from daily mean temperature and humidity) | ERA5 daily via Open-Meteo | Both |
 | heat, humidity | `temp_lag0/2/4/6/8`, `tmax_max4`, `rh_lag0/2/4/6/8`, the inputs the province model already had | ERA5 daily via Open-Meteo, at one population-weighted point per region and the Quezon City centre | Regions + QC |
 | enso | `enso_oni`: Oceanic Niño Index for the 3-month season centred 2 months before week t, already published at forecast time. `enso_oni_lag3`: centred 5 months before | NOAA CPC `oni.ascii.txt` | Both |
-| topography | `topo_elev_mean`: area-weighted mean elevation. `topo_low_share`: area share below 100 m | 42,048 barangay centroids (COD-AB), with elevation from Copernicus DEM GLO-90 via the Open-Meteo elevation API | Provinces only |
+| topography | `topo_elev_mean`: area-weighted mean elevation. `topo_low_share`: area share below 100 m | 42,048 barangay centroids (COD-AB), with elevation from SRTM 90 m (NASA) via the OpenTopoData public API | Provinces only |
 | population | `pop_density_log`: log of people per km² | `data/processed/units.csv` | Provinces only |
 
 **Why not Regions + QC for topography and density:** with 18 areas, a fixed per-area value has 18 distinct values, which works like an area label rather than a measured effect.
