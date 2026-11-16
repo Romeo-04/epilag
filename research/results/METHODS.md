@@ -74,3 +74,9 @@ Each test reports:
 - **Blends:** `blend_all4` (all four methods) and `blend_lgb_negbin` (LightGBM + negative binomial). Equal weights.
 - **No fitting:** nothing is refit, no weight is tuned, and the blend gets no calibration of its own. Its range is the average of the four ranges, each calibrated on the last training year.
 - **Scoring:** the harness's `score()`, so error, range and both alert rules are directly comparable with the single methods in `model_comparison.csv`.
+
+## Longer rain lags (`rain_lags.py`)
+
+- **Features:** `rain_win12_15`, `rain_win16_19`, `rain_win20_23`: weekly rain summed over 12–15, 16–19 and 20–23 weeks before week t, per area. All four weeks are needed; otherwise the value is missing, which LightGBM handles.
+- **Test:** LightGBM through the harness on the research set (`plus`) and on the research set plus the three windows (`plus_long_rain`). The `plus` run reproduces the `full` rows of `feature_groups.csv` exactly.
+- **SHAP:** as in `influence.py`, on the extended set. Rows are per rain feature, with `weeks_back` grouping weekly lags into 4-week blocks (0–3, 4–7, 8–11) to compare with the new windows. Totals (`rain_sum*`) are kept as their own rows.

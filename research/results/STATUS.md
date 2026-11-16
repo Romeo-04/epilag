@@ -8,6 +8,7 @@ How the experiments were run: `METHODS.md`.
 - [x] New variables: heat, humidity and ENSO for Regions + QC; heat, ENSO, elevation and density for provinces (`METHODS.md`).
 - [x] `feature_groups.csv`: each group removed from the full set, and added to cases + season. LightGBM, same test, both panels.
 - [x] `shap_groups.csv`, `shap_lags.csv` (rows with `feature_set = plus` use the research table; `current` is the live feature set).
+- [x] `rain_lags.csv`, `rain_lag_shap.csv`: rain totals 12–23 weeks back added to the research set.
 - [x] Validation page: new sections 4 (data groups) and 6 (other methods). The page lives outside the repo, in `pugad/finals/`.
 
 ## Ready now: four methods on the same test
@@ -72,6 +73,8 @@ Counts are checks where the group helped: 16 for Regions + QC (4 years × 4 lead
 **Research table compared with the live model** (all research variables against today's features, LightGBM):
 - **Regions + QC:** better in 2023 at every lead time (−5% to −14%) and in 2024 (−1% to −4%); mixed in 2025; slightly worse in 2019 (+1% to +3%). At 4 weeks, 2023 drops from 58.0 to 54.0, which now beats "same as this week" (55.6).
 - **Provinces:** worse in all 8 checks (+0.4% to +9.5%). The largest drop is 2020 at 8 weeks.
+- **Provinces without ENSO** (the research set minus ENSO, from the `drop` runs in `feature_groups.csv`): level with the live model, better in 4 of 8, median 0.0% (−0.7% to +1.6%). ENSO accounts for most of the province gap; the other new province variables (heat, elevation, density) add nothing measurable on top.
+- **Regions + QC without ENSO:** better than the live model in 13 of 16, median −1.0%. Much of the 2023 gain further ahead comes from ENSO: at 6 and 8 weeks the set without ENSO is −4.8% and −1.5% against the live model, against −11.9% and −14.2% with it.
 - **Overall:** better in 11 of 24 checks, median +0.5%. Watch caught 1,066 outbreak starts, against 1,049 for the live model (of 1,260 across lead times).
 
 **SHAP (final model, research table).**
@@ -79,13 +82,20 @@ Counts are checks where the group helped: 16 for Regions + QC (4 years × 4 lead
 - Then come time of year (7–13%) and rain (Regions + QC 8–17%, provinces 5–8%).
 - ENSO gets 4–11% of the provinces' attention, despite making their forecasts worse.
 - **Lag profiles (`shap_lags.csv`):**
-  - Rain's largest share is at the longest lag offered (10–11 weeks) in 3 of 4 lead times, for both panels. The lag window may be too short.
+  - Rain's largest share is at the longest lag offered (10–11 weeks) in 3 of 4 lead times, for both panels. Tested below: longer windows do not help.
   - Temperature peaks 4–8 weeks back. Humidity: 8 weeks for provinces.
+
+**Longer rain lags (`rain_lags.py`).** Three 4-week rain totals, 12–15, 16–19 and 20–23 weeks back, added to the research set. LightGBM, same test.
+- **Error:** no gain. Better in 9 of 24 checks, median +0.3% (−2.7% to +4.8%). Regions + QC: 6 of 16, median +0.9% (better in all of 2019, worse in all of 2023 and 2024). Provinces: 3 of 8, median +0.1%.
+- **Watch:** 2 fewer outbreak starts caught for Regions + QC (263 against 265 of 324), 8 fewer for provinces (793 against 801 of 936).
+- **SHAP (`rain_lag_shap.csv`):** the model does use the new windows. At 4–8 weeks ahead, rain 12–15 weeks back gets the largest share of any 4-week block (Regions + QC 2.6–4.3% of all attention, provinces 1.6–2.7%), and the share falls from 16 weeks on.
+- **Reading:** rain 3–4 months before the forecast week marks where the year is in the rainy season, which the time-of-year features and the existing lags already carry. So it draws attention without improving forecasts. Keep the 0–11-week window.
+- Caveat: these windows were chosen after seeing the SHAP lag profile on all data, so this is a check of one idea, not a search.
 
 **Hypotheses for Person B to check against the literature (not findings):**
 1. ENSO hurts provinces because 5 years of province data (2016–2020) hold about one El Niño cycle. The model can use ENSO as a label for the year, and that pattern does not carry over to a new year. For Regions + QC it helped in 2023 and 2024 from 4 weeks ahead, not in 2019, and was mixed in 2025. QC alone has 16 years of data.
 2. Weather groups help Regions + QC more than provinces. Region weather is one population-weighted point per region, while province weather is one point per province. Region counts are larger and smoother, too. Or the province test years (2019 record epidemic, 2020 COVID) are unusual.
 3. Elevation helps provinces on its own but not inside the full set. It may stand in for something the other variables already carry (rain, temperature or urbanisation).
-4. Rain peaking at the longest lag offered suggests effects beyond 12 weeks (lag plus lead). Compare with `expected_lag_weeks` in the literature.
+4. Rain's attention peaks 12–15 weeks before week t (14–23 weeks before the target week), but adding those weeks does not cut the miss. Compare with `expected_lag_weeks` in the literature: is a 3–5 month rain-to-dengue lag reported, or is this the rainy season's timing?
 
 Waiting on: `research/lit/feature_evidence.csv` from Person B (final choice of variables).
