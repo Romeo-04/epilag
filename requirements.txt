@@ -13,3 +13,4 @@ streamlit>=1.40
 plotly
 pytest
 playwright  # tests/test_web_logic.py, tests/test_site.py, scripts/screenshots.py
+markdown    # research/writeup/build_paper.py
