@@ -39,7 +39,7 @@ document.querySelectorAll("section[id]").forEach((s) => spy.observe(s));
 const reader = document.getElementById("reader"), frame = document.getElementById("reader-frame");
 function openDoc(a) {
   document.getElementById("reader-title").textContent = a.dataset.docTitle;
-  document.getElementById("reader-pdf").hidden = a.dataset.doc !== "summary";
+  document.getElementById("reader-pdf").hidden = a.dataset.doc !== "paper";
   document.getElementById("reader-tab").href = a.href;
   frame.title = a.dataset.docTitle;
   frame.src = a.href;

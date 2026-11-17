@@ -6,7 +6,7 @@ After the PJDSC 2026 first round, we tested the submitted EpiLag-PH model more c
 - model experiments: three other methods and nine new groups of variables, all on the same test as the submitted model;
 - an analysis of why the results came out as they did.
 
-**Start here:** [`EpiLag-PH-research-summary.pdf`](EpiLag-PH-research-summary.pdf) (8 pages). The full write-up is [`writeup/paper.md`](writeup/paper.md).
+**Start here:** the research paper, [`EpiLag-PH-research-paper.pdf`](EpiLag-PH-research-paper.pdf) (22 pages), built from [`writeup/paper.md`](writeup/paper.md).
 
 ## Headline findings
 
@@ -27,7 +27,7 @@ After the PJDSC 2026 first round, we tested the submitted EpiLag-PH model more c
 | [`models/`](models/) | Experiment code. `harness.py` runs the shared test, `models.py` holds the four methods, and there are scripts for the new variables, candidate sets and the 2023 calibration check |
 | [`results/`](results/) | `README.md` (every result and the file it comes from), `METHODS.md` (how each experiment ran) and the result CSVs |
 | [`analysis/`](analysis/) | `causes.md` (why the results came out as they did), `step3_checks.py` (its numbers), plus `out/` and `figures/` |
-| [`writeup/`](writeup/) | `paper.md` (full write-up), `summary.html` and `build_summary.py` (the source of the PDF) |
+| [`writeup/`](writeup/) | `paper.md` (the full paper) and `build_paper.py` (draws its figures into `figures/` and builds its PDF) |
 
 The submitted model in `src/` is unchanged. The only change there is one optional argument in `src/alerts.py`, which lets any model's forecasts be scored by the same alert rules.
 
@@ -51,7 +51,7 @@ python research/models/margin_check.py
 python research/models/export_extracts.py
 python research/models/game_forecasts.py          # all four models' forecasts for Dengue Drill
 python research/analysis/step3_checks.py
-python research/writeup/build_summary.py          # the PDF; needs Playwright with Chromium
+python research/writeup/build_paper.py            # the paper PDF and figures; needs Playwright with Chromium, markdown and a network connection (KaTeX)
 ```
 
 Run through `harness.py`, LightGBM reproduces the submitted model's scores in `reports/` exactly.
