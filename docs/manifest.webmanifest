@@ -1,0 +1,21 @@
+{
+  "name": "EpiLag-PH dengue dashboard",
+  "short_name": "EpiLag-PH",
+  "description": "Dengue forecasts 2–8 weeks ahead, alerts, action plans and resident advisories for the Philippines. Works offline once opened.",
+  "id": "/epilag/web/",
+  "start_url": "/epilag/web/?page=home",
+  "scope": "/epilag/",
+  "display": "standalone",
+  "background_color": "#FBFAF4",
+  "theme_color": "#08754F",
+  "lang": "en",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "For residents", "url": "/epilag/web/?page=public", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Forecast map", "url": "/epilag/web/?page=map", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
