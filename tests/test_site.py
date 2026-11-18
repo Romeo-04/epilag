@@ -9,6 +9,8 @@ methodology, research and open-data pages:
   - axe-core: no serious or critical issues (skipped when the CDN cannot be reached)
   - without WebGL the maps fall back to 2D
   - the onboarding guide opens once per device, steps through the Overview on desktop and phone, and can be replayed
+  - phones: the app's settings fold into one line; in the game the board fills the screen and a picked area is a
+    sheet over it whose Send team button can be pressed
 Build first: `cd site && npm run build`. Skipped when Playwright or the build is missing.
 """
 import threading
@@ -289,3 +291,45 @@ def test_guide_axe_no_serious_issues(base, browser):
         assert found == []
     finally:
         c.close()
+
+
+def test_phone_settings_fold_into_one_line(base, browser):
+    c, pg, errors = open_page(browser, base + "web/?page=unit&region=R_NCR&area=QC", width=390)
+    assert pg.locator("#ctx-summary").is_visible()
+    assert not pg.locator("#c-region").is_visible()
+    assert "Quezon City" in pg.locator("#ctx-summary").inner_text()
+    assert pg.locator("#ctx").bounding_box()["height"] < 90
+    pg.locator("#ctx-summary").tap()
+    assert pg.locator("#c-h").is_visible() and pg.locator("#ctx-summary").get_attribute("aria-expanded") == "true"
+    pg.select_option("#c-h", "8")
+    pg.wait_for_timeout(800)
+    assert "8 wk" in pg.locator("#ctx-summary").inner_text() and pg.locator("#c-h").is_visible()
+    c.close()
+    c, pg, errors = open_page(browser, base + "web/?page=unit")  # desktop: no summary, all four settings
+    assert not pg.locator("#ctx-summary").is_visible() and pg.locator("#c-region").is_visible()
+    c.close()
+    assert errors == []
+
+
+def test_phone_game_board_and_area_sheet(base, browser):
+    c, pg, errors = open_page(browser, base + "drill/", width=390)
+    pg.evaluate("localStorage.setItem('drill-tour', '1')")  # skip the walkthrough
+    pg.locator("#start").tap()
+    pg.locator("#go-r1").tap()
+    pg.locator(".model").first.tap()
+    pg.locator("#go-r2").tap()
+    pg.wait_for_timeout(1500)
+    assert pg.locator("#board-wrap").bounding_box()["height"] >= 380
+    pg.locator("#plist .prow__pick").nth(1).tap()
+    pg.wait_for_timeout(500)
+    sheet = pg.locator("#detail").bounding_box()
+    assert sheet["y"] + sheet["height"] <= 844 and sheet["y"] > 300  # docked at the bottom, on screen
+    budget = pg.locator("#h-budget").inner_text()
+    pg.locator("#deploy").tap()  # fails if the board or the turn bar covers the sheet
+    pg.wait_for_timeout(400)
+    assert pg.locator("#h-budget").inner_text() != budget
+    pg.locator("#detail-close").tap()
+    pg.wait_for_timeout(300)
+    assert pg.locator("#pane-areas #detail").count() == 1  # back in the side panel
+    c.close()
+    assert errors == []

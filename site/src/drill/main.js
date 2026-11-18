@@ -121,11 +121,13 @@ function setBackdrop(full) {
   });
   $("backdrop").classList.toggle("backdrop--dry", !!M.estimated);
 }
+const PHONE = "(max-width: 680px)"; // the phone layout in drill.css
 function show(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); scrollTo({ top: 0 });
   backdrop.show(id !== "s-game"); $("backdrop").dataset.scene = id.slice(2);
   if (id !== "s-game") setBackdrop(id === "s-report" || id === "s-vs");
   if (id !== "s-game") { coach.hide(); audio.setTrack(id === "s-report" || id === "s-vs" ? "report" : "title"); }
+  placeDetail();
 }
 
 // ------------------------------------------------------------------ walkthrough (first play) and the how-to-play guide
@@ -149,6 +151,13 @@ const coach = (() => {
     ring.hidden = false;
     Object.assign(ring.style, { left: `${r.left - 5}px`, top: `${r.top - 5}px`, width: `${r.width + 10}px`, height: `${r.height + 10}px` });
     let x = r.left + (r.width - b.width) / 2, y;
+    if (vw <= 680) { // a phone: dock the card along the bottom edge, above the turn bar, or the top when the target is down there
+      const barTop = document.querySelector(".bottom")?.getBoundingClientRect().top ?? vh;
+      const dock = Math.min(vh, barTop) - b.height - 10;
+      y = r.bottom > dock && r.top > b.height + 20 ? 8 : dock;
+      el.style.transform = `translate(8px, ${Math.round(clamp(y, 8, vh - b.height - 8))}px)`;
+      return;
+    }
     if (r.width > vw * 0.45 && r.height > vh * 0.35) y = r.top + r.height * 0.6;            // a large target (the board): sit inside it
     else if (t.closest(".side") && r.left - b.width - gap > 0) { x = r.left - b.width - gap; y = r.top + (r.height - b.height) / 2; } // the side panel: sit beside it
     else if (r.top - b.height - gap > 0) y = r.top - b.height - gap;
@@ -315,12 +324,22 @@ function recall(k) {
   if (!now) return;
   plan[k][turn] = now - 1; kits++; sfx.recall(); refresh();
 }
+// On a phone the picked area is a sheet over the board. It moves to <body> so nothing in the game screen's own
+// stacking (the board, the turn bar) can cover it, and goes back into the side panel when closed or on a wider screen.
+function placeDetail() {
+  const d = $("detail"), sheet = matchMedia(PHONE).matches && sel != null && $("s-game").classList.contains("on");
+  document.body.classList.toggle("sheet-open", sheet);
+  if (sheet && d.parentElement !== document.body) document.body.append(d);
+  else if (!sheet && d.parentElement === document.body) $("pane-areas").append(d);
+}
+matchMedia(PHONE).addEventListener("change", placeDetail);
 function renderDetail() {
   const tw = TURNS[turn], i = idx(tw);
+  placeDetail();
   if (sel == null) { $("detail").innerHTML = `<div class="empty">Pick a ${M.unit[0]} on the map or in the list.</div>`; return; }
   const p = region.provinces[sel], c = p.cases[i], prev = p.cases[i - 2], f = round === 2 ? fcAt(p, tw) : null, now = (plan[sel] || {})[turn] || 0;
   const trend = c != null && prev ? Math.round((c / prev - 1) * 100) : null;
-  $("detail").innerHTML = `<div class="detail__head"><h3>${p.name}</h3><span class="sub">${fmt(p.pop)} people</span></div>
+  $("detail").innerHTML = `<div class="detail__head"><h3>${p.name}</h3><span class="sub">${fmt(p.pop)} people</span><button type="button" class="detail__close" id="detail-close" aria-label="Close ${p.name}">×</button></div>
     <div class="chart-surface">${spark(p, i, { fc: f })}</div>
     <div class="chart-key"><span class="ck ck--cases">Cases</span><span class="ck ck--line">Epidemic line</span>${f ? `<span class="ck ck--fc">Forecast</span>` : ""}</div>
     <div class="kv"><div class="panel"><div class="k">This week</div><div class="v nums">${c == null ? "–" : fmt(c)}</div><div class="d">${trend == null ? "" : `${trend >= 0 ? "▲ " : "▼ "}${Math.abs(trend)}% in 2 weeks`}</div></div>
@@ -332,6 +351,7 @@ function renderDetail() {
     <div class="sub">${capped(sel) ? "Max coverage reached here (30% of the population)." : kits ? `${teamsIn(sel)} here so far · ${kits} left` : "No teams left. End the turn."}</div>`;
   $("deploy").onclick = () => deploy(sel);
   $("recall").onclick = () => recall(sel);
+  $("detail-close").onclick = unpick;
 }
 // ------------------------------------------------------------------ the side panel's tabs and the turn report
 let tab = "areas", logTurn = 0;
@@ -389,6 +409,13 @@ $("pane-log").addEventListener("click", (e) => {
   if (e.target.closest(".prow__add")) { deploy(k); $("pane-log").querySelector(`[data-k="${k}"] .prow__add`)?.focus(); } // send from the report
   else if (e.target.closest(".log__move")) { setTab("areas"); pick(k); } // open that area
 });
+/** Close the area panel (on a phone it is a sheet over the board). */
+function unpick() {
+  if (sel == null) return;
+  sel = null; sfx.click();
+  board?.select(null);
+  renderList(); renderDetail();
+}
 function pick(k) {
   if (k == null || k === sel) return;
   sel = k; sfx.click();
