@@ -39,6 +39,10 @@ class _Handler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
+    def end_headers(self):  # as vite preview does: the offline app must not depend on the server's Vary header
+        self.send_header("Vary", "Origin")
+        super().end_headers()
+
 
 @pytest.fixture(scope="module")
 def base():

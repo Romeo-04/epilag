@@ -23,7 +23,9 @@ self.addEventListener("activate", (e) => {
 });
 
 const put = async (name, req, res) => { if (res && res.ok && res.type !== "opaqueredirect") (await caches.open(name)).put(req, res.clone()); return res; };
-const match = (req) => caches.match(req, { ignoreSearch: req.mode === "navigate" });
+// ignoreVary: a server's "Vary: Origin" would otherwise hide every saved bundle from module-script requests,
+// which carry an Origin header the precache requests did not
+const match = (req) => caches.match(req, { ignoreSearch: req.mode === "navigate", ignoreVary: true });
 
 // After a failed or slow request, serve saved copies at once for a while instead of making every file wait out
 // NET_TIMEOUT in turn (a page loads several data files one after another).
