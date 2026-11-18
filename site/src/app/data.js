@@ -1,5 +1,5 @@
 // Data for the web app: JSON from scripts/build_web.py in docs/web/data/, fetched lazily and cached in memory.
-import { defaultOrigin, latestForecast, replayForecast, replayOrigins, rowsOf } from "./logic.js";
+import { defaultOrigin, latestForecast, replayForecast, replayOrigins, rowsOf, trackRecord, yearOf } from "./logic.js";
 
 const BASE = `${import.meta.env.BASE_URL}web/data/`;
 const cache = new Map();
@@ -44,4 +44,21 @@ export async function forecastFor({ panel, mode, origin }) {
     })());
   }
   return forecasts.get(key);
+}
+
+/** The horizon of the backtest that a track record uses: 8 for 6-8 weeks ahead, else 4 (the backtest has only those). */
+export const recordHorizon = (h) => (h >= 6 ? 8 : 4);
+
+/**
+ * Alert track record per area for the current state (Map unit_id -> record). A replay counts only the test years
+ * before the replayed one, so it never uses what came after.
+ */
+const records = new Map();
+export function trackRecordFor({ panel, mode, origin, horizon }) {
+  const h = recordHorizon(horizon), before = mode === "replay" ? yearOf(origin) : null;
+  const key = `${panel}|${h}|${before}`;
+  if (!records.has(key)) {
+    records.set(key, Promise.all([table(panel, "history"), table(panel, "backtest")]).then(([hist, bt]) => trackRecord(hist, bt, h, before)));
+  }
+  return records.get(key);
 }

@@ -6,6 +6,8 @@ same JSON the app loads:
   - alert levels for every forecast row (app/streamlit_app.py alert_level, read from the app source)
   - thresholds (src/thresholds.py), replay forecasts and the "30 of 32" claim (replay_forecast in the app)
   - the budget plan (src/allocate.py) across budgets of PHP 0.5M-20M
+  - the alert track record per area (src/reliability.py), latest and as a replay sees it
+  - the one-SMS resident message: every level, language and area fits in 160 GSM-7 characters
 Skipped when Playwright or the built app is missing.
 """
 import ast
@@ -25,6 +27,7 @@ DATA = DOCS / "web" / "data"
 sys.path.insert(0, str(ROOT / "src"))
 from allocate import Action, allocate  # noqa: E402
 from thresholds import thresholds  # noqa: E402
+from reliability import track_record  # noqa: E402
 
 playwright = pytest.importorskip("playwright.sync_api")
 pytestmark = pytest.mark.skipif(not (DOCS / "web" / "index.html").exists() or not (DATA / "meta.json").exists(),
@@ -202,3 +205,65 @@ def test_allocate_custom_actions(page):
                              effect_central=a.effect_central, effect_high=a.effect_high, max_coverage=a.max_coverage)
                         for a in actions])
     assert [r["averted_mid"] for r in js] == pytest.approx(py.averted_mid.tolist(), rel=1e-9)
+
+
+@pytest.mark.parametrize("panel,h,before", [("region_qc", 4, None), ("region_qc", 8, None), ("province", 4, None),
+                                            ("province", 8, None), ("region_qc", 4, 2024), ("province", 4, 2020)])
+def test_track_record_matches(page, panel, h, before):
+    py = track_record(_frame(panel, "history"), _frame(panel, "backtest"), h, before).set_index("unit_id")
+    js = page.evaluate("""async ([panel, h, before]) => {
+        const d = window.epilag.data, [hist, bt] = await Promise.all([d.table(panel, "history"), d.table(panel, "backtest")]);
+        return [...window.epilag.logic.trackRecord(hist, bt, h, before)].map(([u, r]) => ({ unit_id: u, ...r, years: r.years.join(",") })); }""",
+                       [panel, h, before])
+    assert len(js) == len(py) > 0
+    for r in js:
+        p = py.loc[r["unit_id"]]
+        for k in ("alert_weeks", "alert_weeks_right", "onsets", "onsets_caught"):
+            assert r[k] == p[k], (r["unit_id"], k)
+        assert r["grade"] == p.grade and r["years"] == p.years
+        assert (r["reliability"] is None) == pd.isna(p.reliability)
+
+
+def test_track_record_replay_uses_only_earlier_years(page):
+    """A 2019 replay has no earlier test year, so no track record; a 2020 replay uses 2019 only."""
+    out = page.evaluate("""async () => {
+        const d = window.epilag.data;
+        const r19 = await d.trackRecordFor({ panel: "province", mode: "replay", origin: 18049, horizon: 4 });
+        const r20 = await d.trackRecordFor({ panel: "province", mode: "replay", origin: 18294, horizon: 4 });
+        return [r19.size, [...new Set([...r20.values()].flatMap((r) => r.years))]]; }""")
+    assert out == [0, [2019]]
+
+
+def test_report_card_ranges(page):
+    """Report card cells say where the reported cases fell against the 10-90% range of the forecast."""
+    rc = page.evaluate("""async () => {
+        const d = window.epilag.data, [hist, bt] = await Promise.all([d.table("region_qc", "history"), d.table("region_qc", "backtest")]);
+        return window.epilag.logic.reportCard(bt, hist, 4, 8); }""")
+    assert len(rc["weeks"]) == 8 and len(rc["rows"]) == 18
+    for row in rc["rows"]:
+        for c in row["cells"]:
+            want = 1 if c["actual"] > c["q90"] else -1 if c["actual"] < c["q10"] else 0
+            assert c["hit"] == want
+        assert row["inside"] == sum(c["hit"] == 0 for c in row["cells"])
+
+
+GSM7 = set("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà")
+
+
+def test_sms_fits_one_message(page):
+    names = sorted({n for p in ("region_qc", "province") for n in _meta(p)["names"].values()}, key=len)
+    msgs = page.evaluate("""async (names) => {
+        const res = [];
+        for (const lang of ["en", "fil"]) {
+          for (const lv of ["outbreak warning", "watch", "above usual", "normal"]) {
+            const tpl = window.epilag.labels[lang].sms[lv];
+            for (const n of names) for (const h of [2, 4, 6, 8]) res.push(window.epilag.logic.smsText(tpl, n, h));
+          }
+        }
+        return res; }""", names)
+    assert len(msgs) == 2 * 4 * len(names) * 4
+    for m in msgs:
+        assert len(m) <= 160, m
+        assert set(m) <= GSM7, set(m) - GSM7
+    # the longest real name fits without being shortened
+    assert any(names[-1] in m for m in msgs)

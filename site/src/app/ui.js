@@ -56,3 +56,25 @@ export const tableHtml = (rows, columns) =>
 /** Area picker (<select>) sorted as given; returns HTML. */
 export const areaSelect = (id, label, rows, current) =>
   `<label class="field"><span class="field__label">${esc(label)}</span><select id="${id}">${rows.map((r) => `<option value="${esc(r.unit_id)}"${r.unit_id === current ? " selected" : ""}>${esc(r.unit_name)}</option>`).join("")}</select></label>`;
+
+/** Alert track record of one area (logic.trackRecord row, or undefined when there are no earlier test years). */
+export function trackRecordHtml(rec, labels, h) {
+  if (!rec) return `<p class="track__none">${esc(labels.track_none)}</p>`;
+  const share = rec.reliability == null ? "–" : `${Math.round(rec.reliability * 100)}%`;
+  return `<div class="track" data-grade="${esc(rec.grade.replace(" ", "-"))}">
+    <div class="track__lead"><span class="track__grade">${esc(labels.track_grade[rec.grade])}</span><b class="track__big nums">${share}</b>
+      <span class="track__of">${esc(labels.track_right.replace("{right}", rec.alert_weeks_right).replace("{n}", rec.alert_weeks))}</span></div>
+    <ul class="track__facts">
+      <li>${rec.onsets ? esc(labels.track_caught.replace("{c}", rec.onsets_caught).replace("{o}", rec.onsets)) : esc(labels.track_no_onsets)}</li>
+      <li>${esc(labels.track_years)}: ${esc(rec.years.join(", "))} · ${esc(labels.weeks_short)}: ${h}</li>
+    </ul></div>`;
+}
+
+/** One row of report-card squares (logic.reportCard cells). */
+export function reportSquares(cells, labels, fmtDay, fmt) {
+  const key = (c) => (c.hit === 0 ? "in" : c.hit > 0 ? "above" : "below");
+  return `<ol class="rc-row">${cells.map((c) => `<li class="rc" data-hit="${key(c)}" title="${esc(`${fmtDay(c.target_week)}: ${fmt(c.actual)} · ${fmt(c.q10)}–${fmt(c.q90)}`)}"><span class="sr-only">${esc(`${fmtDay(c.target_week)}: ${labels[`card_${key(c)}`]}`)}</span></li>`).join("")}</ol>`;
+}
+
+export const reportLegend = (labels) =>
+  `<ul class="rc-legend">${["in", "above", "below"].map((k) => `<li><span class="rc" data-hit="${k}"></span>${esc(labels[`card_${k}`])}</li>`).join("")}</ul>`;
