@@ -3,7 +3,7 @@
 import { recordHorizon, table, trackRecordFor } from "../data.js";
 import { briefMarkdown, briefTable, fmt, fmtDay, reportCard, thresholds, woy, yearOf } from "../logic.js";
 import { barChart, timeChart } from "../chart.js";
-import { LV, areaSelect, cardTitle, download, esc, infoDisclosure, reportLegend, reportSquares, trackRecordHtml } from "../ui.js";
+import { LV, areaSelect, cardTitle, download, esc, infoDisclosure, reportSummary, reportVerdict, reportWeeks, trackRecordHtml } from "../ui.js";
 
 const INK = "#071711", FOREST = "#08754F", BAND = "#08754F", RED = "#F04B2A";
 
@@ -36,7 +36,7 @@ export async function render(el, ctx) {
     </section>
     <div class="grid grid--2 track-grid">
       <section class="card" id="track">${cardTitle("didItWork", labels.track_head, labels.track_sub.replace("{h}", rh))}<div id="track-body" class="track-body"></div>${infoDisclosure(labels.about_this, `<p>${esc(labels.track_note)}</p>`)}</section>
-      <section class="card" id="card">${cardTitle("check", labels.card_head, labels.card_sub.replace("{n}", 8).replace("{h}", rh))}<div id="card-body"></div>${infoDisclosure(labels.about_this, `<p>${esc(labels.card_note.replace("{h}", rh))}</p>`)}</section>
+      <section class="card" id="card">${cardTitle("check", labels.card_head, labels.card_sub.replace("{n}", 8).replace("{h}", rh))}<div id="card-body"></div>${infoDisclosure(labels.about_this, `<p>${esc(labels.card_note_more.replace("{h}", rh))}</p>`)}</section>
     </div>
     <section class="card history-card">${cardTitle("areaDetail", t.history)}<div id="hist" class="chart-box"></div></section>
     ${mode === "replay" ? "" : `<section class="card why-card" id="why">${cardTitle("info", t.why)}${infoDisclosure(labels.about_this, `<p>${esc(t.why_note)}</p>`)}<div id="why-chart" class="chart-box"></div></section>`}
@@ -50,10 +50,8 @@ export async function render(el, ctx) {
   el.querySelector("#track-body").innerHTML = trackRecordHtml(records.get(unit), labels, rh);
   const rc = reportCard(backtest.filter((r) => r.unit_id === unit && (mode !== "replay" || r.target_week <= origin)), history, rh, 8);
   const cells = rc.rows[0]?.cells || [];
-  const inside = cells.filter((c) => c.hit === 0).length;
-  el.querySelector("#card-body").innerHTML = cells.length ? `<div class="rc-one"><div class="track__lead"><b class="track__big nums">${inside}<span class="track__of"> / ${cells.length}</span></b>
-    <span class="track__of">${esc(labels.card_inside.replace("{k}", inside).replace("{n}", cells.length))}</span></div>
-    ${reportSquares(cells, labels, fmtDay, fmt)}<div class="rc-dates small muted"><span>${fmtDay(cells[0].target_week)}</span><span>${fmtDay(cells[cells.length - 1].target_week)}</span></div>${reportLegend(labels)}</div>`
+  el.querySelector("#card-body").innerHTML = cells.length ? `<div class="rc-one">${reportVerdict(reportSummary(cells), labels)}
+    ${reportWeeks(cells, labels, fmtDay, fmt)}<p class="rc-note">${esc(labels.card_note)}</p></div>`
     : `<p class="track__none">${esc(labels.track_none)}</p>`;
   let hist = history.filter((r) => r.unit_id === unit).sort((a, c) => a.week - c.week);
   if (mode === "replay") hist = hist.filter((r) => r.week >= origin - 104 * 7 && r.week <= origin + 26 * 7);

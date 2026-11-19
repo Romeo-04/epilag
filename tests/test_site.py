@@ -11,6 +11,7 @@ methodology, research and open-data pages:
   - the onboarding guide opens once per device, steps through the Overview on desktop and phone, and can be replayed
   - the offline app: after one visit, the dashboard pages open with no network, from saved data, and say so
   - the Area page prints as one A4 page
+  - the report card says in words whether each week's forecast was right, too high or too low
   - phones: the app's settings fold into one line; in the game the board fills the screen and a picked area is a
     sheet over it whose Send team button can be pressed
 Build first: `cd site && npm run build`. Skipped when Playwright or the build is missing.
@@ -323,6 +324,29 @@ def test_area_report_prints_on_one_page(base, browser):
         pdf = pg.pdf(format="A4", print_background=True, prefer_css_page_size=True)
         assert max(int(n) for n in re.findall(rb"/Count (\d+)", pdf)) == 1, url
         c.close()
+
+
+def test_report_card_in_words(base, browser):
+    import re
+    c, pg, errors = open_page(browser, base + "web/?page=unit&region=R_NCR&area=QC")
+    pg.wait_for_selector("#card .rc-verdict")
+    k, n = map(int, re.match(r"(\d+) of (\d+)", pg.locator("#card .rc-verdict__big").inner_text()).groups())
+    results = pg.locator("#card .rc-result").all_inner_texts()
+    assert n == len(results) == 8 and sum(r == "✓ Right" for r in results) == k
+    assert set(results) <= {"✓ Right", "Too high", "Too low"}
+    for row in pg.locator("#card .rc-weeks tbody tr").all():  # the result follows from the numbers in the row
+        said, got, res = row.locator("td").nth(1).inner_text(), row.locator("td").nth(2).inner_text(), row.locator("td").nth(3).inner_text()
+        lo, hi = (float(x.replace(",", "")) for x in said.split("–"))
+        v = float(got.replace(",", ""))
+        assert res == ("Too high" if v < lo else "Too low" if v > hi else "✓ Right"), (said, got, res)
+    c.close()
+    c, pg, errors = open_page(browser, base + "web/?page=proof")
+    pg.wait_for_selector("#report-card .rc-table")
+    right = [int(t.split(" of ")[0]) for t in pg.locator(".rc-table tbody td:nth-child(2)").all_inner_texts()]
+    assert len(right) == 18 and right == sorted(right, reverse=True)  # best record first
+    assert "We aim for about 80%" in pg.locator("#report-card .rc-verdict").inner_text()
+    c.close()
+    assert errors == []
 
 
 def test_phone_settings_fold_into_one_line(base, browser):

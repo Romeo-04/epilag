@@ -1,9 +1,9 @@
 // Did it work?: honest backtests, alert hit rates, range coverage, the latest report card, weather contribution,
 // and full results tables.
 import { recordHorizon, reports, table } from "../data.js";
-import { fmt, fmtDay, reportCard } from "../logic.js";
+import { reportCard } from "../logic.js";
 import { barChart } from "../chart.js";
-import { cardTitle, count, details, esc, infoDisclosure, reportLegend, reportSquares, tableHtml } from "../ui.js";
+import { cardTitle, count, details, esc, infoDisclosure, reportMisses, reportSummary, tableHtml } from "../ui.js";
 
 const FOREST = "#08754F", GREY = "#C5CFC9", SAGE = "#8A9891", WATCH = "#F58220";
 const pct = (v) => `${Math.round(v * 100)}%`;
@@ -30,8 +30,10 @@ export async function render(el, ctx) {
   const [hist, back] = await Promise.all([table(panel, "history"), table(panel, "backtest")]);
   const rc = reportCard(back, hist, rh, 8);
   const names = ctx.meta.names;
-  rc.rows.sort((a, b) => String(names[a.unit_id]).localeCompare(String(names[b.unit_id])));
-  const cellsAll = rc.rows.flatMap((r) => r.cells), insideAll = cellsAll.filter((c) => c.hit === 0).length;
+  // best record first, then by name
+  const sums = rc.rows.map((r) => ({ unit_id: r.unit_id, ...reportSummary(r.cells) }))
+    .sort((a, b) => b.inside / b.n - a.inside / a.n || String(names[a.unit_id]).localeCompare(String(names[b.unit_id])));
+  const all = reportSummary(rc.rows.flatMap((r) => r.cells));
 
   el.innerHTML = `
     ${infoDisclosure(labels.about_this, `<p>${esc(t.proof_sub)}</p>`)}
@@ -39,12 +41,13 @@ export async function render(el, ctx) {
       <section class="card kpi"><div class="kpi__lab"><i data-icon="alert" data-size="20"></i>${esc(t.ew_chart.replace("{h}", h))}</div><div class="kpi__val">${alw.length ? range(alw.map((r) => r.share_warned)) : "–"}</div><div class="kpi__desc">${esc(t.caught_share.replace("{h}", h))}</div></section>
       <section class="card kpi"><div class="kpi__lab"><i data-icon="didItWork" data-size="22"></i>${esc(t.range)}</div><div class="kpi__val">${range(bh.map((r) => r.coverage_10_90))}</div><div class="kpi__desc">${esc(t.coverage)}</div></section></div>
     <div class="grid grid--2"><section class="card">${cardTitle("didItWork", t.err_chart.replace("{h}", h))}<div id="err" class="chart-box"></div></section>${alw.length ? `<section class="card">${cardTitle("alert", t.ew_chart.replace("{h}", h))}<div id="ew" class="chart-box"></div></section>` : ""}</div>
-    ${rc.rows.length ? `<section class="card report-card" id="report-card">${cardTitle("check", labels.card_head, labels.card_sub.replace("{n}", rc.weeks.length).replace("{h}", rh))}
-      <div class="track__lead"><b class="track__big nums">${pct(insideAll / cellsAll.length)}</b><span class="track__of">${esc(labels.card_inside.replace("{k}", insideAll).replace("{n}", cellsAll.length))}</span></div>
-      ${reportLegend(labels)}
-      <div class="tbl-wrap rc-table" tabindex="0" role="region" aria-label="${esc(labels.card_head)}"><table class="tbl"><thead><tr><th>${esc(labels.card_area)}</th><th><span class="rc-dates"><span>${fmtDay(rc.weeks[0])}</span><span>${fmtDay(rc.weeks[rc.weeks.length - 1])}</span></span></th><th class="num">${esc(labels.card_in)}</th></tr></thead>
-        <tbody>${rc.rows.map((r) => `<tr><td>${esc(names[r.unit_id])}</td><td>${reportSquares(r.cells, labels, fmtDay, fmt)}</td><td class="num">${r.inside} / ${r.cells.length}</td></tr>`).join("")}</tbody></table></div>
-      ${infoDisclosure(labels.about_this, `<p>${esc(labels.card_note.replace("{h}", rh))}</p>`)}</section>` : ""}
+    ${rc.rows.length ? `<section class="card report-card" id="report-card">${cardTitle("check", labels.card_head_all, labels.card_sub.replace("{n}", rc.weeks.length).replace("{h}", rh))}
+      <div class="rc-verdict rc-verdict--all" data-lean="${all.lean}"><div class="rc-verdict__text"><span class="rc-verdict__head">${esc(labels.card_all_sum.replace("{k}", all.inside).replace("{n}", all.n).replace("{p}", pct(all.inside / all.n)))}</span>
+        ${all.high + all.low ? `<span class="rc-verdict__line">${esc(labels.card_all_lean[all.high >= all.low ? "high" : "low"].replace("{a}", all.high).replace("{b}", all.low))}</span>` : ""}</div></div>
+      <div class="tbl-wrap rc-table" tabindex="0" role="region" aria-label="${esc(labels.card_head_all)}"><table class="tbl"><thead><tr><th>${esc(labels.card_area)}</th><th class="num">${esc(labels.card_weeks_right)}</th><th aria-hidden="true"></th><th>${esc(labels.card_misses)}</th></tr></thead>
+        <tbody>${sums.map((r) => `<tr><td>${esc(names[r.unit_id])}</td><td class="num"><b>${esc(labels.card_of.replace("{k}", r.inside).replace("{n}", r.n))}</b></td>
+          <td aria-hidden="true"><span class="rc-bar" data-lean="${r.lean}"><span style="width:${(r.inside / r.n * 100).toFixed(1)}%"></span></span></td><td class="rc-miss" data-lean="${r.lean}">${esc(reportMisses(r, labels))}</td></tr>`).join("")}</tbody></table></div>
+      <p class="rc-note">${esc(labels.card_note)}</p>${infoDisclosure(labels.about_this, `<p>${esc(labels.card_note_more.replace("{h}", rh))}</p>`)}</section>` : ""}
     ${g.length ? `<section class="card">${cardTitle("info", t.weather_head)}${infoDisclosure(labels.about_this, `<p>${esc(t.weather_note)}</p>`)}<div id="wx" class="chart-box"></div></section>` : ""}
     ${details(t.tables, [tableHtml(bt, [[labels.test_year, (r) => r.test_year], [labels.weeks_short, (r) => r.horizon, "num"], [labels.epilag_error, (r) => Math.round(r.mae_epilag), "num"], [labels.same_last_year, (r) => Math.round(r.mae_seasonal_naive), "num"], [labels.same_this_week, (r) => Math.round(r.mae_persistence), "num"], [labels.range_coverage, (r) => pct(r.coverage_10_90), "num"]]),
       rep.alerts ? tableHtml([...new Set(rep.alerts.filter((r) => r.horizon === h).map((r) => r.test_year))].map((y) => { const of = (rule, k) => rep.alerts.find((r) => r.horizon === h && r.test_year === y && r.rule === rule)?.[k]; return { y, cw: of("warn_upper", "share_warned"), cm: of("warn_median", "share_warned"), fw: of("warn_upper", "false_alarm_share"), fm: of("warn_median", "false_alarm_share") }; }), [[labels.test_year, (r) => r.y], [labels.caught_watch, (r) => pct(r.cw), "num"], [labels.caught_warning, (r) => pct(r.cm), "num"], [labels.false_watch, (r) => pct(r.fw), "num"], [labels.false_warning, (r) => pct(r.fm), "num"]]) : "",
