@@ -339,7 +339,62 @@ S.append(slide(10, "Model", "Validation", "Expanding-window time split: every te
  <div class="vm"><b>4 scores</b><span>error (MAE), range coverage, outbreaks caught, false alarms</span></div></div></div>''',
     "src/backtest.py, src/alerts.py; research/results/METHODS.md. An outbreak start is the first of 2 or more weeks above the epidemic line."))
 
-# ================================================================== 11 Results: QC
+# ================================================================== 11 Model comparison heat grid
+mods = [("lightgbm", "LightGBM"), ("negbin", "Negative binomial"), ("random_forest", "Random forest"), ("sarimax", "SARIMAX"), ("blend_all4", "Average of the four")]
+order = list(relp.index)
+
+
+def heat(v):
+    if v < 1:
+        t = min((1 - v) / 0.4, 1)
+        return f"rgba(18,128,74,{0.15 + 0.85*t:.2f})"
+    t = min((v - 1) / 0.25, 1)
+    return f"rgba(210,59,48,{0.2 + 0.8*t:.2f})"
+
+
+hdr = ""
+prev = None
+for k, (p, ty, hh) in enumerate(order):
+    lab = f'{"Prov" if p == "province" else "Reg"} {ty}'
+    hdr += f'<div class="hg-h">{lab if (p, ty) != prev else ""}</div>'
+    prev = (p, ty)
+rowsg = ""
+for mkey, mlab in mods:
+    rowsg += f'<div class="hg-n{" us" if mkey == "lightgbm" else ""}">{mlab}<small>{(str(wins[mkey]) + " checks with the lowest error") if mkey in four else "not a separate model"}</small></div>'
+    for k, idx in enumerate(order):
+        v = relp.loc[idx, mkey]
+        gap = " gap" if k % 4 == 0 and k else ""
+        rowsg += f'<div class="hg-c{gap}" style="background:{heat(v)}" title="{v:.2f}"></div>'
+hz = "".join(f'<div class="hg-hz">{hh}</div>' for (_, _, hh) in order)
+S.append(slide(11, "Model", "Model Comparison", "Four methods on the same test, plus their average. Each square is one check.", f'''
+<div class="hg"><div></div>{hdr}<div class="hg-n sm">weeks ahead</div>{hz}{rowsg}</div>
+<div class="hgleg"><span>beat “same as this week” by more</span><i style="background:rgba(18,128,74,1)"></i><i style="background:rgba(18,128,74,.5)"></i><i style="background:rgba(18,128,74,.15)"></i><i style="background:rgba(210,59,48,.3)"></i><i style="background:rgba(210,59,48,1)"></i><span>did worse than “same as this week”</span></div>
+<div class="hgfacts"><span><b>{wins['lightgbm']} of 24</b> lowest error: LightGBM</span><span><b>{wins['negbin']}</b> negative binomial</span><span><b>{wins['sarimax']}</b> SARIMAX</span><span><b>{wins['random_forest']}</b> random forest</span></div>''',
+    "Color = error divided by the error of “same as this week” (research/results/model_comparison.csv, rel_mae_vs_persistence). Prov = provinces; Reg = regions and Quezon City."))
+
+# ================================================================== 12 Decisions and trade-offs
+W2, H2, L2, R2, T2, B2 = 760, 420, 80, 240, 24, 56
+X2 = lambda hh: L2 + (hh - 2) / 6 * (W2 - L2 - R2)  # noqa: E731
+Y2 = lambda v: T2 + (1 - (v + 2) / 16) * (H2 - T2 - B2)  # noqa: E731
+g2 = "".join(f'<line x1="{L2}" x2="{W2-R2}" y1="{Y2(v):.1f}" y2="{Y2(v):.1f}" class="grid"/><text x="{L2-12}" y="{Y2(v)+6:.1f}" class="tick" text-anchor="end">{"+" if v>0 else ""}{v}%</text>' for v in (0, 4, 8, 12))
+x2t = "".join(f'<text x="{X2(hh):.1f}" y="{H2-B2+34}" class="tick" text-anchor="middle">{hh} wk</text>' for hh in (2, 4, 6, 8))
+l2 = f'<line x1="{L2}" x2="{W2-R2}" y1="{Y2(0):.1f}" y2="{Y2(0):.1f}" stroke="var(--accent)" stroke-width="4"/><text x="{L2+8}" y="{Y2(0)+32:.1f}" class="mk" style="fill:var(--accent)">LightGBM = 0</text>'
+for col, nm, color, wdt in [("negbin", "Neg. binomial", "var(--ink)", 3), ("random_forest", "Random forest", "var(--faint)", 2), ("sarimax", "SARIMAX", "var(--faint)", 2)]:
+    pts = [(X2(hh), Y2(rel.loc[hh, col])) for hh in (2, 4, 6, 8)]
+    l2 += f'<path d="{path(*zip(*pts))}" fill="none" stroke="{color}" stroke-width="{wdt}"/><circle cx="{pts[-1][0]:.1f}" cy="{pts[-1][1]:.1f}" r="5" fill="{color}"/>'
+    l2 += f'<text x="{pts[-1][0]+14:.1f}" y="{pts[-1][1]+6:.1f}" class="{"mk" if wdt==3 else "lbl"}">{nm} {rel.loc[8, col]:+.0f}%</text>'
+lims = [("Record surges", "2019 rose past anything in training. Trees can't extrapolate; a simpler model did better at 2 weeks."),
+        ("Quiet years", "2023 was the flattest year, and its calibration year's model ran low, so the range came out too wide (92%)."),
+        ("False alarms, on purpose", "About half of Watch alerts are false. A Watch costs a clean-up drive; Outbreak warning is stricter."),
+        ("Better inputs, not yet live", "Neighbours' cases, temperature and humidity improved 21 of 24 checks, but were chosen after seeing the test years.")]
+S.append(slide(12, "Model", "Decisions and Trade-offs", "Why we kept LightGBM, and where it still falls short.", f'''
+<div class="d14"><div><div class="kicker">How much less accurate than LightGBM, by weeks ahead</div><svg viewBox="0 0 {W2} {H2}" width="{W2}" height="{H2}">{g2}{x2t}{l2}</svg>
+<div class="why"><span><b>{wins['lightgbm']} of 24</b> most accurate</span><span><b>holds up</b> at 8 weeks</span><span><b>explains</b> each forecast</span></div>
+<div class="cap">The average of the four was slightly more accurate, but caught fewer outbreaks early ({warn['blend_all4']}% vs {warn['lightgbm']}%). For early warning, a missed outbreak costs more.</div></div>
+<div class="limcol"><div class="kicker">Where it falls short</div>{"".join(f'<div class="lim2"><b>{a}</b><p>{b}</p></div>' for a, b in lims)}</div></div>''',
+    "research/results/model_comparison.csv; research/analysis/causes.md; research/results/README.md (final variables)."))
+
+# ================================================================== 13 Results: QC
 W, H, L, R, T, B = 1180, 600, 70, 30, 30, 60
 x0, x1 = qcb.target_week.min(), qcb.target_week.max()
 X = lambda d: L + (pd.Timestamp(d) - x0) / (x1 - x0) * (W - L - R)  # noqa: E731
@@ -368,14 +423,14 @@ svg11 = f'''<svg viewBox="0 0 {W} {H}" width="{W}" height="{H}">{grid}{xt}<path 
 {marker("2025-02-15", "Outbreak declared", "15 Feb", 20, left=True)}
 <text x="{X(pk.target_week)+16:.1f}" y="{Y(pk.actual)+8:.1f}" class="mk">{int(pk.actual)}</text><text x="{X(pk.target_week)+16:.1f}" y="{Y(pk.actual)+34:.1f}" class="mks">peak week</text>
 <text x="{W-R}" y="{Y(qcb.epidemic.iloc[-1])+34:.1f}" class="lbl" text-anchor="end">epidemic line</text></svg>'''
-S.append(slide(11, "Results", "Results", "It saw Quezon City's outbreak coming five weeks early.", f'''
+S.append(slide(13, "Results", "Results", "It saw Quezon City's outbreak coming five weeks early.", f'''
 <div class="row"><div><div class="legend"><span><i style="background:var(--accent);opacity:.35"></i>likely range, forecast 4 weeks ahead</span><span><i style="background:var(--ink)"></i>reported cases</span><span><i style="background:var(--red);width:14px;height:14px;border-radius:50%"></i>week above the epidemic line</span></div>{svg11}
 </div>
 <div class="stack"><div class="card"><div class="big green">5 weeks</div><div class="cap">of warning before Quezon City crossed its epidemic line in 2024</div></div>
 <div class="card"><div class="big">{int(pk.q50)}</div><div class="cap">forecast for the peak week, against {int(pk.actual)} reported. The alert was right; the size was not.</div></div></div></div>''',
     "Quezon City, weekly reported cases, Sep 2024 to Mar 2025. Forecasts use only data available at the time. Sources: Pelitro (2026); EpiLag-PH backtests."))
 
-# ================================================================== 12 Results: nationwide
+# ================================================================== 14 Results: nationwide
 COL = {"hit": "#D23B30", "miss": "#14211B", "no": "#D8E0DA"}
 
 
@@ -402,68 +457,13 @@ for i, (lab, s1, s2) in enumerate(sk):
     bars12 += f'<rect x="250" y="{y+8}" width="{max(s1,0)/100*bw12:.0f}" height="24" rx="5" fill="var(--accent)"/><text x="{250+max(s1,0)/100*bw12+10:.0f}" y="{y+28}" class="mks">{s1:.0f}%</text>'
     w2 = abs(s2) / 100 * bw12
     bars12 += f'<rect x="250" y="{y+38}" width="{max(w2,3):.0f}" height="20" rx="5" fill="{"var(--ink)" if s2 >= 0 else "var(--red)"}"/><text x="{250+max(w2,3)+10:.0f}" y="{y+55}" class="mks">{"" if s2 >= 0 else "+"}{abs(s2):.0f}% {"less" if s2 >= 0 else "more"}</text>'
-S.append(slide(12, "Results", "Results", f"Nationwide, the 2019 replay flagged {claim['flagged']} of {claim['crossed']} provinces before they crossed the line.", f'''
+S.append(slide(14, "Results", "Results", f"Nationwide, the 2019 replay flagged {claim['flagged']} of {claim['crossed']} provinces before they crossed the line.", f'''
 <div class="r12"><div class="mapwrap">{map12}
 <div class="mlegend"><span><i style="background:{COL['hit']}"></i>crossed the line, flagged 4 weeks ahead <b>{claim['flagged']}</b></span><span><i style="background:{COL['miss']}"></i>crossed, missed <b>{claim['crossed']-claim['flagged']}</b></span><span><i style="background:{COL['no']}"></i>did not cross</span></div></div>
 <div><div class="kicker">Error cut, 4 weeks ahead</div><div class="lg12"><span><i style="background:var(--accent)"></i>vs “same week last year”</span><span><i style="background:var(--ink)"></i>vs “same as this week”</span></div>
 <svg viewBox="0 0 900 450" width="900" height="450">{bars12}</svg>
 <div class="cap">Ranges held 70 to 92% of real weeks across test years (target 80%).</div></div></div>''',
     "Forecasts made 2 Jun 2019 for 30 Jun 2019 (docs/data/replay_2019-06-02.json). Error: reports/backtest_province.csv, reports/backtest_region_qc.csv (mean absolute error)."))
-
-# ================================================================== 13 Model comparison heat grid
-mods = [("lightgbm", "LightGBM"), ("negbin", "Negative binomial"), ("random_forest", "Random forest"), ("sarimax", "SARIMAX"), ("blend_all4", "Average of the four")]
-order = list(relp.index)
-
-
-def heat(v):
-    if v < 1:
-        t = min((1 - v) / 0.4, 1)
-        return f"rgba(18,128,74,{0.15 + 0.85*t:.2f})"
-    t = min((v - 1) / 0.25, 1)
-    return f"rgba(210,59,48,{0.2 + 0.8*t:.2f})"
-
-
-hdr = ""
-prev = None
-for k, (p, ty, hh) in enumerate(order):
-    lab = f'{"Prov" if p == "province" else "Reg"} {ty}'
-    hdr += f'<div class="hg-h">{lab if (p, ty) != prev else ""}</div>'
-    prev = (p, ty)
-rowsg = ""
-for mkey, mlab in mods:
-    rowsg += f'<div class="hg-n{" us" if mkey == "lightgbm" else ""}">{mlab}<small>{(str(wins[mkey]) + " checks with the lowest error") if mkey in four else "not a separate model"}</small></div>'
-    for k, idx in enumerate(order):
-        v = relp.loc[idx, mkey]
-        gap = " gap" if k % 4 == 0 and k else ""
-        rowsg += f'<div class="hg-c{gap}" style="background:{heat(v)}" title="{v:.2f}"></div>'
-hz = "".join(f'<div class="hg-hz">{hh}</div>' for (_, _, hh) in order)
-S.append(slide(13, "Model", "Model Comparison", "Four methods on the same test, plus their average. Each square is one check.", f'''
-<div class="hg"><div></div>{hdr}<div class="hg-n sm">weeks ahead</div>{hz}{rowsg}</div>
-<div class="hgleg"><span>beat “same as this week” by more</span><i style="background:rgba(18,128,74,1)"></i><i style="background:rgba(18,128,74,.5)"></i><i style="background:rgba(18,128,74,.15)"></i><i style="background:rgba(210,59,48,.3)"></i><i style="background:rgba(210,59,48,1)"></i><span>did worse than “same as this week”</span></div>
-<div class="hgfacts"><span><b>{wins['lightgbm']} of 24</b> lowest error: LightGBM</span><span><b>{wins['negbin']}</b> negative binomial</span><span><b>{wins['sarimax']}</b> SARIMAX</span><span><b>{wins['random_forest']}</b> random forest</span></div>''',
-    "Color = error divided by the error of “same as this week” (research/results/model_comparison.csv, rel_mae_vs_persistence). Prov = provinces; Reg = regions and Quezon City."))
-
-# ================================================================== 14 Decisions and trade-offs
-W2, H2, L2, R2, T2, B2 = 760, 420, 80, 240, 24, 56
-X2 = lambda hh: L2 + (hh - 2) / 6 * (W2 - L2 - R2)  # noqa: E731
-Y2 = lambda v: T2 + (1 - (v + 2) / 16) * (H2 - T2 - B2)  # noqa: E731
-g2 = "".join(f'<line x1="{L2}" x2="{W2-R2}" y1="{Y2(v):.1f}" y2="{Y2(v):.1f}" class="grid"/><text x="{L2-12}" y="{Y2(v)+6:.1f}" class="tick" text-anchor="end">{"+" if v>0 else ""}{v}%</text>' for v in (0, 4, 8, 12))
-x2t = "".join(f'<text x="{X2(hh):.1f}" y="{H2-B2+34}" class="tick" text-anchor="middle">{hh} wk</text>' for hh in (2, 4, 6, 8))
-l2 = f'<line x1="{L2}" x2="{W2-R2}" y1="{Y2(0):.1f}" y2="{Y2(0):.1f}" stroke="var(--accent)" stroke-width="4"/><text x="{L2+8}" y="{Y2(0)+32:.1f}" class="mk" style="fill:var(--accent)">LightGBM = 0</text>'
-for col, nm, color, wdt in [("negbin", "Neg. binomial", "var(--ink)", 3), ("random_forest", "Random forest", "var(--faint)", 2), ("sarimax", "SARIMAX", "var(--faint)", 2)]:
-    pts = [(X2(hh), Y2(rel.loc[hh, col])) for hh in (2, 4, 6, 8)]
-    l2 += f'<path d="{path(*zip(*pts))}" fill="none" stroke="{color}" stroke-width="{wdt}"/><circle cx="{pts[-1][0]:.1f}" cy="{pts[-1][1]:.1f}" r="5" fill="{color}"/>'
-    l2 += f'<text x="{pts[-1][0]+14:.1f}" y="{pts[-1][1]+6:.1f}" class="{"mk" if wdt==3 else "lbl"}">{nm} {rel.loc[8, col]:+.0f}%</text>'
-lims = [("Record surges", "2019 rose past anything in training. Trees can't extrapolate; a simpler model did better at 2 weeks."),
-        ("Quiet years", "2023 was the flattest year, and its calibration year's model ran low, so the range came out too wide (92%)."),
-        ("False alarms, on purpose", "About half of Watch alerts are false. A Watch costs a clean-up drive; Outbreak warning is stricter."),
-        ("Better inputs, not yet live", "Neighbours' cases, temperature and humidity improved 21 of 24 checks, but were chosen after seeing the test years.")]
-S.append(slide(14, "Model", "Decisions and Trade-offs", "Why we kept LightGBM, and where it still falls short.", f'''
-<div class="d14"><div><div class="kicker">How much less accurate than LightGBM, by weeks ahead</div><svg viewBox="0 0 {W2} {H2}" width="{W2}" height="{H2}">{g2}{x2t}{l2}</svg>
-<div class="why"><span><b>{wins['lightgbm']} of 24</b> most accurate</span><span><b>holds up</b> at 8 weeks</span><span><b>explains</b> each forecast</span></div>
-<div class="cap">The average of the four was slightly more accurate, but caught fewer outbreaks early ({warn['blend_all4']}% vs {warn['lightgbm']}%). For early warning, a missed outbreak costs more.</div></div>
-<div class="limcol"><div class="kicker">Where it falls short</div>{"".join(f'<div class="lim2"><b>{a}</b><p>{b}</p></div>' for a, b in lims)}</div></div>''',
-    "research/results/model_comparison.csv; research/analysis/causes.md; research/results/README.md (final variables)."))
 
 # ================================================================== 15 Key drivers: SHAP + factor tests
 # a) SHAP waterfall for QC's latest 4-week forecast
