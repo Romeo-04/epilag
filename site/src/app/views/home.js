@@ -1,10 +1,11 @@
 // Overview: alert counts, trend, fastest risers and this week's actions, then the map and priority list.
 // The action brief is the top-bar download.
-import { table, trackRecordFor } from "../data.js";
+import { forecastFor, meta as loadMeta, table, trackRecordFor } from "../data.js";
 import { LEVELS, briefMarkdown, briefTable, fmt, replayClaim } from "../logic.js";
 import { barChart } from "../chart.js";
-import { loadGrids, createVoxelMap } from "../../lib/voxel.js";
-import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, dot, download, esc, pill, segmented } from "../ui.js";
+import { createDrillMap, loadDrillGeo } from "../../lib/drill-map.js";
+import { drillNames, mapTarget } from "../drill-names.js";
+import { LV, cardTitle, count, dot, download, esc, pill, segmented } from "../ui.js";
 
 const SORT_KEY = "el-priority-sort";
 const readSort = () => { try { return localStorage.getItem(SORT_KEY) === "reliable" ? "reliable" : "cases"; } catch { return "cases"; } };
@@ -67,7 +68,7 @@ export async function render(el, ctx) {
     <div class="overview-grid" aria-label="${esc(t.nav_map)}">
       <section class="card overview-map" data-guide="map">
         ${cardTitle("forecastMap", t.nav_map)}
-        <div class="home-map" id="home-map" role="img" aria-label="${esc(t.nav_map)}"><div class="home-map__tip" id="home-map-tip" hidden></div></div>
+        <div class="home-map" id="home-map" role="img" aria-label="${esc(t.nav_map)}"></div>
         <div class="map-footer"><ul class="home-legend">${LEVELS.map((lv) => `<li data-lv="${LV[lv]}"><span class="sq sq--round"></span>${esc(ctx.levelName(lv))}</li>`).join("")}</ul>
           <a class="inline-link" href="?page=map" data-go="map">${esc(t.open_map)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </section>
@@ -98,33 +99,36 @@ export async function render(el, ctx) {
     categories: [labels.now, ...hs.map((h) => labels.wk_ahead.replace("{h}", h))],
     groups: [{ values: [nowTotal, ...hs.map(total)], colors: ["#8A9891", ...hs.map((h) => (h === horizon ? "#08754F" : "#9FCBA6"))] }] });
 
-  const box = el.querySelector("#home-map"), tip = el.querySelector("#home-map-tip");
-  const grids = panel === "province" && regionMeta ? await loadGrids("voxel_regions") : await loadGrids("voxel_ph");
-  const grid = panel === "province" && regionMeta ? grids[regionMeta.psgc] : panel === "province" ? grids.province : grids.region;
+  // the same 3D map as the forecast map page, compact: hover for the forecast, a tap opens the forecast map there
+  const box = el.querySelector("#home-map");
   const byId = new Map(fcH.map((r) => [r.unit_id, r]));
-  const map = await createVoxelMap(box, { grid, pixel: matchMedia("(max-width: 680px)").matches ? 2 : 3, markers: panel !== "province", framing: "land",
-    onHover(u, e) {
-      const r = u && byId.get(u);
-      map.highlight(u);
-      if (!r) { tip.hidden = true; return; }
-      const b = box.getBoundingClientRect();
-      tip.innerHTML = `<b>${esc(r.unit_name)}</b>${pill(ctx, r.level)}<span>${fmt(r.q50)} (${fmt(r.q10)}–${fmt(r.q90)})</span>`;
-      tip.hidden = false;
-      tip.style.left = `${Math.max(8, Math.min(e.clientX - b.left + 14, b.width - 190))}px`;
-      tip.style.top = `${Math.max(8, Math.min(e.clientY - b.top + 14, b.height - 88))}px`;
+  // on the Provinces data the regions still show their level, from the latest Regions run
+  const [geo, mAll, regionRows] = await Promise.all([loadDrillGeo(), loadMeta(), panel === "province" ? forecastFor({ panel: "region_qc", mode: "latest", origin: null }) : null]);
+  if (!el.isConnected) return disposeTrend;
+  if (regionRows) {
+    const hNear = [...new Set(regionRows.map((r) => r.horizon))].sort((a, b) => Math.abs(a - horizon) - Math.abs(b - horizon))[0];
+    for (const r of regionRows) if (r.horizon === hNear && !byId.has(r.unit_id)) byId.set(r.unit_id, r);
+  }
+  const L = labels.dmap, rowOf = (node) => (node && node.kind !== "barangay" ? byId.get(node.id) : null) || null;
+  const map = await createDrillMap(box, {
+    geo, names: drillNames(mAll, L.special), text: L, compact: true, pixel: 2,
+    initial: panel === "province" && regionMeta ? regionMeta.id : null,
+    level: (node) => { const r = rowOf(node); return r ? LV[r.level] : "none"; },
+    expected: () => 0, maxExpected: 1, legend: () => "",
+    tip(node) {
+      const r = rowOf(node);
+      return `<b>${esc(r?.unit_name || node.name)}</b>${r ? `${pill(ctx, r.level)}<span>${fmt(r.q50)} (${fmt(r.q10)}–${fmt(r.q90)})</span>` : `<span>${esc(L.no_forecast)}</span>`}`;
     },
-    onPick(u) { if (u && byId.has(u)) ctx.go("unit", { area: u }); },
+    onPick(node) { ctx.go("map", mapTarget(node, panel)); },
   });
-  map.setValues(Object.fromEntries(map.units.map((u) => {
-    const r = byId.get(u);
-    return [u, r ? { color: LV_COLOR[r.level], height: LV_HEIGHT[r.level] } : { color: NODATA, height: 1 }];
-  })), { duration: 520 });
-  map.highlight(area);
-  const onLeave = () => { tip.hidden = true; map.highlight(area); };
+  if (!el.isConnected) { map.dispose(); return disposeTrend; }
+  const rest = () => map.hover(area && map.get(area) ? area : null);
+  rest();
+  const onLeave = () => rest();
   box.addEventListener("pointerleave", onLeave);
   const priorityList = el.querySelector("#home-priority");
-  const onPriorityOver = (e) => map.highlight(e.target.closest("[data-u]")?.dataset.u ?? null);
-  const onPriorityLeave = () => map.highlight(area);
+  const onPriorityOver = (e) => { const u = e.target.closest("[data-u]")?.dataset.u; map.hover(u && map.get(u) ? u : null); };
+  const onPriorityLeave = () => rest();
   priorityList?.addEventListener("pointerover", onPriorityOver);
   priorityList?.addEventListener("pointerleave", onPriorityLeave);
   priorityList?.addEventListener("focusin", onPriorityOver);

@@ -7,8 +7,10 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; OUT="${1:-/tmp/ph-geo}"; MS="npx -y mapshaper@0.6.102"
 mkdir -p "$OUT" && cd "$OUT"
 [ -d topojson ] || { curl -sL -o topo.zip https://github.com/faeldon/philippines-json-maps/releases/download/v1.1.1/topojson-hires.zip && unzip -q topo.zip; }
-# provinces from municipalities, uniform 250 m simplification
+# provinces from municipalities, uniform 250 m simplification; Quezon City stays its own shape (it is a forecast
+# unit with barangays), cut out of the Second District so the two never overlap and share one border
 $MS -i topojson/provdists/hires/*.json combine-files snap snap-interval=0.00005 -merge-layers force \
+    -each 'if (adm3_psgc == 1381300000) adm2_psgc = 1381300000' \
     -dissolve adm2_psgc copy-fields=adm1_psgc -filter-islands min-area=3km2 remove-empty \
     -simplify interval=250 keep-shapes -o prov_250.json format=geojson precision=0.00001
 # tag each province with the forecast unit and the region it belongs to in the data (pre-2024 regions)

@@ -7,22 +7,9 @@ import { barangays, forecastFor, meta as loadMeta, table } from "../data.js";
 import { createDrillMap, loadDrillGeo } from "../../lib/drill-map.js";
 import { LV, count, details, download, esc, infoDisclosure, pill, tableHtml } from "../ui.js";
 import { icon } from "../../lib/icons.js";
+import { drillNames } from "../drill-names.js";
 
 const fill = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k] ?? "");
-const shortName = (s) => s.replace("Metropolitan Manila ", "Metro Manila ").replace(" District", "").replace(" (pre-2022)", "");
-const CODES = { R_NCR: "NCR", R_CAR: "CAR", R_BARMM: "BARMM", R_MIMAROPA: "MIMAROPA" };
-
-/** Region names for the map: full name, short name ("Cagayan Valley") and map tag ("II", "NCR"). */
-function regionNames(regions) {
-  const out = {};
-  for (const r of regions) {
-    const m = /\(([^)]+)\)/.exec(r.name), inner = m ? m[1] : r.name;
-    const code = CODES[r.id] || r.name.split(" (")[0];
-    out[r.id] = { name: r.name, short: CODES[r.id] === "NCR" ? "NCR" : inner.replace(/ Region$/, ""), tag: CODES[r.id] || code.replace(/^Region /, ""), code };
-  }
-  return out;
-}
-
 /** Rows of one horizon, falling back to the nearest one the rows have (replays have only 4 and 8). */
 function atHorizon(rows, h) {
   const hs = [...new Set(rows.map((r) => r.horizon))];
@@ -88,11 +75,7 @@ export async function render(el, ctx) {
   const maxExp = ranked[0]?.exp || 1, medianExp = ranked[Math.floor(ranked.length / 2)]?.exp || 0;
   const histOf = (rows) => { const m = new Map(); for (const r of rows) { if (!m.has(r.unit_id)) m.set(r.unit_id, []); m.get(r.unit_id).push(r); } for (const v of m.values()) v.sort((a, b) => a.week - b.week); return m; };
   const rHist = histOf(regionHist), pHist = histOf(provHist);
-  const names = {
-    region: regionNames(mAll.regions || []),
-    province: Object.fromEntries(Object.entries(mAll.panels.province.names).map(([k, v]) => [k, shortName(v)])),
-    city: mAll.panels.region_qc.names.QC || "Quezon City", special: L.special,
-  };
+  const names = drillNames(mAll, L.special);
 
   const fcOf = (node) => (!node ? null : node.kind === "province" ? pFc.get(node.id) : node.kind === "barangay" ? null : rFc.get(node.id)) || null;
   const lvOf = (node) => { const f = fcOf(node); return f ? LV[f.level] : "none"; };
