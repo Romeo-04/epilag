@@ -567,7 +567,7 @@ F = [0.65 * 0.30 * e for e in (0.10, 0.30, 0.50)]
 av = lambda cases: [round(cases * f) for f in F]  # noqa: E731
 avB, avB25, avD2, avQC = av(typ_b), av(first.DC_2025), av(typ_d2), av(typ_qc)
 avDec = [round(v * 0.65) for v in avB]  # Jul-Dec holds ~65% of a QC season
-POP_B, POP_QC, PESO = 166_572, 2_960_048, 15  # PSA 2020; app's example cost per resident covered
+POP_B, POP_QC, PESO = 168_770, 3_084_270, 15  # PSA 2024 census (POPCEN); app's example cost per resident covered
 round_b, round_qc = POP_B * 0.30 * PESO / 1e6, POP_QC * 0.30 * PESO / 1e6
 print("slide 18:", first.Barangay, round(first.avg), "typical", typ_b, avB, avB25, avDec, "D2", round(typ_d2), avD2, round(d2_share, 3), "QC", round(typ_qc), avQC, round(round_b, 2), round(round_qc, 1))
 
@@ -581,7 +581,7 @@ res = [("Jun 2027", "Forecasts scored live", "first clean-up round before the ra
 resh = "".join(f'<div class="res"><em>{d}</em><b>{t}</b><small>{s}</small></div>' for d, t, s in res)
 steps = [("2", "District 2", "Jul 2028", f"+ Payatas, Commonwealth, Holy Spirit, Bagong Silangan: {d2_share*100:.0f}% of the city's cases",
           avD2, "₱0.45M a round per 100,000 residents"),
-         ("3", "All of Quezon City", "Jul 2029", "142 barangays, 2.96 million people; money goes first where it averts the most cases per peso",
+         ("3", "All of Quezon City", "Jul 2029", "142 barangays, " + f"{POP_QC/1e6:.2f}" + " million people; money goes first where it averts the most cases per peso",
           avQC, f"₱{round_qc:.0f}M per citywide round"),
          ("4", "NCR, then national", "from 2030", "regional epidemiology units, then the DOH Epidemiology Bureau; province forecasts already run weekly",
           None, "one scheduled job, open data")]
@@ -589,15 +589,15 @@ sth = "".join(f'<div class="sstep"><div class="shead"><span>{n}</span><div class
               + (f'<div class="sv"><b>{v[1]}</b><small>fewer cases a season<br>range {v[0]} to {v[2]}</small></div>' if v else "")
               + f'</div><p>{d}</p><p class="c">{c}</p></div>' for n, t, w, d, v, c in steps)
 body18 = f"""
-<div class="s18"><div class="pilot"><div class="ptag"><span>1</span><div><b>Batasan Hills, Quezon City</b><small>the most dengue of the city's 142 barangays: {first.avg:.0f} cases a year since 2010, {int(first.DC_2025)} in 2025; about 167,000 people</small></div></div>
+<div class="s18"><div class="pilot"><div class="ptag"><span>1</span><div><b>Batasan Hills, Quezon City</b><small>the most dengue cases of the city's 142 barangays: {first.avg:.0f} a year since 2010, {int(first.DC_2025)} in 2025; about {POP_B/1000:.0f},000 people</small></div></div>
 <div class="mbar">{seg}</div><div class="mticks">{ticks}</div>
 <div class="kicker">Expected results (estimates), compared with Payatas, Commonwealth and Holy Spirit</div>
 <div class="results">{resh}</div>
 <p class="pass"><b>Pass mark:</b> a Watch 4+ weeks before cases cross the epidemic line, clean-up within a week, few false alarms.</p>
 <div class="bcost"><div><b>₱0</b><small>to run EpiLag-PH; about 4 staff hours a week</small></div><div><b>₱{round_b:.2f}M</b><small>per clean-up round; 3 rounds: ₱{3*round_b:.1f}M a season, less if it shifts clean-ups already planned</small></div></div></div>
 <div class="scale"><div class="kicker">Then grow, one step at a time</div>{sth}</div></div>"""
-S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's hardest-hit barangay. Prove it. Then grow.", body18,
-    "Estimates. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents reached × effect 10/30/50% (Bowman 2016). Clean-up round: 50,000 residents at the app's example cost of ₱15 each. No partnership is claimed."))
+S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's barangay with the most dengue cases. Prove it. Then grow.", body18,
+    "Estimates. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents reached × effect 10/30/50% (Bowman 2016). Clean-up round: 30% of residents at the app's example cost of ₱15 each. Population: PSA 2024 census. No partnership is claimed."))
 
 # ================================================================== 19 Outro
 S.append(f'''<section class="slide dark outro"><img class="half" src="assets/frog_outro.png" alt="The EpiLag-PH frog catching a mosquito">{top(None)}
