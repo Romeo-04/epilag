@@ -1,0 +1,1086 @@
+<title>Forecast Drill Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: map-first app shell (map stage + side panel), then a short interaction spec underneath.
+   Tokens follow site/src/css/tokens.css (EpiLag): ink text, forest emphasis, sky/blue for data graphics,
+   alert colours always paired with their label. */
+:root {
+  --ink: #071711; --muted: #4A5A51; --soft: #63706A;
+  --paper: #FBFAF4; --surface: #FFFFFF; --surface-2: #F3F2EA;
+  --line: #E4E4D9; --line-strong: #CFD2C4;
+  --forest: #08754F; --forest-soft: #E3F0E7;
+  --sea: #E6F1F2; --sea-grid: #D5E6E8;
+  --land: #EDEDE3; --ghost: #DCDDD2; --land-stroke: #FBFAF4; --focus: #071711;
+  --lv-warning: #F04B2A; --lv-watch: #F58220; --lv-above: #F7C928; --lv-normal: #0C7A55; --lv-nodata: #C9CFC9;
+  --lv-warning-ink: #071711; --lv-watch-ink: #071711; --lv-above-ink: #071711; --lv-normal-ink: #FFFFFF;
+  --ramp-lo: #E3F1F5; --ramp-hi: #0E4C6B;
+  --tip-bg: #071711; --tip-fg: #F3F7F4;
+  --shadow: 0 1px 2px rgba(7,23,17,.06), 0 14px 34px -18px rgba(7,23,17,.32);
+  --font: "Inter Tight", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.22,1,.36,1); --ease-point: cubic-bezier(.34,1.56,.64,1);
+  --r-sm: 10px; --r-md: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ink: #E9F3EC; --muted: #A9C4B6; --soft: #86A595;
+  --paper: #07160F; --surface: #0C2219; --surface-2: #10291F;
+  --line: #1B3B2D; --line-strong: #285040;
+  --forest: #4CC594; --forest-soft: #12342A;
+  --sea: #0A1D16; --sea-grid: #10281F;
+  --land: #173226; --ghost: #1C3A2D; --land-stroke: #07160F; --focus: #F3F7F4;
+  --lv-nodata: #3A4F45; --ramp-lo: #16332F; --ramp-hi: #7FD3F0;
+  --tip-bg: #E9F3EC; --tip-fg: #071711;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --ink: #E9F3EC; --muted: #A9C4B6; --soft: #86A595;
+  --paper: #07160F; --surface: #0C2219; --surface-2: #10291F;
+  --line: #1B3B2D; --line-strong: #285040;
+  --forest: #4CC594; --forest-soft: #12342A;
+  --sea: #0A1D16; --sea-grid: #10281F;
+  --land: #173226; --ghost: #1C3A2D; --land-stroke: #07160F; --focus: #F3F7F4;
+  --lv-nodata: #3A4F45; --ramp-lo: #16332F; --ramp-hi: #7FD3F0;
+  --tip-bg: #E9F3EC; --tip-fg: #071711;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 18px 40px -20px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }
+button, input { font: inherit; color: inherit }
+.nums { font-variant-numeric: tabular-nums }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; gap: 28px }
+
+/* top bar */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; min-width: 0 }
+.brand__mark { width: 34px; height: 34px; border-radius: 9px; background: var(--forest); display: grid; place-items: center; flex: none }
+.brand__mark svg { width: 20px; height: 20px }
+.brand h1 { font-size: 20px; line-height: 1.1; margin: 0; letter-spacing: -.01em; font-weight: 800 }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px }
+.seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; align-items: center }
+.seg__label { font-size: 12px; color: var(--muted); padding: 0 8px 0 10px; letter-spacing: .02em }
+.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted) }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(7,23,17,.14) }
+.seg button:focus-visible, .btn:focus-visible, .row:focus-visible, .crumb:focus-visible, .chipbtn:focus-visible, .ctl:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px }
+.search { position: relative; width: min(320px, 100%) }
+.search input { width: 100%; border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px; padding: 8px 14px 8px 36px; font-size: 14px }
+.search input:focus { outline: 2px solid var(--forest); outline-offset: 1px; border-color: transparent }
+.search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--soft) }
+.results { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; margin: 0; list-style: none; max-height: 340px; overflow: auto }
+.results li { display: flex; align-items: baseline; gap: 10px; padding: 8px 10px; border-radius: 9px; cursor: pointer }
+.results li[aria-selected="true"], .results li:hover { background: var(--forest-soft) }
+.results b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.results small { color: var(--muted); margin-left: auto; white-space: nowrap; font-size: 12px }
+.results .kind { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--soft); width: 54px; flex: none }
+
+/* stage */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; height: clamp(560px, 80vh, 860px) }
+.map { position: relative; border-radius: 22px; overflow: hidden; background: var(--sea); border: 1px solid var(--line); min-width: 0; isolation: isolate; touch-action: none }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; overflow: auto; min-width: 0; box-shadow: var(--shadow); overscroll-behavior: contain }
+@media (max-width: 900px) {
+  .stage { grid-template-columns: minmax(0, 1fr); height: auto }
+  .map { height: 62svh; min-height: 400px }
+  .panel { overflow: visible }
+}
+
+/* 3D canvas + screen-space overlay */
+.map canvas.gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none }
+.map canvas.gl:active { cursor: grabbing }
+.map svg.ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible }
+.hover-line { fill: none; stroke: var(--focus); stroke-width: 2; stroke-linejoin: round; opacity: .85 }
+.focus-line { fill: none; stroke: var(--focus); stroke-width: 2.4; stroke-linejoin: round; opacity: 0 }
+.focus-line.draw { animation: settle .7s var(--ease-out) forwards }
+.focus-halo { fill: none; stroke: var(--surface); stroke-width: 6; stroke-linejoin: round; opacity: 0; transition: opacity .5s }
+.focus-halo.on { opacity: .55 }
+@keyframes settle { from { opacity: 0; stroke-width: 10px } to { opacity: 1; stroke-width: 2.4px } }
+.nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted) }
+.ctl[aria-pressed] span { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .04em }
+#compass svg { transition: transform .1s linear }
+/* labels in screen space */
+.lbl { font-family: var(--font); font-size: 11.5px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3.2px; stroke-linejoin: round; pointer-events: none; transition: opacity .3s ease }
+.lbl.tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; font-weight: 500 }
+.lbl.big { font-size: 13.5px; font-weight: 800 }
+.lbl.sub { font-size: 10.5px; font-weight: 500; fill: var(--muted) }
+.lbl.hide { opacity: 0 }
+.leader { stroke: var(--ink); stroke-width: 1; opacity: .5 }
+.pulse circle { fill: none; stroke: var(--focus); stroke-width: 2 }
+.pulse .r1 { animation: ring 1.8s ease-out infinite }
+.pulse .r2 { animation: ring 1.8s ease-out .9s infinite }
+.pulse .dot { fill: var(--focus); stroke: var(--surface); stroke-width: 2 }
+@keyframes ring { from { r: 6px; opacity: .9 } to { r: 30px; opacity: 0 } }
+
+/* overlays */
+.ov { position: absolute; z-index: 5 }
+.crumbs { top: 14px; left: 14px; right: 70px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; pointer-events: none }
+.crumb { pointer-events: auto; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; animation: pop .35s var(--ease-point) both; max-width: 100% }
+.crumb span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.crumb[aria-current="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); cursor: default }
+.crumb small { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .65; font-weight: 500 }
+.sep { color: var(--soft); font-size: 12px; animation: pop .35s ease both }
+@keyframes pop { from { opacity: 0; transform: translateY(-4px) scale(.96) } }
+.ctls { top: 14px; right: 14px; display: grid; gap: 6px }
+.ctl { width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: grid; place-items: center; cursor: pointer; color: var(--ink) }
+.ctl svg { width: 18px; height: 18px }
+.ctl:disabled { opacity: .35; cursor: default }
+.legend { left: 14px; bottom: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font-size: 12px; max-width: calc(100% - 170px) }
+.legend h4 { margin: 0 0 6px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700 }
+.legend ul { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; margin: 0; padding: 0 }
+.legend li { display: flex; align-items: center; gap: 6px; white-space: nowrap }
+.sw { width: 11px; height: 11px; border-radius: 3px; flex: none; display: inline-block }
+.ramp { height: 10px; border-radius: 5px; width: 190px; max-width: 100% }
+.ramp-ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-top: 3px }
+.mini { right: 14px; bottom: 14px; width: 112px; height: 160px; border-radius: 14px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); padding: 6px; transition: opacity .4s ease, transform .4s var(--ease-out) }
+.mini.off { opacity: 0; transform: translateY(8px); pointer-events: none }
+.mini svg { width: 100%; height: 100% }
+.mini path { fill: var(--ghost); stroke: none }
+.mini path.sel { fill: var(--forest) }
+.mini polygon { fill: color-mix(in srgb, var(--forest) 18%, transparent); stroke: var(--forest); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round }
+.mini polygon.tiny { stroke-width: 4 }
+.tip { position: absolute; z-index: 20; pointer-events: none; background: var(--tip-bg); color: var(--tip-fg); border-radius: 12px; padding: 9px 11px; font-size: 12.5px; min-width: 160px; max-width: 240px; box-shadow: var(--shadow); transform: translate(12px, 12px) }
+.tip b { display: block; font-size: 13.5px; margin-bottom: 4px }
+.tip .muted { opacity: .7 }
+.tip .k { display: flex; justify-content: space-between; gap: 12px; margin-top: 3px }
+.hint { left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; transition: opacity .4s ease, transform .4s var(--ease-out); pointer-events: none; z-index: 6 }
+.hint.off { opacity: 0; transform: translate(-50%, 8px) }
+@media (max-width: 700px) { .mini, .hint { display: none } .legend { max-width: calc(100% - 28px) } .crumb small { display: none } .crumb { padding: 5px 10px } }
+
+/* panel */
+.pbody { padding: 20px 20px 24px; display: grid; gap: 18px; animation: slidein .45s var(--ease-out) both }
+@keyframes slidein { from { opacity: 0; transform: translateX(14px) } }
+.eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.ptitle { font-size: 26px; line-height: 1.08; margin: 6px 0 0; letter-spacing: -.015em; font-weight: 800; text-wrap: balance }
+.lead { margin: 6px 0 0; color: var(--muted); font-size: 14px }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 9px 3px 7px; font-size: 12px; font-weight: 700; white-space: nowrap }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .7 }
+.pill[data-lv="warning"] { background: var(--lv-warning); color: var(--lv-warning-ink) }
+.pill[data-lv="watch"] { background: var(--lv-watch); color: var(--lv-watch-ink) }
+.pill[data-lv="above"] { background: var(--lv-above); color: var(--lv-above-ink) }
+.pill[data-lv="normal"] { background: var(--lv-normal); color: var(--lv-normal-ink) }
+.pill[data-lv="none"] { background: var(--lv-nodata); color: var(--ink) }
+.pill[data-lv="ramp"] { background: var(--ramp-hi); color: var(--paper) }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden }
+.stat { background: var(--surface); padding: 10px 12px; min-width: 0 }
+.stat b { display: block; font-size: 22px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1 }
+.stat span { font-size: 11.5px; color: var(--muted) }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap }
+.big b { font-size: 46px; font-weight: 800; letter-spacing: -.03em; line-height: 1 }
+.big span { color: var(--muted); font-size: 14px; max-width: 22ch }
+.sect h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 8px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px }
+.sect h3 small { font-family: var(--mono); letter-spacing: .04em; text-transform: none; font-weight: 500 }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px }
+.row { width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; text-align: left; border: 0; background: transparent; padding: 8px 8px; border-radius: 10px; cursor: pointer }
+.row:hover { background: var(--surface-2) }
+.row .n { font-family: var(--mono); font-size: 11px; color: var(--soft) }
+.row .nm { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.row .v { font-size: 12.5px; color: var(--muted); text-align: right; white-space: nowrap }
+.row .bar { grid-column: 2 / -1; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden }
+.row .bar i { display: block; height: 100%; border-radius: 2px; transform-origin: left; animation: grow .7s var(--ease-out) both }
+@keyframes grow { from { transform: scaleX(0) } }
+.row .go { font-size: 11px; font-weight: 700; color: var(--forest); background: var(--forest-soft); padding: 2px 7px; border-radius: 999px; margin-left: 6px }
+.counts { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px }
+.counts div { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; min-width: 0 }
+.counts b { font-size: 22px; font-weight: 800; display: block; line-height: 1.1 }
+.counts span { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px }
+.note { font-size: 12.5px; color: var(--muted); background: var(--surface-2); border-radius: 12px; padding: 10px 12px; line-height: 1.5 }
+.note b { color: var(--ink) }
+.stamp { font-family: var(--mono); font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.stamp .old { background: var(--lv-above); color: var(--lv-above-ink); padding: 1px 6px; border-radius: 6px }
+.btn { border: 0; border-radius: 999px; padding: 9px 14px; font-weight: 700; font-size: 13.5px; cursor: pointer; background: var(--ink); color: var(--paper); display: inline-flex; gap: 8px; align-items: center }
+.btn--ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong) }
+.btn svg { width: 15px; height: 15px }
+.tour { border: 1px dashed var(--line-strong); border-radius: 14px; padding: 12px; display: grid; gap: 8px }
+.tour p { margin: 0; font-size: 13.5px; color: var(--muted) }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chipbtn { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px; padding: 5px 10px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; gap: 6px; align-items: center }
+.chipbtn:hover { border-color: var(--forest); color: var(--forest) }
+.gauge svg, .spark svg { width: 100%; height: auto; display: block; overflow: visible }
+.gauge text, .spark text { font-family: var(--font); font-size: 10px; fill: var(--muted) }
+.cmp { display: grid; gap: 6px }
+.cmp div { display: grid; grid-template-columns: 96px minmax(0, 1fr) 44px; gap: 8px; align-items: center; font-size: 12px; color: var(--muted) }
+.cmp i { display: block; height: 8px; border-radius: 4px; transform-origin: left; animation: grow .8s var(--ease-out) both }
+.cmp em { font-style: normal; text-align: right; color: var(--ink); font-weight: 600 }
+
+/* spec */
+.spec { display: grid; gap: 18px; max-width: 1100px }
+.spec h2 { font-size: 24px; margin: 0; letter-spacing: -.01em; text-wrap: balance }
+.spec > p { margin: 0; color: var(--muted); max-width: 70ch }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface) }
+.tbl table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 13.5px }
+.tbl th, .tbl td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top }
+.tbl th { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 700; background: var(--surface-2) }
+.tbl tr:last-child td { border-bottom: 0 }
+.tbl td:first-child { font-weight: 700; white-space: nowrap }
+.tbl code, .spec code { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-radius: 5px }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px }
+.notes section { border-top: 2px solid var(--ink); padding-top: 10px; min-width: 0 }
+.notes h3 { font-size: 15px; margin: 0 0 6px }
+.notes ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; display: grid; gap: 5px }
+[hidden] { display: none !important }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important } .pulse { display: none } }
+</style>
+
+
+<div class="wrap">
+  <header class="bar">
+    <div class="brand">
+      <div class="brand__mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2.5c3.3 0 6 2.6 6 5.9 0 4.3-6 9.1-6 9.1s-6-4.8-6-9.1C4 5.1 6.7 2.5 10 2.5Z" fill="#FBFAF4"/><circle cx="10" cy="8.4" r="2.3" fill="#08754F"/></svg></div>
+      <div><h1>Forecast map</h1><p>3D drill-down prototype for EpiLag. Click a region, then go deeper. Drag to pan, scroll to zoom, right-drag to rotate.</p></div>
+    </div>
+    <div class="seg" role="group" aria-label="Weeks ahead">
+      <span class="seg__label">Weeks ahead</span>
+      <button type="button" data-h="2" aria-pressed="true">2</button><button type="button" data-h="4" aria-pressed="false">4</button><button type="button" data-h="6" aria-pressed="false">6</button><button type="button" data-h="8" aria-pressed="false">8</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="m11 11 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="q" type="search" placeholder="Find a region, province or barangay" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
+      <ul class="results" id="results" role="listbox" hidden></ul>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="map" id="map">
+      <svg class="ov" id="ov" role="img" aria-label="3D forecast map of the Philippines. Height and colour show the alert level.">
+        <path id="halo" class="focus-halo"></path>
+        <path id="focus" class="focus-line"></path>
+        <path id="hover" class="hover-line"></path>
+        <g id="labels"></g>
+        <g id="pulse" class="pulse" hidden><circle class="r1" r="6"></circle><circle class="r2" r="6"></circle><circle class="dot" r="4.5"></circle></g>
+      </svg>
+      <nav class="ov crumbs" id="crumbs" aria-label="Map location"></nav>
+      <div class="ov ctls">
+        <button class="ctl" id="up" type="button" title="Up one level (Esc)" aria-label="Up one level"><svg viewBox="0 0 18 18" fill="none"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="ctl" id="zin" type="button" title="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 18 18" fill="none"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button class="ctl" id="zout" type="button" title="Zoom out" aria-label="Zoom out"><svg viewBox="0 0 18 18" fill="none"><path d="M4 9h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button class="ctl" id="home" type="button" title="Whole country" aria-label="Show the whole country"><svg viewBox="0 0 18 18" fill="none"><path d="M3 8.2 9 3l6 5.2V15H3V8.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+        <button class="ctl" id="tilt" type="button" title="Switch between 3D and a flat top view" aria-label="3D view" aria-pressed="true"><span>3D</span></button>
+        <button class="ctl" id="compass" type="button" title="Reset north and tilt (right-drag or Shift-drag to rotate)" aria-label="Reset north"><svg viewBox="0 0 18 18" fill="none"><path d="M9 2.5 11.6 9H6.4L9 2.5Z" fill="var(--lv-warning)"/><path d="M9 15.5 6.4 9h5.2L9 15.5Z" fill="currentColor" opacity=".55"/></svg></button>
+      </div>
+      <div class="ov legend" id="legend"></div>
+      <div class="ov mini off" id="mini" aria-hidden="true"><svg id="minisvg"></svg></div>
+      <div class="ov hint" id="hint">Click a region to zoom in</div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="sr" aria-live="polite" id="live"></div>
+    </div>
+    <aside class="panel" id="panel" aria-label="Selected area"></aside>
+  </div>
+
+  <section class="spec" aria-labelledby="spec-h">
+    <h2 id="spec-h">How the drill-down behaves</h2>
+    <p>Each click goes one level deeper. The camera flies to the new area and tilts in, the areas around it sink to the floor and turn grey, and the next level rises out of the ground as the camera arrives. Height and colour both show the alert level. Esc, the back button, a breadcrumb or a click on the sea goes back up.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Level</th><th>You click</th><th>Camera</th><th>What appears on the map</th><th>Side panel</th><th>Data in the repo</th></tr></thead>
+      <tbody>
+        <tr><td>Country</td><td>Nothing yet</td><td>Whole Philippines</td><td>17 regions raised by alert level, rising north to south on load</td><td>Level counts, regions ranked per 100,000, demo flight</td><td><code>region_qc_forecast</code>, run 28 Dec 2025</td></tr>
+        <tr><td>Region</td><td>A region</td><td>Flies to the region's bounds</td><td>Other regions sink and turn grey. Provinces rise from the centre outward. In NCR, Quezon City sits on top as a plateau.</td><td>Region forecast, range against thresholds, 26 weeks of cases, provinces ranked</td><td>Region forecast + <code>province_forecast</code> (latest run 10 Jan 2021)</td></tr>
+        <tr><td>Province or city</td><td>A province, or Quezon City</td><td>Flies to it. Neighbours stay visible at 40%.</td><td>Province: raised a little higher and outlined. Quezon City: 142 barangays rise as bars, height and colour by expected cases.</td><td>Province forecast, or the city's 8-week total and top barangays</td><td>No municipal shapes yet. Barangays exist for QC only.</td></tr>
+        <tr><td>Barangay</td><td>A barangay in QC</td><td>Flies in with room around it for context</td><td>Neighbours stay bright, the rest dim, a pulse marks the centre</td><td>Expected cases, share of the city, rank, history, neighbouring barangays</td><td><code>qc_barangays</code> case shares × the QC forecast</td></tr>
+      </tbody>
+    </table></div>
+    <div class="notes">
+      <section><h3>Motion</h3><ul>
+        <li>The camera follows the smooth zoom-out-pan-zoom-in curve (<code>d3.interpolateZoom</code>, van Wijk) and flattens its tilt by 10° mid-flight. Flights last 0.75–1.9 s depending on distance.</li>
+        <li>Child shapes rise at about half-way through the flight, with a slight overshoot, staggered up to 0.4 s by distance from the centre.</li>
+        <li>The selected outline settles in over 0.7 s. Search and the demo go down one level at a time so each layer is seen.</li>
+        <li>With reduced motion turned on, the camera jumps instead of flying.</li>
+      </ul></section>
+      <section><h3>Porting to the app</h3><ul>
+        <li>The app already has MapLibre (<code>lib/maplibre-map.js</code>): <code>fill-extrusion</code> layers give the same 3D blocks, and <code>flyTo</code> with <code>pitch</code> uses the same curve.</li>
+        <li>Boundaries here come from the PSA PSGC shapefiles as published in faeldon/philippines-json-maps (hi-res pack, MIT licence), rebuilt by <code>scripts/drill_map/boundaries.sh</code>. Provinces are built by merging their municipalities, which keeps far more detail than the repo's <code>app/data/province.geojson</code>, where CAR and NCR are 5–17-point placeholders.</li><li>Barangay names are matched to the case table by name, since the two files use different PSGC codes.</li>
+        <li>The level is kept in the URL hash (try <code>#qc</code>), so a zoomed view can be shared.</li>
+      </ul></section>
+      <section><h3>Gaps to close first</h3><ul>
+        <li>The province forecast in <code>docs/web/data</code> is from 10 Jan 2021, while the region one is from 28 Dec 2025. The panel labels the older date.</li>
+        <li>Barangays have no alert level of their own. They show expected cases on a separate blue scale.</li>
+        <li>The boundary set uses today's regions. Negros Island Region provinces are put back into Regions VI and VII, and Maguindanao del Norte and del Sur are merged into "Maguindanao (pre-2022)", to match the forecast units. The Special Geographic Area has no forecast unit and shows grey.</li><li>CAR is still the least detailed area (about 100 points per province) because the source itself is coarse there.</li>
+      </ul></section>
+    </div>
+  </section>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+(() => {
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const W = D.W, H = D.H;
+const LV = { "normal": "normal", "above usual": "above", "watch": "watch", "outbreak warning": "warning" };
+const LV_NAME = { normal: "Normal", above: "Above usual", watch: "Watch", warning: "Outbreak warning", none: "No data" };
+const LV_ORDER = ["warning", "watch", "above", "normal"];
+const LVH = { normal: 1, above: 2, watch: 3, warning: 4, none: .45 };
+const PITCH = { country: 36, region: 44, province: 44, city: 48, barangay: 46 };
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cssv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmtDate = (d) => new Date(d * 864e5).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const fmtN = (v) => v == null ? "–" : v >= 100 ? Math.round(v).toLocaleString("en-US") : v >= 10 ? v.toFixed(0) : v.toFixed(1);
+const slug = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const diag = (bb) => Math.hypot(bb[2] - bb[0], bb[3] - bb[1]);
+
+/* ---------- index ---------- */
+const regions = new Map(D.regions.map((r) => [r.id, { ...r, kind: "region" }]));
+const provs = new Map(D.provinces.map((p) => [p.id, { ...p, kind: "province" }]));
+const bgys = new Map(D.barangays.map((b) => [b.id, { ...b, kind: "barangay", parent: "QC" }]));
+const drawnB = [...bgys.values()].filter((b) => b.polys);
+const qcBB = drawnB.reduce((a, b) => [Math.min(a[0], b.bb[0]), Math.min(a[1], b.bb[1]), Math.max(a[2], b.bb[2]), Math.max(a[3], b.bb[3])], [1e9, 1e9, -1e9, -1e9]);
+const QC = { ...D.qc, id: "QC", kind: "city", name: "Quezon City", bb: qcBB, c: [(qcBB[0] + qcBB[2]) / 2, (qcBB[1] + qcBB[3]) / 2], h: 0, outline: D.qcOutline };
+const qc8 = [2, 4, 6, 8].reduce((s, h) => s + QC.fc[h].q50, 0) / 4 * 8;
+for (const b of bgys.values()) b.exp = b.share * qc8;
+const maxExp = Math.max(...[...bgys.values()].map((b) => b.exp));
+const medianExp = d3.median([...bgys.values()], (b) => b.exp);
+for (const r of regions.values()) r.slug = r.id === "R_NCR" ? "ncr" : slug(r.code);
+const byHash = new Map();
+for (const r of regions.values()) byHash.set(r.slug, r);
+for (const p of provs.values()) byHash.set("p-" + slug(p.name), p);
+byHash.set("qc", QC);
+for (const b of bgys.values()) byHash.set("b-" + slug(b.name), b);
+const hashOf = (n) => !n ? "" : n.kind === "region" ? n.slug : n.kind === "province" ? "p-" + slug(n.name) : n.kind === "city" ? "qc" : "b-" + slug(n.name);
+const get = (id) => id === "QC" ? QC : regions.get(id) || provs.get(id) || bgys.get(id);
+
+let horizon = 2;
+const fcOf = (n, h = horizon) => n.kind === "barangay" ? null : n.fc ? n.fc[h] : null;
+const lvOf = (n, h = horizon) => { const f = fcOf(n, h); return f ? LV[f.level] : "none"; };
+const lvColor = (lv) => cssv(lv === "none" ? "--lv-nodata" : "--lv-" + lv);
+let ramp;
+const setRamp = () => { const i = d3.interpolateLab(cssv("--ramp-lo"), cssv("--ramp-hi")); const s = d3.scaleSqrt().domain([0, maxExp]); ramp = (v) => i(s(v)); };
+setRamp();
+
+function chain(n) {
+  if (!n) return [];
+  if (n.kind === "region") return [n];
+  if (n.kind === "province") return [regions.get(n.region), n];
+  if (n.kind === "city") return [regions.get("R_NCR"), QC];
+  return [regions.get("R_NCR"), QC, n];
+}
+const levelOf = (n) => !n ? "country" : n.kind;
+
+/* ---------- three.js scene ---------- */
+const mapEl = $("#map");
+let vw = mapEl.clientWidth, vh = mapEl.clientHeight;
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); }
+catch (e) { mapEl.insertAdjacentHTML("afterbegin", `<div class="nogl">This prototype needs WebGL, which this browser has turned off.</div>`); return; }
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.setSize(vw, vh, false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const canvas = renderer.domElement; canvas.className = "gl"; canvas.setAttribute("aria-hidden", "true");
+mapEl.prepend(canvas);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xffffff, 100, 1000);
+const camera = new THREE.PerspectiveCamera(34, vw / vh, 1, 10000);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x8a9590, .62);
+const sun = new THREE.DirectionalLight(0xffffff, .55);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+scene.add(hemi, sun, sun.target);
+const shadowMat = new THREE.ShadowMaterial({ opacity: .2, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(40000, 40000), shadowMat);
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+const C = { x: 0, z: 0, w: 1400, pitch: PITCH.country, bearing: 0 };
+let flat = false;
+
+const v2 = (x, y) => new THREE.Vector2(x - W / 2, -(y - H / 2));
+function ringPts(flatArr) { const out = []; for (let i = 0; i < flatArr.length; i += 2) out.push(v2(flatArr[i], flatArr[i + 1])); return out; }
+function buildGeo(polys) {
+  const shapes = [];
+  for (const P of polys) {
+    const sh = new THREE.Shape(ringPts(P[0]));
+    for (let i = 1; i < P.length; i++) sh.holes.push(new THREE.Path(ringPts(P[i])));
+    shapes.push(sh);
+  }
+  const g = new THREE.ExtrudeGeometry(shapes, { depth: 1, bevelEnabled: false, curveSegments: 1 });
+  g.rotateX(-Math.PI / 2);
+  return g;
+}
+const pickList = new Set();
+function ensureMesh(n) {
+  if (n.mesh || !n.polys) return n.mesh;
+  const top = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+  const side = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+  const m = new THREE.Mesh(buildGeo(n.polys), [top, side]);
+  m.castShadow = true; m.receiveShadow = true; m.scale.y = 1e-4; m.visible = false; m.userData.node = n;
+  n.mesh = m; n.top = top; n.side = side; n.h = 0; n.col = new THREE.Color(cssv("--ghost"));
+  scene.add(m);
+  return m;
+}
+for (const r of regions.values()) ensureMesh(r);
+
+/* ---------- tweens ---------- */
+const tw = new Map();
+let instant = false;
+const tmpC = new THREE.Color();
+function applyNode(n, h, col) {
+  n.h = h; n.col.copy(col);
+  n.mesh.scale.y = Math.max(h, 1e-4);
+  n.mesh.visible = h > 1e-4;
+  n.top.color.copy(col); n.side.color.copy(col).multiplyScalar(.74);
+}
+function setTarget(n, h, color, delay = 0, dur = 750) {
+  if (!ensureMesh(n)) return;
+  const col = color instanceof THREE.Color ? color : new THREE.Color(color);
+  if (reduce || instant) { tw.delete(n); applyNode(n, h, col); return; }
+  if (Math.abs(n.h - h) < 1e-6 && n.col.equals(col)) { tw.delete(n); return; }
+  if (h > 1e-4 && !n.mesh.visible) { n.mesh.visible = true; n.mesh.scale.y = Math.max(n.h, 1e-4); }
+  tw.set(n, { h0: n.h, h1: h, c0: n.col.clone(), c1: col, t0: performance.now() + delay, dur, up: h > n.h * 1.05 });
+  kick();
+}
+const backOut = d3.easeBackOut.overshoot(1.25);
+function runTweens(now) {
+  for (const [n, t] of tw) {
+    const k = (now - t.t0) / t.dur;
+    if (k < 0) continue;
+    const e = Math.min(1, k), eh = t.up ? backOut(e) : d3.easeCubicInOut(e);
+    tmpC.copy(t.c0).lerp(t.c1, d3.easeCubicOut(e));
+    applyNode(n, t.h0 + (t.h1 - t.h0) * eh, tmpC);
+    if (k >= 1) { applyNode(n, t.h1, t.c1); tw.delete(n); }
+  }
+}
+
+/* ---------- camera ---------- */
+let flight = null;
+function camApply() {
+  const asp = vw / vh, vf = camera.fov * Math.PI / 180;
+  const hf = 2 * Math.atan(Math.tan(vf / 2) * asp);
+  const d = (C.w / 2) / Math.tan(hf / 2);
+  const p = C.pitch * Math.PI / 180, b = C.bearing * Math.PI / 180;
+  camera.aspect = asp;
+  camera.position.set(C.x + d * Math.sin(p) * Math.sin(b), d * Math.cos(p), C.z + d * Math.sin(p) * Math.cos(b));
+  camera.near = d * .03; camera.far = d * 14;
+  camera.up.set(0, 1, 0);
+  camera.lookAt(C.x, 0, C.z);
+  camera.updateProjectionMatrix();
+  scene.fog.near = d * 1.05; scene.fog.far = d * 3.6;
+  sun.position.set(C.x - C.w * .55, C.w * 1.25, C.z - C.w * .4);
+  sun.target.position.set(C.x, 0, C.z);
+  const s = sun.shadow.camera, e = C.w * .95;
+  s.left = -e; s.right = e; s.top = e; s.bottom = -e; s.near = C.w * .05; s.far = C.w * 4; s.updateProjectionMatrix();
+  sun.shadow.bias = -.0005; sun.shadow.normalBias = C.w * .0008;
+}
+function pads(kind) {
+  const narrow = vw < 700;
+  const top = narrow ? 70 : 80, side = narrow ? 18 : 50, bot = narrow ? 80 : 70;
+  if (kind === "barangay") return [Math.max(top, vh * .24), Math.max(side, vw * .28), Math.max(bot, vh * .2), Math.max(side, vw * .28)];
+  if (kind === "country") return [top - 40, side - 10, bot - 40, side - 10];
+  return [top, side + 20, bot, side + 20];
+}
+function fitCam(bb, kind) {
+  const pitch = flat ? 0 : PITCH[kind];
+  const [t, r, b, l] = pads(kind);
+  const fx = (vw - l - r) / vw, fy = (vh - t - b) / vh, asp = vw / vh;
+  const bw = Math.max(bb[2] - bb[0], .05), bh = Math.max(bb[3] - bb[1], .05);
+  const w = Math.max(bw / fx, bh * asp * Math.cos(pitch * Math.PI / 180 * .75) / fy) * 1.04;
+  const s = w / vw;
+  const cx = (bb[0] + bb[2]) / 2 - W / 2, cz = (bb[1] + bb[3]) / 2 - H / 2;
+  return { x: cx - (l - r) / 2 * s, z: cz - (t - b) / 2 * s / Math.max(.5, Math.cos(pitch * Math.PI / 180)), w, pitch, bearing: 0 };
+}
+function flightMs(to) { return Math.max(750, Math.min(1900, d3.interpolateZoom([C.x, C.z, C.w], [to.x, to.z, to.w]).duration * .85)); }
+function flyTo(to, ms) {
+  if (flight) { flight.res(); flight = null; }
+  if (reduce || !ms) { Object.assign(C, to); kick(); return Promise.resolve(); }
+  let b1 = to.bearing; while (b1 - C.bearing > 180) b1 -= 360; while (b1 - C.bearing < -180) b1 += 360;
+  return new Promise((res) => {
+    flight = { t0: performance.now(), ms, iz: d3.interpolateZoom([C.x, C.z, C.w], [to.x, to.z, to.w]), p0: C.pitch, p1: to.pitch, b0: C.bearing, b1, res };
+    kick();
+  });
+}
+function runFlight(now) {
+  const f = flight, t = Math.min(1, (now - f.t0) / f.ms), e = d3.easeCubicInOut(t);
+  const [x, z, w] = f.iz(e);
+  C.x = x; C.z = z; C.w = w;
+  C.pitch = f.p0 + (f.p1 - f.p0) * e - Math.sin(Math.PI * e) * (flat ? 0 : 10);
+  C.bearing = f.b0 + (f.b1 - f.b0) * e;
+  if (t >= 1) { flight = null; f.res(); }
+}
+
+/* ---------- render loop ---------- */
+let raf = 0;
+function kick() { if (!raf) raf = requestAnimationFrame(frame); }
+function frame(now) {
+  raf = 0;
+  if (flight) runFlight(now);
+  if (tw.size) runTweens(now);
+  camApply();
+  renderer.render(scene, camera);
+  overlay();
+  if (flight || tw.size) kick();
+}
+
+/* ---------- screen-space overlay: labels, outlines, pulse, minimap ---------- */
+const ns = "http://www.w3.org/2000/svg";
+const ov = $("#ov"), lblG = $("#labels"), focusP = $("#focus"), haloP = $("#halo"), hovP = $("#hover");
+const pv = new THREE.Vector3();
+function scr(px, py, h) { pv.set(px - W / 2, h, py - H / 2).project(camera); return [(pv.x + 1) / 2 * vw, (1 - pv.y) / 2 * vh, pv.z]; }
+function outlineD(n, h) {
+  const rings = n.kind === "city" ? n.outline.map((r) => [r]) : n.polys;
+  let d = "";
+  for (const P of rings) for (const r of P) {
+    let s = "";
+    for (let i = 0; i < r.length; i += 2) { const p = scr(r[i], r[i + 1], h); if (p[2] > 1) return ""; s += (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }
+    d += s + "Z";
+  }
+  return d;
+}
+let focusNode = null, hoverNode = null, pulseNode = null;
+const nodeTop = (n) => n.kind === "city" ? (qcG.split ? 0 : QC.h) : (n.h || 0);
+// a region's outline follows the tops of its raised provinces, so the lines sit on the blocks, not on the ground below them
+function focusD(n) {
+  if (n.kind !== "region") return outlineD(n, nodeTop(n) * 1.002);
+  let d = "";
+  for (const p of provs.values()) if (p.region === n.id && p.mesh && p.mesh.visible) d += outlineD(p, p.h * 1.002);
+  if (qcG.on && !qcG.split) d += outlineD(QC, QC.h * 1.002);
+  return d;
+}
+function overlay() {
+  focusP.setAttribute("d", focusNode ? focusD(focusNode) : "");
+  haloP.setAttribute("d", focusP.getAttribute("d"));
+  hovP.setAttribute("d", hoverNode && hoverNode !== focusNode ? outlineD(hoverNode, nodeTop(hoverNode) * 1.002) : "");
+  placeLabels(); placeMini(); placePulse(); updCompass();
+}
+const qcG = { on: false, split: false };
+
+/* labels */
+let labels = [];
+const meas = document.createElement("canvas").getContext("2d");
+const tw_ = (txt, cls) => { meas.font = `${cls.includes("big") ? 800 : 600} ${cls.includes("big") ? 13.5 : cls.includes("tag") ? 10.5 : 11.5}px ${cls.includes("tag") ? "JetBrains Mono" : "Inter Tight"}, sans-serif`; return meas.measureText(txt).width + (cls.includes("tag") ? txt.length * .6 : 0); };
+const shortProv = (s) => s.replace("Metropolitan Manila ", "Metro Manila ").replace(" District", "").replace(" (pre-2022)", "");
+function buildLabels(n) {
+  const lvl = levelOf(n), ch = chain(n), L = [];
+  const add = (node, text, cls, pri, minPx) => L.push({ node, text, cls, pri, w: tw_(text, cls), minPx: minPx || 0 });
+  if (lvl === "country") {
+    for (const r of regions.values()) add(r, r.tag, "tag", 10 + r.a / 1000);
+  } else {
+    const region = ch[0];
+    for (const r of regions.values()) if (r !== region) add(r, r.tag, "tag sub", 1 + r.a / 1e4);
+    if (lvl === "region" || lvl === "province") {
+      for (const p of provs.values()) if (p.region === region.id) add(p, shortProv(p.name), p === ch[1] ? "big" : "", p === ch[1] ? 100 : 5 + p.a / 100, 18);
+      if (region.id === "R_NCR") add(QC, "Quezon City", "big", 120);
+    }
+    if (lvl === "city" || lvl === "barangay") {
+      const sel = ch[2];
+      for (const b of drawnB) {
+        const isSel = b === sel, isNb = sel && sel.nb.includes(b.id);
+        add(b, b.name, isSel ? "big" : "", isSel ? 200 : isNb ? 60 + b.share * 100 : 10 + b.share * 300, isSel ? 0 : 14);
+      }
+    }
+  }
+  labels = L.sort((a, b) => b.pri - a.pri);
+  lblG.textContent = "";
+  for (const l of labels) {
+    const t = document.createElementNS(ns, "text");
+    t.setAttribute("class", "lbl " + l.cls); t.setAttribute("text-anchor", "middle"); t.setAttribute("dominant-baseline", "central");
+    t.textContent = l.text; lblG.appendChild(t); l.el = t;
+  }
+}
+function placeLabels() {
+  const boxes = [];
+  const pxPerUnit = vw / C.w;
+  for (const l of labels) {
+    const n = l.node, top = nodeTop(n);
+    const [sx, sy0, sz] = scr(n.c[0], n.c[1], top);
+    const sy = sy0 - (l.cls.includes("big") ? 12 : 8);
+    const pw = (n.bb[2] - n.bb[0]) * pxPerUnit;
+    let ok = sz < 1 && sx > 10 && sx < vw - 10 && sy > 10 && sy < vh - 10 && pw >= l.minPx;
+    const w = l.w + 6, h = l.cls.includes("big") ? 18 : 15;
+    const box = [sx - w / 2, sy - h / 2, sx + w / 2, sy + h / 2];
+    if (ok) for (const b of boxes) if (box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]) { ok = false; break; }
+    if (ok) boxes.push(box);
+    l.el.setAttribute("x", sx.toFixed(1)); l.el.setAttribute("y", sy.toFixed(1));
+    l.el.classList.toggle("hide", !ok);
+  }
+}
+function placePulse() {
+  const g = $("#pulse");
+  if (!pulseNode) { g.hidden = true; return; }
+  const [x, y, z] = scr(pulseNode.c[0], pulseNode.c[1], pulseNode.h);
+  g.hidden = z > 1;
+  g.setAttribute("transform", `translate(${x.toFixed(1)},${(y + 14).toFixed(1)})`);
+}
+
+/* minimap */
+const mini = $("#minisvg");
+mini.setAttribute("viewBox", `0 0 ${W} ${H}`); mini.setAttribute("preserveAspectRatio", "xMidYMid meet");
+for (const r of regions.values()) { const p = document.createElementNS(ns, "path"); p.setAttribute("d", D.mini[r.id] || ""); mini.appendChild(p); r.miniEl = p; }
+const miniPoly = document.createElementNS(ns, "polygon"); mini.appendChild(miniPoly);
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+function groundAt(x, y) {
+  ndc.set(x / vw * 2 - 1, -(y / vh) * 2 + 1); ray.setFromCamera(ndc, camera);
+  return ray.ray.intersectPlane(plane, hit) ? hit.clone() : null;
+}
+function placeMini() {
+  const pts = [[0, 0], [vw, 0], [vw, vh], [0, vh]].map(([x, y]) => {
+    let g = groundAt(x, y);
+    if (!g) { g = groundAt(x, vh * .45) || new THREE.Vector3(C.x, 0, C.z); }
+    const dx = g.x - C.x, dz = g.z - C.z, m = Math.hypot(dx, dz), cap = C.w * 2.2;
+    if (m > cap) { g.x = C.x + dx / m * cap; g.z = C.z + dz / m * cap; }
+    return `${(g.x + W / 2).toFixed(1)},${(g.z + H / 2).toFixed(1)}`;
+  });
+  miniPoly.setAttribute("points", pts.join(" "));
+  miniPoly.classList.toggle("tiny", C.w < W * .05);
+}
+
+/* ---------- navigation ---------- */
+let cur = null, navId = 0;
+async function go(target, opts = {}) {
+  const id = ++navId;
+  const from = chain(cur), to = chain(target);
+  let k = 0; while (k < from.length && k < to.length && from[k] === to[k]) k++;
+  const steps = to.slice(k);
+  if (opts.direct || steps.length <= 1) { await step(target, id, 1); return; }
+  for (let i = 0; i < steps.length; i++) {
+    if (id !== navId) return;
+    await step(steps[i], id, i === steps.length - 1 ? 1 : .75);
+    if (i < steps.length - 1) await wait(300);
+  }
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+const bbOf = (n) => !n ? [0, 0, W, H] : n.bb;
+async function step(n, id, speed) {
+  if (id !== navId) return;
+  const prev = cur; cur = n;
+  const to = fitCam(bbOf(n), levelOf(n));
+  const ms = reduce ? 0 : flightMs(to) * speed;
+  const deeper = chain(n).length > chain(prev).length;
+  applyState(prev, n, deeper ? ms * .5 : 0);
+  await flyTo(to, ms);
+  if (id !== navId) return;
+  afterArrive(n);
+}
+function afterArrive(n) {
+  focusNode = n && n.kind === "city" ? null : n;
+  focusP.classList.remove("draw"); void focusP.getBoundingClientRect(); focusP.classList.add("draw");
+  haloP.classList.toggle("on", !!n);
+  pulseNode = n && n.kind === "barangay" && n.polys ? n : null;
+  kick();
+}
+
+/* the heart of it: what every area does at each level */
+function applyState(prev, n, revealDelay) {
+  const lvl = levelOf(n), ch = chain(n);
+  const region = ch[0] || null, second = ch[1] || null, bgy = ch[2] || null;
+  mapEl.dataset.level = lvl;
+  focusNode = null; pulseNode = null; focusP.classList.remove("draw"); haloP.classList.remove("on");
+  const fd = diag(bbOf(n)), floor = Math.max(fd * .006, .004);
+  const ghost = new THREE.Color(cssv("--ghost")), land = new THREE.Color(cssv("--land"));
+  const dimC = (c, k = .58) => new THREE.Color(c).lerp(ghost, k);
+  const wasCountry = !prev;
+  // regions
+  for (const r of regions.values()) {
+    const sel = region === r;
+    if (!region) setTarget(r, 12 + 24 * LVH[lvOf(r)], lvColor(lvOf(r)), wasCountry ? 0 : 120 + Math.random() * 200, 800);
+    else if (sel) setTarget(r, 0, land, 0, 450);
+    else setTarget(r, floor, ghost, 0, 650);
+    r.miniEl.classList.toggle("sel", sel);
+  }
+  // provinces
+  const rd = region ? diag(region.bb) : 0;
+  const cx = region ? (region.bb[0] + region.bb[2]) / 2 : 0, cy = region ? (region.bb[1] + region.bb[3]) / 2 : 0;
+  const provH = (p) => rd * (.014 + .02 * LVH[lvOf(p)]) * (second && second.kind === "province" ? .6 : 1);
+  for (const p of provs.values()) {
+    if (!region || p.region !== region.id) { if (p.mesh) setTarget(p, 0, p.col || ghost, 0, 380); continue; }
+    ensureMesh(p);
+    let h = provH(p), col = new THREE.Color(lvColor(lvOf(p)));
+    if (second && second.kind === "city") { h = floor; col = dimC(col, .7); }
+    else if (second && second !== p) col = dimC(col);
+    else if (second === p) h *= 1.12;
+    const appear = p.h < 1e-4;
+    const delay = appear ? revealDelay + Math.hypot(p.c[0] - cx, p.c[1] - cy) / (rd / 2) * 380 : 0;
+    if (appear) p.col.copy(col);
+    setTarget(p, h, col, delay, 820);
+  }
+  // Quezon City barangays: one plateau at region level, bars by expected cases at city level
+  const qcOn = !!region && region.id === "R_NCR";
+  const split = qcOn && second === QC;
+  const wasSplit = qcG.split;
+  qcG.on = qcOn; qcG.split = split;
+  const plateau = qcOn ? Math.max(provH(provs.get("PH13074")), provH(QC)) * 1.22 : 0;
+  QC.h = plateau;
+  const qd = diag(QC.bb);
+  const qcCol = new THREE.Color(lvColor(lvOf(QC)));
+  for (const b of drawnB) {
+    if (!qcOn) { if (b.mesh) setTarget(b, 0, b.col, 0, 380); continue; }
+    ensureMesh(b);
+    let h, col, delay = 0;
+    if (!split) {
+      h = plateau; col = second && second.kind === "province" ? dimC(qcCol) : qcCol.clone();
+      if (b.h < 1e-4) { delay = revealDelay + 260; b.col.copy(col); }
+    } else {
+      const hs = bgy ? Math.max(diag(bgy.bb) * 1.6, qd * .12) : qd;
+      h = hs * (.02 + .16 * Math.sqrt(b.exp / maxExp)); col = new THREE.Color(ramp(b.exp));
+      if (bgy && b !== bgy && !bgy.nb.includes(b.id)) col = dimC(col, .62);
+      if (b === bgy) h *= 1.15;
+      if (!wasSplit) delay = revealDelay + Math.hypot(b.c[0] - QC.c[0], b.c[1] - QC.c[1]) / (qd / 2) * 420;
+    }
+    setTarget(b, h, col, delay, split && !wasSplit ? 900 : 650);
+  }
+  // pickable meshes
+  pickList.clear();
+  for (const r of regions.values()) if (r !== region) pickList.add(r.mesh);
+  if (region) for (const p of provs.values()) if (p.region === region.id && p.mesh) pickList.add(p.mesh);
+  if (qcOn) for (const b of drawnB) pickList.add(b.mesh);
+
+  buildLabels(n);
+  renderCrumbs(n);
+  renderPanel(n);
+  renderLegend(n);
+  $("#mini").classList.toggle("off", !n);
+  $("#up").disabled = !n;
+  $("#hint").textContent = !n ? "Click a region to fly in" : n.kind === "region" ? (n.id === "R_NCR" ? "Click Quezon City to see its barangays" : "Click a province for its forecast") : n.kind === "city" ? "Click a barangay to zoom in" : "Esc or the back button goes up a level";
+  $("#hint").classList.remove("off"); clearTimeout(hintT); hintT = setTimeout(() => $("#hint").classList.add("off"), 4200);
+  $("#live").textContent = n ? `Zoomed to ${n.name}` : "Showing the whole country";
+  const hsh = hashOf(n);
+  if (location.hash.slice(1) !== hsh) { try { history.replaceState(null, "", hsh ? "#" + hsh : location.pathname + location.search); } catch (e) {} }
+  kick();
+}
+let hintT = 0;
+function refresh(noAnim) {
+  instant = !!noAnim;
+  const keep = cur; applyState(keep, keep, 0);
+  instant = false;
+  if (keep) afterArrive(keep);
+}
+
+/* ---------- picking, hover, input ---------- */
+const tip = $("#tip");
+function pickAt(x, y) {
+  ndc.set(x / vw * 2 - 1, -(y / vh) * 2 + 1); ray.setFromCamera(ndc, camera);
+  const list = [...pickList].filter((m) => m && m.visible);
+  const hits = ray.intersectObjects(list, false);
+  if (!hits.length) return null;
+  const n = hits[0].object.userData.node;
+  if (n.kind === "barangay" && !qcG.split) return QC;
+  return n;
+}
+function hideTip() { tip.hidden = true; if (hoverNode) { hoverNode = null; kick(); } }
+function showHover(n) { hoverNode = n || null; kick(); }
+function tipHTML(n) {
+  if (n.kind === "barangay") return `<b>${esc(n.name)}</b><span class="muted">Barangay · Quezon City</span><div class="k"><span>Expected, next 8 wks</span><b class="nums" style="margin:0">${fmtN(n.exp)}</b></div><div class="k"><span>Share of city cases</span><span class="nums">${(n.share * 100).toFixed(1)}%</span></div>`;
+  const f = fcOf(n), lv = lvOf(n);
+  return `<b>${esc(n.kind === "region" ? n.nice : n.kind === "province" ? shortProv(n.name) : n.name)}</b><span class="pill" data-lv="${lv}">${LV_NAME[lv]}</span>${f ? `<div class="k"><span>Expected cases</span><span class="nums">${fmtN(f.q50)} (${fmtN(f.q10)}–${fmtN(f.q90)})</span></div><div class="k"><span>Per 100,000</span><span class="nums">${f.q50_per100k.toFixed(1)}</span></div>` : `<div class="k muted"><span>No forecast unit for this area</span></div>`}${n.kind === "province" && f ? `<div class="k muted"><span>Province run</span><span>${fmtDate(f ? n.fc._wk : 0)}</span></div>` : ""}`;
+}
+let hoverRaf = 0, lastMove = null;
+function doHover() {
+  hoverRaf = 0; const e = lastMove; if (!e || drag) return;
+  const n = pickAt(e.x, e.y);
+  if (!n || n === cur) { hideTip(); canvas.style.cursor = "grab"; return; }
+  canvas.style.cursor = "pointer";
+  if (hoverNode !== n) { hoverNode = n; tip.innerHTML = tipHTML(n); kick(); }
+  tip.hidden = false;
+  tip.style.left = Math.min(e.x, vw - 260) + "px"; tip.style.top = Math.min(e.y, vh - 130) + "px";
+}
+const ptrs = new Map();
+let drag = null, pinch = null;
+const local = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+canvas.addEventListener("pointerdown", (e) => {
+  const p = local(e); canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, p);
+  if (ptrs.size === 1) drag = { mode: e.button === 2 || e.ctrlKey || e.shiftKey || e.altKey ? "rotate" : "pan", sx: p.x, sy: p.y, lx: p.x, ly: p.y, moved: false, g: groundAt(p.x, p.y) };
+  else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), w: C.w }; if (drag) drag.moved = true; }
+});
+canvas.addEventListener("pointermove", (e) => {
+  const p = local(e);
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, p);
+  if (pinch && ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+    C.w = Math.min(4000, Math.max(.3, pinch.w * pinch.d / Math.max(d, 1))); stopFlight(); kick(); return;
+  }
+  if (drag) {
+    if (!drag.moved && Math.hypot(p.x - drag.sx, p.y - drag.sy) > 5) { drag.moved = true; stopFlight(); hideTip(); }
+    if (!drag.moved) return;
+    if (drag.mode === "pan" && drag.g) {
+      const g1 = groundAt(p.x, p.y);
+      if (g1) { C.x += drag.g.x - g1.x; C.z += drag.g.z - g1.z; camApply(); }
+    } else if (drag.mode === "rotate") {
+      C.bearing -= (p.x - drag.lx) * .3; C.pitch = Math.min(68, Math.max(0, C.pitch + (p.y - drag.ly) * .25)); updCompass();
+    }
+    drag.lx = p.x; drag.ly = p.y; kick(); return;
+  }
+  if (e.pointerType === "touch") return;
+  lastMove = p; if (!hoverRaf) hoverRaf = requestAnimationFrame(doHover);
+});
+function endPtr(e) {
+  const wasDrag = drag, p = local(e);
+  ptrs.delete(e.pointerId);
+  if (ptrs.size < 2) pinch = null;
+  if (ptrs.size === 0) {
+    drag = null;
+    if (wasDrag && !wasDrag.moved && e.type === "pointerup" && e.button !== 2) onClick(p.x, p.y);
+  }
+}
+canvas.addEventListener("pointerup", endPtr);
+canvas.addEventListener("pointercancel", endPtr);
+canvas.addEventListener("pointerleave", () => { if (!drag) hideTip(); });
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault(); stopFlight();
+  const p = local(e), g0 = groundAt(p.x, p.y);
+  C.w = Math.min(4000, Math.max(.3, C.w * Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0013))));
+  camApply();
+  const g1 = groundAt(p.x, p.y);
+  if (g0 && g1) { C.x += g0.x - g1.x; C.z += g0.z - g1.z; }
+  kick();
+}, { passive: false });
+function stopFlight() { if (flight) { flight.res(); flight = null; navId++; afterArrive(cur); } }
+function onClick(x, y) {
+  const n = pickAt(x, y);
+  hideTip();
+  if (!n) { if (cur) goUp(); return; }
+  if (n === cur) return;
+  go(n);
+}
+function goUp() { const ch = chain(cur); go(ch.length > 1 ? ch[ch.length - 2] : null); }
+$("#up").addEventListener("click", goUp);
+$("#home").addEventListener("click", () => go(null));
+const zoomBy = (k) => { stopFlight(); flyTo({ ...C, w: Math.min(4000, Math.max(.3, C.w * k)) }, reduce ? 0 : 420); };
+$("#zin").addEventListener("click", () => zoomBy(1 / 1.6));
+$("#zout").addEventListener("click", () => zoomBy(1.6));
+const updCompass = () => { $("#compass svg").style.transform = `rotate(${C.bearing}deg)`; };
+$("#compass").addEventListener("click", () => { stopFlight(); flyTo({ ...C, bearing: 0, pitch: flat ? 0 : PITCH[levelOf(cur)] }, reduce ? 0 : 600).then(updCompass); });
+$("#tilt").addEventListener("click", () => {
+  flat = !flat; $("#tilt").setAttribute("aria-pressed", String(!flat)); $("#tilt span").textContent = flat ? "2D" : "3D";
+  stopFlight(); flyTo(fitCam(bbOf(cur), levelOf(cur)), reduce ? 0 : 900);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.activeElement !== $("#q") && cur) { e.preventDefault(); goUp(); }
+});
+
+/* ---------- breadcrumbs ---------- */
+function renderCrumbs(n) {
+  const ch = chain(n), nav = $("#crumbs");
+  const items = [{ n: null, label: "Philippines", kind: "Country" }, ...ch.map((x) => ({ n: x, label: x.kind === "region" ? x.code === "NCR" ? "NCR" : x.nice : x.kind === "province" ? shortProv(x.name) : x.name, kind: x.kind === "city" ? "City" : x.kind[0].toUpperCase() + x.kind.slice(1) }))];
+  nav.innerHTML = items.map((it, i) => `${i ? '<span class="sep" aria-hidden="true">›</span>' : ""}<button type="button" class="crumb" data-i="${i}" ${i === items.length - 1 ? 'aria-current="true"' : ""} style="animation-delay:${i * 50}ms"><small>${it.kind}</small><span>${esc(it.label)}</span></button>`).join("");
+  nav.querySelectorAll(".crumb").forEach((b) => b.addEventListener("click", () => { const it = items[+b.dataset.i]; if (it.n !== cur) go(it.n); }));
+}
+
+/* ---------- legend ---------- */
+function renderLegend(n) {
+  const lvl = levelOf(n), L = $("#legend");
+  const levels = `<h4>Alert level · ${horizon} weeks ahead · height = level</h4><ul>${LV_ORDER.map((lv) => `<li><span class="sw" style="background:var(--lv-${lv})"></span>${LV_NAME[lv]}</li>`).join("")}</ul>`;
+  if (lvl === "city" || lvl === "barangay") {
+    const stops = d3.range(0, 1.01, .1).map((t) => ramp(maxExp * t * t)).join(",");
+    L.innerHTML = `<h4>Expected cases, next 8 weeks · height + colour</h4><div class="ramp" style="background:linear-gradient(90deg,${stops})"></div><div class="ramp-ticks nums"><span>0</span><span>${fmtN(maxExp / 4)}</span><span>${fmtN(maxExp)}</span></div>`;
+  } else L.innerHTML = levels;
+}
+
+/* ---------- panel ---------- */
+const panel = $("#panel");
+const pill = (lv) => `<span class="pill" data-lv="${lv}">${LV_NAME[lv]}</span>`;
+const go_ = (n) => `data-go="${n.id}"`;
+function row(i, n, val, frac, color, extra = "") {
+  return `<li><button type="button" class="row" ${go_(n)} data-hl="${n.id}"><span class="n">${i}</span><span class="nm">${esc(n.kind === "region" ? n.nice : n.kind === "province" ? shortProv(n.name) : n.name)}${extra}</span><span class="v nums">${val}</span><span class="bar"><i style="width:${Math.max(2, frac * 100).toFixed(1)}%;background:${color}"></i></span></button></li>`;
+}
+function stamp(kind) {
+  if (kind === "province") return `<div class="stamp"><span>Province run · week of ${fmtDate(D.provinces[0].fc._wk)}</span><span class="old">older data</span></div>`;
+  const wk = D.regions[0].fc._wk;
+  return `<div class="stamp"><span>Run · week of ${fmtDate(wk)}</span><span>→ target week of ${fmtDate(wk + horizon * 7)}</span></div>`;
+}
+function gauge(f) {
+  const max = Math.max(f.epidemic * 1.2, f.q90 * 1.08), w = 320, x = (v) => 8 + (v / max) * (w - 16);
+  return `<svg viewBox="0 0 ${w} 62" role="img" aria-label="Forecast range ${fmtN(f.q10)} to ${fmtN(f.q90)} against alert ${fmtN(f.alert)} and epidemic ${fmtN(f.epidemic)} thresholds">
+    <rect x="8" y="22" width="${x(f.alert) - 8}" height="12" rx="3" fill="var(--lv-normal)" opacity=".22"/>
+    <rect x="${x(f.alert)}" y="22" width="${x(f.epidemic) - x(f.alert)}" height="12" fill="var(--lv-above)" opacity=".35"/>
+    <rect x="${x(f.epidemic)}" y="22" width="${w - 8 - x(f.epidemic)}" height="12" rx="3" fill="var(--lv-warning)" opacity=".3"/>
+    <rect x="${x(f.q10)}" y="18" width="${Math.max(2, x(f.q90) - x(f.q10))}" height="20" rx="5" fill="var(--ink)" opacity=".85"><animate attributeName="width" from="0" to="${Math.max(2, x(f.q90) - x(f.q10))}" dur=".7s" fill="freeze" calcMode="spline" keySplines=".22 1 .36 1"/></rect>
+    <circle cx="${x(f.q50)}" cy="28" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="${x(f.alert)}" x2="${x(f.alert)}" y1="14" y2="42" stroke="var(--muted)" stroke-dasharray="2 2"/>
+    <line x1="${x(f.epidemic)}" x2="${x(f.epidemic)}" y1="14" y2="42" stroke="var(--muted)" stroke-dasharray="2 2"/>
+    <text x="${x(f.alert)}" y="9" text-anchor="middle">alert ${fmtN(f.alert)}</text>
+    <text x="${x(f.epidemic)}" y="9" text-anchor="middle">epidemic ${fmtN(f.epidemic)}</text>
+    <text x="${x(f.q10)}" y="55" text-anchor="middle">${fmtN(f.q10)}</text><text x="${x(f.q90)}" y="55" text-anchor="middle">${fmtN(f.q90)}</text>
+  </svg>`;
+}
+function spark(n, scale = 1, label = "Weekly cases", showAlert = true) {
+  if (!n.hist || !n.fc) return "";
+  const hist = n.hist.map((v) => v * scale), w = 320, h = 120, pl = 6, pr = 6, pt = 12, pb = 20;
+  const fc = [2, 4, 6, 8].map((hh) => ({ h: hh, ...n.fc[hh] }));
+  const xs = d3.scaleLinear().domain([-(hist.length - 1), 8]).range([pl, w - pr]);
+  const top = d3.max([...hist, ...fc.map((f) => f.q90 * scale), ...fc.map((f) => f.alert * scale)]) * 1.08 || 1;
+  const ys = d3.scaleLinear().domain([0, top]).range([h - pb, pt]);
+  const last = hist[hist.length - 1];
+  const line = hist.map((v, i) => `${i ? "L" : "M"}${xs(i - hist.length + 1).toFixed(1)} ${ys(v).toFixed(1)}`).join("");
+  const area = line + `L${xs(0).toFixed(1)} ${ys(0)}L${xs(-(hist.length - 1)).toFixed(1)} ${ys(0)}Z`;
+  const band = `M${xs(0)} ${ys(last)}` + fc.map((f) => `L${xs(f.h).toFixed(1)} ${ys(f.q90 * scale).toFixed(1)}`).join("") + [...fc].reverse().map((f) => `L${xs(f.h).toFixed(1)} ${ys(f.q10 * scale).toFixed(1)}`).join("") + "Z";
+  const mid = `M${xs(0)} ${ys(last)}` + fc.map((f) => `L${xs(f.h).toFixed(1)} ${ys(f.q50 * scale).toFixed(1)}`).join("");
+  const alert = fc.map((f, i) => `${i ? "L" : "M"}${xs(f.h).toFixed(1)} ${ys(f.alert * scale).toFixed(1)}`).join("");
+  const hf = fc.find((f) => f.h === horizon);
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}: last ${hist.length} weeks and the forecast for 2 to 8 weeks ahead">
+    <line x1="${pl}" x2="${w - pr}" y1="${ys(0)}" y2="${ys(0)}" stroke="var(--line-strong)"/>
+    <line x1="${xs(0)}" x2="${xs(0)}" y1="${pt - 6}" y2="${h - pb}" stroke="var(--line-strong)" stroke-dasharray="2 3"/>
+    <path d="${area}" fill="var(--ramp-hi)" opacity=".1"/>
+    <path d="${line}" fill="none" stroke="var(--ramp-hi)" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="${band}" fill="var(--lv-${lvOf(n) === "none" ? "normal" : lvOf(n)})" opacity=".28"/>
+    ${showAlert ? `<path d="${alert}" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>` : ""}
+    <path d="${mid}" fill="none" stroke="var(--ink)" stroke-width="1.8"/>
+    <circle cx="${xs(hf.h)}" cy="${ys(hf.q50 * scale)}" r="4" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+    <text x="${pl}" y="${h - 5}">${hist.length} weeks ago</text>
+    <text x="${xs(0)}" y="${h - 5}" text-anchor="middle">now</text>
+    <text x="${w - pr}" y="${h - 5}" text-anchor="end">+8 wks</text>
+    ${showAlert ? `<text x="${w - pr}" y="${Math.max(pt, ys(fc[3].alert * scale) - 5)}" text-anchor="end">alert line</text>` : ""}
+  </svg>`;
+}
+function panelCountry() {
+  const list = [...regions.values()].sort((a, b) => (fcOf(b)?.q50_per100k ?? -1) - (fcOf(a)?.q50_per100k ?? -1));
+  const peak = fcOf(list[0]).q50_per100k;
+  const cnt = (lv) => list.filter((r) => lvOf(r) === lv).length;
+  const top = [...bgys.values()].sort((a, b) => a.rank - b.rank)[0];
+  return `<div class="pbody">
+    <div><div class="eyebrow"><span>Philippines</span><span>· 17 regions</span></div><h2 class="ptitle">Where dengue is expected ${horizon} weeks from now</h2>${stamp("region")}</div>
+    <div class="counts">${LV_ORDER.map((lv) => `<div><b class="nums">${cnt(lv)}</b><span><i class="sw" style="background:var(--lv-${lv})"></i>${LV_NAME[lv]}</span></div>`).join("")}</div>
+    <div class="tour"><b>See the full drill-down</b><p>Fly from the whole country to NCR, then Quezon City, then ${esc(top.name)}, the barangay with the most cases from 2022 to 2025.</p><div><button class="btn" type="button" data-tour><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.8v10.4L13 8 4 2.8Z"/></svg>Play the flight</button></div></div>
+    <div class="sect"><h3>Regions, per 100,000 <small>${horizon}-week forecast</small></h3><ol class="rows">${list.map((r, i) => { const f = fcOf(r); return row(i + 1, r, f.q50_per100k.toFixed(1), f.q50_per100k / peak, `var(--lv-${lvOf(r)})`); }).join("")}</ol></div>
+  </div>`;
+}
+function panelRegion(r) {
+  const f = fcOf(r), lv = lvOf(r);
+  const ps = [...provs.values()].filter((p) => p.region === r.id).sort((a, b) => (fcOf(b)?.q50_per100k ?? -1) - (fcOf(a)?.q50_per100k ?? -1));
+  const peak = Math.max(...ps.map((p) => fcOf(p)?.q50_per100k ?? 0), 1e-9);
+  const qcRow = r.id === "R_NCR" ? `<div class="sect"><h3>City with barangay data</h3><ul class="rows">${row("", QC, `${fmtN(fcOf(QC).q50)} cases`, 1, `var(--lv-${lvOf(QC)})`, ` <span class="go">142 barangays</span>`)}</ul></div>` : "";
+  return `<div class="pbody">
+    <div><div class="eyebrow"><span>Region</span><span>· ${esc(r.code)}</span><span>· pop. ${(r.pop / 1e6).toFixed(1)}M</span></div><h2 class="ptitle">${esc(r.nice)}</h2><p class="lead">${esc(r.name)}</p></div>
+    <div style="display:grid;gap:8px">${pill(lv)}${stamp("region")}</div>
+    <div class="stats"><div class="stat"><b class="nums">${fmtN(f.q50)}</b><span>expected cases</span></div><div class="stat"><b class="nums">${fmtN(f.q10)}–${fmtN(f.q90)}</b><span>likely range</span></div><div class="stat"><b class="nums">${f.q50_per100k.toFixed(1)}</b><span>per 100,000</span></div></div>
+    <div class="sect gauge"><h3>Range against thresholds</h3>${gauge(f)}</div>
+    <div class="sect spark"><h3>Weekly cases and forecast <small>to ${fmtDate(r.histEnd)}</small></h3>${spark(r)}</div>
+    ${qcRow}
+    <div class="sect"><h3>Provinces, per 100,000 <small>older run</small></h3><ol class="rows">${ps.map((p, i) => { const pf = fcOf(p); return row(i + 1, p, pf ? pf.q50_per100k.toFixed(1) : "–", pf ? pf.q50_per100k / peak : 0, `var(--lv-${lvOf(p)})`); }).join("")}</ol>${stamp("province")}</div>
+  </div>`;
+}
+function panelProvince(p) {
+  const f = fcOf(p), lv = lvOf(p), r = regions.get(p.region);
+  const sib = [...provs.values()].filter((x) => x.region === p.region && x !== p);
+  return `<div class="pbody">
+    <div><div class="eyebrow"><span>Province</span><span>· ${esc(r.code)}</span>${p.pop ? `<span>· pop. ${(p.pop / 1e6).toFixed(2)}M</span>` : ""}</div><h2 class="ptitle">${esc(shortProv(p.name))}</h2><p class="lead">${esc(r.nice)}</p></div>
+    <div style="display:grid;gap:8px">${pill(lv)}${stamp("province")}</div>
+    ${f ? `<div class="stats"><div class="stat"><b class="nums">${fmtN(f.q50)}</b><span>expected cases</span></div><div class="stat"><b class="nums">${fmtN(f.q10)}–${fmtN(f.q90)}</b><span>likely range</span></div><div class="stat"><b class="nums">${f.q50_per100k.toFixed(1)}</b><span>per 100,000</span></div></div>
+    <div class="sect gauge"><h3>Range against thresholds</h3>${gauge(f)}</div>
+    <div class="sect spark"><h3>Weekly cases and forecast <small>to ${fmtDate(p.histEnd)}</small></h3>${spark(p)}</div>` : `<div class="note">No forecast for this province in the data files.</div>`}
+    <div class="note"><b>No towns or barangays here yet.</b> The repo has barangay shapes for Quezon City only. Once municipal boundaries are added, this level opens up the same way.${p.region === "R_NCR" ? "" : ""}</div>
+    <div class="sect"><h3>Other provinces in ${esc(r.code)}</h3><div class="chips">${sib.map((s) => `<button type="button" class="chipbtn" ${go_(s)} data-hl="${s.id}"><span class="sw" style="background:var(--lv-${lvOf(s)})"></span>${esc(shortProv(s.name))}</button>`).join("")}${p.region === "R_NCR" ? `<button type="button" class="chipbtn" ${go_(QC)}><span class="sw" style="background:var(--lv-${lvOf(QC)})"></span>Quezon City</button>` : ""}</div></div>
+  </div>`;
+}
+function panelCity() {
+  const f = fcOf(QC), lv = lvOf(QC);
+  const list = [...bgys.values()].sort((a, b) => a.rank - b.rank).slice(0, 12);
+  return `<div class="pbody">
+    <div><div class="eyebrow"><span>City</span><span>· NCR</span><span>· pop. ${(QC.pop / 1e6).toFixed(2)}M</span></div><h2 class="ptitle">Quezon City</h2><p class="lead">142 barangays. Pick one on the map or below.</p></div>
+    <div style="display:grid;gap:8px">${pill(lv)}${stamp("region")}</div>
+    <div class="big"><b class="nums">${fmtN(qc8)}</b><span>cases expected across the city over the next 8 weeks</span></div>
+    <div class="stats"><div class="stat"><b class="nums">${fmtN(f.q50)}</b><span>expected in week +${horizon}</span></div><div class="stat"><b class="nums">${fmtN(f.q10)}–${fmtN(f.q90)}</b><span>likely range</span></div><div class="stat"><b class="nums">${f.q50_per100k.toFixed(1)}</b><span>per 100,000</span></div></div>
+    <div class="sect spark"><h3>Weekly cases and forecast <small>to ${fmtDate(QC.histEnd)}</small></h3>${spark(QC)}</div>
+    <div class="sect"><h3>Barangays, expected next 8 weeks <small>top 12 of 142</small></h3><ol class="rows">${list.map((b) => row(b.rank, b, fmtN(b.exp), b.exp / maxExp, ramp(b.exp))).join("")}</ol></div>
+    <div class="note">Weekly forecasts are city-wide. Barangay data is yearly only, so the city forecast is shared out by each barangay's share of cases in 2022–2025.</div>
+  </div>`;
+}
+function panelBarangay(b) {
+  const nbs = b.nb.map((id) => bgys.get(id)).sort((x, y) => x.rank - y.rank);
+  const vsMed = b.exp / medianExp;
+  return `<div class="pbody">
+    <div><div class="eyebrow"><span>Barangay</span><span>· Quezon City</span><span>· ${esc(b.pcode)}</span></div><h2 class="ptitle">${esc(b.name)}</h2><p class="lead">Rank ${b.rank} of 142 by expected cases</p></div>
+    <div class="big"><b class="nums">${fmtN(b.exp)}</b><span>cases expected over the next 8 weeks</span></div>
+    <div class="stats"><div class="stat"><b class="nums">${(b.share * 100).toFixed(1)}%</b><span>of city cases</span></div><div class="stat"><b class="nums">${b.c25.toLocaleString("en-US")}</b><span>cases in 2025</span></div><div class="stat"><b class="nums">${b.c22.toLocaleString("en-US")}</b><span>cases 2022–2025</span></div></div>
+    <div class="sect"><h3>Compared with other barangays</h3><div class="cmp">
+      <div><span>${esc(b.name)}</span><i style="width:${(b.exp / maxExp * 100).toFixed(1)}%;background:${ramp(b.exp)}"></i><em class="nums">${fmtN(b.exp)}</em></div>
+      <div><span>Median barangay</span><i style="width:${(medianExp / maxExp * 100).toFixed(1)}%;background:var(--line-strong)"></i><em class="nums">${fmtN(medianExp)}</em></div>
+      ${b.rank === 1 ? "" : `<div><span>Highest (${esc([...bgys.values()].find((x) => x.rank === 1).name)})</span><i style="width:100%;background:var(--ramp-hi)"></i><em class="nums">${fmtN(maxExp)}</em></div>`}
+    </div><p class="lead" style="font-size:12.5px">${vsMed >= 1 ? `${vsMed.toFixed(1)}× the median barangay.` : `${(1 / vsMed).toFixed(1)}× below the median barangay.`}</p></div>
+    <div class="sect spark"><h3>City trend, scaled to this barangay <small>${(b.share * 100).toFixed(1)}% share</small></h3>${spark(QC, b.share, "Quezon City weekly cases scaled by this barangay's share", false)}</div>
+    <div class="sect"><h3>Neighbouring barangays <small>${nbs.length}</small></h3><div class="chips">${nbs.map((x) => `<button type="button" class="chipbtn" ${go_(x)} data-hl="${x.id}"><span class="sw" style="background:${ramp(x.exp)}"></span>${esc(x.name)} <span class="nums" style="color:var(--muted)">${fmtN(x.exp)}</span></button>`).join("") || "<span class='lead'>None found in the boundary file.</span>"}</div></div>
+    <div class="note">${b.polys ? "" : "<b>No shape in the boundary file for this barangay.</b> "}Barangays have no alert level of their own: these figures are the city forecast shared out by this barangay's share of 2022–2025 cases.</div>
+  </div>`;
+}
+function renderPanel(n) {
+  const lvl = levelOf(n);
+  panel.innerHTML = lvl === "country" ? panelCountry() : lvl === "region" ? panelRegion(n) : lvl === "province" ? panelProvince(n) : lvl === "city" ? panelCity() : panelBarangay(n);
+  panel.scrollTop = 0;
+}
+panel.addEventListener("click", (e) => {
+  if (e.target.closest("[data-tour]")) { tour(); return; }
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  const n = get(b.dataset.go); if (n) { hideTip(); go(n); }
+});
+panel.addEventListener("pointerover", (e) => { const b = e.target.closest("[data-hl]"); const n = b && get(b.dataset.hl); showHover(n && (n.polys || n.kind === "city") ? n : null); });
+panel.addEventListener("pointerleave", () => showHover(null));
+
+async function tour() {
+  const top = [...bgys.values()].find((b) => b.rank === 1);
+  if (cur) { await go(null); await wait(250); }
+  go(top);
+}
+
+/* ---------- horizon ---------- */
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+  horizon = +b.dataset.h;
+  document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  refresh();
+}));
+
+/* ---------- search ---------- */
+const q = $("#q"), res = $("#results");
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const index = [
+  ...[...regions.values()].map((r) => ({ n: r, kind: "Region", label: r.nice, sub: r.code, key: norm(`${r.nice} ${r.name} ${r.code}`) })),
+  ...[...provs.values()].map((p) => ({ n: p, kind: "Province", label: shortProv(p.name), sub: regions.get(p.region).code, key: norm(p.name) })),
+  { n: QC, kind: "City", label: "Quezon City", sub: "NCR", key: "quezon city qc" },
+  ...[...bgys.values()].map((b) => ({ n: b, kind: "Barangay", label: b.name, sub: "Quezon City", key: norm(b.name) })),
+];
+let hits = [], sel = 0;
+function showResults() {
+  const v = norm(q.value.trim());
+  if (!v) { res.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
+  hits = index.filter((x) => x.key.includes(v)).sort((a, b) => (a.key.startsWith(v) ? 0 : 1) - (b.key.startsWith(v) ? 0 : 1)).slice(0, 9);
+  sel = 0;
+  res.innerHTML = hits.length ? hits.map((h, i) => `<li role="option" id="opt${i}" data-i="${i}" aria-selected="${i === sel}"><span class="kind">${h.kind}</span><b>${esc(h.label)}</b><small>${esc(h.sub)}</small></li>`).join("") : `<li aria-disabled="true"><b>No match</b><small>Try a region, province or QC barangay</small></li>`;
+  res.hidden = false; q.setAttribute("aria-expanded", "true");
+}
+function pick(i) { const h = hits[i]; if (!h) return; res.hidden = true; q.value = ""; q.blur(); go(h.n); }
+q.addEventListener("input", showResults);
+q.addEventListener("keydown", (e) => {
+  if (res.hidden) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % hits.length; res.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === sel))); q.setAttribute("aria-activedescendant", "opt" + sel); }
+  else if (e.key === "Enter") { e.preventDefault(); pick(sel); }
+  else if (e.key === "Escape") { res.hidden = true; }
+});
+res.addEventListener("pointerdown", (e) => { const li = e.target.closest("li[data-i]"); if (li) { e.preventDefault(); pick(+li.dataset.i); } });
+q.addEventListener("blur", () => setTimeout(() => { res.hidden = true; }, 120));
+
+
+/* ---------- resize, theme, hash, boot ---------- */
+function setSceneColors() {
+  const sea = new THREE.Color(cssv("--sea"));
+  renderer.setClearColor(sea, 1); scene.fog.color.copy(sea);
+  const dark = cssv("color-scheme") === "dark" || (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches && document.documentElement.dataset.theme !== "light");
+  shadowMat.opacity = dark ? .45 : .2;
+  hemi.intensity = dark ? .5 : .62; sun.intensity = dark ? .62 : .55;
+}
+new ResizeObserver(() => {
+  const w = mapEl.clientWidth, h = mapEl.clientHeight;
+  if (!w || !h || (w === vw && h === vh)) return;
+  vw = w; vh = h; renderer.setSize(vw, vh, false); ov.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+  if (!flight) Object.assign(C, fitCam(bbOf(cur), levelOf(cur)));
+  kick();
+}).observe(mapEl);
+const retheme = () => { setRamp(); setSceneColors(); refresh(true); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", retheme);
+new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+window.addEventListener("hashchange", () => {
+  const n = byHash.get(location.hash.slice(1)) || null;
+  if (n !== cur) go(n);
+});
+ov.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+setSceneColors();
+Object.assign(C, fitCam([0, 0, W, H], "country"));
+applyState(null, null, 0);
+// first rise: regions grow north to south
+if (!reduce) for (const r of regions.values()) { const t = tw.get(r); if (t) t.t0 = performance.now() + 150 + (r.c[1] / H) * 700; }
+const start = byHash.get(location.hash.slice(1));
+if (start) setTimeout(() => go(start), 900);
+})();
+</script>
