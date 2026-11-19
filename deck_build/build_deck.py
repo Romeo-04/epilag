@@ -269,7 +269,7 @@ S.append(slide(7, "Data", "Data Sources and Cleaning", "Four public sources, cle
 
 # ================================================================== 8 Features
 groups8 = [("Recent cases", "8 inputs", "this week, 1 to 3 weeks back, 4 and 12 week averages, trend, same week last year", 0, 3, "var(--ink)"),
-           ("Rain", "15 inputs", "each of the last 12 weeks, plus 4, 8 and 12 week totals", 0, 11, "var(--accent)"),
+           ("Rain", "16 inputs", "each of the last 12 weeks, plus 4, 8 and 12 week totals, and heavy-rain days (50 mm or more) in 8 weeks", 0, 11, "var(--accent)"),
            ("Humidity", "5 inputs", "0, 2, 4, 6 and 8 weeks back", 0, 8, "var(--accent)"),
            ("Temperature", "6 inputs", "0, 2, 4, 6 and 8 weeks back, plus the 4 week maximum", 0, 8, "var(--accent)"),
            ("Time of year", "2 inputs", "sine and cosine, so December sits next to January", None, None, "var(--faint)"),
@@ -284,7 +284,7 @@ for i, (n, cnt, d, a, b_, col) in enumerate(groups8):
 axis8 = f'<svg viewBox="0 0 {fw} 50" width="{fw}" height="50"><line x1="20" x2="{fw-20}" y1="6" y2="6" class="axis"/>' + "".join(f'<text x="{fx(k):.0f}" y="38" class="tick" text-anchor="middle">{k}</text>' for k in (0, 2, 4, 6, 8, 10, 12)) + "</svg>"
 S.append(slide(8, "Data", "Feature Engineering", "The literature's lags, turned into model inputs.", f'''
 <div class="f8"><div class="frs">{f8}<div class="fr axisrow"><div class="fn"></div>{axis8}</div><div class="axlab">weeks before the forecast is made</div></div>
-<div class="f8side"><div class="big">38</div><div class="cap">inputs per province forecast. Regions and Quezon City use 26: their live data has rain but not temperature or humidity.</div>
+<div class="f8side"><div class="big">38</div><div class="cap">inputs per province forecast. Regions and Quezon City use 26: rain, but not heavy-rain days, temperature or humidity.</div>
 <div class="rule2">Every input is known on the day the forecast is made. No future data, ever.</div></div></div>''',
     "src/features.py, feature_columns(). Temperature and humidity were tested for regions in the research (slide 15)."))
 
@@ -551,17 +551,53 @@ S.append(slide(17, "System", "The System, for Residents and Training", "Plain wo
     "Live app and Dengue Drill (epilag.vercel.app). Drill result checked in tests/test_drill_rules.py."))
 
 # ================================================================== 18 Scaling roadmap
-phases = [("Pilot", "1 city, 1 rainy season", [("Who", "one city health office's epidemiology team"), ("Data", "weekly case counts they already report"), ("Cost", "free static hosting; a few hours a week"), ("Success", "lead time, outbreaks caught, false alarms, scored live")]),
-          ("Regional", "a region's provinces", [("Who", "regional epidemiology unit"), ("Data", "weekly province counts plus temperature and humidity"), ("Cost", "same pipeline, more areas"), ("Success", "beats “same as this week” on a new season")]),
-          ("National", "all provinces", [("Who", "DOH Epidemiology Bureau dashboards"), ("Data", "province data after 2021, automated weekly"), ("Cost", "one scheduled job, open data"), ("Success", "alerts used in budget and clean-up decisions")])]
-ph = ""
-for i, (n, sub, items) in enumerate(phases):
-    ph += f'<div class="phase{" last" if i == 2 else ""}"><div class="phn"><span>{i+1}</span><b>{n}</b><small>{sub}</small></div>' + "".join(f'<div class="phi"><em>{a}</em>{b}</div>' for a, b in items) + "</div>"
-bg18 = '<img class="topimg" src="assets/scale.jpg">' if HAS("scale.jpg") else ""
-S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start with one city. Prove it on a new season. Then grow.", f'''{bg18}
-<div class="phases">{ph}</div>
-<div class="sustain"><span><b>Open source</b> code and open forecast data</span><span><b>No install</b> runs in any browser, on any phone</span><span><b>Public data only</b> no new data collection needed</span></div>''',
-    "Planned phases; no partnership is claimed. Costs assume the current static site and weekly batch pipeline."))
+# First barangay = highest average yearly cases of QC's 142 (UPRI NOAH 2010-2025): Batasan Hills, 327 a year.
+# Cases averted per season = season cases x 65% in the 24 busiest weeks (QC median, 2014-24 seasons)
+#   x 30% of residents covered per 8-week round (src/allocate.py max coverage) x effect 10/30/50% (allocate.py).
+qcb = pd.read_csv(ROOT / "data/raw/upri_noah/QC_YearlyData-Barangay(CSV).csv")
+yrs = [f"DC_{y}" for y in range(2010, 2026)]
+qcb["avg"] = qcb[yrs].mean(axis=1)
+first = qcb.sort_values("avg", ascending=False).iloc[0]
+assert first.Barangay == "Batasan Hills"
+D2 = ["Batasan Hills", "Payatas", "Commonwealth", "Holy Spirit", "Bagong Silangan"]
+r4 = ["DC_2022", "DC_2023", "DC_2024", "DC_2025"]
+typ_b, typ_d2, typ_qc = first[r4].mean(), qcb[qcb.Barangay.isin(D2)][r4].sum().mean(), qcb[r4].sum().mean()
+d2_share = qcb[qcb.Barangay.isin(D2)][r4].sum().sum() / qcb[r4].sum().sum()
+F = [0.65 * 0.30 * e for e in (0.10, 0.30, 0.50)]
+av = lambda cases: [round(cases * f) for f in F]  # noqa: E731
+avB, avB25, avD2, avQC = av(typ_b), av(first.DC_2025), av(typ_d2), av(typ_qc)
+avDec = [round(v * 0.65) for v in avB]  # Jul-Dec holds ~65% of a QC season
+POP_B, POP_QC, PESO = 168_770, 3_084_270, 15  # PSA 2024 census (POPCEN); app's example cost per resident covered
+round_b, round_qc = POP_B * 0.30 * PESO / 1e6, POP_QC * 0.30 * PESO / 1e6
+print("slide 18:", first.Barangay, round(first.avg), "typical", typ_b, avB, avB25, avDec, "D2", round(typ_d2), avD2, round(d2_share, 3), "QC", round(typ_qc), avQC, round(round_b, 2), round(round_qc, 1))
+
+months = [("Setup", 2, "data link"), ("Shadow run", 4, "forecasts scored, no action"), ("Live: rainy season", 6, "a Watch triggers clean-up within a week"),
+          ("Early-year tail", 3, "2025 peaked in Feb"), ("Evaluate", 3, "go or no-go")]
+seg = "".join(f'<div class="mseg m{i}" style="flex:{n}"><b>{name}</b><small>{what}</small></div>' for i, (name, n, what) in enumerate(months))
+ticks = "".join(f'<span style="left:{i / 18 * 100:.3f}%">{m}</span>' for i, m in [(0, "Jan 2027"), (6, "Jul"), (12, "Jan 2028"), (18, "Jun 2028")])
+res = [("Jun 2027", "Forecasts scored live", "first clean-up round before the rains"),
+       ("Dec 2027", f"{avDec[1]} fewer cases", f"range {avDec[0]} to {avDec[2]}"),
+       ("Jun 2028", "Lead time, response and false alarms scored", f"{avB[1]} fewer cases expected ({avB[0]} to {avB[2]}); {avB25[1]} in a 2025-sized season")]
+resh = "".join(f'<div class="res"><em>{d}</em><b>{t}</b><small>{s}</small></div>' for d, t, s in res)
+steps = [("2", "District 2", "Jul 2028", f"+ Payatas, Commonwealth, Holy Spirit, Bagong Silangan: {d2_share*100:.0f}% of the city's cases",
+          avD2, "₱0.45M a round per 100,000 residents"),
+         ("3", "All of Quezon City", "Jul 2029", "142 barangays, " + f"{POP_QC/1e6:.2f}" + " million people; money goes first where it averts the most cases per peso",
+          avQC, f"₱{round_qc:.0f}M per citywide round"),
+         ("4", "NCR, then national", "from 2030", "regional epidemiology units, then the DOH Epidemiology Bureau; province forecasts already run weekly",
+          None, "one scheduled job, open data")]
+sth = "".join(f'<div class="sstep"><div class="shead"><span>{n}</span><div class="sn"><b>{t}</b><em>{w}</em></div>'
+              + (f'<div class="sv"><b>{v[1]}</b><small>fewer cases a season<br>range {v[0]} to {v[2]}</small></div>' if v else "")
+              + f'</div><p>{d}</p><p class="c">{c}</p></div>' for n, t, w, d, v, c in steps)
+body18 = f"""
+<div class="s18"><div class="pilot"><div class="ptag"><span>1</span><div><b>Batasan Hills, Quezon City</b><small>the most dengue cases of the city's 142 barangays: {first.avg:.0f} a year since 2010, {int(first.DC_2025)} in 2025; about {POP_B/1000:.0f},000 people</small></div></div>
+<div class="mbar">{seg}</div><div class="mticks">{ticks}</div>
+<div class="kicker">Expected results (estimates), compared with Payatas, Commonwealth and Holy Spirit</div>
+<div class="results">{resh}</div>
+<p class="pass"><b>Pass mark:</b> a Watch 4+ weeks before cases cross the epidemic line, clean-up within a week, few false alarms.</p>
+<div class="bcost"><div><b>₱0</b><small>to run EpiLag-PH; about 4 staff hours a week</small></div><div><b>₱{round_b:.2f}M</b><small>per clean-up round; 3 rounds: ₱{3*round_b:.1f}M a season, less if it shifts clean-ups already planned</small></div></div></div>
+<div class="scale"><div class="kicker">Then grow, one step at a time</div>{sth}</div></div>"""
+S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's barangay with the most dengue cases. Prove it. Then grow.", body18,
+    "Estimates. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents reached × effect 10/30/50% (Bowman 2016). Clean-up round: 30% of residents at the app's example cost of ₱15 each. Population: PSA 2024 census. No partnership is claimed."))
 
 # ================================================================== 19 Outro
 S.append(f'''<section class="slide dark outro"><img class="half" src="assets/frog_outro.png" alt="The EpiLag-PH frog catching a mosquito">{top(None)}
