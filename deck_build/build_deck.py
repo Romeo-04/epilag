@@ -571,32 +571,26 @@ POP_B, POP_QC, PESO = 166_572, 2_960_048, 15  # PSA 2020; app's example cost per
 round_b, round_qc = POP_B * 0.30 * PESO / 1e6, POP_QC * 0.30 * PESO / 1e6
 print("slide 18:", first.Barangay, round(first.avg), "typical", typ_b, avB, avB25, avDec, "D2", round(typ_d2), avD2, round(d2_share, 3), "QC", round(typ_qc), avQC, round(round_b, 2), round(round_qc, 1))
 
-months = [("Setup", 2, "data link, triggers"), ("Shadow run", 4, "forecasts logged and scored, no action yet"),
-          ("Live: rainy season", 6, "a Watch triggers clean-up + container covers within a week"),
-          ("Early-year tail", 3, "2025's peak came in February"), ("Evaluate", 3, "go or no-go for step 2")]
-seg = "".join(f'<div class="mseg m{i}" style="flex:{n}"><b>{name}</b><small>{what}</small></div>' for i, (name, n, what) in enumerate(months))
+months = [("Setup", 2), ("Shadow run", 4), ("Live: rainy season", 6), ("Early-year tail", 3), ("Evaluate", 3)]
+seg = "".join(f'<div class="mseg m{i}" style="flex:{n}"><b>{name}</b></div>' for i, (name, n) in enumerate(months))
 ticks = "".join(f'<span style="left:{i / 18 * 100:.3f}%">{m}</span>' for i, m in [(0, "Jan 2027"), (6, "Jul"), (12, "Jan 2028"), (18, "Jun 2028")])
-res = [("Jun 2027", "Forecasts scored live", "first clean-up round before the rains"),
-       ("Dec 2027", f"{avDec[1]} fewer reported cases", f"range {avDec[0]} to {avDec[2]}"),
-       ("Jun 2028", f"{avB[1]} fewer in a typical season", f"range {avB[0]} to {avB[2]}; {avB25[1]} in a 2025-sized one")]
+res = [("Jun 2027", "Forecasts scored live", "no action yet"),
+       ("Dec 2027", f"{avDec[1]} fewer cases", f"expected, range {avDec[0]} to {avDec[2]}"),
+       ("Jun 2028", "Lead time, response and false alarms scored", f"{avB[1]} fewer cases expected ({avB[0]} to {avB[2]})")]
 resh = "".join(f'<div class="res"><em>{d}</em><b>{t}</b><small>{s}</small></div>' for d, t, s in res)
-steps = [("2", "District 2", "Jul 2028 to Jun 2029", f"+ Payatas, Commonwealth, Holy Spirit, Bagong Silangan: {d2_share*100:.0f}% of the city's cases",
-          f"{avD2[1]} fewer cases a season ({avD2[0]} to {avD2[2]})", "₱0.45M a round per 100,000 residents"),
-         ("3", "All of Quezon City", "Jul 2029 to Jun 2030", "142 barangays, 2.96 million people; money goes first where it averts the most cases per peso",
-          f"up to {avQC[1]} fewer a season ({avQC[0]} to {avQC[2]})", f"₱{round_qc:.0f}M per citywide round"),
-         ("4", "NCR, then national", "from 2030", "regional epidemiology units, then the DOH Epidemiology Bureau",
-          "", "province forecasts already run weekly; one scheduled job")]
-sth = "".join(f'<div class="sstep"><span>{n}</span><div><b>{t}</b><em>{w}</em><p>{d}</p>' + (f'<p class="g">{r}</p>' if r else "") + f'<p class="c">{c}</p></div></div>' for n, t, w, d, r, c in steps)
+steps = [("2", "District 2", "Jul 2028", f"{avD2[1]}", "fewer cases a season"),
+         ("3", "All of Quezon City", "Jul 2029", f"{avQC[1]}", "fewer cases a season"),
+         ("4", "NCR, then national", "from 2030", "", "")]
+sth = "".join(f'<div class="sstep"><span>{n}</span><div class="sn"><b>{t}</b><em>{w}</em></div>'
+              + (f'<div class="sv"><b>{v}</b><small>{u}</small></div>' if v else "") + "</div>" for n, t, w, v, u in steps)
 body18 = f"""
-<div class="s18"><div class="pilot"><div class="ptag"><span>1</span><div><b>Batasan Hills, Quezon City</b><small>Jan 2027 to Jun 2028, about 167,000 people</small></div></div>
-<p class="bwhy">Highest dengue of the city's 142 barangays: <b>{first.avg:.0f} cases a year</b> on average since 2010, <b>{int(first.DC_2025)}</b> in 2025.</p>
+<div class="s18"><div class="pilot"><div class="ptag"><span>1</span><div><b>Batasan Hills, Quezon City</b><small>{first.avg:.0f} cases a year, the most of the city's 142 barangays</small></div></div>
 <div class="mbar">{seg}</div><div class="mticks">{ticks}</div>
-<div class="kicker">Expected results (estimates), compared with Payatas, Commonwealth and Holy Spirit</div><div class="results">{resh}</div>
-<p class="outb"><b>Outbreaks:</b> a Watch 4+ weeks before cases cross the epidemic line, and fewer weeks above it than comparison barangays.</p>
-<div class="bcost"><div><em>EpiLag-PH</em><b>₱0</b><small>open source, free hosting; about 4 staff hours a week</small></div><div><em>Each clean-up round</em><b>₱{round_b:.2f}M</b><small>50,000 residents at ₱{PESO} each; 3 rounds: ₱{3*round_b:.1f}M a season, less if it re-times clean-ups already planned</small></div></div></div>
-<div class="scale"><div class="kicker">Then scale, one step at a time</div>{sth}</div></div>"""
-S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's hardest-hit barangay. Prove it on one season. Then grow.", body18,
-    "Estimates, not promises. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents covered × effect 10/30/50% (Bowman 2016). Typical = 2022 to 2025 average. Costs are the app's example values. No partnership is claimed."))
+<div class="results">{resh}</div>
+<div class="bcost"><div><b>₱0</b><small>to run EpiLag-PH</small></div><div><b>₱{round_b:.2f}M</b><small>per clean-up round</small></div></div></div>
+<div class="scale"><div class="kicker">Then grow</div>{sth}</div></div>"""
+S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills. Prove it. Then grow.", body18,
+    "Estimates. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents reached × effect 10/30/50% (Bowman 2016). Clean-up round: 50,000 residents at the app's example cost of ₱15 each. No partnership is claimed."))
 
 # ================================================================== 19 Outro
 S.append(f'''<section class="slide dark outro"><img class="half" src="assets/frog_outro.png" alt="The EpiLag-PH frog catching a mosquito">{top(None)}

@@ -24,7 +24,7 @@ ANN = {
     14: [dict(t="falls further behind<br>the further ahead it looks", x=230, y=405, w=330)],
     15: [dict(t="green = helped the forecast", x=1540, y=900, w=320)],
     17: [dict(t="same outbreak data, now playable", x=1380, y=880, w=420)],
-    18: [dict(t="each step must prove itself first", x=1330, y=936, w=520)],
+    18: [dict(t="each step must prove itself first", x=1380, y=900, w=460)],
 }
 
 

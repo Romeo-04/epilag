@@ -45,32 +45,28 @@ blockquote.onphoto cite{display:block;font-size:19px;color:#BFD0C7;font-style:no
 /* slide 17: equal screenshots */
 .dpair img{aspect-ratio:16/9;object-fit:cover;object-position:top;height:auto}
 
-/* slide 18: Batasan Hills first, then scale */
-.s18{display:grid;grid-template-columns:1090px 1fr;gap:56px;margin-top:34px}
-.s18 .kicker{font-size:16px;margin-bottom:12px;color:var(--accent)}
-.s18 .ptag{display:flex;align-items:center;gap:16px}
-.s18 .ptag>span,.s18 .sstep>span{display:inline-flex;flex:none;width:50px;height:50px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:24px;align-items:center;justify-content:center}
-.s18 .ptag b{display:block;font-size:34px;line-height:1.1}.s18 .ptag small{font-size:19px;color:var(--muted)}
-.s18 .bwhy{font-size:20px;line-height:1.4;margin:12px 0 18px;color:var(--ink)}
-.s18 .mbar{display:flex;gap:4px;height:84px}
-.s18 .mseg{border-radius:10px;padding:9px 12px;background:#E7EEE9;overflow:hidden}
-.s18 .mseg b{display:block;font-size:17px;line-height:1.2}.s18 .mseg small{display:block;font-size:14px;line-height:1.25;color:var(--muted);margin-top:3px}
-.s18 .mseg.m2,.s18 .mseg.m3{background:var(--accent);color:#fff}.s18 .mseg.m2 small,.s18 .mseg.m3 small{color:#D6EEDF}
-.s18 .mseg.m4{background:var(--ink);color:#fff}.s18 .mseg.m4 small{color:#C9D6CF}
-.s18 .mticks{position:relative;height:30px;font-size:14px;color:var(--muted);font-weight:600;margin-bottom:10px}
-.s18 .mticks span{position:absolute;white-space:nowrap;top:6px;transform:translateX(-50%)}.s18 .mticks span:first-child{transform:none}.s18 .mticks span:last-child{transform:translateX(-100%)}
-.s18 .results{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.s18 .res{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
-.s18 .res em{display:block;font-style:normal;font-size:15px;font-weight:800;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
-.s18 .res b{display:block;font-size:21px;line-height:1.25;margin-top:4px}.s18 .res small{display:block;font-size:15px;color:var(--muted);margin-top:4px;line-height:1.3}
-.s18 .outb{font-size:18px;line-height:1.4;margin:14px 0 16px}.s18 .outb b{color:var(--red)}
-.s18 .bcost{display:grid;grid-template-columns:330px 1fr;background:var(--ink);border-radius:14px;color:#C9D6CF}
-.s18 .bcost>div{padding:14px 22px}.s18 .bcost>div+div{border-left:1px solid #2A3B33}
-.s18 .bcost em{display:block;font-style:normal;font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9FD9B8}
-.s18 .bcost b{display:block;font-size:32px;color:#fff;line-height:1.15;margin-top:2px}.s18 .bcost small{display:block;font-size:15px;line-height:1.3}
-.s18 .scale{border-left:2px dashed var(--dim2);padding-left:44px}
-.s18 .sstep{display:flex;gap:16px;padding:14px 18px;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px}
-.s18 .sstep>span{width:42px;height:42px;font-size:20px;background:var(--ink)}
-.s18 .sstep b{display:block;font-size:26px;line-height:1.15}.s18 .sstep em{display:block;font-style:normal;font-size:16px;font-weight:700;color:var(--accent);margin:2px 0 6px}
-.s18 .sstep p{font-size:17px;line-height:1.35;color:var(--muted)}.s18 .sstep p.g{color:var(--ink);font-weight:700;margin-top:4px}.s18 .sstep p.c{font-size:16px;margin-top:2px}
-.s18 ~ .foot{bottom:28px}.s18 ~ .foot span:first-child{max-width:1560px;font-size:15px;line-height:1.35}
+/* slide 18: Batasan Hills first, then grow */
+.s18{display:grid;grid-template-columns:1080px 1fr;gap:64px;margin-top:60px}
+.s18 .ptag{display:flex;align-items:center;gap:18px}
+.s18 .ptag>span,.s18 .sstep>span{display:inline-flex;flex:none;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:28px;align-items:center;justify-content:center}
+.s18 .ptag b{display:block;font-size:40px;line-height:1.1}.s18 .ptag small{font-size:22px;color:var(--muted)}
+.s18 .mbar{display:flex;gap:5px;height:78px;margin-top:40px}
+.s18 .mseg{border-radius:10px;padding:0 14px;background:#E7EEE9;display:flex;align-items:center;overflow:hidden}
+.s18 .mseg b{font-size:21px;line-height:1.15}
+.s18 .mseg.m2,.s18 .mseg.m3{background:var(--accent);color:#fff}.s18 .mseg.m4{background:var(--ink);color:#fff}
+.s18 .mticks{position:relative;height:40px;font-size:18px;color:var(--muted);font-weight:600}
+.s18 .mticks span{position:absolute;white-space:nowrap;top:8px;transform:translateX(-50%)}.s18 .mticks span:first-child{transform:none}.s18 .mticks span:last-child{transform:translateX(-100%)}
+.s18 .results{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.s18 .res{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.s18 .res em{display:block;font-style:normal;font-size:16px;font-weight:800;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.s18 .res b{display:block;font-size:26px;line-height:1.2;margin-top:8px}.s18 .res small{display:block;font-size:18px;color:var(--muted);margin-top:6px;line-height:1.3}
+.s18 .bcost{display:grid;grid-template-columns:1fr 1fr;background:var(--ink);border-radius:14px;color:#C9D6CF;margin-top:32px}
+.s18 .bcost>div{padding:26px 30px;display:flex;align-items:baseline;gap:16px}.s18 .bcost>div+div{border-left:1px solid #2A3B33}
+.s18 .bcost b{font-size:48px;color:#fff;line-height:1}.s18 .bcost small{font-size:21px;line-height:1.3}
+.s18 .scale{border-left:2px dashed var(--dim2);padding-left:48px}
+.s18 .kicker{font-size:18px;margin-bottom:6px;color:var(--accent)}
+.s18 .sstep{display:flex;align-items:center;gap:18px;padding:36px 0;border-bottom:1px solid var(--line)}.s18 .sstep:last-child{border-bottom:none}
+.s18 .sstep>span{width:48px;height:48px;font-size:22px;background:var(--ink)}
+.s18 .sn{flex:1}.s18 .sn b{display:block;font-size:31px;line-height:1.15}.s18 .sn em{display:block;font-style:normal;font-size:19px;font-weight:700;color:var(--accent);margin-top:4px}
+.s18 .sv{text-align:right}.s18 .sv b{display:block;font-size:50px;line-height:1;color:var(--accent)}.s18 .sv small{font-size:17px;color:var(--muted)}
+.s18 ~ .foot span:first-child{max-width:1560px}
