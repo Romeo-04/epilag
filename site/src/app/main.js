@@ -81,6 +81,7 @@ function set(patch, { push = true } = {}) {
   if (patch.panel && patch.panel !== state.panel && !Object.prototype.hasOwnProperty.call(patch, "area")) next.area = null;
   if (patch.mode === "latest") next.origin = null;
   const pageChanged = next.page !== state.page;
+  if (pageChanged) ctxOpen = false;
   state = next;
   writeUrl(state, push);
   closeMobileNav();
@@ -193,6 +194,16 @@ function normalizeState(m) {
   return region;
 }
 
+let ctxOpen = false, ctxOpenedAt = 0; // phone settings panel, open or folded (kept while settings change)
+function setCtxOpen(open) {
+  ctxOpen = open;
+  ctxOpenedAt = scrollY;
+  $("ctx").dataset.open = String(open);
+  $("ctx-summary")?.setAttribute("aria-expanded", String(open));
+}
+// the header is sticky, so an open panel would ride along over the page: fold it once the page scrolls on
+addEventListener("scroll", () => { if (ctxOpen && Math.abs(scrollY - ctxOpenedAt) > 120) setCtxOpen(false); }, { passive: true });
+
 function renderChrome(t, originList, m) {
   const labels = LABELS[state.lang];
   const regions = [...(m.regions || [])].sort((a, b) => String(a.psgc).localeCompare(String(b.psgc)));
@@ -237,7 +248,18 @@ function renderChrome(t, originList, m) {
 
   const replay = state.mode === "replay";
   const hs = replay ? [4, 8] : [2, 4, 6, 8];
+  // On phones the four settings fold into one summary line (see .ctx-summary in app.css); desktop shows them all.
+  const where = region ? (areaRows.find((r) => r.value === selectedArea)?.label.replace(/ ·.*$/, "") || region.name) : labels.all_philippines;
+  const when = replay ? `${t.mode_replay} ${fmtDay(dayOf(state.origin))}` : t.mode_latest;
+  const summary = [region && selectedArea !== region.id ? `${region.name} › ${where}` : region ? region.name : where, when, labels.wk_short.replace("{h}", state.h)];
+  $("ctx").dataset.open = String(ctxOpen);
   $("ctx").innerHTML = `
+    <button type="button" class="ctx-summary" id="ctx-summary" aria-expanded="${ctxOpen}" aria-controls="ctx-fields">
+      <span class="ctx-summary__label">${esc(labels.forecast_settings)}</span>
+      <span class="ctx-summary__value">${summary.map((x) => `<span>${esc(x)}</span>`).join("")}</span>
+      <i data-icon="chevronRight" data-size="18" class="ctx-summary__chev"></i>
+    </button>
+    <div class="ctx__fields" id="ctx-fields">
     <label class="ctx__item ctx__item--region" for="c-region"><span class="ctx__label">${esc(labels.region)}</span>
       <select class="ctx__select" id="c-region" aria-label="${esc(labels.region)}">
         <option value=""${state.region ? "" : " selected"}>${esc(labels.all_philippines)}</option>
@@ -255,7 +277,9 @@ function renderChrome(t, originList, m) {
       <input class="ctx__range" type="range" id="c-origin" min="0" max="${Math.max(0, originList.length - 1)}" step="1" value="${Math.max(0, originList.indexOf(dayOf(state.origin)))}" aria-label="${esc(t.origin)}" aria-valuetext="${esc(fmtDay(dayOf(state.origin)))}"></label>` : ""}
     <label class="ctx__item ctx__item--horizon" for="c-h"><span class="ctx__label">${esc(t.horizon)}</span>
       <select class="ctx__select" id="c-h">${hs.map((h) => `<option value="${h}"${h === state.h ? " selected" : ""}>${h}</option>`).join("")}</select>
-    </label>`;
+    </label>
+    </div>`;
+  $("ctx-summary").addEventListener("click", () => setCtxOpen(!ctxOpen));
   $("c-region").addEventListener("change", (e) => {
     const id = e.target.value || null;
     set({ region: id, panel: "region_qc", area: id }, { push: true });

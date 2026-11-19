@@ -14,7 +14,7 @@ body.drill::before { content: ""; position: fixed; inset: 0; pointer-events: non
 .btn--go:disabled, .btn--dark-ghost:disabled { opacity: .4; cursor: not-allowed; filter: none; }
 .btn--dark-ghost { border-radius: 0; }
 .screen { position: relative; z-index: 1; display: none; min-height: 100vh; }
-.screen.on { display: block; animation: d-enter .5s var(--ease-out) both; }
+.screen.on { display: block; animation: d-enter .5s var(--ease-out) backwards; } /* not "both": a kept transform would trap the fixed area sheet */
 .back { position: absolute; top: 20px; left: var(--gutter); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: var(--night-muted); text-decoration: none; z-index: 2; }
 .back:hover { color: var(--night-text); }
 
@@ -612,3 +612,25 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
   .backdrop__key { display: none; }
   #s-title .title, #s-brief .briefing { padding-bottom: 40px; }
 }
+
+/* ------------------------------------------------------------------ phones: a full-height board, the area as a sheet */
+.detail__close { display: none; }
+@media (max-width: 680px) {
+  /* the board fills the screen under the HUD; the list follows below it */
+  .board-wrap { height: calc(100svh - 230px); min-height: 380px; max-height: 760px; }
+  /* the picked area slides up over the board, above the turn bar, so a team can be sent without scrolling */
+  body.sheet-open #detail { position: fixed; left: 6px; right: 6px; bottom: 76px; z-index: 20; max-height: 58svh; overflow-y: auto; gap: 8px;
+    padding: 12px 12px 10px; border: 2px solid var(--night-line); background: rgba(16, 27, 66, .97);
+    box-shadow: inset 2px 2px 0 var(--d-hi), inset -2px -2px 0 var(--d-lo), 0 -12px 30px rgba(0, 0, 0, .45); animation: d-sheet .22s var(--ease-out) both; }
+  body.sheet-open #detail .chart-surface, body.sheet-open #detail .chart-key { display: none; }
+  body.sheet-open #detail .kv .panel { padding: 7px 9px; }
+  body.sheet-open #s-game .side { padding-bottom: 270px; } /* the end of the list can scroll clear of the sheet */
+  .detail__head { align-items: center; }
+  .detail__head h3 { font-size: 19px; }
+  .detail__close { display: grid; place-items: center; width: 40px; height: 40px; margin: -6px -6px -6px auto; color: var(--night-text); font-size: 26px; line-height: 1; }
+  .detail__close:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+  .detail__head .sub { order: 3; flex-basis: 100%; }
+  /* the walkthrough card docks along an edge, full width, instead of covering what it points at */
+  .coach { width: calc(100vw - 16px); }
+}
+@keyframes d-sheet { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
