@@ -68,7 +68,7 @@ function webgl() {
  *   pixel       art-pixel size in screen pixels (render scale is 1 / pixel), default 3 as in voxel.js
  * Returns { go(idOrNode), up(), get(id), nodes, current(), dispose() }.
  */
-export async function createDrillMap(el, { geo, names, level, expected, maxExpected, tip, legend, text, onFocus, initial = null, keyRoot = null, pixel = 3 }) {
+export async function createDrillMap(el, { geo, names, level, expected, maxExpected, tip, legend, text, onFocus, initial = null, keyRoot = null, pixel = 3, compact = false, onPick = null }) {
   const THREE = await import("three");
   const W = geo.W, H = geo.H;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -80,7 +80,8 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   const bgys = new Map(geo.barangays.map((b) => [b.id, { ...b, kind: "barangay" }]));
   const drawnB = [...bgys.values()].filter((b) => b.polys);
   const qbb = drawnB.reduce((a, b) => [Math.min(a[0], b.bb[0]), Math.min(a[1], b.bb[1]), Math.max(a[2], b.bb[2]), Math.max(a[3], b.bb[3])], [1e9, 1e9, -1e9, -1e9]);
-  const QC = { id: "QC", kind: "city", name: names.city, bb: qbb, c: [(qbb[0] + qbb[2]) / 2, (qbb[1] + qbb[3]) / 2], h: 0, outline: geo.qcOutline, region: "R_NCR" };
+  const QC = { id: "QC", kind: "city", name: names.city, bb: qbb, c: [(qbb[0] + qbb[2]) / 2, (qbb[1] + qbb[3]) / 2], h: 0, outline: geo.qcOutline, region: "R_NCR",
+    ...(geo.qc ? { polys: geo.qc.polys, bb: geo.qc.bb, c: geo.qc.c, a: geo.qc.a } : {}) };
   const get = (id) => (typeof id === "object" ? id : id === "QC" ? QC : regions.get(id) || provs.get(id) || bgys.get(id) || null);
   const chain = (n) => (!n ? [] : n.kind === "region" ? [n] : n.kind === "province" ? [regions.get(n.region), n] : n.kind === "city" ? [regions.get("R_NCR"), QC] : [regions.get("R_NCR"), QC, n]);
   const levelOf = (n) => (!n ? "country" : n.kind);
@@ -89,10 +90,10 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   const ramp = (v) => rampLo.clone().lerp(rampHi, Math.sqrt(clamp(v / (maxExpected || 1), 0, 1)));
 
   /* ---------- DOM ---------- */
-  el.classList.add("dmap");
+  el.classList.add("dmap"); el.classList.toggle("dmap--compact", compact);
   el.style.setProperty("--dm-px", `${Math.max(1, pixel)}px`);
   el.innerHTML = `
-    <svg class="dmap__ov" aria-hidden="true"><path class="dmap__halo"></path><path class="dmap__focus"></path><path class="dmap__hover"></path><g class="dmap__labels"></g>
+    <svg class="dmap__ov" aria-hidden="true"><path class="dmap__inner"></path><path class="dmap__halo"></path><path class="dmap__focus"></path><path class="dmap__hover"></path><g class="dmap__labels"></g>
       <g class="dmap__pulse" hidden><rect class="r1" x="-6" y="-6" width="12" height="12"></rect><rect class="r2" x="-6" y="-6" width="12" height="12"></rect><rect class="dot" x="-4" y="-4" width="8" height="8"></rect></g></svg>
     <nav class="dmap__crumbs" aria-label="${text.where}"></nav>
     <div class="dmap__ctls">
@@ -109,7 +110,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
     <div class="dmap__tip" hidden></div>
     <p class="dmap__live" aria-live="polite"></p>`;
   const q = (s) => el.querySelector(s);
-  const ov = q(".dmap__ov"), lblG = q(".dmap__labels"), focusP = q(".dmap__focus"), haloP = q(".dmap__halo"), hovP = q(".dmap__hover");
+  const ov = q(".dmap__ov"), innerP = q(".dmap__inner"), lblG = q(".dmap__labels"), focusP = q(".dmap__focus"), haloP = q(".dmap__halo"), hovP = q(".dmap__hover");
   const pulseG = q(".dmap__pulse"), tipEl = q(".dmap__tip"), hintEl = q(".dmap__hint");
   let vw = el.clientWidth || 600, vh = el.clientHeight || 400;
 
@@ -219,6 +220,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
     sun.shadow.bias = -0.0005; sun.shadow.normalBias = C.w * 0.0008;
   }
   function pads(kind) {
+    if (compact) return kind === "country" ? [10, 10, 4, 10] : [22, 22, 18, 22]; // no crumbs, controls or legend to clear
     const narrow = vw < 560, top = narrow ? 64 : 70, side = narrow ? 14 : 46, bot = narrow ? 70 : 64;
     if (kind === "barangay") return [Math.max(top, vh * 0.24), Math.max(side, vw * 0.26), Math.max(bot, vh * 0.2), Math.max(side, vw * 0.26)];
     if (kind === "country") return [top - 30, side - 6, bot - 34, side - 6];
@@ -248,7 +250,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   /* ---------- drawing ---------- */
   let raf = 0, alive = true;
   const kick = () => { if (!raf && alive) raf = requestAnimationFrame(frame); };
-  const LAYERS = () => [regions.values(), provs.values(), drawnB];
+  const LAYERS = () => [regions.values(), provs.values(), [QC], drawnB];
   function draw2d() {
     const k = vw / C.w;
     ctx2.imageSmoothingEnabled = false;
@@ -279,7 +281,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
     return [((pv.x + 1) / 2) * vw, ((1 - pv.y) / 2) * vh, pv.z];
   }
   function outlineD(n, h) {
-    const rings = n.kind === "city" ? n.outline.map((r) => [r]) : n.polys;
+    const rings = n.polys || (n.kind === "city" ? n.outline.map((r) => [r]) : null);
     if (!rings) return "";
     let d = "";
     for (const P of rings) for (const r of P) {
@@ -298,17 +300,72 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   const qcState = { on: false, split: false };
   const top = (n) => (n.kind === "city" ? (qcState.split ? 0 : QC.h) : n.h || 0);
   // a region's outline follows the tops of its raised provinces, so the lines sit on the blocks, not on the ground
+  // Inner borders are left to the blocks' own sides: drawing every province would double each shared border
+  // wherever two neighbours stand at different heights.
+  const edgeKey = (r, i) => {
+    const j = (i + 2) % r.length, a = `${Math.round(r[i] * 100)},${Math.round(r[i + 1] * 100)}`, b = `${Math.round(r[j] * 100)},${Math.round(r[j + 1] * 100)}`;
+    return a < b ? `${a}|${b}` : `${b}|${a}`;
+  };
+  let outerCache = { key: "", runs: [] };
+  function outerRuns(region) {
+    const blocks = [...provs.values()].filter((p) => p.region === region.id && p.polys);
+    if (qcState.on && QC.polys) blocks.push(QC);
+    const key = region.id + blocks.length;
+    if (outerCache.key === key) return outerCache;
+    const count = new Map(), owners = new Map();
+    for (const b of blocks) for (const P of b.polys) for (const r of P) for (let i = 0; i < r.length; i += 2) {
+      const k = edgeKey(r, i); count.set(k, (count.get(k) || 0) + 1);
+      const o = owners.get(k); if (!o) owners.set(k, [b, r, i]); else if (o[0] !== b) o.push(b);
+    }
+    // inner borders, once each: [ring, vertex, block, neighbour]
+    const inner = [...owners.values()].filter((o) => o.length === 4).map(([b, r, i, b2]) => [r, i, b, b2]);
+    const runs = []; // [block, ring, first vertex, number of edges]
+    for (const b of blocks) for (const P of b.polys) for (const r of P) {
+      const n = r.length / 2, outer = Array.from({ length: n }, (_, e) => count.get(edgeKey(r, e * 2)) === 1);
+      if (outer.every(Boolean)) { runs.push([b, r, 0, n]); continue; }
+      for (let e = 0; e < n; e++) {
+        if (!outer[e] || outer[(e + n - 1) % n]) continue; // start of a stretch
+        let len = 0; while (outer[(e + len) % n] && len < n) len++;
+        runs.push([b, r, e, len]);
+      }
+    }
+    outerCache = { key, runs, inner };
+    return outerCache;
+  }
   function focusD(n) {
     if (n.kind !== "region") return outlineD(n, top(n) * 1.002);
     let d = "";
-    for (const p of provs.values()) if (p.region === n.id && p.h > 1e-4) d += outlineD(p, p.h * 1.002);
-    if (qcState.on && !qcState.split) d += outlineD(QC, QC.h * 1.002);
+    for (const [b, r, e0, len] of outerRuns(n).runs) {
+      const h = top(b); if (h <= 1e-4) continue;
+      const n2 = r.length / 2, closed = len === n2;
+      let s = "", lx = NaN, ly = NaN;
+      for (let k = 0; k <= (closed ? len - 1 : len); k++) {
+        const v = ((e0 + k) % n2) * 2, p = scr(r[v], r[v + 1], h * 1.002); if (p[2] > 1) { s = ""; break; }
+        const x = snap(p[0]), y = snap(p[1]);
+        if (x === lx && y === ly) continue;
+        s += (s ? "L" : "M") + x + " " + y; lx = x; ly = y;
+      }
+      if (s) d += s + (closed ? "Z" : "");
+    }
+    return d;
+  }
+  // thin lines between the blocks of the focused region, each on the taller of its two blocks (the edge you see)
+  function innerD(n) {
+    if (!n || n.kind !== "region") return "";
+    let d = "";
+    for (const [r, i, b, b2] of outerRuns(n).inner) {
+      const h = Math.max(top(b), top(b2)); if (h <= 1e-4) continue;
+      const j = (i + 2) % r.length, p = scr(r[i], r[i + 1], h * 1.002), q2 = scr(r[j], r[j + 1], h * 1.002);
+      if (p[2] > 1 || q2[2] > 1) continue;
+      const x1 = snap(p[0]), y1 = snap(p[1]), x2 = snap(q2[0]), y2 = snap(q2[1]);
+      if (x1 !== x2 || y1 !== y2) d += `M${x1} ${y1}L${x2} ${y2}`;
+    }
     return d;
   }
   let focusNode = null, hoverNode = null, pulseNode = null;
   function overlay() {
     const d = focusNode ? focusD(focusNode) : "";
-    focusP.setAttribute("d", d); haloP.setAttribute("d", d);
+    focusP.setAttribute("d", d); haloP.setAttribute("d", d); innerP.setAttribute("d", innerD(focusNode));
     hovP.setAttribute("d", hoverNode && hoverNode !== focusNode ? outlineD(hoverNode, top(hoverNode) * 1.002) : "");
     placeLabels(); placeMini(); placePulse();
     q('[data-act="north"] svg').style.transform = `rotate(${C.bearing}deg)`;
@@ -450,13 +507,19 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
     // Quezon City: one plateau inside NCR, bars by expected cases once it is chosen
     const qcOn = !!region && region.id === "R_NCR", split = qcOn && second === QC, wasSplit = qcState.split;
     qcState.on = qcOn; qcState.split = split;
-    const plateau = qcOn ? Math.max(provH(provs.get("PH13074") || { region: "R_NCR" }), provH(QC)) * 1.22 : 0;
-    QC.h = plateau;
+    const own = !!QC.polys; // the boundary build gives QC its own shape; older files only have its barangays
+    const plateau = qcOn ? (own ? provH(QC) : Math.max(provH(provs.get("PH13074") || { region: "R_NCR" }), provH(QC)) * 1.22) : 0;
     const qd = diag(QC.bb), qcCol = new THREE.Color(lvColor(level(QC)));
+    if (own) {
+      const col = second && second.kind === "province" ? dim(qcCol) : qcCol.clone();
+      if (qcOn && !split) { const appear = QC.h < 1e-4; ensure(QC); if (appear) QC.col.copy(col); setTarget(QC, plateau, col, appear ? reveal + 200 : 0, 820); }
+      else if (QC.col) setTarget(QC, 0, QC.col, 0, split ? 420 : 380);
+    } else QC.h = plateau;
     for (const b of drawnB) {
       if (!qcOn) { if (b.col) setTarget(b, 0, b.col, 0, 380); continue; }
       ensure(b);
       let h, col, delay = 0;
+      if (!split && own) { if (b.col) setTarget(b, 0, b.col, 0, 380); continue; }
       if (!split) {
         h = plateau; col = second && second.kind === "province" ? dim(qcCol) : qcCol.clone();
         if (b.h < 1e-4) { delay = reveal + 260; b.col.copy(col); }
@@ -469,7 +532,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
       }
       setTarget(b, h, col, delay, split && !wasSplit ? 900 : 650);
     }
-    picks = [...[...regions.values()].filter((r) => r !== region), ...(region ? [...provs.values()].filter((p) => p.region === region.id && p.col) : []), ...(qcOn ? drawnB : [])];
+    picks = [...[...regions.values()].filter((r) => r !== region), ...(region ? [...provs.values()].filter((p) => p.region === region.id && p.col) : []), ...(qcOn ? (own && !split ? [QC] : drawnB) : [])];
     buildLabels(n);
     crumbs(n);
     q(".dmap__legend").innerHTML = legend(lvl === "city" || lvl === "barangay" ? "expected" : "level");
@@ -523,6 +586,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   on(canvas, "contextmenu", (e) => e.preventDefault());
   on(canvas, "pointerdown", (e) => {
     const p = local(e); canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, p);
+    if (compact) { drag = { mode: null, sx: p.x, sy: p.y, moved: false }; return; } // compact: no pan, rotate or pinch; a tap picks
     if (ptrs.size === 1) drag = { mode: !flat && (e.button === 2 || e.shiftKey || e.ctrlKey || e.altKey) ? "rotate" : "pan", sx: p.x, sy: p.y, lx: p.x, ly: p.y, moved: false, g: groundAt(p.x, p.y) };
     else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), w: C.w }; if (drag) drag.moved = true; }
   });
@@ -549,6 +613,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   on(canvas, "pointerup", endPtr); on(canvas, "pointercancel", endPtr);
   on(canvas, "pointerleave", () => { if (!drag) hideTip(); });
   on(canvas, "wheel", (e) => {
+    if (compact) return; // the page scrolls past a compact map
     e.preventDefault(); stopFlight(); camApply();
     const p = local(e), g0 = groundAt(p.x, p.y);
     C.w = clamp(C.w * Math.exp(e.deltaY * (e.ctrlKey ? 0.01 : 0.0013)), 0.3, 4000);
@@ -560,6 +625,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   function click(x, y) {
     const n = pickAt(x, y);
     hideTip();
+    if (onPick) { if (n) onPick(n, api); return; }
     if (!n) { if (cur) up(); return; }
     if (n !== cur) go(n);
   }
@@ -579,7 +645,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
   });
   // Esc goes up a level while the map, or anything inside keyRoot (the side panel too), has focus
   on(document, "keydown", (e) => {
-    if (e.key !== "Escape" || !cur || e.defaultPrevented) return;
+    if (compact || e.key !== "Escape" || !cur || e.defaultPrevented) return;
     const t = e.target, root = keyRoot || el;
     if (t !== document.body && !root.contains(t)) return;
     if (t.closest?.("input, textarea, select, [contenteditable]")) return;
@@ -605,7 +671,7 @@ export async function createDrillMap(el, { geo, names, level, expected, maxExpec
         scene.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); } });
         renderer.dispose(); renderer.forceContextLoss?.();
       }
-      el.innerHTML = ""; el.classList.remove("dmap");
+      el.innerHTML = ""; el.classList.remove("dmap", "dmap--compact");
     },
   };
 

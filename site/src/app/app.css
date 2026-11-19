@@ -544,15 +544,17 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .map-card { display: flex; flex-direction: column; gap: 10px; }
 .map-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .map-card__head .ctitle { margin: 0; }
-.vmap--drill {
+.vmap--drill, .dmap {
   --dm-sea: #BFE2EC; --dm-ghost: #DCE7DF; --dm-land: #EEF0E6; --dm-nodata: #C9CFC9; --dm-edge: #071711;
   --dm-ramp-lo: #E6F3F6; --dm-ramp-hi: #0E4C6B;
   --dm-px: 3px; --notch: calc(var(--dm-px) * 2);
+}
+.vmap--drill {
   flex: none; height: 600px; border-radius: 4px; background: var(--dm-sea); outline: none; touch-action: none; user-select: none; -webkit-user-select: none;
   box-shadow: inset 0 0 0 var(--dm-px) color-mix(in srgb, var(--ink) 14%, transparent);
 }
 .vmap--drill:focus-visible { box-shadow: inset 0 0 0 var(--dm-px) var(--forest); }
-.vmap--drill .dmap__gl { position: absolute; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; }
+.dmap .dmap__gl { position: absolute; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; }
 .vmap--drill.is-dragging .dmap__gl, .vmap--drill .dmap__gl:active { cursor: grabbing; }
 .dmap__ov { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .dmap__ov path { fill: none; stroke-linejoin: miter; stroke-linecap: square; shape-rendering: crispEdges; }
@@ -722,3 +724,9 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
   .dmap__focus.is-drawn, .dmap__pulse .r1, .dmap__pulse .r2, .dmap__crumb, .dpanel { animation: none; }
   .dmap__halo, .dmap__mini, .dmap__hint, .dmap__lbl, .dmap__ctl svg { transition: none; }
 }
+.dmap__inner { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: max(1px, calc(var(--dm-px) * .67)); }
+/* the same map, compact, on the overview: no chrome, no pan or zoom, the page scrolls past it, a tap opens the forecast map */
+.dmap--compact { touch-action: pan-y; }
+.dmap--compact .dmap__crumbs, .dmap--compact .dmap__ctls, .dmap--compact .dmap__legend, .dmap--compact .dmap__mini, .dmap--compact .dmap__hint { display: none; }
+.dmap--compact .dmap__gl { cursor: default; }
+.dmap--compact .dmap__lbl.tag { font-size: 10px; }

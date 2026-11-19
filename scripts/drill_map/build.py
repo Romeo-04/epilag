@@ -102,9 +102,10 @@ for f in regG['features']:
     c=code.get(u, m['name'].split(' (')[0])
     regions.append({'id':u,'name':m['name'],'nice':nice(m['name']),'code':c,'tag':code.get(u,c.replace('Region ','')),
         'pop':RP['population'][u],'fc':rfc[u],'hist':rh[u],'histEnd':rhend[u],**shape(f['geometry'],1)})
-prov=[]
+prov=[]; qcShape=None
 for f in proG['features']:
     u=f['properties']['unit']; r=f['properties']['region']
+    if u=='QC': qcShape=shape(f['geometry'],2); continue  # Quezon City: its own block, cut out of the Second District
     nm=PP['names'].get(u,'Special Geographic Area (BARMM)')
     prov.append({'id':u,'name':nm,'region':r,'pop':PP['population'].get(u),'fc':pfc.get(u),'hist':ph.get(u),'histEnd':phend.get(u),**shape(f['geometry'],2)})
 def fix(s):
@@ -128,27 +129,8 @@ for e,s in edges.items():
     for a in s:
         for b in s:
             if a!=b: adj[a].add(b)
-bnd=[e for e,s in edges.items() if len(s)==1]
-g=defaultdict(list)
-for a,b in bnd: g[a].append(b); g[b].append(a)
-used=set(); chains=[]
-for a,b in bnd:
-    if (a,b) in used: continue
-    used|={(a,b),(b,a)}; ch=[a,b]; cur=b
-    while True:
-        nx=[n for n in g[cur] if (cur,n) not in used]
-        if not nx: break
-        n=nx[0]; used|={(cur,n),(n,cur)}; ch.append(n); cur=n
-        if n==ch[0]: break
-    chains.append(ch)
-chains.sort(key=len,reverse=True)
-print('qc chains',[len(c) for c in chains[:5]],file=sys.stderr)
-outline=[]
-for ch in chains:
-    if len(ch)<30: continue
-    fl=[]
-    for p in ch: x,y=proj(p); fl+=[round(x,4),round(y,4)]
-    outline.append(fl)
+# the city outline is the same shape as its block, sharing its borders with the districts around it
+outline=[P[0] for P in qcShape['polys']]
 bgys=[]
 for i,f in enumerate(feats):
     nm=f['properties']['adm4_en']; k=key(nm); d=bd.get(k)
@@ -171,7 +153,7 @@ out={'W':W,'H':round(H,2),'regions':regions,'provinces':prov,'barangays':bgys,'q
   'regionWeek':RP['forecast_week'],'provinceWeek':PP['forecast_week']}
 # boundaries only, for the app's forecast map (site/src/lib/drill-map.js); forecasts come from docs/web/data there
 GEO_KEYS={'regions':('id','polys','bb','c','a'),'provinces':('id','region','polys','bb','c','a'),'barangays':('id','pcode','name','polys','bb','c','a','nb')}
-geo={'W':W,'H':round(H,2),'qcOutline':outline,'mini':minis,**{k:[{f:x[f] for f in fs if f in x} for x in out[k]] for k,fs in GEO_KEYS.items()}}
+geo={'W':W,'H':round(H,2),'qcOutline':outline,'qc':qcShape,'mini':minis,**{k:[{f:x[f] for f in fs if f in x} for x in out[k]] for k,fs in GEO_KEYS.items()}}
 geo_dest=ROOT/'site/public/geo/drill.json'
 geo_dest.write_text(json.dumps(geo,separators=(',',':')))
 print('wrote',geo_dest,geo_dest.stat().st_size,'bytes',file=sys.stderr)
