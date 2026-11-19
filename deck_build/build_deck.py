@@ -269,7 +269,7 @@ S.append(slide(7, "Data", "Data Sources and Cleaning", "Four public sources, cle
 
 # ================================================================== 8 Features
 groups8 = [("Recent cases", "8 inputs", "this week, 1 to 3 weeks back, 4 and 12 week averages, trend, same week last year", 0, 3, "var(--ink)"),
-           ("Rain", "15 inputs", "each of the last 12 weeks, plus 4, 8 and 12 week totals", 0, 11, "var(--accent)"),
+           ("Rain", "16 inputs", "each of the last 12 weeks, plus 4, 8 and 12 week totals, and heavy-rain days (50 mm or more) in 8 weeks", 0, 11, "var(--accent)"),
            ("Humidity", "5 inputs", "0, 2, 4, 6 and 8 weeks back", 0, 8, "var(--accent)"),
            ("Temperature", "6 inputs", "0, 2, 4, 6 and 8 weeks back, plus the 4 week maximum", 0, 8, "var(--accent)"),
            ("Time of year", "2 inputs", "sine and cosine, so December sits next to January", None, None, "var(--faint)"),
@@ -284,7 +284,7 @@ for i, (n, cnt, d, a, b_, col) in enumerate(groups8):
 axis8 = f'<svg viewBox="0 0 {fw} 50" width="{fw}" height="50"><line x1="20" x2="{fw-20}" y1="6" y2="6" class="axis"/>' + "".join(f'<text x="{fx(k):.0f}" y="38" class="tick" text-anchor="middle">{k}</text>' for k in (0, 2, 4, 6, 8, 10, 12)) + "</svg>"
 S.append(slide(8, "Data", "Feature Engineering", "The literature's lags, turned into model inputs.", f'''
 <div class="f8"><div class="frs">{f8}<div class="fr axisrow"><div class="fn"></div>{axis8}</div><div class="axlab">weeks before the forecast is made</div></div>
-<div class="f8side"><div class="big">38</div><div class="cap">inputs per province forecast. Regions and Quezon City use 26: their live data has rain but not temperature or humidity.</div>
+<div class="f8side"><div class="big">38</div><div class="cap">inputs per province forecast. Regions and Quezon City use 26: rain, but not heavy-rain days, temperature or humidity.</div>
 <div class="rule2">Every input is known on the day the forecast is made. No future data, ever.</div></div></div>''',
     "src/features.py, feature_columns(). Temperature and humidity were tested for regions in the research (slide 15)."))
 
