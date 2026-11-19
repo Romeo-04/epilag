@@ -70,11 +70,31 @@ export function trackRecordHtml(rec, labels, h) {
     </ul></div>`;
 }
 
-/** One row of report-card squares (logic.reportCard cells). */
-export function reportSquares(cells, labels, fmtDay, fmt) {
-  const key = (c) => (c.hit === 0 ? "in" : c.hit > 0 ? "above" : "below");
-  return `<ol class="rc-row">${cells.map((c) => `<li class="rc" data-hit="${key(c)}" title="${esc(`${fmtDay(c.target_week)}: ${fmt(c.actual)} · ${fmt(c.q10)}–${fmt(c.q90)}`)}"><span class="sr-only">${esc(`${fmtDay(c.target_week)}: ${labels[`card_${key(c)}`]}`)}</span></li>`).join("")}</ol>`;
+/** Report card (logic.reportCard cells): weeks inside the likely range ("right"), and which way the misses lean.
+ * hit -1: reported below the range, so the forecast was too high; hit 1: above it, too low. */
+export function reportSummary(cells) {
+  const inside = cells.filter((c) => c.hit === 0).length, high = cells.filter((c) => c.hit < 0).length, low = cells.filter((c) => c.hit > 0).length;
+  return { inside, high, low, n: cells.length, lean: inside >= 0.75 * cells.length ? "good" : high >= low ? "high" : "low" };
+}
+const result = (c) => (c.hit === 0 ? "right" : c.hit < 0 ? "high" : "low");
+
+/** The headline: "7 of 8 weeks right: good", and what it means for the reader. */
+export function reportVerdict(s, labels) {
+  const v = labels.card_verdict[s.lean];
+  return `<div class="rc-verdict" data-lean="${s.lean}"><b class="rc-verdict__big nums">${esc(labels.card_of.replace("{k}", s.inside).replace("{n}", s.n))}</b>
+    <div class="rc-verdict__text"><span class="rc-verdict__head">${esc(v.head)}</span><span class="rc-verdict__line">${esc(v.line.replace("{k}", s.lean === "low" ? s.low : s.high))}</span></div></div>`;
 }
 
-export const reportLegend = (labels) =>
-  `<ul class="rc-legend">${["in", "above", "below"].map((k) => `<li><span class="rc" data-hit="${k}"></span>${esc(labels[`card_${k}`])}</li>`).join("")}</ul>`;
+/** One row per week, newest first: what the forecast said, what was reported, Right / Too high / Too low. */
+export function reportWeeks(cells, labels, fmtDay, fmt) {
+  const day = (d) => esc(fmtDay(d)).replace(/ (\d{4})$/, '<span class="rc-yr"> $1</span>'); // the year is dropped on phones
+  const rows = [...cells].reverse().map((c) => `<tr><td class="rc-day">${day(c.target_week)}</td><td class="num">${fmt(c.q10)}–${fmt(c.q90)}</td><td class="num"><b>${fmt(c.actual)}</b></td>
+    <td><span class="rc-result" data-r="${result(c)}">${esc(labels.card_result[result(c)])}</span></td></tr>`).join("");
+  return `<div class="tbl-wrap rc-weeks"><table class="tbl"><thead><tr><th>${esc(labels.card_week)}</th><th class="num">${esc(labels.card_said)}</th><th class="num">${esc(labels.card_reported)}</th><th>${esc(labels.card_result_head)}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/** "3 too high, 1 too low", or "None". */
+export function reportMisses(s, labels) {
+  const parts = [s.high ? labels.card_miss.high.replace("{k}", s.high) : "", s.low ? labels.card_miss.low.replace("{k}", s.low) : ""].filter(Boolean);
+  return parts.length ? parts.join(", ") : labels.card_miss.none;
+}
