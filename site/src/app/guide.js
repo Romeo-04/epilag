@@ -63,8 +63,8 @@ function steps(c) {
         body: `<p>Ang abong bar ay ang kabuuang kasong naiulat sa pinakahuling linggo. Ang mga berdeng bar ay ang forecast para sa mga susunod na linggo; ang madilim na berde ay ang pinili mong ${b(t.horizon)}.</p>
           <p>Ikinukumpara ng porsyento ang forecast na iyon sa ngayon.</p>` },
       { target: '[data-guide="rising"]', title: labels.rising,
-        body: `<p>Mga lugar na pinakamalaki ang itataas ng forecast mula sa huling naiulat na linggo. Ipinapakita ang bawat isa bilang kaso ngayon → forecast.</p>
-          <p>Puwedeng maliit pa rin ang bilang kahit malaki ang porsyento, kaya tingnan din ang antas ng alerto (ang may kulay na tuldok). Piliin ang lugar para makita ang detalye.</p>` },
+        body: `<p>Mga lugar na pinakamalaki ang dagdag na kaso sa forecast mula sa huling naiulat na linggo, bawat 100,000 tao. Binibilang ito bawat tao para hindi malampasan ng maliit na lugar na mula 5 naging 30 kaso ang lungsod na nadagdagan ng daan-daan. Nasa ilalim ng pangalan ang kaso ngayon → forecast.</p>
+          <p>Tingnan din ang antas ng alerto (ang may kulay na tuldok): puwedeng mabilis ang pagtaas pero nasa ilalim pa rin ng epidemic line ng lugar. Piliin ang lugar para makita ang detalye.</p>` },
       { target: '[data-guide="do"]', title: labels.do_week,
         body: `<p>Ang mga lugar na pinakakailangang tutukan, kasama ang hakbang na angkop sa antas ng alerto nito. Piliin ang isa para sa buong checklist.</p>
           <p>Gamitin ang ${b(labels.download)} sa itaas para mag-save ng isang pahinang buod ng aksyon na maibabahagi.</p>` },
@@ -110,8 +110,8 @@ function steps(c) {
       body: `<p>The grey bar is all cases reported in the latest week. The green bars are the forecasts for the weeks ahead; the dark one is the ${b(t.horizon.toLowerCase())} you chose.</p>
         <p>The percentage compares that forecast with now.</p>` },
     { target: '[data-guide="rising"]', title: labels.rising,
-      body: `<p>The areas whose forecast rises most above their latest reported week, shown as cases now → forecast.</p>
-        <p>A big percentage can still be a small number of cases, so check the alert level (the coloured dot) too. Select an area to see its details.</p>` },
+      body: `<p>The areas whose forecast adds the most cases above their latest reported week, per 100,000 people. Counting per person keeps a small area going from 5 to 30 cases from outranking a city adding hundreds. Cases now → forecast are under each name.</p>
+        <p>Check the alert level (the coloured dot) too: a fast rise can still be below the area's epidemic line. Select an area to see its details.</p>` },
     { target: '[data-guide="do"]', title: labels.do_week,
       body: `<p>The areas that need attention most, each with the step that fits its alert level. Select one for the full checklist.</p>
         <p>Use ${b(labels.download)} at the top to save a one-page action brief to share.</p>` },
