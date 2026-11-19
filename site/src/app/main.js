@@ -122,15 +122,23 @@ function clearTopAction() {
   const host = $("top-actions");
   if (host) host.innerHTML = "";
 }
-function setTopDownload(label, handler) {
+/** The top-bar Download menu: the main download, plus optional [label, handler, icon] items (e.g. print). */
+function setTopDownload(label, handler, more = []) {
   const host = $("top-actions");
   if (!host) return;
   topDownloadCleanup?.();
-  host.innerHTML = `<details class="download-menu"><summary class="btn btn--ghost btn--sm top-download"><i data-icon="download" data-size="20"></i><span>${esc(LABELS[state.lang].download)}</span><i data-icon="chevronRight" data-size="16" class="download-menu__chev"></i></summary><div class="download-menu__pop"><button type="button" id="top-download">${icon("download", { size: 18 })}<span>${esc(label)}</span></button></div></details>`;
-  const button = $("top-download");
-  const onClick = () => handler();
-  button.addEventListener("click", onClick);
-  topDownloadCleanup = () => button.removeEventListener("click", onClick);
+  const items = [[label, handler, "download"], ...more];
+  host.innerHTML = `<details class="download-menu"><summary class="btn btn--ghost btn--sm top-download"><i data-icon="download" data-size="20"></i><span>${esc(LABELS[state.lang].download)}</span><i data-icon="chevronRight" data-size="16" class="download-menu__chev"></i></summary><div class="download-menu__pop">${
+    items.map(([l, , ic], i) => `<button type="button" id="${i ? `top-download-${i}` : "top-download"}" data-i="${i}">${icon(ic || "download", { size: 18 })}<span>${esc(l)}</span></button>`).join("")}</div></details>`;
+  const menu = host.querySelector(".download-menu");
+  const onClick = (e) => {
+    const b = e.target.closest("button[data-i]");
+    if (!b) return;
+    menu.open = false;
+    items[Number(b.dataset.i)][1]();
+  };
+  menu.addEventListener("click", onClick);
+  topDownloadCleanup = () => menu.removeEventListener("click", onClick);
   hydrateIcons(host);
 }
 
@@ -205,6 +213,7 @@ function renderChrome(t, originList, m) {
   $("sidebar-title").textContent = labels.dashboard;
   $("sidebar").querySelector(".sidebar__language .ctx__label")?.replaceChildren(document.createTextNode(t.lang));
   $("sidebar").querySelector("a.sidebar__link .nav-item__text")?.replaceChildren(document.createTextNode(labels.drill));
+  $("install-app")?.querySelector(".nav-item__text")?.replaceChildren(document.createTextNode(labels.install));
   $("guide-top")?.querySelector("span")?.replaceChildren(document.createTextNode(labels.guide));
   $("guide-top")?.setAttribute("aria-label", labels.guide);
   $("sidebar").setAttribute("aria-label", labels.navigation);
@@ -330,8 +339,52 @@ async function render() {
   }
 }
 
-// Exposed for tests/test_web_logic.py; this is intentionally unchanged in shape.
-window.epilag = { logic, data };
+// ------------------------------------------------------------------ offline app
+// The service worker (src/sw.js, built to docs/sw.js) saves the dashboard on the first visit. A banner says when
+// the page is showing saved data; "Install app" appears where the browser offers installing.
+function offlineBanner() {
+  let el = null, timer = 0;
+  const show = (online) => {
+    const labels = LABELS[state.lang];
+    clearTimeout(timer);
+    if (!el) { el = Object.assign(document.createElement("div"), { className: "offline-banner", role: "status" }); document.body.append(el); }
+    el.dataset.state = online ? "online" : "offline";
+    el.innerHTML = `<span class="sq sq--round"></span><span>${esc(online ? labels.offline_back : labels.offline)}</span>`;
+    if (online) timer = setTimeout(() => { el?.remove(); el = null; }, 2500);
+  };
+  addEventListener("offline", () => show(false));
+  addEventListener("online", () => { if (el) show(true); });
+  if (!navigator.onLine) show(false);
+}
+
+function installButton() {
+  const btn = $("install-app");
+  if (!btn) return;
+  let prompt = null;
+  addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    prompt = e;
+    btn.querySelector(".nav-item__text").textContent = LABELS[state.lang].install;
+    btn.hidden = false;
+  });
+  btn.addEventListener("click", async () => {
+    if (!prompt) return;
+    prompt.prompt();
+    await prompt.userChoice.catch(() => null);
+    prompt = null;
+    btn.hidden = true;
+  });
+  addEventListener("appinstalled", () => { btn.hidden = true; });
+}
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL }).catch(() => {}));
+}
+offlineBanner();
+installButton();
+
+// Exposed for tests/test_web_logic.py (logic and data, plus the labels the SMS test reads).
+window.epilag = { logic, data, labels: LABELS };
 
 bindShell();
 hydrateIcons(document);

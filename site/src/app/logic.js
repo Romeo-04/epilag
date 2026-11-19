@@ -117,6 +117,87 @@ export function latestForecast({ forecast, meta }) {
   return forecast.map((r) => ({ ...r, unit_name: meta.names[r.unit_id], population: meta.population[r.unit_id] }));
 }
 
+/** src/reliability.py MIN_ALERTS, HIGH, MEDIUM */
+export const RELIABILITY = { minAlerts: 4, high: 0.6, medium: 0.4 };
+export function reliabilityGrade(alertWeeks, right) {
+  if (alertWeeks < RELIABILITY.minAlerts) return "too few";
+  const s = right / alertWeeks;
+  return s >= RELIABILITY.high ? "high" : s >= RELIABILITY.medium ? "medium" : "low";
+}
+
+/**
+ * src/reliability.py track_record(): per unit, how often its past alerts at one horizon were right.
+ * Alert week = backtest forecast at watch or warning; right = reported cases above the epidemic line that week.
+ * Onset = first week of >= 2 weeks above the line; caught = the forecast for that week was an alert.
+ * Thresholds per test year from the history before 1 January of it. Only test years before `beforeYear` count.
+ * Returns Map unit_id -> {alert_weeks, alert_weeks_right, onsets, onsets_caught, reliability, grade, years}.
+ */
+export function trackRecord(history, backtest, horizon = 4, beforeYear = null) {
+  const b = backtest.filter((r) => r.horizon === horizon && (beforeYear == null || r.test_year < beforeYear));
+  const out = new Map();
+  for (const year of [...new Set(b.map((r) => r.test_year))].sort((x, y) => x - y)) {
+    const cut = Date.UTC(year, 0, 1) / DAY, end = Date.UTC(year + 1, 0, 1) / DAY;
+    const thr = thresholds(history.filter((r) => r.week < cut));
+    const alertAt = new Map(); // "unit|target_week" -> alert, for the onset check
+    const rec = (u) => {
+      let o = out.get(u);
+      if (!o) out.set(u, (o = { alert_weeks: 0, alert_weeks_right: 0, onsets: 0, onsets_caught: 0, years: [] }));
+      if (o.years[o.years.length - 1] !== year) o.years.push(year);
+      return o;
+    };
+    for (const r of b) {
+      if (r.test_year !== year) continue;
+      const t = thr.get(`${r.unit_id}|${woy(r.target_week)}`);
+      if (!t) continue;
+      const alert = gt(r.q50, t.epidemic) || gt(r.q90, t.epidemic);
+      const o = rec(r.unit_id);
+      alertAt.set(`${r.unit_id}|${r.target_week}`, alert);
+      if (alert) { o.alert_weeks++; if (gt(r.actual, t.epidemic)) o.alert_weeks_right++; }
+    }
+    const weeks = groupBy(history.filter((r) => r.week >= cut && r.week < end && isNum(r.cases) && thr.has(`${r.unit_id}|${woy(r.week)}`)), "unit_id");
+    for (const [u, rows] of weeks) {
+      if (!out.has(u)) continue;
+      const above = rows.sort((x, y) => x.week - y.week).map((r) => r.cases > thr.get(`${u}|${woy(r.week)}`).epidemic);
+      above.forEach((a, i) => {
+        if (!a || (i > 0 && above[i - 1]) || !above[i + 1]) return;
+        const k = `${u}|${rows[i].week}`;
+        if (!alertAt.has(k)) return; // pandas inner merge: onsets without a forecast for that week are not counted
+        const o = out.get(u);
+        o.onsets++;
+        if (alertAt.get(k)) o.onsets_caught++;
+      });
+    }
+  }
+  for (const o of out.values()) {
+    o.reliability = o.alert_weeks > 0 ? o.alert_weeks_right / o.alert_weeks : null;
+    o.grade = reliabilityGrade(o.alert_weeks, o.alert_weeks_right);
+  }
+  return out;
+}
+
+/**
+ * Report card: per unit, the backtest forecasts at `horizon` for the last `n` weeks that have results, with whether the
+ * reported cases fell inside (0), above (1) or below (-1) the likely range, and the forecast vs reported level.
+ */
+export function reportCard(backtest, history, horizon = 4, n = 8) {
+  const b = backtest.filter((r) => r.horizon === horizon && isNum(r.actual));
+  const weeks = [...new Set(b.map((r) => r.target_week))].sort((x, y) => x - y).slice(-n);
+  if (!weeks.length) return { weeks, rows: [] };
+  const want = new Set(weeks), thrOf = new Map(); // thresholds from the years before each test year, as the backtest
+  const thr = (y) => { if (!thrOf.has(y)) thrOf.set(y, thresholds(history.filter((r) => r.week < Date.UTC(y, 0, 1) / DAY))); return thrOf.get(y); };
+  const rows = [];
+  for (const [unit_id, g] of groupBy(b.filter((r) => want.has(r.target_week)), "unit_id")) {
+    const cells = g.sort((x, y) => x.target_week - y.target_week).map((r) => {
+      const t = thr(r.test_year).get(`${unit_id}|${woy(r.target_week)}`) || {};
+      return { target_week: r.target_week, q10: r.q10, q50: r.q50, q90: r.q90, actual: r.actual,
+        hit: r.actual > r.q90 ? 1 : r.actual < r.q10 ? -1 : 0,
+        level: alertLevel(r.q50, r.q90, t.alert ?? NaN, t.epidemic ?? NaN), actual_level: alertLevel(r.actual, r.actual, t.alert ?? NaN, t.epidemic ?? NaN) };
+    });
+    rows.push({ unit_id, cells, inside: cells.filter((c) => c.hit === 0).length });
+  }
+  return { weeks, rows };
+}
+
 /** Areas that crossed the epidemic threshold in the replayed week, and how many were flagged watch or warning. */
 export function replayClaim(rowsAtHorizon) {
   const crossed = rowsAtHorizon.filter((r) => r.actual_level === LEVELS[3]);
@@ -209,6 +290,18 @@ export function briefMarkdown(rows, { t, lang, i18n, panelLabel, horizon, asOf }
   }
   lines.push("Source: EpiLag-PH (github.com/Romeo-04/epilag). Forecasts carry uncertainty; see the likely range.");
   return lines.join("\n");
+}
+
+/**
+ * The one-SMS outlook: the level's template with the area and horizon filled in. If it would pass 160 characters
+ * (one GSM-7 SMS), the area name is shortened with a trailing "." until it fits.
+ */
+export const SMS_MAX = 160;
+export function smsText(template, area, h) {
+  const fill = (a) => template.replace("{area}", a).replace("{h}", h);
+  let name = area;
+  while (fill(name).length > SMS_MAX && name.length > 4) name = `${name.slice(0, -2).trimEnd()}.`;
+  return fill(name);
 }
 
 /** CSV text from row objects and [header, getter] columns. */

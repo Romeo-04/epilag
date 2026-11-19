@@ -9,6 +9,8 @@ methodology, research and open-data pages:
   - axe-core: no serious or critical issues (skipped when the CDN cannot be reached)
   - without WebGL the maps fall back to 2D
   - the onboarding guide opens once per device, steps through the Overview on desktop and phone, and can be replayed
+  - the offline app: after one visit, the dashboard pages open with no network, from saved data, and say so
+  - the Area page prints as one A4 page
 Build first: `cd site && npm run build`. Skipped when Playwright or the build is missing.
 """
 import threading
@@ -36,6 +38,10 @@ class _Handler(SimpleHTTPRequestHandler):
 
     def log_message(self, *args):
         pass
+
+    def end_headers(self):  # as vite preview does: the offline app must not depend on the server's Vary header
+        self.send_header("Vary", "Origin")
+        super().end_headers()
 
 
 @pytest.fixture(scope="module")
@@ -288,4 +294,30 @@ def test_guide_axe_no_serious_issues(base, browser):
                                  ".filter(v => ['serious', 'critical'].includes(v.impact)).map(v => v.id + ': ' + v.nodes.length)")
         assert found == []
     finally:
+        c.close()
+
+
+def test_app_works_offline_after_one_visit(base, browser):
+    c, pg, errors = open_page(browser, base + "web/?page=home")
+    pg.evaluate("navigator.serviceWorker.ready")
+    pg.wait_for_function("navigator.serviceWorker.controller !== null", timeout=15000)
+    pg.wait_for_function("caches.keys().then(ks => ks.some(k => k.startsWith('epilag-')))", timeout=15000)
+    c.set_offline(True)
+    try:
+        for view in ("unit", "public", "proof", "map"):
+            pg.goto(base + f"web/?page={view}")
+            pg.wait_for_selector("#view:not([aria-busy])", timeout=15000)
+            assert "Could not load" not in pg.locator("#view").inner_text(), view
+            assert pg.locator(".offline-banner").count() == 1, view
+    finally:
+        c.set_offline(False)
+        c.close()
+
+
+def test_area_report_prints_on_one_page(base, browser):
+    import re
+    for url in ("web/?page=unit&region=R_NCR&area=QC", "web/?page=unit&panel=province&mode=replay&origin=2019-06-02"):
+        c, pg, errors = open_page(browser, base + url)
+        pdf = pg.pdf(format="A4", print_background=True, prefer_css_page_size=True)
+        assert max(int(n) for n in re.findall(rb"/Count (\d+)", pdf)) == 1, url
         c.close()

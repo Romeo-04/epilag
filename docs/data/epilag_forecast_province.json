@@ -12,7 +12,9 @@
   "usual_level": 7.0,
   "epidemic_threshold": 20.2,
   "alert_level": "normal",
-  "population": 249467
+  "population": 249467,
+  "alert_reliability": 0.318,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16002",
@@ -27,7 +29,9 @@
   "usual_level": 73.2,
   "epidemic_threshold": 238.5,
   "alert_level": "normal",
-  "population": 754883
+  "population": 754883,
+  "alert_reliability": 0.327,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16003",
@@ -42,7 +46,9 @@
   "usual_level": 51.4,
   "epidemic_threshold": 156.5,
   "alert_level": "normal",
-  "population": 746771
+  "population": 746771,
+  "alert_reliability": 0.297,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06004",
@@ -57,7 +63,9 @@
   "usual_level": 29.7,
   "epidemic_threshold": 82.8,
   "alert_level": "normal",
-  "population": 616000
+  "population": 616000,
+  "alert_reliability": 0.667,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05005",
@@ -72,7 +80,9 @@
   "usual_level": 10.2,
   "epidemic_threshold": 20.2,
   "alert_level": "normal",
-  "population": 1423708
+  "population": 1423708,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06006",
@@ -87,7 +97,9 @@
   "usual_level": 10.9,
   "epidemic_threshold": 21.2,
   "alert_level": "watch",
-  "population": 622828
+  "population": 622828,
+  "alert_reliability": 0.24,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14081",
@@ -102,7 +114,9 @@
   "usual_level": 13.1,
   "epidemic_threshold": 39.8,
   "alert_level": "normal",
-  "population": 125511
+  "population": 125511,
+  "alert_reliability": 0.414,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH03077",
@@ -117,7 +131,9 @@
   "usual_level": 12.4,
   "epidemic_threshold": 33.7,
   "alert_level": "normal",
-  "population": 232022
+  "population": 232022,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19007",
@@ -132,7 +148,9 @@
   "usual_level": 7.2,
   "epidemic_threshold": 16.1,
   "alert_level": "normal",
-  "population": 404492
+  "population": 404492,
+  "alert_reliability": 0.391,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03008",
@@ -147,7 +165,9 @@
   "usual_level": 57.9,
   "epidemic_threshold": 111.4,
   "alert_level": "normal",
-  "population": 862233
+  "population": 862233,
+  "alert_reliability": 0.185,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02009",
@@ -162,7 +182,9 @@
   "usual_level": 0.9,
   "epidemic_threshold": 6.1,
   "alert_level": "normal",
-  "population": 18145
+  "population": 18145,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04010",
@@ -177,7 +199,9 @@
   "usual_level": 93.3,
   "epidemic_threshold": 179.3,
   "alert_level": "normal",
-  "population": 3183930
+  "population": 3183930,
+  "alert_reliability": 0.696,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14011",
@@ -192,7 +216,9 @@
   "usual_level": 36.7,
   "epidemic_threshold": 98.6,
   "alert_level": "normal",
-  "population": 867853
+  "population": 867853,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08078",
@@ -207,7 +233,9 @@
   "usual_level": 10.2,
   "epidemic_threshold": 37.0,
   "alert_level": "normal",
-  "population": 182002
+  "population": 182002,
+  "alert_reliability": 0.347,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07012",
@@ -222,7 +250,9 @@
   "usual_level": 89.8,
   "epidemic_threshold": 262.6,
   "alert_level": "normal",
-  "population": 1382606
+  "population": 1382606,
+  "alert_reliability": 0.537,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10013",
@@ -237,7 +267,9 @@
   "usual_level": 61.0,
   "epidemic_threshold": 150.4,
   "alert_level": "normal",
-  "population": 1542544
+  "population": 1542544,
+  "alert_reliability": 0.826,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03014",
@@ -252,7 +284,9 @@
   "usual_level": 118.4,
   "epidemic_threshold": 229.8,
   "alert_level": "normal",
-  "population": 3767534
+  "population": 3767534,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02015",
@@ -267,7 +301,9 @@
   "usual_level": 54.8,
   "epidemic_threshold": 216.9,
   "alert_level": "normal",
-  "population": 1298316
+  "population": 1298316,
+  "alert_reliability": 0.846,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05016",
@@ -282,7 +318,9 @@
   "usual_level": 6.3,
   "epidemic_threshold": 16.6,
   "alert_level": "normal",
-  "population": 635921
+  "population": 635921,
+  "alert_reliability": 0.491,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH05017",
@@ -297,7 +335,9 @@
   "usual_level": 40.1,
   "epidemic_threshold": 79.7,
   "alert_level": "normal",
-  "population": 2095990
+  "population": 2095990,
+  "alert_reliability": 0.431,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10018",
@@ -312,7 +352,9 @@
   "usual_level": 11.3,
   "epidemic_threshold": 33.9,
   "alert_level": "normal",
-  "population": 93769
+  "population": 93769,
+  "alert_reliability": 0.083,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06019",
@@ -327,7 +369,9 @@
   "usual_level": 20.2,
   "epidemic_threshold": 55.3,
   "alert_level": "normal",
-  "population": 820940
+  "population": 820940,
+  "alert_reliability": 0.72,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05020",
@@ -342,7 +386,9 @@
   "usual_level": 2.8,
   "epidemic_threshold": 9.8,
   "alert_level": "normal",
-  "population": 277033
+  "population": 277033,
+  "alert_reliability": 0.724,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04021",
@@ -357,7 +403,9 @@
   "usual_level": 189.6,
   "epidemic_threshold": 349.8,
   "alert_level": "normal",
-  "population": 4395803
+  "population": 4395803,
+  "alert_reliability": 0.55,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07022",
@@ -372,7 +420,9 @@
   "usual_level": 353.4,
   "epidemic_threshold": 729.2,
   "alert_level": "normal",
-  "population": 5238915
+  "population": 5238915,
+  "alert_reliability": 0.103,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09097",
@@ -387,7 +437,9 @@
   "usual_level": 10.6,
   "epidemic_threshold": 19.8,
   "alert_level": "normal",
-  "population": 132907
+  "population": 132907,
+  "alert_reliability": 0.302,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH12047",
@@ -402,7 +454,9 @@
   "usual_level": 60.8,
   "epidemic_threshold": 150.7,
   "alert_level": "normal",
-  "population": 1577659
+  "population": 1577659,
+  "alert_reliability": 0.487,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH11086",
@@ -417,7 +471,9 @@
   "usual_level": 0.8,
   "epidemic_threshold": 2.9,
   "alert_level": "watch",
-  "population": 346602
+  "population": 346602,
+  "alert_reliability": 0.215,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11025",
@@ -432,7 +488,9 @@
   "usual_level": 18.3,
   "epidemic_threshold": 54.1,
   "alert_level": "normal",
-  "population": 614795
+  "population": 614795,
+  "alert_reliability": 0.0,
+  "reliability_grade": "too few"
  },
  {
   "area_code": "PH11082",
@@ -447,7 +505,9 @@
   "usual_level": 21.8,
   "epidemic_threshold": 53.0,
   "alert_level": "normal",
-  "population": 787004
+  "population": 787004,
+  "alert_reliability": 0.348,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11023",
@@ -462,7 +522,9 @@
   "usual_level": 31.0,
   "epidemic_threshold": 124.0,
   "alert_level": "normal",
-  "population": 1069992
+  "population": 1069992,
+  "alert_reliability": 0.167,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11024",
@@ -477,7 +539,9 @@
   "usual_level": 61.2,
   "epidemic_threshold": 134.4,
   "alert_level": "normal",
-  "population": 2633055
+  "population": 2633055,
+  "alert_reliability": 0.407,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH16085",
@@ -492,7 +556,9 @@
   "usual_level": 10.3,
   "epidemic_threshold": 37.7,
   "alert_level": "normal",
-  "population": 131841
+  "population": 131841,
+  "alert_reliability": 0.513,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH08026",
@@ -507,7 +573,9 @@
   "usual_level": 25.1,
   "epidemic_threshold": 66.4,
   "alert_level": "normal",
-  "population": 519219
+  "population": 519219,
+  "alert_reliability": 0.458,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06079",
@@ -522,7 +590,9 @@
   "usual_level": 2.3,
   "epidemic_threshold": 7.1,
   "alert_level": "normal",
-  "population": 188747
+  "population": 188747,
+  "alert_reliability": 0.833,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14027",
@@ -537,7 +607,9 @@
   "usual_level": 6.5,
   "epidemic_threshold": 21.8,
   "alert_level": "normal",
-  "population": 213380
+  "population": 213380,
+  "alert_reliability": 0.488,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH01028",
@@ -552,7 +624,9 @@
   "usual_level": 9.8,
   "epidemic_threshold": 26.6,
   "alert_level": "normal",
-  "population": 620052
+  "population": 620052,
+  "alert_reliability": 0.356,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01029",
@@ -567,7 +641,9 @@
   "usual_level": 19.9,
   "epidemic_threshold": 46.9,
   "alert_level": "watch",
-  "population": 724395
+  "population": 724395,
+  "alert_reliability": 0.469,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06030",
@@ -582,7 +658,9 @@
   "usual_level": 54.9,
   "epidemic_threshold": 140.3,
   "alert_level": "normal",
-  "population": 2571326
+  "population": 2571326,
+  "alert_reliability": 0.861,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH02031",
@@ -597,7 +675,9 @@
   "usual_level": 71.5,
   "epidemic_threshold": 220.7,
   "alert_level": "normal",
-  "population": 1716854
+  "population": 1716854,
+  "alert_reliability": 0.7,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14032",
@@ -612,7 +692,9 @@
   "usual_level": 17.5,
   "epidemic_threshold": 34.3,
   "alert_level": "normal",
-  "population": 222826
+  "population": 222826,
+  "alert_reliability": 0.053,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01033",
@@ -627,7 +709,9 @@
   "usual_level": 20.0,
   "epidemic_threshold": 39.4,
   "alert_level": "normal",
-  "population": 842047
+  "population": 842047,
+  "alert_reliability": 0.19,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04034",
@@ -642,7 +726,9 @@
   "usual_level": 158.6,
   "epidemic_threshold": 309.5,
   "alert_level": "normal",
-  "population": 3448503
+  "population": 3448503,
+  "alert_reliability": 0.596,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10035",
@@ -657,7 +743,9 @@
   "usual_level": 60.1,
   "epidemic_threshold": 128.8,
   "alert_level": "normal",
-  "population": 1121424
+  "population": 1121424,
+  "alert_reliability": 0.49,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19036",
@@ -672,7 +760,9 @@
   "usual_level": 13.0,
   "epidemic_threshold": 41.2,
   "alert_level": "normal",
-  "population": 1190443
+  "population": 1190443,
+  "alert_reliability": 0.701,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH08037",
@@ -687,7 +777,9 @@
   "usual_level": 81.8,
   "epidemic_threshold": 188.1,
   "alert_level": "normal",
-  "population": 2192249
+  "population": 2192249,
+  "alert_reliability": 0.492,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "MAG",
@@ -702,7 +794,9 @@
   "usual_level": 21.9,
   "epidemic_threshold": 49.3,
   "alert_level": "normal",
-  "population": 1702564
+  "population": 1702564,
+  "alert_reliability": 0.386,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17040",
@@ -717,7 +811,9 @@
   "usual_level": 6.0,
   "epidemic_threshold": 18.2,
   "alert_level": "normal",
-  "population": 243827
+  "population": 243827,
+  "alert_reliability": 0.741,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05041",
@@ -732,7 +828,9 @@
   "usual_level": 6.3,
   "epidemic_threshold": 11.4,
   "alert_level": "normal",
-  "population": 952388
+  "population": 952388,
+  "alert_reliability": 0.264,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13039",
@@ -747,7 +845,9 @@
   "usual_level": 55.0,
   "epidemic_threshold": 100.1,
   "alert_level": "normal",
-  "population": 1933360
+  "population": 1933360,
+  "alert_reliability": 0.068,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13076",
@@ -762,7 +862,9 @@
   "usual_level": 123.6,
   "epidemic_threshold": 251.8,
   "alert_level": "normal",
-  "population": 4043589
+  "population": 4043589,
+  "alert_reliability": 0.509,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13074",
@@ -777,7 +879,9 @@
   "usual_level": 196.4,
   "epidemic_threshold": 384.9,
   "alert_level": "normal",
-  "population": 4995782
+  "population": 4995782,
+  "alert_reliability": 0.419,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13075",
@@ -792,7 +896,9 @@
   "usual_level": 92.5,
   "epidemic_threshold": 176.5,
   "alert_level": "normal",
-  "population": 3145943
+  "population": 3145943,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10042",
@@ -807,7 +913,9 @@
   "usual_level": 37.7,
   "epidemic_threshold": 77.7,
   "alert_level": "normal",
-  "population": 635589
+  "population": 635589,
+  "alert_reliability": 0.296,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10043",
@@ -822,7 +930,9 @@
   "usual_level": 99.5,
   "epidemic_threshold": 197.8,
   "alert_level": "normal",
-  "population": 1735638
+  "population": 1735638,
+  "alert_reliability": 0.37,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14044",
@@ -837,7 +947,9 @@
   "usual_level": 4.9,
   "epidemic_threshold": 20.1,
   "alert_level": "normal",
-  "population": 157820
+  "population": 157820,
+  "alert_reliability": 0.472,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06045",
@@ -852,7 +964,9 @@
   "usual_level": 109.7,
   "epidemic_threshold": 244.6,
   "alert_level": "normal",
-  "population": 3213200
+  "population": 3213200,
+  "alert_reliability": 0.537,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07046",
@@ -867,7 +981,9 @@
   "usual_level": 70.1,
   "epidemic_threshold": 153.8,
   "alert_level": "normal",
-  "population": 1423606
+  "population": 1423606,
+  "alert_reliability": 0.235,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08048",
@@ -882,7 +998,9 @@
   "usual_level": 19.1,
   "epidemic_threshold": 57.9,
   "alert_level": "normal",
-  "population": 681299
+  "population": 681299,
+  "alert_reliability": 0.604,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03049",
@@ -897,7 +1015,9 @@
   "usual_level": 112.5,
   "epidemic_threshold": 242.0,
   "alert_level": "normal",
-  "population": 2443879
+  "population": 2443879,
+  "alert_reliability": 0.429,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02050",
@@ -912,7 +1032,9 @@
   "usual_level": 25.6,
   "epidemic_threshold": 80.9,
   "alert_level": "normal",
-  "population": 493293
+  "population": 493293,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17051",
@@ -927,7 +1049,9 @@
   "usual_level": 18.2,
   "epidemic_threshold": 50.6,
   "alert_level": "normal",
-  "population": 524583
+  "population": 524583,
+  "alert_reliability": 0.245,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17052",
@@ -942,7 +1066,9 @@
   "usual_level": 25.5,
   "epidemic_threshold": 81.5,
   "alert_level": "normal",
-  "population": 920817
+  "population": 920817,
+  "alert_reliability": 0.286,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17053",
@@ -957,7 +1083,9 @@
   "usual_level": 25.2,
   "epidemic_threshold": 57.2,
   "alert_level": "normal",
-  "population": 1254111
+  "population": 1254111,
+  "alert_reliability": 0.207,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03054",
@@ -972,7 +1100,9 @@
   "usual_level": 162.5,
   "epidemic_threshold": 282.1,
   "alert_level": "above usual",
-  "population": 2990403
+  "population": 2990403,
+  "alert_reliability": 0.269,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01055",
@@ -987,7 +1117,9 @@
   "usual_level": 85.7,
   "epidemic_threshold": 177.0,
   "alert_level": "watch",
-  "population": 3166645
+  "population": 3166645,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04056",
@@ -1002,7 +1134,9 @@
   "usual_level": 78.3,
   "epidemic_threshold": 174.0,
   "alert_level": "normal",
-  "population": 2306668
+  "population": 2306668,
+  "alert_reliability": 0.564,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02057",
@@ -1017,7 +1151,9 @@
   "usual_level": 22.1,
   "epidemic_threshold": 78.3,
   "alert_level": "normal",
-  "population": 200940
+  "population": 200940,
+  "alert_reliability": 0.742,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04058",
@@ -1032,7 +1168,9 @@
   "usual_level": 107.2,
   "epidemic_threshold": 200.1,
   "alert_level": "normal",
-  "population": 3320071
+  "population": 3320071,
+  "alert_reliability": 0.583,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17059",
@@ -1047,7 +1185,9 @@
   "usual_level": 2.1,
   "epidemic_threshold": 6.1,
   "alert_level": "normal",
-  "population": 304342
+  "population": 304342,
+  "alert_reliability": 0.323,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08060",
@@ -1062,7 +1202,9 @@
   "usual_level": 31.4,
   "epidemic_threshold": 86.0,
   "alert_level": "normal",
-  "population": 836358
+  "population": 836358,
+  "alert_reliability": 0.714,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH12080",
@@ -1077,7 +1219,9 @@
   "usual_level": 31.6,
   "epidemic_threshold": 67.0,
   "alert_level": "normal",
-  "population": 597339
+  "population": 597339,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07061",
@@ -1092,7 +1236,9 @@
   "usual_level": 7.5,
   "epidemic_threshold": 20.3,
   "alert_level": "normal",
-  "population": 101951
+  "population": 101951,
+  "alert_reliability": 0.176,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05062",
@@ -1107,7 +1253,9 @@
   "usual_level": 8.5,
   "epidemic_threshold": 18.7,
   "alert_level": "normal",
-  "population": 863803
+  "population": 863803,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12063",
@@ -1122,7 +1270,9 @@
   "usual_level": 100.4,
   "epidemic_threshold": 223.0,
   "alert_level": "normal",
-  "population": 1690512
+  "population": 1690512,
+  "alert_reliability": 0.316,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08064",
@@ -1137,7 +1287,9 @@
   "usual_level": 12.1,
   "epidemic_threshold": 47.0,
   "alert_level": "normal",
-  "population": 454030
+  "population": 454030,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12065",
@@ -1152,7 +1304,9 @@
   "usual_level": 20.0,
   "epidemic_threshold": 47.0,
   "alert_level": "normal",
-  "population": 869896
+  "population": 869896,
+  "alert_reliability": 0.705,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH19066",
@@ -1167,7 +1321,9 @@
   "usual_level": 3.2,
   "epidemic_threshold": 7.7,
   "alert_level": "normal",
-  "population": 952737
+  "population": 952737,
+  "alert_reliability": 0.324,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16067",
@@ -1182,7 +1338,9 @@
   "usual_level": 46.6,
   "epidemic_threshold": 117.1,
   "alert_level": "normal",
-  "population": 546799
+  "population": 546799,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16068",
@@ -1197,7 +1355,9 @@
   "usual_level": 63.3,
   "epidemic_threshold": 162.9,
   "alert_level": "normal",
-  "population": 630132
+  "population": 630132,
+  "alert_reliability": 0.222,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03069",
@@ -1212,7 +1372,9 @@
   "usual_level": 90.9,
   "epidemic_threshold": 190.7,
   "alert_level": "above usual",
-  "population": 1492038
+  "population": 1492038,
+  "alert_reliability": 0.385,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19070",
@@ -1227,7 +1389,9 @@
   "usual_level": 2.0,
   "epidemic_threshold": 5.5,
   "alert_level": "normal",
-  "population": 421522
+  "population": 421522,
+  "alert_reliability": 0.304,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03071",
@@ -1242,7 +1406,9 @@
   "usual_level": 24.8,
   "epidemic_threshold": 48.1,
   "alert_level": "normal",
-  "population": 918351
+  "population": 918351,
+  "alert_reliability": 0.174,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09083",
@@ -1257,7 +1423,9 @@
   "usual_level": 14.9,
   "epidemic_threshold": 33.5,
   "alert_level": "normal",
-  "population": 695261
+  "population": 695261,
+  "alert_reliability": 0.825,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09072",
@@ -1272,7 +1440,9 @@
   "usual_level": 42.9,
   "epidemic_threshold": 97.5,
   "alert_level": "normal",
-  "population": 1059419
+  "population": 1059419,
+  "alert_reliability": 0.662,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09073",
@@ -1287,7 +1457,9 @@
   "usual_level": 69.4,
   "epidemic_threshold": 150.2,
   "alert_level": "normal",
-  "population": 1947214
+  "population": 1947214,
+  "alert_reliability": 0.833,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14001",
@@ -1302,7 +1474,9 @@
   "usual_level": 8.5,
   "epidemic_threshold": 21.8,
   "alert_level": "normal",
-  "population": 249467
+  "population": 249467,
+  "alert_reliability": 0.318,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16002",
@@ -1317,7 +1491,9 @@
   "usual_level": 75.9,
   "epidemic_threshold": 245.7,
   "alert_level": "normal",
-  "population": 754883
+  "population": 754883,
+  "alert_reliability": 0.327,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16003",
@@ -1332,7 +1508,9 @@
   "usual_level": 58.6,
   "epidemic_threshold": 170.2,
   "alert_level": "normal",
-  "population": 746771
+  "population": 746771,
+  "alert_reliability": 0.297,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06004",
@@ -1347,7 +1525,9 @@
   "usual_level": 27.7,
   "epidemic_threshold": 60.9,
   "alert_level": "normal",
-  "population": 616000
+  "population": 616000,
+  "alert_reliability": 0.667,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05005",
@@ -1362,7 +1542,9 @@
   "usual_level": 9.7,
   "epidemic_threshold": 20.0,
   "alert_level": "normal",
-  "population": 1423708
+  "population": 1423708,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06006",
@@ -1377,7 +1559,9 @@
   "usual_level": 11.2,
   "epidemic_threshold": 21.0,
   "alert_level": "watch",
-  "population": 622828
+  "population": 622828,
+  "alert_reliability": 0.24,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14081",
@@ -1392,7 +1576,9 @@
   "usual_level": 14.2,
   "epidemic_threshold": 44.8,
   "alert_level": "normal",
-  "population": 125511
+  "population": 125511,
+  "alert_reliability": 0.414,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH03077",
@@ -1407,7 +1593,9 @@
   "usual_level": 12.0,
   "epidemic_threshold": 31.6,
   "alert_level": "normal",
-  "population": 232022
+  "population": 232022,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19007",
@@ -1422,7 +1610,9 @@
   "usual_level": 7.9,
   "epidemic_threshold": 16.9,
   "alert_level": "normal",
-  "population": 404492
+  "population": 404492,
+  "alert_reliability": 0.391,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03008",
@@ -1437,7 +1627,9 @@
   "usual_level": 57.6,
   "epidemic_threshold": 107.4,
   "alert_level": "normal",
-  "population": 862233
+  "population": 862233,
+  "alert_reliability": 0.185,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02009",
@@ -1452,7 +1644,9 @@
   "usual_level": 1.1,
   "epidemic_threshold": 6.5,
   "alert_level": "normal",
-  "population": 18145
+  "population": 18145,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04010",
@@ -1467,7 +1661,9 @@
   "usual_level": 94.3,
   "epidemic_threshold": 180.7,
   "alert_level": "normal",
-  "population": 3183930
+  "population": 3183930,
+  "alert_reliability": 0.696,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14011",
@@ -1482,7 +1678,9 @@
   "usual_level": 33.1,
   "epidemic_threshold": 73.7,
   "alert_level": "normal",
-  "population": 867853
+  "population": 867853,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08078",
@@ -1497,7 +1695,9 @@
   "usual_level": 16.2,
   "epidemic_threshold": 50.7,
   "alert_level": "normal",
-  "population": 182002
+  "population": 182002,
+  "alert_reliability": 0.347,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07012",
@@ -1512,7 +1712,9 @@
   "usual_level": 94.0,
   "epidemic_threshold": 278.2,
   "alert_level": "normal",
-  "population": 1382606
+  "population": 1382606,
+  "alert_reliability": 0.537,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10013",
@@ -1527,7 +1729,9 @@
   "usual_level": 66.8,
   "epidemic_threshold": 158.3,
   "alert_level": "normal",
-  "population": 1542544
+  "population": 1542544,
+  "alert_reliability": 0.826,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03014",
@@ -1542,7 +1746,9 @@
   "usual_level": 129.4,
   "epidemic_threshold": 237.3,
   "alert_level": "normal",
-  "population": 3767534
+  "population": 3767534,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02015",
@@ -1557,7 +1763,9 @@
   "usual_level": 63.2,
   "epidemic_threshold": 257.1,
   "alert_level": "normal",
-  "population": 1298316
+  "population": 1298316,
+  "alert_reliability": 0.846,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05016",
@@ -1572,7 +1780,9 @@
   "usual_level": 6.2,
   "epidemic_threshold": 16.1,
   "alert_level": "normal",
-  "population": 635921
+  "population": 635921,
+  "alert_reliability": 0.491,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH05017",
@@ -1587,7 +1797,9 @@
   "usual_level": 39.2,
   "epidemic_threshold": 80.2,
   "alert_level": "normal",
-  "population": 2095990
+  "population": 2095990,
+  "alert_reliability": 0.431,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10018",
@@ -1602,7 +1814,9 @@
   "usual_level": 10.0,
   "epidemic_threshold": 26.9,
   "alert_level": "normal",
-  "population": 93769
+  "population": 93769,
+  "alert_reliability": 0.083,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06019",
@@ -1617,7 +1831,9 @@
   "usual_level": 23.9,
   "epidemic_threshold": 63.2,
   "alert_level": "normal",
-  "population": 820940
+  "population": 820940,
+  "alert_reliability": 0.72,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05020",
@@ -1632,7 +1848,9 @@
   "usual_level": 2.7,
   "epidemic_threshold": 9.8,
   "alert_level": "watch",
-  "population": 277033
+  "population": 277033,
+  "alert_reliability": 0.724,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04021",
@@ -1647,7 +1865,9 @@
   "usual_level": 189.7,
   "epidemic_threshold": 345.0,
   "alert_level": "normal",
-  "population": 4395803
+  "population": 4395803,
+  "alert_reliability": 0.55,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07022",
@@ -1662,7 +1882,9 @@
   "usual_level": 374.5,
   "epidemic_threshold": 763.6,
   "alert_level": "normal",
-  "population": 5238915
+  "population": 5238915,
+  "alert_reliability": 0.103,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09097",
@@ -1677,7 +1899,9 @@
   "usual_level": 10.8,
   "epidemic_threshold": 19.9,
   "alert_level": "normal",
-  "population": 132907
+  "population": 132907,
+  "alert_reliability": 0.302,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH12047",
@@ -1692,7 +1916,9 @@
   "usual_level": 67.0,
   "epidemic_threshold": 154.0,
   "alert_level": "normal",
-  "population": 1577659
+  "population": 1577659,
+  "alert_reliability": 0.487,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH11086",
@@ -1707,7 +1933,9 @@
   "usual_level": 0.8,
   "epidemic_threshold": 2.9,
   "alert_level": "watch",
-  "population": 346602
+  "population": 346602,
+  "alert_reliability": 0.215,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11025",
@@ -1722,7 +1950,9 @@
   "usual_level": 20.2,
   "epidemic_threshold": 56.6,
   "alert_level": "normal",
-  "population": 614795
+  "population": 614795,
+  "alert_reliability": 0.0,
+  "reliability_grade": "too few"
  },
  {
   "area_code": "PH11082",
@@ -1737,7 +1967,9 @@
   "usual_level": 24.0,
   "epidemic_threshold": 52.9,
   "alert_level": "normal",
-  "population": 787004
+  "population": 787004,
+  "alert_reliability": 0.348,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11023",
@@ -1752,7 +1984,9 @@
   "usual_level": 34.0,
   "epidemic_threshold": 125.1,
   "alert_level": "normal",
-  "population": 1069992
+  "population": 1069992,
+  "alert_reliability": 0.167,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11024",
@@ -1767,7 +2001,9 @@
   "usual_level": 69.6,
   "epidemic_threshold": 137.9,
   "alert_level": "normal",
-  "population": 2633055
+  "population": 2633055,
+  "alert_reliability": 0.407,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH16085",
@@ -1782,7 +2018,9 @@
   "usual_level": 12.0,
   "epidemic_threshold": 41.7,
   "alert_level": "normal",
-  "population": 131841
+  "population": 131841,
+  "alert_reliability": 0.513,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH08026",
@@ -1797,7 +2035,9 @@
   "usual_level": 28.9,
   "epidemic_threshold": 78.9,
   "alert_level": "normal",
-  "population": 519219
+  "population": 519219,
+  "alert_reliability": 0.458,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06079",
@@ -1812,7 +2052,9 @@
   "usual_level": 2.9,
   "epidemic_threshold": 8.5,
   "alert_level": "normal",
-  "population": 188747
+  "population": 188747,
+  "alert_reliability": 0.833,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14027",
@@ -1827,7 +2069,9 @@
   "usual_level": 6.4,
   "epidemic_threshold": 20.5,
   "alert_level": "normal",
-  "population": 213380
+  "population": 213380,
+  "alert_reliability": 0.488,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH01028",
@@ -1842,7 +2086,9 @@
   "usual_level": 9.6,
   "epidemic_threshold": 23.7,
   "alert_level": "normal",
-  "population": 620052
+  "population": 620052,
+  "alert_reliability": 0.356,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01029",
@@ -1857,7 +2103,9 @@
   "usual_level": 18.1,
   "epidemic_threshold": 41.6,
   "alert_level": "watch",
-  "population": 724395
+  "population": 724395,
+  "alert_reliability": 0.469,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06030",
@@ -1872,7 +2120,9 @@
   "usual_level": 65.4,
   "epidemic_threshold": 165.8,
   "alert_level": "normal",
-  "population": 2571326
+  "population": 2571326,
+  "alert_reliability": 0.861,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH02031",
@@ -1887,7 +2137,9 @@
   "usual_level": 80.4,
   "epidemic_threshold": 244.3,
   "alert_level": "normal",
-  "population": 1716854
+  "population": 1716854,
+  "alert_reliability": 0.7,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14032",
@@ -1902,7 +2154,9 @@
   "usual_level": 17.1,
   "epidemic_threshold": 34.7,
   "alert_level": "normal",
-  "population": 222826
+  "population": 222826,
+  "alert_reliability": 0.053,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01033",
@@ -1917,7 +2171,9 @@
   "usual_level": 17.7,
   "epidemic_threshold": 32.7,
   "alert_level": "normal",
-  "population": 842047
+  "population": 842047,
+  "alert_reliability": 0.19,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04034",
@@ -1932,7 +2188,9 @@
   "usual_level": 152.0,
   "epidemic_threshold": 267.8,
   "alert_level": "normal",
-  "population": 3448503
+  "population": 3448503,
+  "alert_reliability": 0.596,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10035",
@@ -1947,7 +2205,9 @@
   "usual_level": 60.1,
   "epidemic_threshold": 127.8,
   "alert_level": "normal",
-  "population": 1121424
+  "population": 1121424,
+  "alert_reliability": 0.49,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19036",
@@ -1962,7 +2222,9 @@
   "usual_level": 14.3,
   "epidemic_threshold": 41.2,
   "alert_level": "normal",
-  "population": 1190443
+  "population": 1190443,
+  "alert_reliability": 0.701,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH08037",
@@ -1977,7 +2239,9 @@
   "usual_level": 91.3,
   "epidemic_threshold": 217.0,
   "alert_level": "normal",
-  "population": 2192249
+  "population": 2192249,
+  "alert_reliability": 0.492,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "MAG",
@@ -1992,7 +2256,9 @@
   "usual_level": 24.8,
   "epidemic_threshold": 55.1,
   "alert_level": "normal",
-  "population": 1702564
+  "population": 1702564,
+  "alert_reliability": 0.386,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17040",
@@ -2007,7 +2273,9 @@
   "usual_level": 8.2,
   "epidemic_threshold": 20.6,
   "alert_level": "normal",
-  "population": 243827
+  "population": 243827,
+  "alert_reliability": 0.741,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05041",
@@ -2022,7 +2290,9 @@
   "usual_level": 6.9,
   "epidemic_threshold": 11.8,
   "alert_level": "normal",
-  "population": 952388
+  "population": 952388,
+  "alert_reliability": 0.264,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13039",
@@ -2037,7 +2307,9 @@
   "usual_level": 56.8,
   "epidemic_threshold": 99.2,
   "alert_level": "normal",
-  "population": 1933360
+  "population": 1933360,
+  "alert_reliability": 0.068,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13076",
@@ -2052,7 +2324,9 @@
   "usual_level": 128.3,
   "epidemic_threshold": 255.2,
   "alert_level": "normal",
-  "population": 4043589
+  "population": 4043589,
+  "alert_reliability": 0.509,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13074",
@@ -2067,7 +2341,9 @@
   "usual_level": 208.1,
   "epidemic_threshold": 377.6,
   "alert_level": "normal",
-  "population": 4995782
+  "population": 4995782,
+  "alert_reliability": 0.419,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13075",
@@ -2082,7 +2358,9 @@
   "usual_level": 99.8,
   "epidemic_threshold": 177.3,
   "alert_level": "normal",
-  "population": 3145943
+  "population": 3145943,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10042",
@@ -2097,7 +2375,9 @@
   "usual_level": 41.3,
   "epidemic_threshold": 78.3,
   "alert_level": "normal",
-  "population": 635589
+  "population": 635589,
+  "alert_reliability": 0.296,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10043",
@@ -2112,7 +2392,9 @@
   "usual_level": 100.1,
   "epidemic_threshold": 183.9,
   "alert_level": "normal",
-  "population": 1735638
+  "population": 1735638,
+  "alert_reliability": 0.37,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14044",
@@ -2127,7 +2409,9 @@
   "usual_level": 5.8,
   "epidemic_threshold": 23.1,
   "alert_level": "normal",
-  "population": 157820
+  "population": 157820,
+  "alert_reliability": 0.472,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06045",
@@ -2142,7 +2426,9 @@
   "usual_level": 113.6,
   "epidemic_threshold": 250.8,
   "alert_level": "normal",
-  "population": 3213200
+  "population": 3213200,
+  "alert_reliability": 0.537,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07046",
@@ -2157,7 +2443,9 @@
   "usual_level": 73.8,
   "epidemic_threshold": 162.6,
   "alert_level": "normal",
-  "population": 1423606
+  "population": 1423606,
+  "alert_reliability": 0.235,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08048",
@@ -2172,7 +2460,9 @@
   "usual_level": 19.5,
   "epidemic_threshold": 52.0,
   "alert_level": "normal",
-  "population": 681299
+  "population": 681299,
+  "alert_reliability": 0.604,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03049",
@@ -2187,7 +2477,9 @@
   "usual_level": 96.5,
   "epidemic_threshold": 237.0,
   "alert_level": "above usual",
-  "population": 2443879
+  "population": 2443879,
+  "alert_reliability": 0.429,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02050",
@@ -2202,7 +2494,9 @@
   "usual_level": 29.8,
   "epidemic_threshold": 89.5,
   "alert_level": "normal",
-  "population": 493293
+  "population": 493293,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17051",
@@ -2217,7 +2511,9 @@
   "usual_level": 23.2,
   "epidemic_threshold": 52.6,
   "alert_level": "normal",
-  "population": 524583
+  "population": 524583,
+  "alert_reliability": 0.245,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17052",
@@ -2232,7 +2528,9 @@
   "usual_level": 35.8,
   "epidemic_threshold": 95.3,
   "alert_level": "normal",
-  "population": 920817
+  "population": 920817,
+  "alert_reliability": 0.286,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17053",
@@ -2247,7 +2545,9 @@
   "usual_level": 34.2,
   "epidemic_threshold": 72.6,
   "alert_level": "normal",
-  "population": 1254111
+  "population": 1254111,
+  "alert_reliability": 0.207,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03054",
@@ -2262,7 +2562,9 @@
   "usual_level": 153.8,
   "epidemic_threshold": 282.6,
   "alert_level": "watch",
-  "population": 2990403
+  "population": 2990403,
+  "alert_reliability": 0.269,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01055",
@@ -2277,7 +2579,9 @@
   "usual_level": 78.8,
   "epidemic_threshold": 157.0,
   "alert_level": "watch",
-  "population": 3166645
+  "population": 3166645,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04056",
@@ -2292,7 +2596,9 @@
   "usual_level": 84.1,
   "epidemic_threshold": 176.7,
   "alert_level": "normal",
-  "population": 2306668
+  "population": 2306668,
+  "alert_reliability": 0.564,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02057",
@@ -2307,7 +2613,9 @@
   "usual_level": 17.7,
   "epidemic_threshold": 60.7,
   "alert_level": "normal",
-  "population": 200940
+  "population": 200940,
+  "alert_reliability": 0.742,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04058",
@@ -2322,7 +2630,9 @@
   "usual_level": 111.3,
   "epidemic_threshold": 190.1,
   "alert_level": "normal",
-  "population": 3320071
+  "population": 3320071,
+  "alert_reliability": 0.583,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17059",
@@ -2337,7 +2647,9 @@
   "usual_level": 3.7,
   "epidemic_threshold": 11.1,
   "alert_level": "normal",
-  "population": 304342
+  "population": 304342,
+  "alert_reliability": 0.323,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08060",
@@ -2352,7 +2664,9 @@
   "usual_level": 36.0,
   "epidemic_threshold": 95.1,
   "alert_level": "normal",
-  "population": 836358
+  "population": 836358,
+  "alert_reliability": 0.714,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH12080",
@@ -2367,7 +2681,9 @@
   "usual_level": 32.9,
   "epidemic_threshold": 59.9,
   "alert_level": "normal",
-  "population": 597339
+  "population": 597339,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07061",
@@ -2382,7 +2698,9 @@
   "usual_level": 6.9,
   "epidemic_threshold": 18.2,
   "alert_level": "normal",
-  "population": 101951
+  "population": 101951,
+  "alert_reliability": 0.176,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05062",
@@ -2397,7 +2715,9 @@
   "usual_level": 8.7,
   "epidemic_threshold": 21.0,
   "alert_level": "normal",
-  "population": 863803
+  "population": 863803,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12063",
@@ -2412,7 +2732,9 @@
   "usual_level": 97.9,
   "epidemic_threshold": 188.5,
   "alert_level": "normal",
-  "population": 1690512
+  "population": 1690512,
+  "alert_reliability": 0.316,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08064",
@@ -2427,7 +2749,9 @@
   "usual_level": 15.5,
   "epidemic_threshold": 50.9,
   "alert_level": "normal",
-  "population": 454030
+  "population": 454030,
+  "alert_reliability": 0.5,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12065",
@@ -2442,7 +2766,9 @@
   "usual_level": 22.1,
   "epidemic_threshold": 53.6,
   "alert_level": "normal",
-  "population": 869896
+  "population": 869896,
+  "alert_reliability": 0.705,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH19066",
@@ -2457,7 +2783,9 @@
   "usual_level": 3.3,
   "epidemic_threshold": 8.4,
   "alert_level": "normal",
-  "population": 952737
+  "population": 952737,
+  "alert_reliability": 0.324,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16067",
@@ -2472,7 +2800,9 @@
   "usual_level": 49.9,
   "epidemic_threshold": 123.6,
   "alert_level": "normal",
-  "population": 546799
+  "population": 546799,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16068",
@@ -2487,7 +2817,9 @@
   "usual_level": 65.8,
   "epidemic_threshold": 165.8,
   "alert_level": "normal",
-  "population": 630132
+  "population": 630132,
+  "alert_reliability": 0.222,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03069",
@@ -2502,7 +2834,9 @@
   "usual_level": 93.9,
   "epidemic_threshold": 198.3,
   "alert_level": "watch",
-  "population": 1492038
+  "population": 1492038,
+  "alert_reliability": 0.385,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19070",
@@ -2517,7 +2851,9 @@
   "usual_level": 3.1,
   "epidemic_threshold": 8.3,
   "alert_level": "normal",
-  "population": 421522
+  "population": 421522,
+  "alert_reliability": 0.304,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03071",
@@ -2532,7 +2868,9 @@
   "usual_level": 24.5,
   "epidemic_threshold": 49.7,
   "alert_level": "normal",
-  "population": 918351
+  "population": 918351,
+  "alert_reliability": 0.174,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09083",
@@ -2547,7 +2885,9 @@
   "usual_level": 17.3,
   "epidemic_threshold": 41.6,
   "alert_level": "normal",
-  "population": 695261
+  "population": 695261,
+  "alert_reliability": 0.825,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09072",
@@ -2562,7 +2902,9 @@
   "usual_level": 44.6,
   "epidemic_threshold": 101.6,
   "alert_level": "normal",
-  "population": 1059419
+  "population": 1059419,
+  "alert_reliability": 0.662,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09073",
@@ -2577,7 +2919,9 @@
   "usual_level": 76.4,
   "epidemic_threshold": 155.8,
   "alert_level": "normal",
-  "population": 1947214
+  "population": 1947214,
+  "alert_reliability": 0.833,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14001",
@@ -2592,7 +2936,9 @@
   "usual_level": 7.1,
   "epidemic_threshold": 17.7,
   "alert_level": "normal",
-  "population": 249467
+  "population": 249467,
+  "alert_reliability": 0.211,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16002",
@@ -2607,7 +2953,9 @@
   "usual_level": 57.4,
   "epidemic_threshold": 169.5,
   "alert_level": "normal",
-  "population": 754883
+  "population": 754883,
+  "alert_reliability": 0.258,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16003",
@@ -2622,7 +2970,9 @@
   "usual_level": 49.7,
   "epidemic_threshold": 135.2,
   "alert_level": "normal",
-  "population": 746771
+  "population": 746771,
+  "alert_reliability": 0.2,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06004",
@@ -2637,7 +2987,9 @@
   "usual_level": 28.7,
   "epidemic_threshold": 67.0,
   "alert_level": "normal",
-  "population": 616000
+  "population": 616000,
+  "alert_reliability": 0.625,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05005",
@@ -2652,7 +3004,9 @@
   "usual_level": 8.1,
   "epidemic_threshold": 17.9,
   "alert_level": "normal",
-  "population": 1423708
+  "population": 1423708,
+  "alert_reliability": 0.493,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06006",
@@ -2667,7 +3021,9 @@
   "usual_level": 9.5,
   "epidemic_threshold": 19.0,
   "alert_level": "watch",
-  "population": 622828
+  "population": 622828,
+  "alert_reliability": 0.217,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14081",
@@ -2682,7 +3038,9 @@
   "usual_level": 12.0,
   "epidemic_threshold": 38.7,
   "alert_level": "normal",
-  "population": 125511
+  "population": 125511,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03077",
@@ -2697,7 +3055,9 @@
   "usual_level": 10.3,
   "epidemic_threshold": 28.8,
   "alert_level": "normal",
-  "population": 232022
+  "population": 232022,
+  "alert_reliability": 0.449,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19007",
@@ -2712,7 +3072,9 @@
   "usual_level": 7.0,
   "epidemic_threshold": 14.6,
   "alert_level": "normal",
-  "population": 404492
+  "population": 404492,
+  "alert_reliability": 0.321,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03008",
@@ -2727,7 +3089,9 @@
   "usual_level": 47.0,
   "epidemic_threshold": 93.2,
   "alert_level": "normal",
-  "population": 862233
+  "population": 862233,
+  "alert_reliability": 0.089,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02009",
@@ -2742,7 +3106,9 @@
   "usual_level": 1.3,
   "epidemic_threshold": 7.0,
   "alert_level": "normal",
-  "population": 18145
+  "population": 18145,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04010",
@@ -2757,7 +3123,9 @@
   "usual_level": 77.2,
   "epidemic_threshold": 150.4,
   "alert_level": "normal",
-  "population": 3183930
+  "population": 3183930,
+  "alert_reliability": 0.577,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH14011",
@@ -2772,7 +3140,9 @@
   "usual_level": 28.4,
   "epidemic_threshold": 65.5,
   "alert_level": "normal",
-  "population": 867853
+  "population": 867853,
+  "alert_reliability": 0.25,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08078",
@@ -2787,7 +3157,9 @@
   "usual_level": 17.6,
   "epidemic_threshold": 53.5,
   "alert_level": "normal",
-  "population": 182002
+  "population": 182002,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07012",
@@ -2802,7 +3174,9 @@
   "usual_level": 74.4,
   "epidemic_threshold": 231.0,
   "alert_level": "normal",
-  "population": 1382606
+  "population": 1382606,
+  "alert_reliability": 0.468,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10013",
@@ -2817,7 +3191,9 @@
   "usual_level": 65.1,
   "epidemic_threshold": 152.3,
   "alert_level": "normal",
-  "population": 1542544
+  "population": 1542544,
+  "alert_reliability": 0.645,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03014",
@@ -2832,7 +3208,9 @@
   "usual_level": 112.8,
   "epidemic_threshold": 206.4,
   "alert_level": "normal",
-  "population": 3767534
+  "population": 3767534,
+  "alert_reliability": 0.229,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02015",
@@ -2847,7 +3225,9 @@
   "usual_level": 50.2,
   "epidemic_threshold": 215.8,
   "alert_level": "normal",
-  "population": 1298316
+  "population": 1298316,
+  "alert_reliability": 0.767,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05016",
@@ -2862,7 +3242,9 @@
   "usual_level": 5.4,
   "epidemic_threshold": 13.6,
   "alert_level": "normal",
-  "population": 635921
+  "population": 635921,
+  "alert_reliability": 0.329,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05017",
@@ -2877,7 +3259,9 @@
   "usual_level": 34.0,
   "epidemic_threshold": 70.1,
   "alert_level": "normal",
-  "population": 2095990
+  "population": 2095990,
+  "alert_reliability": 0.373,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10018",
@@ -2892,7 +3276,9 @@
   "usual_level": 6.8,
   "epidemic_threshold": 18.8,
   "alert_level": "normal",
-  "population": 93769
+  "population": 93769,
+  "alert_reliability": 0.103,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06019",
@@ -2907,7 +3293,9 @@
   "usual_level": 23.0,
   "epidemic_threshold": 63.2,
   "alert_level": "normal",
-  "population": 820940
+  "population": 820940,
+  "alert_reliability": 0.655,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05020",
@@ -2922,7 +3310,9 @@
   "usual_level": 2.2,
   "epidemic_threshold": 7.0,
   "alert_level": "watch",
-  "population": 277033
+  "population": 277033,
+  "alert_reliability": 0.646,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04021",
@@ -2937,7 +3327,9 @@
   "usual_level": 158.4,
   "epidemic_threshold": 297.0,
   "alert_level": "normal",
-  "population": 4395803
+  "population": 4395803,
+  "alert_reliability": 0.485,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07022",
@@ -2952,7 +3344,9 @@
   "usual_level": 310.2,
   "epidemic_threshold": 652.3,
   "alert_level": "normal",
-  "population": 5238915
+  "population": 5238915,
+  "alert_reliability": 0.1,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09097",
@@ -2967,7 +3361,9 @@
   "usual_level": 9.2,
   "epidemic_threshold": 17.8,
   "alert_level": "normal",
-  "population": 132907
+  "population": 132907,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH12047",
@@ -2982,7 +3378,9 @@
   "usual_level": 65.9,
   "epidemic_threshold": 159.5,
   "alert_level": "normal",
-  "population": 1577659
+  "population": 1577659,
+  "alert_reliability": 0.426,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH11086",
@@ -2997,7 +3395,9 @@
   "usual_level": 0.8,
   "epidemic_threshold": 2.3,
   "alert_level": "watch",
-  "population": 346602
+  "population": 346602,
+  "alert_reliability": 0.188,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11025",
@@ -3012,7 +3412,9 @@
   "usual_level": 18.6,
   "epidemic_threshold": 51.8,
   "alert_level": "normal",
-  "population": 614795
+  "population": 614795,
+  "alert_reliability": 0.0,
+  "reliability_grade": "too few"
  },
  {
   "area_code": "PH11082",
@@ -3027,7 +3429,9 @@
   "usual_level": 19.9,
   "epidemic_threshold": 41.7,
   "alert_level": "normal",
-  "population": 787004
+  "population": 787004,
+  "alert_reliability": 0.136,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11023",
@@ -3042,7 +3446,9 @@
   "usual_level": 25.2,
   "epidemic_threshold": 61.2,
   "alert_level": "normal",
-  "population": 1069992
+  "population": 1069992,
+  "alert_reliability": 0.07,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11024",
@@ -3057,7 +3463,9 @@
   "usual_level": 60.0,
   "epidemic_threshold": 121.7,
   "alert_level": "normal",
-  "population": 2633055
+  "population": 2633055,
+  "alert_reliability": 0.27,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16085",
@@ -3072,7 +3480,9 @@
   "usual_level": 9.4,
   "epidemic_threshold": 32.6,
   "alert_level": "normal",
-  "population": 131841
+  "population": 131841,
+  "alert_reliability": 0.494,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH08026",
@@ -3087,7 +3497,9 @@
   "usual_level": 25.4,
   "epidemic_threshold": 75.4,
   "alert_level": "normal",
-  "population": 519219
+  "population": 519219,
+  "alert_reliability": 0.373,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06079",
@@ -3102,7 +3514,9 @@
   "usual_level": 3.2,
   "epidemic_threshold": 10.1,
   "alert_level": "normal",
-  "population": 188747
+  "population": 188747,
+  "alert_reliability": 0.667,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14027",
@@ -3117,7 +3531,9 @@
   "usual_level": 5.4,
   "epidemic_threshold": 20.1,
   "alert_level": "normal",
-  "population": 213380
+  "population": 213380,
+  "alert_reliability": 0.37,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01028",
@@ -3132,7 +3548,9 @@
   "usual_level": 9.2,
   "epidemic_threshold": 22.0,
   "alert_level": "normal",
-  "population": 620052
+  "population": 620052,
+  "alert_reliability": 0.226,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01029",
@@ -3147,7 +3565,9 @@
   "usual_level": 14.5,
   "epidemic_threshold": 31.5,
   "alert_level": "outbreak warning",
-  "population": 724395
+  "population": 724395,
+  "alert_reliability": 0.329,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06030",
@@ -3162,7 +3582,9 @@
   "usual_level": 59.3,
   "epidemic_threshold": 155.7,
   "alert_level": "normal",
-  "population": 2571326
+  "population": 2571326,
+  "alert_reliability": 0.659,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH02031",
@@ -3177,7 +3599,9 @@
   "usual_level": 69.5,
   "epidemic_threshold": 214.1,
   "alert_level": "normal",
-  "population": 1716854
+  "population": 1716854,
+  "alert_reliability": 0.583,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH14032",
@@ -3192,7 +3616,9 @@
   "usual_level": 14.1,
   "epidemic_threshold": 33.4,
   "alert_level": "normal",
-  "population": 222826
+  "population": 222826,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01033",
@@ -3207,7 +3633,9 @@
   "usual_level": 12.9,
   "epidemic_threshold": 24.3,
   "alert_level": "watch",
-  "population": 842047
+  "population": 842047,
+  "alert_reliability": 0.091,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04034",
@@ -3222,7 +3650,9 @@
   "usual_level": 127.8,
   "epidemic_threshold": 225.6,
   "alert_level": "normal",
-  "population": 3448503
+  "population": 3448503,
+  "alert_reliability": 0.476,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10035",
@@ -3237,7 +3667,9 @@
   "usual_level": 51.0,
   "epidemic_threshold": 113.6,
   "alert_level": "normal",
-  "population": 1121424
+  "population": 1121424,
+  "alert_reliability": 0.367,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19036",
@@ -3252,7 +3684,9 @@
   "usual_level": 13.7,
   "epidemic_threshold": 40.0,
   "alert_level": "normal",
-  "population": 1190443
+  "population": 1190443,
+  "alert_reliability": 0.662,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH08037",
@@ -3267,7 +3701,9 @@
   "usual_level": 79.6,
   "epidemic_threshold": 208.1,
   "alert_level": "normal",
-  "population": 2192249
+  "population": 2192249,
+  "alert_reliability": 0.471,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "MAG",
@@ -3282,7 +3718,9 @@
   "usual_level": 22.2,
   "epidemic_threshold": 54.3,
   "alert_level": "normal",
-  "population": 1702564
+  "population": 1702564,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17040",
@@ -3297,7 +3735,9 @@
   "usual_level": 7.0,
   "epidemic_threshold": 17.8,
   "alert_level": "normal",
-  "population": 243827
+  "population": 243827,
+  "alert_reliability": 0.585,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH05041",
@@ -3312,7 +3752,9 @@
   "usual_level": 6.8,
   "epidemic_threshold": 12.4,
   "alert_level": "normal",
-  "population": 952388
+  "population": 952388,
+  "alert_reliability": 0.247,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13039",
@@ -3327,7 +3769,9 @@
   "usual_level": 47.3,
   "epidemic_threshold": 79.7,
   "alert_level": "normal",
-  "population": 1933360
+  "population": 1933360,
+  "alert_reliability": 0.044,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13076",
@@ -3342,7 +3786,9 @@
   "usual_level": 104.2,
   "epidemic_threshold": 206.9,
   "alert_level": "normal",
-  "population": 4043589
+  "population": 4043589,
+  "alert_reliability": 0.484,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13074",
@@ -3357,7 +3803,9 @@
   "usual_level": 168.9,
   "epidemic_threshold": 302.0,
   "alert_level": "normal",
-  "population": 4995782
+  "population": 4995782,
+  "alert_reliability": 0.209,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13075",
@@ -3372,7 +3820,9 @@
   "usual_level": 83.6,
   "epidemic_threshold": 144.0,
   "alert_level": "normal",
-  "population": 3145943
+  "population": 3145943,
+  "alert_reliability": 0.167,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10042",
@@ -3387,7 +3837,9 @@
   "usual_level": 38.2,
   "epidemic_threshold": 69.4,
   "alert_level": "normal",
-  "population": 635589
+  "population": 635589,
+  "alert_reliability": 0.237,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10043",
@@ -3402,7 +3854,9 @@
   "usual_level": 87.8,
   "epidemic_threshold": 161.4,
   "alert_level": "normal",
-  "population": 1735638
+  "population": 1735638,
+  "alert_reliability": 0.214,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14044",
@@ -3417,7 +3871,9 @@
   "usual_level": 4.6,
   "epidemic_threshold": 20.1,
   "alert_level": "normal",
-  "population": 157820
+  "population": 157820,
+  "alert_reliability": 0.35,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06045",
@@ -3432,7 +3888,9 @@
   "usual_level": 96.7,
   "epidemic_threshold": 219.4,
   "alert_level": "normal",
-  "population": 3213200
+  "population": 3213200,
+  "alert_reliability": 0.347,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07046",
@@ -3447,7 +3905,9 @@
   "usual_level": 61.8,
   "epidemic_threshold": 135.3,
   "alert_level": "normal",
-  "population": 1423606
+  "population": 1423606,
+  "alert_reliability": 0.15,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08048",
@@ -3462,7 +3922,9 @@
   "usual_level": 15.8,
   "epidemic_threshold": 41.4,
   "alert_level": "normal",
-  "population": 681299
+  "population": 681299,
+  "alert_reliability": 0.433,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH03049",
@@ -3477,7 +3939,9 @@
   "usual_level": 69.0,
   "epidemic_threshold": 172.6,
   "alert_level": "watch",
-  "population": 2443879
+  "population": 2443879,
+  "alert_reliability": 0.317,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02050",
@@ -3492,7 +3956,9 @@
   "usual_level": 20.7,
   "epidemic_threshold": 71.5,
   "alert_level": "normal",
-  "population": 493293
+  "population": 493293,
+  "alert_reliability": 0.276,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17051",
@@ -3507,7 +3973,9 @@
   "usual_level": 18.9,
   "epidemic_threshold": 47.5,
   "alert_level": "normal",
-  "population": 524583
+  "population": 524583,
+  "alert_reliability": 0.232,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17052",
@@ -3522,7 +3990,9 @@
   "usual_level": 35.4,
   "epidemic_threshold": 87.1,
   "alert_level": "normal",
-  "population": 920817
+  "population": 920817,
+  "alert_reliability": 0.241,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17053",
@@ -3537,7 +4007,9 @@
   "usual_level": 34.7,
   "epidemic_threshold": 82.6,
   "alert_level": "normal",
-  "population": 1254111
+  "population": 1254111,
+  "alert_reliability": 0.164,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03054",
@@ -3552,7 +4024,9 @@
   "usual_level": 123.7,
   "epidemic_threshold": 239.4,
   "alert_level": "watch",
-  "population": 2990403
+  "population": 2990403,
+  "alert_reliability": 0.13,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01055",
@@ -3567,7 +4041,9 @@
   "usual_level": 63.9,
   "epidemic_threshold": 132.5,
   "alert_level": "watch",
-  "population": 3166645
+  "population": 3166645,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04056",
@@ -3582,7 +4058,9 @@
   "usual_level": 68.9,
   "epidemic_threshold": 146.6,
   "alert_level": "normal",
-  "population": 2306668
+  "population": 2306668,
+  "alert_reliability": 0.478,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02057",
@@ -3597,7 +4075,9 @@
   "usual_level": 15.3,
   "epidemic_threshold": 54.1,
   "alert_level": "normal",
-  "population": 200940
+  "population": 200940,
+  "alert_reliability": 0.561,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH04058",
@@ -3612,7 +4092,9 @@
   "usual_level": 97.3,
   "epidemic_threshold": 161.2,
   "alert_level": "normal",
-  "population": 3320071
+  "population": 3320071,
+  "alert_reliability": 0.429,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17059",
@@ -3627,7 +4109,9 @@
   "usual_level": 4.8,
   "epidemic_threshold": 13.8,
   "alert_level": "normal",
-  "population": 304342
+  "population": 304342,
+  "alert_reliability": 0.239,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08060",
@@ -3642,7 +4126,9 @@
   "usual_level": 30.2,
   "epidemic_threshold": 79.4,
   "alert_level": "normal",
-  "population": 836358
+  "population": 836358,
+  "alert_reliability": 0.588,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12080",
@@ -3657,7 +4143,9 @@
   "usual_level": 31.8,
   "epidemic_threshold": 63.5,
   "alert_level": "normal",
-  "population": 597339
+  "population": 597339,
+  "alert_reliability": 0.273,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07061",
@@ -3672,7 +4160,9 @@
   "usual_level": 5.8,
   "epidemic_threshold": 15.8,
   "alert_level": "watch",
-  "population": 101951
+  "population": 101951,
+  "alert_reliability": 0.147,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05062",
@@ -3687,7 +4177,9 @@
   "usual_level": 8.0,
   "epidemic_threshold": 20.0,
   "alert_level": "normal",
-  "population": 863803
+  "population": 863803,
+  "alert_reliability": 0.481,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12063",
@@ -3702,7 +4194,9 @@
   "usual_level": 93.4,
   "epidemic_threshold": 176.8,
   "alert_level": "normal",
-  "population": 1690512
+  "population": 1690512,
+  "alert_reliability": 0.353,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08064",
@@ -3717,7 +4211,9 @@
   "usual_level": 12.7,
   "epidemic_threshold": 38.5,
   "alert_level": "normal",
-  "population": 454030
+  "population": 454030,
+  "alert_reliability": 0.462,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12065",
@@ -3732,7 +4228,9 @@
   "usual_level": 23.3,
   "epidemic_threshold": 60.5,
   "alert_level": "normal",
-  "population": 869896
+  "population": 869896,
+  "alert_reliability": 0.592,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19066",
@@ -3747,7 +4245,9 @@
   "usual_level": 2.8,
   "epidemic_threshold": 7.4,
   "alert_level": "watch",
-  "population": 952737
+  "population": 952737,
+  "alert_reliability": 0.275,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16067",
@@ -3762,7 +4262,9 @@
   "usual_level": 43.0,
   "epidemic_threshold": 103.6,
   "alert_level": "normal",
-  "population": 546799
+  "population": 546799,
+  "alert_reliability": 0.233,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16068",
@@ -3777,7 +4279,9 @@
   "usual_level": 54.0,
   "epidemic_threshold": 127.7,
   "alert_level": "normal",
-  "population": 630132
+  "population": 630132,
+  "alert_reliability": 0.149,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03069",
@@ -3792,7 +4296,9 @@
   "usual_level": 78.1,
   "epidemic_threshold": 173.9,
   "alert_level": "watch",
-  "population": 1492038
+  "population": 1492038,
+  "alert_reliability": 0.277,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19070",
@@ -3807,7 +4313,9 @@
   "usual_level": 3.2,
   "epidemic_threshold": 8.7,
   "alert_level": "normal",
-  "population": 421522
+  "population": 421522,
+  "alert_reliability": 0.212,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03071",
@@ -3822,7 +4330,9 @@
   "usual_level": 19.6,
   "epidemic_threshold": 39.5,
   "alert_level": "normal",
-  "population": 918351
+  "population": 918351,
+  "alert_reliability": 0.095,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09083",
@@ -3837,7 +4347,9 @@
   "usual_level": 18.1,
   "epidemic_threshold": 46.9,
   "alert_level": "normal",
-  "population": 695261
+  "population": 695261,
+  "alert_reliability": 0.81,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09072",
@@ -3852,7 +4364,9 @@
   "usual_level": 34.4,
   "epidemic_threshold": 78.2,
   "alert_level": "normal",
-  "population": 1059419
+  "population": 1059419,
+  "alert_reliability": 0.587,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH09073",
@@ -3867,7 +4381,9 @@
   "usual_level": 71.8,
   "epidemic_threshold": 145.0,
   "alert_level": "normal",
-  "population": 1947214
+  "population": 1947214,
+  "alert_reliability": 0.764,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14001",
@@ -3882,7 +4398,9 @@
   "usual_level": 6.6,
   "epidemic_threshold": 16.8,
   "alert_level": "normal",
-  "population": 249467
+  "population": 249467,
+  "alert_reliability": 0.211,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16002",
@@ -3897,7 +4415,9 @@
   "usual_level": 46.7,
   "epidemic_threshold": 111.3,
   "alert_level": "normal",
-  "population": 754883
+  "population": 754883,
+  "alert_reliability": 0.258,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16003",
@@ -3912,7 +4432,9 @@
   "usual_level": 37.1,
   "epidemic_threshold": 106.1,
   "alert_level": "normal",
-  "population": 746771
+  "population": 746771,
+  "alert_reliability": 0.2,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06004",
@@ -3927,7 +4449,9 @@
   "usual_level": 28.2,
   "epidemic_threshold": 74.9,
   "alert_level": "normal",
-  "population": 616000
+  "population": 616000,
+  "alert_reliability": 0.625,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05005",
@@ -3942,7 +4466,9 @@
   "usual_level": 6.1,
   "epidemic_threshold": 13.6,
   "alert_level": "normal",
-  "population": 1423708
+  "population": 1423708,
+  "alert_reliability": 0.493,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH06006",
@@ -3957,7 +4483,9 @@
   "usual_level": 10.4,
   "epidemic_threshold": 20.4,
   "alert_level": "watch",
-  "population": 622828
+  "population": 622828,
+  "alert_reliability": 0.217,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14081",
@@ -3972,7 +4500,9 @@
   "usual_level": 9.3,
   "epidemic_threshold": 33.1,
   "alert_level": "normal",
-  "population": 125511
+  "population": 125511,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03077",
@@ -3987,7 +4517,9 @@
   "usual_level": 9.8,
   "epidemic_threshold": 28.2,
   "alert_level": "normal",
-  "population": 232022
+  "population": 232022,
+  "alert_reliability": 0.449,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19007",
@@ -4002,7 +4534,9 @@
   "usual_level": 5.6,
   "epidemic_threshold": 12.6,
   "alert_level": "normal",
-  "population": 404492
+  "population": 404492,
+  "alert_reliability": 0.321,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03008",
@@ -4017,7 +4551,9 @@
   "usual_level": 35.8,
   "epidemic_threshold": 66.1,
   "alert_level": "normal",
-  "population": 862233
+  "population": 862233,
+  "alert_reliability": 0.089,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02009",
@@ -4032,7 +4568,9 @@
   "usual_level": 1.4,
   "epidemic_threshold": 5.7,
   "alert_level": "watch",
-  "population": 18145
+  "population": 18145,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04010",
@@ -4047,7 +4585,9 @@
   "usual_level": 62.8,
   "epidemic_threshold": 127.6,
   "alert_level": "normal",
-  "population": 3183930
+  "population": 3183930,
+  "alert_reliability": 0.577,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH14011",
@@ -4062,7 +4602,9 @@
   "usual_level": 23.3,
   "epidemic_threshold": 57.6,
   "alert_level": "normal",
-  "population": 867853
+  "population": 867853,
+  "alert_reliability": 0.25,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08078",
@@ -4077,7 +4619,9 @@
   "usual_level": 14.8,
   "epidemic_threshold": 45.3,
   "alert_level": "normal",
-  "population": 182002
+  "population": 182002,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07012",
@@ -4092,7 +4636,9 @@
   "usual_level": 54.4,
   "epidemic_threshold": 157.9,
   "alert_level": "normal",
-  "population": 1382606
+  "population": 1382606,
+  "alert_reliability": 0.468,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10013",
@@ -4107,7 +4653,9 @@
   "usual_level": 64.3,
   "epidemic_threshold": 142.9,
   "alert_level": "normal",
-  "population": 1542544
+  "population": 1542544,
+  "alert_reliability": 0.645,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH03014",
@@ -4122,7 +4670,9 @@
   "usual_level": 91.5,
   "epidemic_threshold": 156.2,
   "alert_level": "normal",
-  "population": 3767534
+  "population": 3767534,
+  "alert_reliability": 0.229,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02015",
@@ -4137,7 +4687,9 @@
   "usual_level": 36.8,
   "epidemic_threshold": 160.8,
   "alert_level": "normal",
-  "population": 1298316
+  "population": 1298316,
+  "alert_reliability": 0.767,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05016",
@@ -4152,7 +4704,9 @@
   "usual_level": 5.6,
   "epidemic_threshold": 13.6,
   "alert_level": "normal",
-  "population": 635921
+  "population": 635921,
+  "alert_reliability": 0.329,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05017",
@@ -4167,7 +4721,9 @@
   "usual_level": 29.9,
   "epidemic_threshold": 64.1,
   "alert_level": "normal",
-  "population": 2095990
+  "population": 2095990,
+  "alert_reliability": 0.373,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10018",
@@ -4182,7 +4738,9 @@
   "usual_level": 4.2,
   "epidemic_threshold": 12.0,
   "alert_level": "normal",
-  "population": 93769
+  "population": 93769,
+  "alert_reliability": 0.103,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06019",
@@ -4197,7 +4755,9 @@
   "usual_level": 19.4,
   "epidemic_threshold": 54.6,
   "alert_level": "normal",
-  "population": 820940
+  "population": 820940,
+  "alert_reliability": 0.655,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH05020",
@@ -4212,7 +4772,9 @@
   "usual_level": 1.7,
   "epidemic_threshold": 5.7,
   "alert_level": "watch",
-  "population": 277033
+  "population": 277033,
+  "alert_reliability": 0.646,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH04021",
@@ -4227,7 +4789,9 @@
   "usual_level": 119.4,
   "epidemic_threshold": 220.3,
   "alert_level": "normal",
-  "population": 4395803
+  "population": 4395803,
+  "alert_reliability": 0.485,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH07022",
@@ -4242,7 +4806,9 @@
   "usual_level": 259.1,
   "epidemic_threshold": 546.3,
   "alert_level": "normal",
-  "population": 5238915
+  "population": 5238915,
+  "alert_reliability": 0.1,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09097",
@@ -4257,7 +4823,9 @@
   "usual_level": 7.4,
   "epidemic_threshold": 14.2,
   "alert_level": "normal",
-  "population": 132907
+  "population": 132907,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH12047",
@@ -4272,7 +4840,9 @@
   "usual_level": 60.0,
   "epidemic_threshold": 150.2,
   "alert_level": "normal",
-  "population": 1577659
+  "population": 1577659,
+  "alert_reliability": 0.426,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH11086",
@@ -4287,7 +4857,9 @@
   "usual_level": 1.0,
   "epidemic_threshold": 2.7,
   "alert_level": "watch",
-  "population": 346602
+  "population": 346602,
+  "alert_reliability": 0.188,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11025",
@@ -4302,7 +4874,9 @@
   "usual_level": 16.6,
   "epidemic_threshold": 49.2,
   "alert_level": "normal",
-  "population": 614795
+  "population": 614795,
+  "alert_reliability": 0.0,
+  "reliability_grade": "too few"
  },
  {
   "area_code": "PH11082",
@@ -4317,7 +4891,9 @@
   "usual_level": 17.4,
   "epidemic_threshold": 38.0,
   "alert_level": "normal",
-  "population": 787004
+  "population": 787004,
+  "alert_reliability": 0.136,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11023",
@@ -4332,7 +4908,9 @@
   "usual_level": 22.3,
   "epidemic_threshold": 56.7,
   "alert_level": "normal",
-  "population": 1069992
+  "population": 1069992,
+  "alert_reliability": 0.07,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH11024",
@@ -4347,7 +4925,9 @@
   "usual_level": 55.0,
   "epidemic_threshold": 108.2,
   "alert_level": "normal",
-  "population": 2633055
+  "population": 2633055,
+  "alert_reliability": 0.27,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16085",
@@ -4362,7 +4942,9 @@
   "usual_level": 5.5,
   "epidemic_threshold": 17.1,
   "alert_level": "normal",
-  "population": 131841
+  "population": 131841,
+  "alert_reliability": 0.494,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH08026",
@@ -4377,7 +4959,9 @@
   "usual_level": 18.3,
   "epidemic_threshold": 49.4,
   "alert_level": "normal",
-  "population": 519219
+  "population": 519219,
+  "alert_reliability": 0.373,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06079",
@@ -4392,7 +4976,9 @@
   "usual_level": 3.4,
   "epidemic_threshold": 10.6,
   "alert_level": "normal",
-  "population": 188747
+  "population": 188747,
+  "alert_reliability": 0.667,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH14027",
@@ -4407,7 +4993,9 @@
   "usual_level": 4.2,
   "epidemic_threshold": 16.1,
   "alert_level": "normal",
-  "population": 213380
+  "population": 213380,
+  "alert_reliability": 0.37,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01028",
@@ -4422,7 +5010,9 @@
   "usual_level": 8.7,
   "epidemic_threshold": 22.3,
   "alert_level": "normal",
-  "population": 620052
+  "population": 620052,
+  "alert_reliability": 0.226,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01029",
@@ -4437,7 +5027,9 @@
   "usual_level": 11.8,
   "epidemic_threshold": 26.9,
   "alert_level": "watch",
-  "population": 724395
+  "population": 724395,
+  "alert_reliability": 0.329,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06030",
@@ -4452,7 +5044,9 @@
   "usual_level": 55.7,
   "epidemic_threshold": 150.1,
   "alert_level": "normal",
-  "population": 2571326
+  "population": 2571326,
+  "alert_reliability": 0.659,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH02031",
@@ -4467,7 +5061,9 @@
   "usual_level": 54.8,
   "epidemic_threshold": 181.5,
   "alert_level": "normal",
-  "population": 1716854
+  "population": 1716854,
+  "alert_reliability": 0.583,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH14032",
@@ -4482,7 +5078,9 @@
   "usual_level": 12.0,
   "epidemic_threshold": 29.2,
   "alert_level": "normal",
-  "population": 222826
+  "population": 222826,
+  "alert_reliability": 0.0,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01033",
@@ -4497,7 +5095,9 @@
   "usual_level": 10.5,
   "epidemic_threshold": 19.8,
   "alert_level": "watch",
-  "population": 842047
+  "population": 842047,
+  "alert_reliability": 0.091,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04034",
@@ -4512,7 +5112,9 @@
   "usual_level": 103.9,
   "epidemic_threshold": 173.1,
   "alert_level": "normal",
-  "population": 3448503
+  "population": 3448503,
+  "alert_reliability": 0.476,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH10035",
@@ -4527,7 +5129,9 @@
   "usual_level": 42.7,
   "epidemic_threshold": 93.1,
   "alert_level": "normal",
-  "population": 1121424
+  "population": 1121424,
+  "alert_reliability": 0.367,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19036",
@@ -4542,7 +5146,9 @@
   "usual_level": 13.0,
   "epidemic_threshold": 37.5,
   "alert_level": "normal",
-  "population": 1190443
+  "population": 1190443,
+  "alert_reliability": 0.662,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH08037",
@@ -4557,7 +5163,9 @@
   "usual_level": 67.8,
   "epidemic_threshold": 184.4,
   "alert_level": "normal",
-  "population": 2192249
+  "population": 2192249,
+  "alert_reliability": 0.471,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "MAG",
@@ -4572,7 +5180,9 @@
   "usual_level": 21.7,
   "epidemic_threshold": 57.8,
   "alert_level": "normal",
-  "population": 1702564
+  "population": 1702564,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17040",
@@ -4587,7 +5197,9 @@
   "usual_level": 6.5,
   "epidemic_threshold": 17.3,
   "alert_level": "normal",
-  "population": 243827
+  "population": 243827,
+  "alert_reliability": 0.585,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH05041",
@@ -4602,7 +5214,9 @@
   "usual_level": 6.5,
   "epidemic_threshold": 13.0,
   "alert_level": "normal",
-  "population": 952388
+  "population": 952388,
+  "alert_reliability": 0.247,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13039",
@@ -4617,7 +5231,9 @@
   "usual_level": 36.9,
   "epidemic_threshold": 66.2,
   "alert_level": "normal",
-  "population": 1933360
+  "population": 1933360,
+  "alert_reliability": 0.044,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13076",
@@ -4632,7 +5248,9 @@
   "usual_level": 82.1,
   "epidemic_threshold": 147.2,
   "alert_level": "normal",
-  "population": 4043589
+  "population": 4043589,
+  "alert_reliability": 0.484,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH13074",
@@ -4647,7 +5265,9 @@
   "usual_level": 126.1,
   "epidemic_threshold": 228.5,
   "alert_level": "normal",
-  "population": 4995782
+  "population": 4995782,
+  "alert_reliability": 0.209,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH13075",
@@ -4662,7 +5282,9 @@
   "usual_level": 64.6,
   "epidemic_threshold": 111.1,
   "alert_level": "normal",
-  "population": 3145943
+  "population": 3145943,
+  "alert_reliability": 0.167,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10042",
@@ -4677,7 +5299,9 @@
   "usual_level": 35.3,
   "epidemic_threshold": 68.6,
   "alert_level": "normal",
-  "population": 635589
+  "population": 635589,
+  "alert_reliability": 0.237,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH10043",
@@ -4692,7 +5316,9 @@
   "usual_level": 76.4,
   "epidemic_threshold": 138.9,
   "alert_level": "normal",
-  "population": 1735638
+  "population": 1735638,
+  "alert_reliability": 0.214,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH14044",
@@ -4707,7 +5333,9 @@
   "usual_level": 2.6,
   "epidemic_threshold": 11.1,
   "alert_level": "normal",
-  "population": 157820
+  "population": 157820,
+  "alert_reliability": 0.35,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH06045",
@@ -4722,7 +5350,9 @@
   "usual_level": 82.1,
   "epidemic_threshold": 179.3,
   "alert_level": "normal",
-  "population": 3213200
+  "population": 3213200,
+  "alert_reliability": 0.347,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07046",
@@ -4737,7 +5367,9 @@
   "usual_level": 53.8,
   "epidemic_threshold": 116.8,
   "alert_level": "normal",
-  "population": 1423606
+  "population": 1423606,
+  "alert_reliability": 0.15,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08048",
@@ -4752,7 +5384,9 @@
   "usual_level": 11.4,
   "epidemic_threshold": 29.8,
   "alert_level": "normal",
-  "population": 681299
+  "population": 681299,
+  "alert_reliability": 0.433,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH03049",
@@ -4767,7 +5401,9 @@
   "usual_level": 43.5,
   "epidemic_threshold": 101.2,
   "alert_level": "watch",
-  "population": 2443879
+  "population": 2443879,
+  "alert_reliability": 0.317,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH02050",
@@ -4782,7 +5418,9 @@
   "usual_level": 14.1,
   "epidemic_threshold": 43.1,
   "alert_level": "normal",
-  "population": 493293
+  "population": 493293,
+  "alert_reliability": 0.276,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17051",
@@ -4797,7 +5435,9 @@
   "usual_level": 14.8,
   "epidemic_threshold": 38.1,
   "alert_level": "normal",
-  "population": 524583
+  "population": 524583,
+  "alert_reliability": 0.232,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17052",
@@ -4812,7 +5452,9 @@
   "usual_level": 33.8,
   "epidemic_threshold": 81.9,
   "alert_level": "normal",
-  "population": 920817
+  "population": 920817,
+  "alert_reliability": 0.241,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH17053",
@@ -4827,7 +5469,9 @@
   "usual_level": 32.3,
   "epidemic_threshold": 83.1,
   "alert_level": "normal",
-  "population": 1254111
+  "population": 1254111,
+  "alert_reliability": 0.164,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03054",
@@ -4842,7 +5486,9 @@
   "usual_level": 83.0,
   "epidemic_threshold": 155.2,
   "alert_level": "watch",
-  "population": 2990403
+  "population": 2990403,
+  "alert_reliability": 0.13,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH01055",
@@ -4857,7 +5503,9 @@
   "usual_level": 48.4,
   "epidemic_threshold": 98.0,
   "alert_level": "watch",
-  "population": 3166645
+  "population": 3166645,
+  "alert_reliability": 0.268,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH04056",
@@ -4872,7 +5520,9 @@
   "usual_level": 51.2,
   "epidemic_threshold": 105.8,
   "alert_level": "normal",
-  "population": 2306668
+  "population": 2306668,
+  "alert_reliability": 0.478,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH02057",
@@ -4887,7 +5537,9 @@
   "usual_level": 11.4,
   "epidemic_threshold": 44.6,
   "alert_level": "normal",
-  "population": 200940
+  "population": 200940,
+  "alert_reliability": 0.561,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH04058",
@@ -4902,7 +5554,9 @@
   "usual_level": 85.2,
   "epidemic_threshold": 138.0,
   "alert_level": "normal",
-  "population": 3320071
+  "population": 3320071,
+  "alert_reliability": 0.429,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH17059",
@@ -4917,7 +5571,9 @@
   "usual_level": 4.7,
   "epidemic_threshold": 13.2,
   "alert_level": "normal",
-  "population": 304342
+  "population": 304342,
+  "alert_reliability": 0.239,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08060",
@@ -4932,7 +5588,9 @@
   "usual_level": 23.5,
   "epidemic_threshold": 55.2,
   "alert_level": "normal",
-  "population": 836358
+  "population": 836358,
+  "alert_reliability": 0.588,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12080",
@@ -4947,7 +5605,9 @@
   "usual_level": 32.4,
   "epidemic_threshold": 64.9,
   "alert_level": "normal",
-  "population": 597339
+  "population": 597339,
+  "alert_reliability": 0.273,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH07061",
@@ -4962,7 +5622,9 @@
   "usual_level": 5.2,
   "epidemic_threshold": 13.4,
   "alert_level": "watch",
-  "population": 101951
+  "population": 101951,
+  "alert_reliability": 0.147,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH05062",
@@ -4977,7 +5639,9 @@
   "usual_level": 7.0,
   "epidemic_threshold": 15.9,
   "alert_level": "normal",
-  "population": 863803
+  "population": 863803,
+  "alert_reliability": 0.481,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12063",
@@ -4992,7 +5656,9 @@
   "usual_level": 91.1,
   "epidemic_threshold": 165.1,
   "alert_level": "normal",
-  "population": 1690512
+  "population": 1690512,
+  "alert_reliability": 0.353,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH08064",
@@ -5007,7 +5673,9 @@
   "usual_level": 12.1,
   "epidemic_threshold": 37.1,
   "alert_level": "normal",
-  "population": 454030
+  "population": 454030,
+  "alert_reliability": 0.462,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH12065",
@@ -5022,7 +5690,9 @@
   "usual_level": 24.0,
   "epidemic_threshold": 61.8,
   "alert_level": "normal",
-  "population": 869896
+  "population": 869896,
+  "alert_reliability": 0.592,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH19066",
@@ -5037,7 +5707,9 @@
   "usual_level": 2.3,
   "epidemic_threshold": 6.3,
   "alert_level": "watch",
-  "population": 952737
+  "population": 952737,
+  "alert_reliability": 0.275,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16067",
@@ -5052,7 +5724,9 @@
   "usual_level": 31.8,
   "epidemic_threshold": 69.7,
   "alert_level": "normal",
-  "population": 546799
+  "population": 546799,
+  "alert_reliability": 0.233,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH16068",
@@ -5067,7 +5741,9 @@
   "usual_level": 51.0,
   "epidemic_threshold": 145.5,
   "alert_level": "normal",
-  "population": 630132
+  "population": 630132,
+  "alert_reliability": 0.149,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03069",
@@ -5082,7 +5758,9 @@
   "usual_level": 58.6,
   "epidemic_threshold": 127.6,
   "alert_level": "watch",
-  "population": 1492038
+  "population": 1492038,
+  "alert_reliability": 0.277,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH19070",
@@ -5097,7 +5775,9 @@
   "usual_level": 2.8,
   "epidemic_threshold": 8.7,
   "alert_level": "normal",
-  "population": 421522
+  "population": 421522,
+  "alert_reliability": 0.212,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH03071",
@@ -5112,7 +5792,9 @@
   "usual_level": 16.4,
   "epidemic_threshold": 30.9,
   "alert_level": "watch",
-  "population": 918351
+  "population": 918351,
+  "alert_reliability": 0.095,
+  "reliability_grade": "low"
  },
  {
   "area_code": "PH09083",
@@ -5127,7 +5809,9 @@
   "usual_level": 18.5,
   "epidemic_threshold": 53.5,
   "alert_level": "normal",
-  "population": 695261
+  "population": 695261,
+  "alert_reliability": 0.81,
+  "reliability_grade": "high"
  },
  {
   "area_code": "PH09072",
@@ -5142,7 +5826,9 @@
   "usual_level": 26.6,
   "epidemic_threshold": 62.7,
   "alert_level": "normal",
-  "population": 1059419
+  "population": 1059419,
+  "alert_reliability": 0.587,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "PH09073",
@@ -5157,6 +5843,8 @@
   "usual_level": 64.4,
   "epidemic_threshold": 130.1,
   "alert_level": "normal",
-  "population": 1947214
+  "population": 1947214,
+  "alert_reliability": 0.764,
+  "reliability_grade": "high"
  }
 ]
