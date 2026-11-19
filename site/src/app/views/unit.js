@@ -1,8 +1,9 @@
-// Area detail: one area’s alert, cases and range, what to do, history chart, and latest-mode drivers.
-import { table } from "../data.js";
-import { briefMarkdown, briefTable, fmt, fmtDay, thresholds, woy, yearOf } from "../logic.js";
+// Area detail: one area’s alert, cases and range, what to do, its alert track record and recent report card,
+// history chart, and latest-mode drivers. The top-bar menu downloads the brief or prints a one-page report.
+import { recordHorizon, table, trackRecordFor } from "../data.js";
+import { briefMarkdown, briefTable, fmt, fmtDay, reportCard, thresholds, woy, yearOf } from "../logic.js";
 import { barChart, timeChart } from "../chart.js";
-import { LV, areaSelect, cardTitle, download, esc, infoDisclosure } from "../ui.js";
+import { LV, areaSelect, cardTitle, download, esc, infoDisclosure, reportLegend, reportSquares, trackRecordHtml } from "../ui.js";
 
 const INK = "#071711", FOREST = "#08754F", BAND = "#08754F", RED = "#F04B2A";
 
@@ -16,7 +17,10 @@ export async function render(el, ctx) {
   const b = one[0];
   const saveBrief = () => download(`epilag_brief_${unit}.md`, briefMarkdown(one, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf: Math.max(...fcH.map((r) => r.week)) }), "text/markdown");
 
+  const rh = recordHorizon(horizon);
+  const asOf = mode === "replay" ? origin : Math.max(...fcH.map((r) => r.week));
   el.innerHTML = `
+    <header class="print-head" aria-hidden="true"><b>${esc(labels.print_title)}</b><span>${esc(row.unit_name)} · ${esc(t.as_of)} ${fmtDay(asOf)} · ${horizon} ${esc(t.weeks_ahead)}</span></header>
     <div class="unit-header"><div class="unit-pick">${areaSelect("area", t.pick, names, unit)}</div></div>
     <div class="grid grid--unit">
       <section class="hero-card status-hero" data-lv="${LV[row.level]}"><div class="kicker">${esc(row.unit_name)}</div>
@@ -30,14 +34,27 @@ export async function render(el, ctx) {
       ${cardTitle("check", t.todo)}
       <ol class="todo">${i18n.PLAYBOOK[lang][row.level].map(([w, d]) => `<li class="todo__row"><span class="todo__when">${esc(w)}</span><span>${esc(d)}</span></li>`).join("")}</ol>
     </section>
+    <div class="grid grid--2 track-grid">
+      <section class="card" id="track">${cardTitle("didItWork", labels.track_head, labels.track_sub.replace("{h}", rh))}<div id="track-body" class="track-body"></div>${infoDisclosure(labels.about_this, `<p>${esc(labels.track_note)}</p>`)}</section>
+      <section class="card" id="card">${cardTitle("check", labels.card_head, labels.card_sub.replace("{n}", 8).replace("{h}", rh))}<div id="card-body"></div>${infoDisclosure(labels.about_this, `<p>${esc(labels.card_note.replace("{h}", rh))}</p>`)}</section>
+    </div>
     <section class="card history-card">${cardTitle("areaDetail", t.history)}<div id="hist" class="chart-box"></div></section>
-    ${mode === "replay" ? "" : `<section class="card" id="why">${cardTitle("info", t.why)}${infoDisclosure(labels.about_this, `<p>${esc(t.why_note)}</p>`)}<div id="why-chart" class="chart-box"></div></section>`}`;
+    ${mode === "replay" ? "" : `<section class="card why-card" id="why">${cardTitle("info", t.why)}${infoDisclosure(labels.about_this, `<p>${esc(t.why_note)}</p>`)}<div id="why-chart" class="chart-box"></div></section>`}
+    <p class="print-foot" aria-hidden="true">${esc(labels.print_source)} ${esc(labels.printed)} ${fmtDay(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()) / 864e5)}.</p>`;
 
   el.querySelector("#area").addEventListener("change", (e) => ctx.set({ area: e.target.value }, { push: false }));
-  ctx.topDownload(t.download_brief, saveBrief);
+  ctx.topDownload(t.download_brief, saveBrief, [[labels.print_report, () => print(), "file"]]);
 
-  const [history, backtest, thrTable, drivers] = await Promise.all([table(panel, "history"), table(panel, "backtest"),
-    mode === "replay" ? null : table(panel, "thresholds"), mode === "replay" ? null : table(panel, "drivers")]);
+  const [history, backtest, thrTable, drivers, records] = await Promise.all([table(panel, "history"), table(panel, "backtest"),
+    mode === "replay" ? null : table(panel, "thresholds"), mode === "replay" ? null : table(panel, "drivers"), trackRecordFor(ctx)]);
+  el.querySelector("#track-body").innerHTML = trackRecordHtml(records.get(unit), labels, rh);
+  const rc = reportCard(backtest.filter((r) => r.unit_id === unit && (mode !== "replay" || r.target_week <= origin)), history, rh, 8);
+  const cells = rc.rows[0]?.cells || [];
+  const inside = cells.filter((c) => c.hit === 0).length;
+  el.querySelector("#card-body").innerHTML = cells.length ? `<div class="rc-one"><div class="track__lead"><b class="track__big nums">${inside}<span class="track__of"> / ${cells.length}</span></b>
+    <span class="track__of">${esc(labels.card_inside.replace("{k}", inside).replace("{n}", cells.length))}</span></div>
+    ${reportSquares(cells, labels, fmtDay, fmt)}<div class="rc-dates small muted"><span>${fmtDay(cells[0].target_week)}</span><span>${fmtDay(cells[cells.length - 1].target_week)}</span></div>${reportLegend(labels)}</div>`
+    : `<p class="track__none">${esc(labels.track_none)}</p>`;
   let hist = history.filter((r) => r.unit_id === unit).sort((a, c) => a.week - c.week);
   if (mode === "replay") hist = hist.filter((r) => r.week >= origin - 104 * 7 && r.week <= origin + 26 * 7);
   else { const last = hist[hist.length - 1].week; hist = hist.filter((r) => r.week >= last - 156 * 7); }

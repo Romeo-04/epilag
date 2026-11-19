@@ -92,6 +92,34 @@
                 <i class="dl__go" data-icon="arrowRight" data-size="24"></i></a></li>
             </ul>
           </article>
+          <article class="card file" data-reveal>
+            <div class="file__head"><span class="ic px-box"><i data-icon="didItWork" data-size="32"></i></span><h3>Alert track record</h3></div>
+            <p>For each area: how many past watch and warning weeks were right, and how many outbreak starts were flagged in time, from the out-of-sample tests at 4 and 8 weeks ahead.</p>
+            <ul class="dl">
+              <li><a href="epilag_reliability_region_qc.csv" download>
+                <span class="file-tag file-tag--csv"><i data-icon="file" data-size="48"></i><span>CSV</span></span>
+                <span class="dl__name"><b>epilag_reliability_region_qc.csv</b><small>Regions and Quezon City · download</small></span>
+                <i class="dl__go" data-icon="downloadBox" data-size="32"></i></a></li>
+              <li><a href="epilag_reliability_province.csv" download>
+                <span class="file-tag file-tag--csv"><i data-icon="file" data-size="48"></i><span>CSV</span></span>
+                <span class="dl__name"><b>epilag_reliability_province.csv</b><small>Provinces · download</small></span>
+                <i class="dl__go" data-icon="downloadBox" data-size="32"></i></a></li>
+            </ul>
+          </article>
+          <article class="card file" data-reveal>
+            <div class="file__head"><span class="ic px-box"><i data-icon="alert" data-size="32"></i></span><h3>Alert feeds</h3></div>
+            <p>Regions and Quezon City on watch or outbreak warning, updated with each forecast. Add the RSS link to a feed reader, or the calendar link to Google Calendar or Outlook (“From URL” / “Subscribe”).</p>
+            <ul class="dl">
+              <li><a href="alerts.xml">
+                <span class="file-tag file-tag--json"><i data-icon="file" data-size="48"></i><span>RSS</span></span>
+                <span class="dl__name"><b>alerts.xml</b><small>RSS 2.0 · 4 weeks ahead</small></span>
+                <i class="dl__go" data-icon="arrowRight" data-size="24"></i></a></li>
+              <li><a href="alerts.ics" download>
+                <span class="file-tag file-tag--csv"><i data-icon="file" data-size="48"></i><span>ICS</span></span>
+                <span class="dl__name"><b>alerts.ics</b><small>Calendar · 2–8 weeks ahead</small></span>
+                <i class="dl__go" data-icon="downloadBox" data-size="32"></i></a></li>
+            </ul>
+          </article>
         </div>
 
         <div class="pg-head pg-head--cols" data-reveal>
@@ -109,6 +137,10 @@
               <tr><td><code>usual_level</code>, <code>epidemic_threshold</code></td><td>Average for that week in earlier years, and that average + 2 standard deviations</td></tr>
               <tr><td><code>alert_level</code></td><td>normal, above usual, watch (high forecast above the epidemic threshold), outbreak warning (middle forecast above it)</td></tr>
               <tr><td><code>population</code></td><td>Population used (OCHA COD-PS, 2022)</td></tr>
+              <tr><td><code>alert_reliability</code>, <code>reliability_grade</code></td><td>Share of the area’s past alert weeks (watch or warning) when reported cases went above the epidemic line, in out-of-sample tests at 4 weeks ahead (8 for forecasts 6–8 weeks ahead); graded high (60% or more), medium (40–60%), low (under 40%), or “too few” with fewer than 4 alert weeks</td></tr>
+              <tr><td><code>alert_weeks</code>, <code>alert_weeks_right</code></td><td>Track record files: past forecasts at watch or warning, and how many of those weeks had reported cases above the epidemic line</td></tr>
+              <tr><td><code>outbreak_starts</code>, <code>outbreak_starts_caught</code></td><td>Track record files: first weeks of 2 or more weeks above the epidemic line, and how many the forecast for that week flagged</td></tr>
+              <tr><td><code>backtest_weeks_ahead</code>, <code>test_years</code></td><td>Track record files: the horizon tested and the years it was tested on (each from earlier years only)</td></tr>
             </tbody>
           </table>
         </div>

@@ -103,14 +103,15 @@ flowchart LR
 | User | What they get |
 | --- | --- |
 | **Provincial, city and municipal health offices** | Alert map, area checklists, action brief, budget plan, and an explanation of why each area is flagged |
-| **Barangays and residents** | A *For residents* page with this week's outlook, the DOH 4S steps, warning signs, and a message ready to share in a group chat |
+| **Barangays and residents** | A *For residents* page with this week's outlook, the DOH 4S steps, warning signs, a message ready to share in a group chat, and a one-SMS version for phones without data |
 | **Trainees, students and the public** | [Dengue Drill](https://romeo-04.github.io/epilag/drill/), a game where you run the response yourself, from Quezon City's barangays in 2024–25 to the 2019 regions |
-| **Researchers, newsrooms and other apps** | Every forecast as [CSV and JSON](https://romeo-04.github.io/epilag/data/), with column definitions |
+| **Researchers, newsrooms and other apps** | Every forecast and each area's alert track record as [CSV and JSON](https://romeo-04.github.io/epilag/data/), with column definitions, plus [RSS](https://romeo-04.github.io/epilag/data/alerts.xml) and [calendar](https://romeo-04.github.io/epilag/data/alerts.ics) alert feeds |
 
 ## What you can do
 **Overview: see this week's priorities.** The app opens on a dashboard: how many areas need action now, a 3D map of
-the forecast, the priority list, and this week's action brief. The sidebar groups the tools into *Monitor*, *Act* and
-*Evidence*; explanations sit behind "About this" buttons, in English and Filipino.
+the forecast, the priority list, and this week's action brief. The priority list sorts by cases or by *reliability*
+(areas on alert first, then by how often their past alerts were right). The sidebar groups the tools into *Monitor*,
+*Act* and *Evidence*; explanations sit behind "About this" buttons, in English and Filipino.
 
 **Pick the area, from latest to most specific.** The settings bar has two dropdowns. *Region* is All Philippines or one
 of 17 regions (the latest data, to December 2025). *Province / city* then lists only that region: the whole region,
@@ -127,6 +128,15 @@ In replay mode it shows what happened next.
 **Area page: know what to do and why.** Each area shows its forecast range, alert level, checklist, and the
 factors behind the forecast (recent cases, season, rain, heat, humidity).
 
+- **Alert track record:** how far to trust this area's alert. From the out-of-sample tests: the share of its past
+  watch and warning weeks when cases really went above the epidemic line, and how many outbreak starts were flagged
+  in time (for example, Quezon City at 4 weeks ahead: 41 of 84 alert weeks right, 5 of 7 outbreak starts caught).
+  A replay counts only the test years before it, so a 2019 replay has no track record yet.
+- **Report card:** the last 8 weeks with results, each a square showing whether the reported cases landed inside,
+  above or below the forecast's likely range. *Did it work?* has the same report card for every area.
+- **Print:** *Download → Print area report* gives a one-page A4 report (alert, checklist, track record, chart)
+  for meetings and offices without screens.
+
 ![Area page with forecast, checklist and explanation](docs/screenshots/unit_replay_2019.png)
 
 **Budget: spend where it counts.** Enter a budget and get a ranked plan you can export as CSV.
@@ -134,7 +144,17 @@ factors behind the forecast (recent cases, season, rain, heat, humidity).
 ![Budget plan for the 2019 replay](docs/screenshots/budget_replay_2019.png)
 
 **For residents: a plain-language outlook.** This week's dengue level in Filipino or English, the DOH 4S steps,
-warning signs, and a message ready to share.
+warning signs, a message ready to share, and the same outlook in one SMS (160 characters or fewer, plain GSM
+characters) with *Copy SMS* and *Send by SMS* buttons.
+
+**Works offline.** After one visit with a connection, the dashboard opens with no signal: a service worker saves the
+pages, data and map grids, and a banner says when saved data is showing. With a connection it always loads this
+week's data first. Browsers that support it offer *Install app* for the home screen.
+
+**Alert feeds.** [alerts.xml](https://romeo-04.github.io/epilag/data/alerts.xml) (RSS) lists the regions and Quezon
+City on watch or outbreak warning 4 weeks ahead; [alerts.ics](https://romeo-04.github.io/epilag/data/alerts.ics)
+puts every watch or warning week (2–8 weeks ahead) on a calendar. Subscribe to the calendar link in Google Calendar
+or Outlook and it updates with each forecast.
 
 ![For residents page](docs/screenshots/public.png)
 
@@ -218,8 +238,10 @@ streamlit run app/streamlit_app.py                 # the original Streamlit app,
 ```
 
 The tests check that the JavaScript app computes what the Python does (alert levels, thresholds, replays, the
-"30 of 32" claim, budget plans), that the game scores like `scripts/drill_data.py`, and that every page loads without
-errors, fits a phone, works with reduced motion and the keyboard, and passes an accessibility scan.
+"30 of 32" claim, budget plans, each area's alert track record), that the game scores like `scripts/drill_data.py`,
+that every page loads without errors, fits a phone, works with reduced motion and the keyboard, and passes an
+accessibility scan, that the dashboard works offline after one visit and the area report prints on one page, that
+every SMS fits in 160 characters, and that the alert feeds are valid RSS and iCalendar.
 
 <details>
 <summary>Rebuild everything from the raw data</summary>
@@ -239,11 +261,12 @@ python scripts/drill_data.py         # Dengue Drill season data (site/public/dri
 python scripts/qc_drill_data.py      # Dengue Drill Quezon City mission (site/public/drill/qc.json, geo/voxel_qc.json)
 python scripts/drill_models.py       # Dengue Drill round 2: every model's forecasts (site/public/drill/models.json)
 python scripts/research_docs.py      # Research page reader: the research documents as pages (site/public/research/)
-python scripts/export_open_data.py   # open forecast files (docs/data/)
+python scripts/export_open_data.py   # open forecast and track-record files, RSS and calendar feeds (docs/data/)
 python scripts/build_web.py          # app data and EN/FIL copy
 python scripts/voxel_data.py         # 3D map grids (site/public/geo/)
 python scripts/landing_data.py       # the landing page's 2019 replay numbers
 python scripts/og_image.py           # social card (site/public/og.png)
+python scripts/pwa_icons.py          # app icons for the installable app (site/public/icons/)
 python scripts/screenshots.py        # docs/screenshots, from the built site
 ```
 </details>
@@ -254,7 +277,7 @@ site/           the website, app and game (Vite): pages, src/app (dashboard), sr
                 src/landing, src/lib (pixel sprites, voxel maps, motion), public/ (data, sprites, grids)
 docs/           the built site for GitHub Pages, plus the demo video (demo.mp4), open data (data/), deck, figures
                 and screenshots
-src/            pipeline: fetch, clean, weather, features, backtest, alerts, train, allocate, export
+src/            pipeline: fetch, clean, weather, features, backtest, alerts, reliability (alert track record), train, allocate, export
 app/            the original Streamlit app and its small data files
 tests/          allocation, JS/Python parity, game rules, site checks (Playwright), Streamlit smoke tests
 reports/        backtest, early-warning, ablation and SHAP results (CSV)

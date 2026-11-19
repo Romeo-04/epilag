@@ -1,10 +1,13 @@
 // Overview: alert counts, trend, fastest risers and this week's actions, then the map and priority list.
 // The action brief is the top-bar download.
-import { table } from "../data.js";
+import { table, trackRecordFor } from "../data.js";
 import { LEVELS, briefMarkdown, briefTable, fmt, replayClaim } from "../logic.js";
 import { barChart } from "../chart.js";
 import { loadGrids, createVoxelMap } from "../../lib/voxel.js";
-import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, dot, download, esc, pill } from "../ui.js";
+import { LV, LV_COLOR, LV_HEIGHT, NODATA, cardTitle, count, dot, download, esc, pill, segmented } from "../ui.js";
+
+const SORT_KEY = "el-priority-sort";
+const readSort = () => { try { return localStorage.getItem(SORT_KEY) === "reliable" ? "reliable" : "cases"; } catch { return "cases"; } };
 
 export async function render(el, ctx) {
   const { t, labels, lang, i18n, fc, fcH, horizon, mode, panel, area, regionMeta } = ctx;
@@ -14,7 +17,14 @@ export async function render(el, ctx) {
   const rows = briefTable(fc, fcH);
   const act = rows.filter((r) => r.level === LEVELS[2] || r.level === LEVELS[3]).slice(0, 4);
   const shown = act.length ? act : rows.filter((r) => r.level === LEVELS[1]).slice(0, 3);
-  const priority = [...rows].sort((a, b) => b.q50_per100k - a.q50_per100k).slice(0, 6);
+  const records = await trackRecordFor(ctx);
+  // "Reliability": areas on watch or warning first, then the share of their past alerts that were right
+  const rel = (r) => records.get(r.unit_id)?.reliability ?? -1;
+  const ranked = (by) => [...rows].sort(by === "reliable"
+    ? (a, b) => (LEVELS.indexOf(b.level) >= 2) - (LEVELS.indexOf(a.level) >= 2) || rel(b) - rel(a) || b.q50_per100k - a.q50_per100k
+    : (a, b) => b.q50_per100k - a.q50_per100k).slice(0, 6);
+  let sortBy = readSort();
+  const priority = ranked(sortBy);
   const status = mode === "replay" ? replayStatus(labels, horizon, fcH) : nWarn + nWatch === 0 ? quietStatus(t, labels) : "";
   // reported cases in the forecast's own week: the "now" every change is measured from
   const ids = new Set(fcH.map((r) => r.unit_id));
@@ -61,8 +71,8 @@ export async function render(el, ctx) {
       </section>
 
       <aside class="card overview-priority" data-guide="priority">
-        ${cardTitle("alert", t.rank)}
-        ${priority.length ? `<ol class="priority-list" id="home-priority">${priority.map((r, i) => priorityRow(r, i, ctx)).join("")}</ol>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(labels.quiet)}</div></div>`}
+        <div class="priority-head">${cardTitle("alert", t.rank)}<div class="seg seg--sm priority-sort" id="priority-sort"></div></div>
+        ${priority.length ? `<ol class="priority-list" id="home-priority">${priority.map((r, i) => priorityRow(r, i, ctx, records)).join("")}</ol>` : `<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${esc(labels.quiet)}</div></div>`}
         <div class="priority-list__footer"><a class="inline-link" href="?page=map" data-go="map">${esc(labels.all_areas)} <i data-icon="arrowRight" data-size="18"></i></a></div>
       </aside>
     </div>`;
@@ -73,6 +83,15 @@ export async function render(el, ctx) {
   }));
   el.querySelector("#story-btn")?.addEventListener("click", () => ctx.set({ panel: "province", mode: "replay", region: null, area: null }));
   ctx.topDownload(t.download_brief, saveBrief);
+  const sortEl = el.querySelector("#priority-sort");
+  const drawSort = () => segmented(sortEl, labels.sort_by, [["cases", labels.sort_cases], ["reliable", labels.sort_reliable]], sortBy, (v) => {
+    sortBy = v;
+    try { localStorage.setItem(SORT_KEY, v); } catch { /* per-viewer convenience only */ }
+    const list = el.querySelector("#home-priority");
+    if (list) list.innerHTML = ranked(v).map((r, i) => priorityRow(r, i, ctx, records)).join("");
+    drawSort();
+  });
+  drawSort();
   const disposeTrend = barChart(el.querySelector("#home-trend"), { height: 170, text: true,
     categories: [labels.now, ...hs.map((h) => labels.wk_ahead.replace("{h}", h))],
     groups: [{ values: [nowTotal, ...hs.map(total)], colors: ["#8A9891", ...hs.map((h) => (h === horizon ? "#08754F" : "#9FCBA6"))] }] });
@@ -124,10 +143,12 @@ function quietStatus(t, labels) {
   return `<div class="status-message__title">${esc(labels.quiet)}</div><button type="button" class="btn btn--ghost btn--sm" id="story-btn">${esc(t.replay_story)}</button>`;
 }
 
-function priorityRow(r, i, ctx) {
+function priorityRow(r, i, ctx, records) {
+  const rec = records?.get(r.unit_id);
+  const right = rec?.reliability == null ? "" : ` · <span class="rel" data-grade="${esc(rec.grade.replace(" ", "-"))}">${esc(ctx.labels.pct_right.replace("{p}", Math.round(rec.reliability * 100)))}</span>`;
   return `<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit" aria-label="${esc(`${r.unit_name}, ${ctx.levelName(r.level)}`)}" title="${esc(`${ctx.t.range}: ${fmt(r.q10)}–${fmt(r.q90)}`)}">
     <span class="priority-row__rank">${i + 1}</span><span class="priority-row__copy"><b>${esc(r.unit_name)}</b><small>${fmt(r.q50)} ${esc(ctx.labels.cases_n)}</small></span>
-    <span class="priority-row__level">${pill(ctx, r.level)}<small>${r.q50_per100k.toFixed(1)} ${esc(ctx.labels.per100k_short)}</small></span></a></li>`;
+    <span class="priority-row__level">${pill(ctx, r.level)}<small>${r.q50_per100k.toFixed(1)} ${esc(ctx.labels.per100k_short)}${right}</small></span></a></li>`;
 }
 
 function riseRow(r, i, ctx) {

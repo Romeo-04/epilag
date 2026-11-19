@@ -16,6 +16,9 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#FBFAF4">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="EpiLag-PH">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -38,6 +41,7 @@
       <nav class="app-tabs" id="tabs"></nav>
       <div class="sidebar__bottom">
         <a class="sidebar__link" href="../drill/"><span class="nav-item__icon"><i data-icon="play" data-size="22"></i></span><span class="nav-item__text">Dengue Drill</span></a>
+        <button type="button" class="sidebar__link sidebar__install" id="install-app" hidden><span class="nav-item__icon"><i data-icon="download" data-size="22"></i></span><span class="nav-item__text">Install app</span></button>
         <div class="sidebar__language"><span class="ctx__label">Language</span><div class="seg seg--sm" id="lang" role="group" aria-label="Language"></div></div>
       </div>
     </aside>

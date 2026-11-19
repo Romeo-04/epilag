@@ -1,5 +1,6 @@
-// For residents: the area status, danger signs (always open), DOH 4S actions (tap to open), and a shareable advisory.
-import { fmtDay } from "../logic.js";
+// For residents: the area status, danger signs (always open), DOH 4S actions (tap to open), a shareable advisory,
+// and a one-SMS version (160 characters) for phones without data.
+import { fmtDay, smsText } from "../logic.js";
 import { LV, areaSelect, cardTitle, esc, infoDisclosure, pill } from "../ui.js";
 
 const DO_ART = { drop: ["props", "container"], shirt: ["props", "people"], hospital: ["props", "clinicBag"], bug: ["mosquito", "sleepy"] };
@@ -14,6 +15,7 @@ export function render(el, ctx) {
   const row = fcH.find((r) => r.unit_id === unit);
   const status = P.status[row.level].replace("{area}", row.unit_name).replace("{h}", horizon);
   const msg = P.msg.replace("{area}", row.unit_name).replace("{week}", fmtDay(row.target_week)).replace("{status}", status);
+  const sms = smsText(labels.sms[row.level], row.unit_name, horizon);
   const [sheet, pose] = MASCOT[row.level];
 
   el.innerHTML = `
@@ -25,12 +27,16 @@ export function render(el, ctx) {
     </div>
     <h2 class="vsub">${esc(labels.do_head)}</h2>
     <div class="public-actions">${P.do.map(([ic, h, body]) => `<details class="card public-action"><summary><span class="public-action__ic"><pixel-sprite sprite="${DO_ART[ic][0]}" pose="${DO_ART[ic][1]}" scale="${DO_ART[ic][0] === "props" ? 1 : 2}"></pixel-sprite></span><h3>${esc(h)}</h3></summary><p>${esc(body)}</p></details>`).join("")}</div>
-    <section class="card">${cardTitle("residents", P.share_head)}<div class="share"><p id="msg">${esc(msg)}</p><button type="button" class="btn btn--primary btn--sm" id="copy">${esc(labels.copy)}</button>${infoDisclosure(labels.about_this, `<p>${esc(P.note)}</p>`)}</div></section>`;
+    <section class="card">${cardTitle("residents", P.share_head)}<div class="share"><p id="msg">${esc(msg)}</p><button type="button" class="btn btn--primary btn--sm" id="copy">${esc(labels.copy)}</button>${infoDisclosure(labels.about_this, `<p>${esc(P.note)}</p>`)}</div></section>
+    <section class="card" id="sms-card">${cardTitle("residents", labels.sms_head, labels.sms_sub)}<div class="sms"><p class="sms__text" id="sms">${esc(sms)}</p>
+      <span class="sms__meta">${esc(labels.sms_chars.replace("{n}", sms.length))}</span>
+      <div class="sms__actions"><button type="button" class="btn btn--primary btn--sm" id="copy-sms">${esc(labels.sms_copy)}</button><a class="btn btn--ghost btn--sm" id="send-sms" href="sms:?&amp;body=${encodeURIComponent(sms)}">${esc(labels.sms_send)}</a></div></div></section>`;
 
   el.querySelector("#area").addEventListener("change", (e) => ctx.set({ area: e.target.value }, { push: false }));
-  el.querySelector("#copy").addEventListener("click", async (e) => {
-    const b = e.currentTarget;
-    try { await navigator.clipboard.writeText(msg); b.textContent = labels.copied; }
-    catch { getSelection().selectAllChildren(el.querySelector("#msg")); }
+  const copy = (btn, text, node) => btn.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(text); btn.textContent = labels.copied; }
+    catch { getSelection().selectAllChildren(el.querySelector(node)); }
   });
+  copy(el.querySelector("#copy"), msg, "#msg");
+  copy(el.querySelector("#copy-sms"), sms, "#sms");
 }

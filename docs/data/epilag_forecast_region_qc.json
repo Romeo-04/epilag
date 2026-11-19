@@ -12,7 +12,9 @@
   "usual_level": 75.8,
   "epidemic_threshold": 173.4,
   "alert_level": "normal",
-  "population": 4671758
+  "population": 4671758,
+  "alert_reliability": 0.656,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_CAR",
@@ -27,7 +29,9 @@
   "usual_level": 104.8,
   "epidemic_threshold": 205.7,
   "alert_level": "normal",
-  "population": 1836857
+  "population": 1836857,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_MIMAROPA",
@@ -42,7 +46,9 @@
   "usual_level": 124.5,
   "epidemic_threshold": 313.9,
   "alert_level": "normal",
-  "population": 3247680
+  "population": 3247680,
+  "alert_reliability": 0.535,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_NCR",
@@ -57,7 +63,9 @@
   "usual_level": 548.0,
   "epidemic_threshold": 1347.4,
   "alert_level": "normal",
-  "population": 14118674
+  "population": 14118674,
+  "alert_reliability": 0.476,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "QC",
@@ -72,7 +80,9 @@
   "usual_level": 90.8,
   "epidemic_threshold": 231.2,
   "alert_level": "above usual",
-  "population": 2960048
+  "population": 2960048,
+  "alert_reliability": 0.488,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_I",
@@ -87,7 +97,9 @@
   "usual_level": 115.6,
   "epidemic_threshold": 276.8,
   "alert_level": "above usual",
-  "population": 5353139
+  "population": 5353139,
+  "alert_reliability": 0.35,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_II",
@@ -102,7 +114,9 @@
   "usual_level": 190.4,
   "epidemic_threshold": 559.7,
   "alert_level": "normal",
-  "population": 3727548
+  "population": 3727548,
+  "alert_reliability": 0.689,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_III",
@@ -117,7 +131,9 @@
   "usual_level": 562.3,
   "epidemic_threshold": 1273.2,
   "alert_level": "normal",
-  "population": 12706460
+  "population": 12706460,
+  "alert_reliability": 0.56,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_IV-A",
@@ -132,7 +148,9 @@
   "usual_level": 634.3,
   "epidemic_threshold": 1557.5,
   "alert_level": "normal",
-  "population": 16654975
+  "population": 16654975,
+  "alert_reliability": 0.702,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_IX",
@@ -147,7 +165,9 @@
   "usual_level": 159.2,
   "epidemic_threshold": 314.3,
   "alert_level": "normal",
-  "population": 3834801
+  "population": 3834801,
+  "alert_reliability": 0.55,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_V",
@@ -162,7 +182,9 @@
   "usual_level": 50.9,
   "epidemic_threshold": 125.8,
   "alert_level": "normal",
-  "population": 6248843
+  "population": 6248843,
+  "alert_reliability": 0.741,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_VI",
@@ -177,7 +199,9 @@
   "usual_level": 141.0,
   "epidemic_threshold": 337.9,
   "alert_level": "normal",
-  "population": 8033041
+  "population": 8033041,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VII",
@@ -192,7 +216,9 @@
   "usual_level": 310.7,
   "epidemic_threshold": 762.2,
   "alert_level": "normal",
-  "population": 8147078
+  "population": 8147078,
+  "alert_reliability": 0.493,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VIII",
@@ -207,7 +233,9 @@
   "usual_level": 164.2,
   "epidemic_threshold": 441.5,
   "alert_level": "normal",
-  "population": 4865157
+  "population": 4865157,
+  "alert_reliability": 0.474,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_X",
@@ -222,7 +250,9 @@
   "usual_level": 270.6,
   "epidemic_threshold": 567.3,
   "alert_level": "normal",
-  "population": 5128964
+  "population": 5128964,
+  "alert_reliability": 0.439,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XI",
@@ -237,7 +267,9 @@
   "usual_level": 231.2,
   "epidemic_threshold": 531.3,
   "alert_level": "normal",
-  "population": 5451448
+  "population": 5451448,
+  "alert_reliability": 0.588,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XII",
@@ -252,7 +284,9 @@
   "usual_level": 222.7,
   "epidemic_threshold": 458.0,
   "alert_level": "normal",
-  "population": 4735406
+  "population": 4735406,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XIII",
@@ -267,7 +301,9 @@
   "usual_level": 244.4,
   "epidemic_threshold": 686.3,
   "alert_level": "normal",
-  "population": 2810426
+  "population": 2810426,
+  "alert_reliability": 0.438,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_BARMM",
@@ -282,7 +318,9 @@
   "usual_level": 76.5,
   "epidemic_threshold": 177.9,
   "alert_level": "normal",
-  "population": 4671758
+  "population": 4671758,
+  "alert_reliability": 0.656,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_CAR",
@@ -297,7 +335,9 @@
   "usual_level": 94.5,
   "epidemic_threshold": 186.4,
   "alert_level": "normal",
-  "population": 1836857
+  "population": 1836857,
+  "alert_reliability": 0.333,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_MIMAROPA",
@@ -312,7 +352,9 @@
   "usual_level": 132.8,
   "epidemic_threshold": 322.2,
   "alert_level": "normal",
-  "population": 3247680
+  "population": 3247680,
+  "alert_reliability": 0.535,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_NCR",
@@ -327,7 +369,9 @@
   "usual_level": 534.4,
   "epidemic_threshold": 1314.2,
   "alert_level": "normal",
-  "population": 14118674
+  "population": 14118674,
+  "alert_reliability": 0.476,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "QC",
@@ -342,7 +386,9 @@
   "usual_level": 95.4,
   "epidemic_threshold": 240.3,
   "alert_level": "above usual",
-  "population": 2960048
+  "population": 2960048,
+  "alert_reliability": 0.488,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_I",
@@ -357,7 +403,9 @@
   "usual_level": 96.6,
   "epidemic_threshold": 230.3,
   "alert_level": "above usual",
-  "population": 5353139
+  "population": 5353139,
+  "alert_reliability": 0.35,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_II",
@@ -372,7 +420,9 @@
   "usual_level": 172.0,
   "epidemic_threshold": 497.2,
   "alert_level": "normal",
-  "population": 3727548
+  "population": 3727548,
+  "alert_reliability": 0.689,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_III",
@@ -387,7 +437,9 @@
   "usual_level": 516.4,
   "epidemic_threshold": 1216.9,
   "alert_level": "normal",
-  "population": 12706460
+  "population": 12706460,
+  "alert_reliability": 0.56,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_IV-A",
@@ -402,7 +454,9 @@
   "usual_level": 617.6,
   "epidemic_threshold": 1543.2,
   "alert_level": "normal",
-  "population": 16654975
+  "population": 16654975,
+  "alert_reliability": 0.702,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_IX",
@@ -417,7 +471,9 @@
   "usual_level": 159.6,
   "epidemic_threshold": 296.5,
   "alert_level": "normal",
-  "population": 3834801
+  "population": 3834801,
+  "alert_reliability": 0.55,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_V",
@@ -432,7 +488,9 @@
   "usual_level": 44.5,
   "epidemic_threshold": 105.4,
   "alert_level": "normal",
-  "population": 6248843
+  "population": 6248843,
+  "alert_reliability": 0.741,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_VI",
@@ -447,7 +505,9 @@
   "usual_level": 147.1,
   "epidemic_threshold": 342.4,
   "alert_level": "normal",
-  "population": 8033041
+  "population": 8033041,
+  "alert_reliability": 0.507,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VII",
@@ -462,7 +522,9 @@
   "usual_level": 284.6,
   "epidemic_threshold": 642.9,
   "alert_level": "normal",
-  "population": 8147078
+  "population": 8147078,
+  "alert_reliability": 0.493,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VIII",
@@ -477,7 +539,9 @@
   "usual_level": 158.7,
   "epidemic_threshold": 389.8,
   "alert_level": "normal",
-  "population": 4865157
+  "population": 4865157,
+  "alert_reliability": 0.474,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_X",
@@ -492,7 +556,9 @@
   "usual_level": 274.4,
   "epidemic_threshold": 516.9,
   "alert_level": "normal",
-  "population": 5128964
+  "population": 5128964,
+  "alert_reliability": 0.439,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XI",
@@ -507,7 +573,9 @@
   "usual_level": 232.9,
   "epidemic_threshold": 506.5,
   "alert_level": "normal",
-  "population": 5451448
+  "population": 5451448,
+  "alert_reliability": 0.588,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XII",
@@ -522,7 +590,9 @@
   "usual_level": 226.6,
   "epidemic_threshold": 452.3,
   "alert_level": "normal",
-  "population": 4735406
+  "population": 4735406,
+  "alert_reliability": 0.375,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XIII",
@@ -537,7 +607,9 @@
   "usual_level": 213.5,
   "epidemic_threshold": 575.3,
   "alert_level": "normal",
-  "population": 2810426
+  "population": 2810426,
+  "alert_reliability": 0.438,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_BARMM",
@@ -552,7 +624,9 @@
   "usual_level": 74.8,
   "epidemic_threshold": 179.8,
   "alert_level": "normal",
-  "population": 4671758
+  "population": 4671758,
+  "alert_reliability": 0.606,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_CAR",
@@ -567,7 +641,9 @@
   "usual_level": 82.0,
   "epidemic_threshold": 167.4,
   "alert_level": "normal",
-  "population": 1836857
+  "population": 1836857,
+  "alert_reliability": 0.235,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_MIMAROPA",
@@ -582,7 +658,9 @@
   "usual_level": 132.2,
   "epidemic_threshold": 329.5,
   "alert_level": "normal",
-  "population": 3247680
+  "population": 3247680,
+  "alert_reliability": 0.458,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_NCR",
@@ -597,7 +675,9 @@
   "usual_level": 493.3,
   "epidemic_threshold": 1305.5,
   "alert_level": "normal",
-  "population": 14118674
+  "population": 14118674,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "QC",
@@ -612,7 +692,9 @@
   "usual_level": 90.0,
   "epidemic_threshold": 275.8,
   "alert_level": "normal",
-  "population": 2960048
+  "population": 2960048,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_I",
@@ -627,7 +709,9 @@
   "usual_level": 78.4,
   "epidemic_threshold": 180.9,
   "alert_level": "above usual",
-  "population": 5353139
+  "population": 5353139,
+  "alert_reliability": 0.223,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_II",
@@ -642,7 +726,9 @@
   "usual_level": 143.7,
   "epidemic_threshold": 410.7,
   "alert_level": "normal",
-  "population": 3727548
+  "population": 3727548,
+  "alert_reliability": 0.448,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_III",
@@ -657,7 +743,9 @@
   "usual_level": 452.2,
   "epidemic_threshold": 1114.5,
   "alert_level": "normal",
-  "population": 12706460
+  "population": 12706460,
+  "alert_reliability": 0.354,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_IV-A",
@@ -672,7 +760,9 @@
   "usual_level": 553.5,
   "epidemic_threshold": 1423.3,
   "alert_level": "normal",
-  "population": 16654975
+  "population": 16654975,
+  "alert_reliability": 0.525,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_IX",
@@ -687,7 +777,9 @@
   "usual_level": 152.6,
   "epidemic_threshold": 282.1,
   "alert_level": "normal",
-  "population": 3834801
+  "population": 3834801,
+  "alert_reliability": 0.43,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_V",
@@ -702,7 +794,9 @@
   "usual_level": 40.9,
   "epidemic_threshold": 92.8,
   "alert_level": "normal",
-  "population": 6248843
+  "population": 6248843,
+  "alert_reliability": 0.652,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_VI",
@@ -717,7 +811,9 @@
   "usual_level": 141.9,
   "epidemic_threshold": 340.7,
   "alert_level": "normal",
-  "population": 8033041
+  "population": 8033041,
+  "alert_reliability": 0.439,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VII",
@@ -732,7 +828,9 @@
   "usual_level": 255.6,
   "epidemic_threshold": 544.9,
   "alert_level": "normal",
-  "population": 8147078
+  "population": 8147078,
+  "alert_reliability": 0.362,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_VIII",
@@ -747,7 +845,9 @@
   "usual_level": 137.6,
   "epidemic_threshold": 325.0,
   "alert_level": "normal",
-  "population": 4865157
+  "population": 4865157,
+  "alert_reliability": 0.185,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_X",
@@ -762,7 +862,9 @@
   "usual_level": 260.9,
   "epidemic_threshold": 494.8,
   "alert_level": "normal",
-  "population": 5128964
+  "population": 5128964,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XI",
@@ -777,7 +879,9 @@
   "usual_level": 217.5,
   "epidemic_threshold": 474.2,
   "alert_level": "normal",
-  "population": 5451448
+  "population": 5451448,
+  "alert_reliability": 0.516,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XII",
@@ -792,7 +896,9 @@
   "usual_level": 227.0,
   "epidemic_threshold": 458.1,
   "alert_level": "normal",
-  "population": 4735406
+  "population": 4735406,
+  "alert_reliability": 0.281,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XIII",
@@ -807,7 +913,9 @@
   "usual_level": 173.8,
   "epidemic_threshold": 436.4,
   "alert_level": "normal",
-  "population": 2810426
+  "population": 2810426,
+  "alert_reliability": 0.328,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_BARMM",
@@ -822,7 +930,9 @@
   "usual_level": 73.2,
   "epidemic_threshold": 177.6,
   "alert_level": "normal",
-  "population": 4671758
+  "population": 4671758,
+  "alert_reliability": 0.606,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_CAR",
@@ -837,7 +947,9 @@
   "usual_level": 71.0,
   "epidemic_threshold": 146.1,
   "alert_level": "normal",
-  "population": 1836857
+  "population": 1836857,
+  "alert_reliability": 0.235,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_MIMAROPA",
@@ -852,7 +964,9 @@
   "usual_level": 129.4,
   "epidemic_threshold": 327.7,
   "alert_level": "normal",
-  "population": 3247680
+  "population": 3247680,
+  "alert_reliability": 0.458,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_NCR",
@@ -867,7 +981,9 @@
   "usual_level": 441.6,
   "epidemic_threshold": 1201.6,
   "alert_level": "normal",
-  "population": 14118674
+  "population": 14118674,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "QC",
@@ -882,7 +998,9 @@
   "usual_level": 82.8,
   "epidemic_threshold": 276.2,
   "alert_level": "normal",
-  "population": 2960048
+  "population": 2960048,
+  "alert_reliability": 0.271,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_I",
@@ -897,7 +1015,9 @@
   "usual_level": 67.5,
   "epidemic_threshold": 155.8,
   "alert_level": "above usual",
-  "population": 5353139
+  "population": 5353139,
+  "alert_reliability": 0.223,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_II",
@@ -912,7 +1032,9 @@
   "usual_level": 122.4,
   "epidemic_threshold": 330.6,
   "alert_level": "normal",
-  "population": 3727548
+  "population": 3727548,
+  "alert_reliability": 0.448,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_III",
@@ -927,7 +1049,9 @@
   "usual_level": 384.8,
   "epidemic_threshold": 983.2,
   "alert_level": "normal",
-  "population": 12706460
+  "population": 12706460,
+  "alert_reliability": 0.354,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_IV-A",
@@ -942,7 +1066,9 @@
   "usual_level": 473.2,
   "epidemic_threshold": 1218.0,
   "alert_level": "normal",
-  "population": 16654975
+  "population": 16654975,
+  "alert_reliability": 0.525,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_IX",
@@ -957,7 +1083,9 @@
   "usual_level": 153.0,
   "epidemic_threshold": 284.4,
   "alert_level": "normal",
-  "population": 3834801
+  "population": 3834801,
+  "alert_reliability": 0.43,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_V",
@@ -972,7 +1100,9 @@
   "usual_level": 38.8,
   "epidemic_threshold": 85.9,
   "alert_level": "normal",
-  "population": 6248843
+  "population": 6248843,
+  "alert_reliability": 0.652,
+  "reliability_grade": "high"
  },
  {
   "area_code": "R_REGION_VI",
@@ -987,7 +1117,9 @@
   "usual_level": 139.2,
   "epidemic_threshold": 343.7,
   "alert_level": "normal",
-  "population": 8033041
+  "population": 8033041,
+  "alert_reliability": 0.439,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_VII",
@@ -1002,7 +1134,9 @@
   "usual_level": 229.3,
   "epidemic_threshold": 452.0,
   "alert_level": "normal",
-  "population": 8147078
+  "population": 8147078,
+  "alert_reliability": 0.362,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_VIII",
@@ -1017,7 +1151,9 @@
   "usual_level": 123.0,
   "epidemic_threshold": 277.9,
   "alert_level": "normal",
-  "population": 4865157
+  "population": 4865157,
+  "alert_reliability": 0.185,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_X",
@@ -1032,7 +1168,9 @@
   "usual_level": 253.3,
   "epidemic_threshold": 469.2,
   "alert_level": "normal",
-  "population": 5128964
+  "population": 5128964,
+  "alert_reliability": 0.312,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XI",
@@ -1047,7 +1185,9 @@
   "usual_level": 208.3,
   "epidemic_threshold": 459.2,
   "alert_level": "normal",
-  "population": 5451448
+  "population": 5451448,
+  "alert_reliability": 0.516,
+  "reliability_grade": "medium"
  },
  {
   "area_code": "R_REGION_XII",
@@ -1062,7 +1202,9 @@
   "usual_level": 234.6,
   "epidemic_threshold": 477.0,
   "alert_level": "normal",
-  "population": 4735406
+  "population": 4735406,
+  "alert_reliability": 0.281,
+  "reliability_grade": "low"
  },
  {
   "area_code": "R_REGION_XIII",
@@ -1077,6 +1219,8 @@
   "usual_level": 141.2,
   "epidemic_threshold": 312.9,
   "alert_level": "normal",
-  "population": 2810426
+  "population": 2810426,
+  "alert_reliability": 0.328,
+  "reliability_grade": "low"
  }
 ]
