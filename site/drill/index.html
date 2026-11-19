@@ -215,7 +215,11 @@
       <li><span class="guide__art guide__art--early" aria-hidden="true"><svg viewBox="0 0 120 56" width="120" height="56"><polyline points="2,50 24,48 44,42 62,26 78,8 94,24 118,44" fill="none" stroke="#EEF2FF" stroke-width="2.5" stroke-linejoin="round"/><line x1="78" x2="78" y1="2" y2="54" stroke="#F04B2A" stroke-width="2"/><path d="M38 56L44 46L50 56Z" fill="#2FD6C3"/></svg></span>
         <b>Be early</b><span>A team cuts cases 2 to 9 weeks later. Arrive 4+ weeks before the peak.</span></li>
     </ol>
-    <p class="guide__note">You play each season twice: first with case reports only, then with forecasts from a model you choose. After each turn, the Turn report tab lists what changed. Drag the map to turn it, scroll or pinch to zoom.</p>
+    <div class="guide__rounds" aria-label="The two rounds">
+      <div><b>Round 1 · no model</b><span>You see case reports only. The model you pick before starting stays hidden this round: play it on your gut.</span></div>
+      <div><b>Round 2 · your model</b><span>The same season again, now with your model's 4-week forecasts on every area. Compare the two scores to see what it was worth.</span></div>
+    </div>
+    <p class="guide__note">After each turn, the Turn report tab lists what changed. Drag the map to turn it, scroll or pinch to zoom.</p>
     <div class="btn-row"><button type="button" class="btn btn--go" id="guide-ok">Got it</button>
       <button type="button" class="btn btn--dark-ghost" id="guide-tour" hidden>Replay the walkthrough</button></div>
   </dialog>

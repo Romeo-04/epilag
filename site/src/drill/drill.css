@@ -424,6 +424,10 @@ body.drill::before { background: linear-gradient(rgba(255, 255, 255, .025) 1px, 
 .guide__art--turn i:nth-child(2) { background: var(--d-amber); border-color: #FFE2A6; }
 .guide__art--early { align-items: center; }
 .guide__note { font-size: 14px; line-height: 1.5; color: var(--night-muted); margin-bottom: 18px; max-width: 70ch; }
+.guide__rounds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; }
+.guide__rounds div { display: grid; gap: 4px; padding: 12px; border: 1.5px solid var(--night-line); background: rgba(255, 255, 255, .04); font-size: 14px; line-height: 1.4; color: var(--night-muted); }
+.guide__rounds b { font-size: 16px; color: var(--d-amber); }
+@media (max-width: 560px) { .guide__rounds { grid-template-columns: 1fr; } }
 
 /* report: one bar for the teams, medals as a strip */
 .report .lead { font-size: 16px; }
