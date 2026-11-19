@@ -33,8 +33,10 @@ export async function render(el, ctx) {
   const total = (h) => fc.filter((r) => r.horizon === h).reduce((s, r) => s + r.q50, 0);
   const nowTotal = [...nowBy.values()].reduce((s, v) => s + v, 0);
   const change = nowBy.size ? total(horizon) / Math.max(nowTotal, 1) - 1 : null;
-  const rising = fcH.filter((r) => (nowBy.get(r.unit_id) ?? 0) >= 5).map((r) => ({ ...r, now: nowBy.get(r.unit_id), pct: r.q50 / nowBy.get(r.unit_id) - 1 }))
-    .filter((r) => r.pct > 0).sort((a, b) => b.pct - a.pct).slice(0, 5);
+  // ranked by the forecast's rise per 100,000 people, so a small area going from 5 to 30 cases does not outrank a city adding hundreds
+  const rising = fcH.filter((r) => nowBy.has(r.unit_id) && r.population > 0)
+    .map((r) => ({ ...r, now: nowBy.get(r.unit_id), rise100k: ((r.q50 - nowBy.get(r.unit_id)) / r.population) * 1e5 }))
+    .filter((r) => r.rise100k >= 0.05).sort((a, b) => b.rise100k - a.rise100k).slice(0, 5);
   const saveBrief = () => download("epilag_action_brief.md", briefMarkdown(shown, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf }), "text/markdown");
 
   el.innerHTML = `
@@ -152,10 +154,13 @@ function priorityRow(r, i, ctx, records) {
 }
 
 function riseRow(r, i, ctx) {
-  return `<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit" aria-label="${esc(`${r.unit_name}, +${Math.round(r.pct * 100)}%, ${ctx.levelName(r.level)}`)}" title="${esc(ctx.levelName(r.level))}">
+  return `<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit" aria-label="${esc(`${r.unit_name}, +${rate(r.rise100k)} ${ctx.labels.per100k_short}, ${ctx.levelName(r.level)}`)}" title="${esc(ctx.levelName(r.level))}">
     <span class="priority-row__rank">${i + 1}</span><span class="priority-row__copy"><b>${esc(r.unit_name)}</b><small>${fmt(r.now)} → ${fmt(r.q50)} ${esc(ctx.labels.cases_n)}</small></span>
-    <span class="rise-pct nums">${dot(r.level)}+${Math.round(r.pct * 100)}%</span></a></li>`;
+    <span class="rise-pct nums">${dot(r.level)}<b>+${rate(r.rise100k)}</b><small>${esc(ctx.labels.per100k_short)}</small></span></a></li>`;
 }
+
+// two decimals below 1, so close regional rises (0.68 vs 0.74) don't all read as 0.7
+const rate = (v) => v.toFixed(v < 1 ? 2 : 1);
 
 function doRow(r, ctx) {
   return `<a class="do-row" data-lv="${LV[r.level]}" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit">
