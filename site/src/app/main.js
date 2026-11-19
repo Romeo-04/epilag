@@ -45,6 +45,7 @@ function readUrl() {
     lang: q.get("lang") === "fil" ? "fil" : "en",
     region: q.get("region") || null,
     area: q.get("area") || null,
+    focus: /^[\w-]{1,40}$/.test(q.get("focus") || "") ? q.get("focus") : null, // the forecast map's drill-down level
   };
 }
 
@@ -53,6 +54,7 @@ function writeUrl(s, push) {
   if (s.mode === "replay" && s.origin) q.set("origin", s.origin);
   if (s.region) q.set("region", s.region);
   if (s.area) q.set("area", s.area);
+  if (s.focus) q.set("focus", s.focus);
   history[push ? "pushState" : "replaceState"](null, "", `?${q}`);
 }
 
@@ -80,6 +82,8 @@ function set(patch, { push = true } = {}) {
   const next = { ...state, ...patch };
   if (patch.panel && patch.panel !== state.panel && !Object.prototype.hasOwnProperty.call(patch, "area")) next.area = null;
   if (patch.mode === "latest") next.origin = null;
+  // a new region or area from the settings starts the map's drill-down from there
+  if (("region" in patch || "area" in patch || "panel" in patch) && !("focus" in patch)) next.focus = null;
   const pageChanged = next.page !== state.page;
   if (pageChanged) ctxOpen = false;
   state = next;
@@ -88,6 +92,21 @@ function set(patch, { push = true } = {}) {
   const done = render();
   if (pageChanged) { scrollTo({ top: 0 }); $("view").focus({ preventScroll: true }); }
   return done;
+}
+
+/**
+ * Update URL state without re-rendering the view (the forecast map drills down in place and keeps its animation).
+ * The settings bar is redrawn so it shows the new region; the page note and the top Download menu are kept.
+ */
+let chromeArgs = null, topArgs = null;
+function setQuiet(patch) {
+  state = { ...state, ...patch };
+  writeUrl(state, false);
+  if (!chromeArgs) return;
+  const note = $("app-page-note").textContent, keep = topArgs;
+  renderChrome(...chromeArgs);
+  $("app-page-note").textContent = note;
+  if (keep) setTopDownload(...keep);
 }
 
 addEventListener("popstate", () => { state = readUrl(); closeMobileNav(); render(); });
@@ -118,6 +137,7 @@ function bindShell() {
 
 let topDownloadCleanup = null;
 function clearTopAction() {
+  topArgs = null;
   topDownloadCleanup?.();
   topDownloadCleanup = null;
   const host = $("top-actions");
@@ -128,6 +148,7 @@ function setTopDownload(label, handler, more = []) {
   const host = $("top-actions");
   if (!host) return;
   topDownloadCleanup?.();
+  topArgs = [label, handler, more];
   const items = [[label, handler, "download"], ...more];
   host.innerHTML = `<details class="download-menu"><summary class="btn btn--ghost btn--sm top-download"><i data-icon="download" data-size="20"></i><span>${esc(LABELS[state.lang].download)}</span><i data-icon="chevronRight" data-size="16" class="download-menu__chev"></i></summary><div class="download-menu__pop">${
     items.map(([l, , ic], i) => `<button type="button" id="${i ? `top-download-${i}` : "top-download"}" data-i="${i}">${icon(ic || "download", { size: 18 })}<span>${esc(l)}</span></button>`).join("")}</div></details>`;
@@ -325,6 +346,7 @@ async function render() {
     const hs = state.mode === "replay" ? [4, 8] : [2, 4, 6, 8];
     if (!hs.includes(state.h)) { state.h = 4; writeUrl(state, false); }
     renderChrome(t, list, m);
+    chromeArgs = [t, list, m];
     if (id !== renderId) return;
 
     cleanup?.(); cleanup = null;
@@ -345,7 +367,7 @@ async function render() {
       panelLabel: panelLabel(LABELS[state.lang], state.panel),
       levelName: (lv) => i18n.LEVEL_NAME[state.lang][lv],
       fc, fcH: fc ? fc.filter((r) => r.horizon === state.h) : null,
-      set, go: (page, extra = {}) => set({ page, ...extra }),
+      set, setQuiet, go: (page, extra = {}) => set({ page, ...extra }),
       topDownload: setTopDownload,
     };
     view.innerHTML = "";

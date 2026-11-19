@@ -1,4 +1,5 @@
-"""Build the 3D drill-down forecast map prototype (docs/prototypes/forecast-drill/index.html).
+"""Build the drill-down map boundaries (site/public/geo/drill.json, used by the app's forecast map) and the
+standalone prototype page (docs/prototypes/forecast-drill/index.html).
 
 Usage: bash scripts/drill_map/boundaries.sh /tmp/ph-geo && python scripts/drill_map/build.py /tmp/ph-geo
 
@@ -168,6 +169,12 @@ minis={f['properties']['region']:svgpath(f['geometry']) for f in mini['features'
 out={'W':W,'H':round(H,2),'regions':regions,'provinces':prov,'barangays':bgys,'qcOutline':outline,'mini':minis,
   'qc':{'fc':rfc['QC'],'hist':rh['QC'],'histEnd':rhend['QC'],'pop':RP['population']['QC'],'region':'R_NCR'},
   'regionWeek':RP['forecast_week'],'provinceWeek':PP['forecast_week']}
+# boundaries only, for the app's forecast map (site/src/lib/drill-map.js); forecasts come from docs/web/data there
+GEO_KEYS={'regions':('id','polys','bb','c','a'),'provinces':('id','region','polys','bb','c','a'),'barangays':('id','pcode','name','polys','bb','c','a','nb')}
+geo={'W':W,'H':round(H,2),'qcOutline':outline,'mini':minis,**{k:[{f:x[f] for f in fs if f in x} for x in out[k]] for k,fs in GEO_KEYS.items()}}
+geo_dest=ROOT/'site/public/geo/drill.json'
+geo_dest.write_text(json.dumps(geo,separators=(',',':')))
+print('wrote',geo_dest,geo_dest.stat().st_size,'bytes',file=sys.stderr)
 s=json.dumps(out,separators=(',',':'))
 page=(ROOT/'scripts/drill_map/page.html').read_text().replace('__DATA__',s)
 dest=ROOT/'docs/prototypes/forecast-drill/index.html'
