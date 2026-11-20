@@ -1,11 +1,11 @@
-// Overview: alert counts, trend, fastest risers and this week's actions, then the map and priority list.
+// Overview: alert counts, trend, areas rising toward their outbreak line and this week's actions, then the map and priority list.
 // The action brief is the top-bar download.
 import { forecastFor, meta as loadMeta, table, trackRecordFor } from "../data.js";
-import { LEVELS, briefMarkdown, briefTable, fmt, replayClaim } from "../logic.js";
+import { LEVELS, briefMarkdown, briefTable, fmt, replayClaim, risingToward, thresholds, yearOf } from "../logic.js";
 import { barChart } from "../chart.js";
 import { createDrillMap, loadDrillGeo } from "../../lib/drill-map.js";
 import { drillNames, mapTarget } from "../drill-names.js";
-import { LV, cardTitle, count, dot, download, esc, pill, segmented } from "../ui.js";
+import { LV, cardTitle, count, download, esc, pill, segmented } from "../ui.js";
 
 const SORT_KEY = "el-priority-sort";
 const readSort = () => { try { return localStorage.getItem(SORT_KEY) === "reliable" ? "reliable" : "cases"; } catch { return "cases"; } };
@@ -29,15 +29,18 @@ export async function render(el, ctx) {
   const status = mode === "replay" ? replayStatus(labels, horizon, fcH) : nWarn + nWatch === 0 ? quietStatus(t, labels) : "";
   // reported cases in the forecast's own week: the "now" every change is measured from
   const ids = new Set(fcH.map((r) => r.unit_id));
-  const nowBy = new Map((await table(panel, "history")).filter((r) => r.week === asOf && ids.has(r.unit_id) && r.cases != null).map((r) => [r.unit_id, r.cases]));
+  const hist = await table(panel, "history");
+  const nowBy = new Map(hist.filter((r) => r.week === asOf && ids.has(r.unit_id) && r.cases != null).map((r) => [r.unit_id, r.cases]));
   const hs = [...new Set(fc.map((r) => r.horizon))].sort((a, b) => a - b);
   const total = (h) => fc.filter((r) => r.horizon === h).reduce((s, r) => s + r.q50, 0);
   const nowTotal = [...nowBy.values()].reduce((s, v) => s + v, 0);
   const change = nowBy.size ? total(horizon) / Math.max(nowTotal, 1) - 1 : null;
-  // ranked by the forecast's rise per 100,000 people, so a small area going from 5 to 30 cases does not outrank a city adding hundreds
-  const rising = fcH.filter((r) => nowBy.has(r.unit_id) && r.population > 0)
-    .map((r) => ({ ...r, now: nowBy.get(r.unit_id), rise100k: ((r.q50 - nowBy.get(r.unit_id)) / r.population) * 1e5 }))
-    .filter((r) => r.rise100k >= 0.05).sort((a, b) => b.rise100k - a.rise100k).slice(0, 5);
+  // each area against its own past (0 = usual for the season, 1 = its epidemic line), so population, how much dengue
+  // an area usually has and the season do not decide the order; a replay uses only the years before it, like its forecast
+  const thr = mode === "replay"
+    ? thresholds(hist.filter((r) => r.week < Date.UTC(yearOf(asOf), 0, 1) / 864e5))
+    : new Map((await table(panel, "thresholds")).map((r) => [`${r.unit_id}|${r.woy}`, r]));
+  const rising = risingToward(fcH, nowBy, thr);
   const saveBrief = () => download("epilag_action_brief.md", briefMarkdown(shown, { t, lang, i18n, panelLabel: ctx.panelLabel, horizon, asOf }), "text/markdown");
 
   el.innerHTML = `
@@ -157,14 +160,21 @@ function priorityRow(r, i, ctx, records) {
     <span class="priority-row__level">${pill(ctx, r.level)}<small>${r.q50_per100k.toFixed(1)} ${esc(ctx.labels.per100k_short)}${right}</small></span></a></li>`;
 }
 
+// the meter runs from the usual level (0%) to past the outbreak line (100%, the tick at 80% of the track)
+const METER_MAX = 1.25;
+const onMeter = (v) => `${(Math.min(Math.max(v, 0), METER_MAX) / METER_MAX * 100).toFixed(1)}%`;
+const pct = (v) => `${Math.round(v * 100)}%`;
 function riseRow(r, i, ctx) {
-  return `<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit" aria-label="${esc(`${r.unit_name}, +${rate(r.rise100k)} ${ctx.labels.per100k_short}, ${ctx.levelName(r.level)}`)}" title="${esc(ctx.levelName(r.level))}">
-    <span class="priority-row__rank">${i + 1}</span><span class="priority-row__copy"><b>${esc(r.unit_name)}</b><small>${fmt(r.now)} → ${fmt(r.q50)} ${esc(ctx.labels.cases_n)}</small></span>
-    <span class="rise-pct nums">${dot(r.level)}<b>+${rate(r.rise100k)}</b><small>${esc(ctx.labels.per100k_short)}</small></span></a></li>`;
+  const L = ctx.labels;
+  const from = r.from <= 0 ? L.rise_usual : pct(r.from);
+  return `<li><a class="priority-row rise-row" data-lv="${LV[r.level]}" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit"
+      aria-label="${esc(`${r.unit_name}: ${L.rise_now} ${from}, ${L.rise_fc} ${pct(r.to)}. ${ctx.levelName(r.level)}`)}">
+    <span class="priority-row__rank">${i + 1}</span>
+    <span class="priority-row__copy"><b>${esc(r.unit_name)}</b><small>${fmt(r.now)} → ${fmt(r.q50)} ${esc(L.cases_n)} · ${esc(ctx.levelName(r.level))}</small>
+      <span class="rise-meter" aria-hidden="true"><i class="rise-meter__run" style="left:${onMeter(r.from)};width:calc(${onMeter(r.to)} - ${onMeter(r.from)})"></i>
+        <i class="rise-meter__from" style="left:${onMeter(r.from)}"></i><i class="rise-meter__to" style="left:${onMeter(r.to)}"></i><i class="rise-meter__line"></i></span></span>
+    <span class="rise-pct nums"><small>${esc(from)} →</small><b>${pct(r.to)}</b></span></a></li>`;
 }
-
-// two decimals below 1, so close regional rises (0.68 vs 0.74) don't all read as 0.7
-const rate = (v) => v.toFixed(v < 1 ? 2 : 1);
 
 function doRow(r, ctx) {
   return `<a class="do-row" data-lv="${LV[r.level]}" href="?page=unit&area=${encodeURIComponent(r.unit_id)}" data-u="${esc(r.unit_id)}" data-go="unit">
