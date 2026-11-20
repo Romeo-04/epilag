@@ -23,6 +23,13 @@ export async function render(el, ctx) {
   const table_ = [...fcH].sort((a, b) => b.q50_per100k - a.q50_per100k);
   const n = (lv) => fcH.filter((r) => r.level === lv).length;
   const claim = mode === "replay" ? replayClaim(fcH) : null;
+  // what the level counts cover, e.g. "17 regions and Quezon City, 8 wk ahead"
+  const wk = labels.wk_short.replace("{h}", horizon);
+  const hasQC = fcH.some((r) => r.unit_id === "QC");
+  const scope = fill(L.lv_scope, {
+    areas: panel === "province" ? fill(L.lv_provinces, { n: fcH.length }) : `${fill(L.lv_regions, { n: fcH.length - (hasQC ? 1 : 0) })}${hasQC ? L.lv_and_qc : ""}`,
+    w: wk,
+  });
   const saveAll = () => {
     const cols = Object.keys(fc[0]).filter((k) => !["test_year"].includes(k));
     download(`epilag_forecast_${panel}_${mode}.csv`, toCsv(fc, cols.map((k) => [k, (r) => (k.includes("week") ? new Date(r[k] * 864e5).toISOString().slice(0, 10) : r[k])])), "text/csv");
@@ -34,7 +41,11 @@ export async function render(el, ctx) {
         <div class="replay-result" data-crossed="${claim.crossed}" data-flagged="${claim.flagged}"><strong>${count(claim.flagged)}</strong><small>/ ${claim.crossed} ${esc(labels.flagged_early.replace("{h}", horizon))}</small></div>
         ${infoDisclosure(labels.about_this, `<p>${esc(t.replay_note)}</p>`)}
       </div><pixel-sprite sprite="mosquito" pose="check" scale="3"></pixel-sprite></section>` : ""}
-    <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></li>`).join("")}</ul>
+    <div class="level-pick">
+      <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}"><button type="button" class="level-count" data-pick="${esc(lv)}" aria-expanded="false" aria-controls="level-list" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></button></li>`).join("")}</ul>
+      <p class="level-pick__scope">${esc(scope)}</p>
+      <div class="level-list" id="level-list" aria-live="polite" hidden></div>
+    </div>
     <div class="map-page-grid map-page-grid--drill">
       <section class="card map-card">
         <div class="map-card__head">
@@ -56,6 +67,29 @@ export async function render(el, ctx) {
     ]))}`;
   ctx.topDownload(t.download_all, saveAll);
 
+  // ---------------------------------------------------------------- which areas are at each level
+  // A count opens the list of its areas; an area flies the map there once the map is ready.
+  const pickBox = el.querySelector(".level-pick"), levelList = el.querySelector("#level-list");
+  let nameOf = (r) => r.unit_name, goTo = null, openLv = null;
+  function showLevel(lv) {
+    openLv = openLv === lv ? null : lv;
+    pickBox.querySelectorAll(".level-count").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.pick === openLv)));
+    if (!openLv) { levelList.hidden = true; return; }
+    const rows = fcH.filter((r) => r.level === openLv).sort((a, b) => b.q50_per100k - a.q50_per100k);
+    levelList.dataset.lv = LV[openLv];
+    levelList.innerHTML = `<h3>${esc(ctx.levelName(openLv))} · ${esc(wk)}</h3>${rows.length
+      ? `<div class="dpanel__chips">${rows.map((r) => `<button type="button" class="dpanel__chip" data-goto="${esc(r.unit_id)}"><span class="sq"></span>${esc(nameOf(r))} <span class="nums">${fmt(r.q50)} ${esc(labels.cases_n)}</span></button>`).join("")}</div><p>${esc(L.lv_hint)}</p>`
+      : `<p>${esc(L.lv_none)}</p>`}`;
+    levelList.hidden = false;
+  }
+  const onPick = (e) => {
+    const b = e.target.closest("[data-pick]");
+    if (b) { showLevel(b.dataset.pick); return; }
+    const a = e.target.closest("[data-goto]");
+    if (a && goTo) goTo(a.dataset.goto);
+  };
+  pickBox.addEventListener("click", onPick);
+
   // ---------------------------------------------------------------- data for every level
   // Regions and Quezon City follow the current settings when they are on the Regions data, otherwise the latest run.
   // Provinces follow the settings when they are on the Provinces data, otherwise the latest province run (Jan 2021).
@@ -76,6 +110,8 @@ export async function render(el, ctx) {
   const histOf = (rows) => { const m = new Map(); for (const r of rows) { if (!m.has(r.unit_id)) m.set(r.unit_id, []); m.get(r.unit_id).push(r); } for (const v of m.values()) v.sort((a, b) => a.week - b.week); return m; };
   const rHist = histOf(regionHist), pHist = histOf(provHist);
   const names = drillNames(mAll, L.special);
+  nameOf = (r) => (r.unit_id === "QC" ? names.city : names.region[r.unit_id]?.short || names.province[r.unit_id] || r.unit_name);
+  if (openLv) { const lv = openLv; openLv = null; showLevel(lv); }
 
   const fcOf = (node) => (!node ? null : node.kind === "province" ? pFc.get(node.id) : node.kind === "barangay" ? null : rFc.get(node.id)) || null;
   const lvOf = (node) => { const f = fcOf(node); return f ? LV[f.level] : "none"; };
@@ -269,6 +305,11 @@ export async function render(el, ctx) {
     },
   });
   if (!el.isConnected) { map.dispose(); return; }
+  goTo = (id) => {
+    if (!map.get(id)) return;
+    map.go(id);
+    box.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+  };
 
   // panel: drill from rows and chips, highlight on hover, links out
   const onPanelClick = (e) => {
@@ -322,6 +363,7 @@ export async function render(el, ctx) {
   input.addEventListener("input", show); input.addEventListener("keydown", onKey); input.addEventListener("blur", onBlur); list.addEventListener("pointerdown", onDown);
 
   return () => {
+    pickBox.removeEventListener("click", onPick);
     dpanel.removeEventListener("click", onPanelClick); dpanel.removeEventListener("pointerover", onPanelOver); dpanel.removeEventListener("pointerleave", onPanelLeave);
     input.removeEventListener("input", show); input.removeEventListener("keydown", onKey); input.removeEventListener("blur", onBlur); list.removeEventListener("pointerdown", onDown);
     map.dispose();
