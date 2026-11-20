@@ -59,6 +59,9 @@ T = {
         "qc_head": "Quezon City barangays", "qc_muted": "where to look first",
         "qc_note": ("Weekly forecasts are city-wide. Barangay data is yearly only, so the city forecast "
                     "is shared out by each barangay's share of cases in 2022-2025."),
+        "hotspot_rule": ("Hotspot rule (DOH): a barangay with 3+ reported cases in 4 consecutive weeks is a cluster. "
+                         "Spray that cluster only, and run search and destroy there. The barangay numbers here are "
+                         "estimates from city totals, so confirm with the barangay's own case reports."),
         "hello": "Dengue outlook,", "weeks_ahead": "weeks ahead",
         "act_now": "Areas to act on now", "quiet": "Quiet week: no area needs outbreak action.",
         "replay_story": "Replay the June 2019 outbreak", "open_map": "Open the forecast map",
@@ -130,6 +133,10 @@ T = {
         "qc_head": "Mga barangay ng Quezon City", "qc_muted": "saan unang titingin",
         "qc_note": ("Ang lingguhang forecast ay para sa buong lungsod. Taunan lang ang datos ng barangay, kaya "
                     "hinati ang forecast ayon sa bahagi ng bawat barangay sa mga kaso noong 2022-2025."),
+        "hotspot_rule": ("Panuntunan sa hotspot (DOH): cluster ang barangay na may 3 o higit pang naiulat na kaso sa 4 na "
+                         "magkakasunod na linggo. I-spray ang cluster na iyon lamang, at magsagawa ng search and destroy doon. "
+                         "Tantiya mula sa kabuuan ng lungsod ang mga bilang ng barangay dito, kaya kumpirmahin sa sariling "
+                         "ulat ng kaso ng barangay."),
         "hello": "Lagay ng dengue,", "weeks_ahead": "linggo mula ngayon",
         "act_now": "Mga lugar na dapat kumilos na", "quiet": "Tahimik na linggo: walang lugar na kailangan ng aksyon sa outbreak.",
         "replay_story": "Balikan ang outbreak ng Hunyo 2019", "open_map": "Buksan ang mapa",
@@ -199,16 +206,24 @@ PLAYBOOK = {
         "outbreak warning": [
             ("Today", "Convene the local dengue task force and barangay health teams; issue a public advisory.",
              "Which areas, how many cases (with a range), and the week of the peak."),
-            ("Weeks 1–2", "Run clean-up drives and cover water containers in the top barangays; larvicide where needed.",
+            ("Weeks 1–2", "Run area-wide search and destroy at 4 p.m. every week in the top barangays: cover drums, "
+                          "empty vases, tires and gutters; larvicide water that cannot be drained.",
              "The budget split by cases averted per peso, and the QC barangay shortlist."),
+            ("Hotspots", "Where a barangay has 3+ cases in 4 consecutive weeks (DOH clustering), send spraying teams "
+                         "to that cluster only, together with search and destroy there.",
+             "The barangay shortlist shows where to look first."),
             ("Weeks 2–4", "Stock NS1 rapid tests and IV fluids; ask hospitals to open dengue fast lanes.",
              "The upper forecast to size supplies: up to {n} cases in 8 weeks."),
         ],
         "watch": [
-            ("This week", "Inspect and destroy breeding sites; check test-kit and IV-fluid stocks.",
+            ("This week", "Inspect and destroy breeding sites in the top barangays; larvicide standing water "
+                          "that cannot be drained; check test-kit and IV-fluid stocks.",
              "An early signal weeks ahead, before reported cases rise."),
-            ("Weeks 1–3", "Prepare clean-up teams and messages so they can start within days.",
+            ("Weeks 1–3", "Prepare clean-up and spraying teams and messages so they can start within days.",
              "The likely range, so you can plan for the high case: up to {n} cases in 8 weeks."),
+            ("Hotspots", "If a barangay reports 3+ cases in 4 consecutive weeks, or cases rise 2 weeks in a row, "
+                         "treat it as a hotspot: search and destroy there, and spray that cluster only.",
+             "Which barangays to check first."),
             ("Every week", "Re-check the forecast. If the middle forecast passes the threshold, escalate to outbreak response.",
              "A weekly update with the reasons behind any change."),
         ],
@@ -216,9 +231,12 @@ PLAYBOOK = {
             ("This week", "Remind households of the DOH 4S: search and destroy breeding sites, self-protect, "
                           "seek early consultation, support fogging only in hotspots.",
              "Which areas are trending above their usual level."),
-            ("Every week", "Watch for a move to 'watch'.", "The forecast, range and threshold in one chart."),
+            ("Every week", "Hold a 4 p.m. search and destroy in the barangays with the most cases, and watch for a move to 'watch'.",
+             "The forecast, range and threshold in one chart."),
         ],
         "normal": [
+            ("Every week", "Keep the 4 p.m. habit: a weekly search and destroy of breeding sites in every barangay.",
+             "Confirmation that no unusual rise is expected."),
             ("Routine", "Keep routine surveillance and community clean-ups.",
              "Confirmation that no unusual rise is expected."),
         ],
@@ -227,16 +245,24 @@ PLAYBOOK = {
         "outbreak warning": [
             ("Ngayon", "Tipunin ang dengue task force at mga barangay health team; maglabas ng abiso sa publiko.",
              "Aling mga lugar, ilang kaso (may saklaw), at kailan ang rurok."),
-            ("Linggo 1–2", "Maglinis at takpan ang mga lalagyan ng tubig sa mga nangungunang barangay; maglagay ng larvicide kung kailangan.",
+            ("Linggo 1–2", "Magsagawa ng search and destroy tuwing alas-4 ng hapon bawat linggo sa mga nangungunang barangay: "
+                           "takpan ang mga drum, alisan ng tubig ang plorera, gulong at alulod; maglagay ng larvicide sa tubig na hindi maalis.",
              "Ang hati ng budget ayon sa kasong naiiwasan bawat piso, at ang listahan ng barangay sa QC."),
+            ("Hotspot", "Kapag may 3 o higit pang kaso ang isang barangay sa 4 na magkakasunod na linggo (clustering ayon sa DOH), "
+                        "magpadala ng spraying team sa cluster na iyon lamang, kasabay ng search and destroy doon.",
+             "Ipinapakita ng listahan ng barangay kung saan unang titingin."),
             ("Linggo 2–4", "Mag-imbak ng NS1 rapid test at IV fluids; hilingin sa mga ospital na magbukas ng dengue fast lane.",
              "Ang mataas na forecast para sukatin ang gamit: hanggang {n} kaso sa 8 linggo."),
         ],
         "watch": [
-            ("Ngayong linggo", "Suriin at sirain ang mga pinamumugaran ng lamok; tingnan ang stock ng test kit at IV fluids.",
+            ("Ngayong linggo", "Suriin at sirain ang mga pinamumugaran ng lamok sa mga nangungunang barangay; maglagay ng larvicide "
+                               "sa tubig na hindi maalis; tingnan ang stock ng test kit at IV fluids.",
              "Maagang senyales ilang linggo bago tumaas ang naiulat na kaso."),
-            ("Linggo 1–3", "Ihanda ang mga team sa paglilinis at ang mga mensahe para makapagsimula sa loob ng ilang araw.",
+            ("Linggo 1–3", "Ihanda ang mga team sa paglilinis at pag-spray at ang mga mensahe para makapagsimula sa loob ng ilang araw.",
              "Ang malamang na saklaw para makapaghanda sa pinakamataas: hanggang {n} kaso sa 8 linggo."),
+            ("Hotspot", "Kapag may 3 o higit pang kaso ang isang barangay sa 4 na magkakasunod na linggo, o tumaas ang kaso nang "
+                        "2 linggong sunod, ituring itong hotspot: search and destroy doon, at i-spray ang cluster na iyon lamang.",
+             "Aling mga barangay ang unang susuriin."),
             ("Bawat linggo", "Balikan ang forecast. Kapag lumampas sa threshold ang gitnang forecast, itaas sa outbreak response.",
              "Lingguhang update kasama ang dahilan ng anumang pagbabago."),
         ],
@@ -244,9 +270,13 @@ PLAYBOOK = {
             ("Ngayong linggo", "Ipaalala sa mga tahanan ang 4S ng DOH: hanapin at sirain ang pinamumugaran, protektahan ang sarili, "
                                "magpakonsulta agad, suportahan ang fogging sa hotspot lamang.",
              "Aling mga lugar ang mas mataas kaysa karaniwan."),
-            ("Bawat linggo", "Bantayan kung lilipat sa 'bantayan'.", "Ang forecast, saklaw at threshold sa iisang tsart."),
+            ("Bawat linggo", "Magsagawa ng search and destroy tuwing alas-4 ng hapon sa mga barangay na may pinakamaraming kaso, "
+                             "at bantayan kung lilipat sa 'bantayan'.",
+             "Ang forecast, saklaw at threshold sa iisang tsart."),
         ],
         "normal": [
+            ("Bawat linggo", "Ituloy ang 4 o'clock habit: lingguhang search and destroy ng pinamumugaran sa bawat barangay.",
+             "Kumpirmasyon na walang inaasahang di-pangkaraniwang pagtaas."),
             ("Karaniwan", "Ituloy ang karaniwang pagbabantay at paglilinis ng komunidad.",
              "Kumpirmasyon na walang inaasahang di-pangkaraniwang pagtaas."),
         ],
@@ -1021,6 +1051,7 @@ def page_qc():
     qc8 = qc.q50.mean() * 8
     brgy["expected_8wk"] = brgy.share * qc8
     lvl = qc[qc.horizon == horizon].level.iloc[0]
+    st.info(t["hotspot_rule"], icon=":material/pest_control:")
     a, b = st.columns([1, 1.6], gap="medium")
     with a:
         with st.container(key="hero_qc"):
@@ -1062,11 +1093,11 @@ PUBLIC = {
         },
         "do_head": "What your household can do this week (DOH 4S)",
         "do": [("drop", "Search and destroy breeding sites",
-                "Cover water drums and pails. Empty and scrub vases, plant saucers and old tires every week. Clear roof gutters."),
+                "Every week at 4 p.m.: cover water drums and pails, empty and scrub vases, plant saucers and old tires, and clear roof gutters."),
                ("shirt", "Secure self-protection",
                 "Wear long sleeves and pants, use mosquito repellent, and sleep under a net or behind screens, especially at dawn and dusk."),
                ("hospital", "Seek early consultation", "Fever for 2 days? Go to your health center. Do not wait for a rash."),
-               ("bug", "Support fogging only in hotspots", "Fogging does little on its own. Removing breeding sites matters more.")],
+               ("bug", "Support fogging only in hotspots", "Spraying is for barangays with 3+ cases in 4 weeks, and does little on its own. Removing breeding sites matters more.")],
         "signs_head": "Go to the hospital now if someone with dengue has:",
         "signs": ["Severe stomach pain", "Vomiting that will not stop", "Bleeding from the gums or nose",
                   "Blood in vomit or stool", "Unusual sleepiness or restlessness", "Difficulty breathing"],
@@ -1088,11 +1119,11 @@ PUBLIC = {
         },
         "do_head": "Ang magagawa ng inyong pamilya ngayong linggo (4S ng DOH)",
         "do": [("drop", "Hanapin at sirain ang pinamumugaran",
-                "Takpan ang mga drum at timba. Linggo-linggong alisan ng laman at kuskusin ang mga plorera, platito ng halaman at lumang gulong. Linisin ang alulod."),
+                "Linggo-linggo tuwing alas-4 ng hapon: takpan ang mga drum at timba, alisan ng laman at kuskusin ang mga plorera, platito ng halaman at lumang gulong, at linisin ang alulod."),
                ("shirt", "Protektahan ang sarili",
                 "Magsuot ng mahabang manggas at pantalon, gumamit ng mosquito repellent, at matulog sa kulambo o may screen, lalo na sa madaling-araw at dapit-hapon."),
                ("hospital", "Magpakonsulta agad", "Dalawang araw nang may lagnat? Pumunta sa health center. Huwag hintayin ang pantal."),
-               ("bug", "Fogging sa hotspot lamang", "Kaunti lang ang naitutulong ng fogging. Mas mahalaga ang pag-alis ng pinamumugaran.")],
+               ("bug", "Fogging sa hotspot lamang", "Para sa barangay na may 3+ kaso sa 4 na linggo ang pag-spray, at kaunti lang ang naitutulong nito nang mag-isa. Mas mahalaga ang pag-alis ng pinamumugaran.")],
         "signs_head": "Dalhin agad sa ospital kung ang may dengue ay may:",
         "signs": ["Matinding pananakit ng tiyan", "Walang tigil na pagsusuka", "Pagdurugo ng gilagid o ilong",
                   "Dugo sa suka o dumi", "Di-pangkaraniwang antok o pagkabalisa", "Hirap sa paghinga"],

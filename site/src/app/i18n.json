@@ -82,6 +82,7 @@
    "qc_head": "Quezon City barangays",
    "qc_muted": "where to look first",
    "qc_note": "Weekly forecasts are city-wide. Barangay data is yearly only, so the city forecast is shared out by each barangay's share of cases in 2022-2025.",
+   "hotspot_rule": "Hotspot rule (DOH): a barangay with 3+ reported cases in 4 consecutive weeks is a cluster. Spray that cluster only, and run search and destroy there. The barangay numbers here are estimates from city totals, so confirm with the barangay's own case reports.",
    "hello": "Dengue outlook,",
    "weeks_ahead": "weeks ahead",
    "act_now": "Areas to act on now",
@@ -218,6 +219,7 @@
    "qc_head": "Mga barangay ng Quezon City",
    "qc_muted": "saan unang titingin",
    "qc_note": "Ang lingguhang forecast ay para sa buong lungsod. Taunan lang ang datos ng barangay, kaya hinati ang forecast ayon sa bahagi ng bawat barangay sa mga kaso noong 2022-2025.",
+   "hotspot_rule": "Panuntunan sa hotspot (DOH): cluster ang barangay na may 3 o higit pang naiulat na kaso sa 4 na magkakasunod na linggo. I-spray ang cluster na iyon lamang, at magsagawa ng search and destroy doon. Tantiya mula sa kabuuan ng lungsod ang mga bilang ng barangay dito, kaya kumpirmahin sa sariling ulat ng kaso ng barangay.",
    "hello": "Lagay ng dengue,",
    "weeks_ahead": "linggo mula ngayon",
    "act_now": "Mga lugar na dapat kumilos na",
@@ -321,8 +323,13 @@
     ],
     [
      "Weeks 1–2",
-     "Run clean-up drives and cover water containers in the top barangays; larvicide where needed.",
+     "Run area-wide search and destroy at 4 p.m. every week in the top barangays: cover drums, empty vases, tires and gutters; larvicide water that cannot be drained.",
      "The budget split by cases averted per peso, and the QC barangay shortlist."
+    ],
+    [
+     "Hotspots",
+     "Where a barangay has 3+ cases in 4 consecutive weeks (DOH clustering), send spraying teams to that cluster only, together with search and destroy there.",
+     "The barangay shortlist shows where to look first."
     ],
     [
      "Weeks 2–4",
@@ -333,13 +340,18 @@
    "watch": [
     [
      "This week",
-     "Inspect and destroy breeding sites; check test-kit and IV-fluid stocks.",
+     "Inspect and destroy breeding sites in the top barangays; larvicide standing water that cannot be drained; check test-kit and IV-fluid stocks.",
      "An early signal weeks ahead, before reported cases rise."
     ],
     [
      "Weeks 1–3",
-     "Prepare clean-up teams and messages so they can start within days.",
+     "Prepare clean-up and spraying teams and messages so they can start within days.",
      "The likely range, so you can plan for the high case: up to {n} cases in 8 weeks."
+    ],
+    [
+     "Hotspots",
+     "If a barangay reports 3+ cases in 4 consecutive weeks, or cases rise 2 weeks in a row, treat it as a hotspot: search and destroy there, and spray that cluster only.",
+     "Which barangays to check first."
     ],
     [
      "Every week",
@@ -355,11 +367,16 @@
     ],
     [
      "Every week",
-     "Watch for a move to 'watch'.",
+     "Hold a 4 p.m. search and destroy in the barangays with the most cases, and watch for a move to 'watch'.",
      "The forecast, range and threshold in one chart."
     ]
    ],
    "normal": [
+    [
+     "Every week",
+     "Keep the 4 p.m. habit: a weekly search and destroy of breeding sites in every barangay.",
+     "Confirmation that no unusual rise is expected."
+    ],
     [
      "Routine",
      "Keep routine surveillance and community clean-ups.",
@@ -376,8 +393,13 @@
     ],
     [
      "Linggo 1–2",
-     "Maglinis at takpan ang mga lalagyan ng tubig sa mga nangungunang barangay; maglagay ng larvicide kung kailangan.",
+     "Magsagawa ng search and destroy tuwing alas-4 ng hapon bawat linggo sa mga nangungunang barangay: takpan ang mga drum, alisan ng tubig ang plorera, gulong at alulod; maglagay ng larvicide sa tubig na hindi maalis.",
      "Ang hati ng budget ayon sa kasong naiiwasan bawat piso, at ang listahan ng barangay sa QC."
+    ],
+    [
+     "Hotspot",
+     "Kapag may 3 o higit pang kaso ang isang barangay sa 4 na magkakasunod na linggo (clustering ayon sa DOH), magpadala ng spraying team sa cluster na iyon lamang, kasabay ng search and destroy doon.",
+     "Ipinapakita ng listahan ng barangay kung saan unang titingin."
     ],
     [
      "Linggo 2–4",
@@ -388,13 +410,18 @@
    "watch": [
     [
      "Ngayong linggo",
-     "Suriin at sirain ang mga pinamumugaran ng lamok; tingnan ang stock ng test kit at IV fluids.",
+     "Suriin at sirain ang mga pinamumugaran ng lamok sa mga nangungunang barangay; maglagay ng larvicide sa tubig na hindi maalis; tingnan ang stock ng test kit at IV fluids.",
      "Maagang senyales ilang linggo bago tumaas ang naiulat na kaso."
     ],
     [
      "Linggo 1–3",
-     "Ihanda ang mga team sa paglilinis at ang mga mensahe para makapagsimula sa loob ng ilang araw.",
+     "Ihanda ang mga team sa paglilinis at pag-spray at ang mga mensahe para makapagsimula sa loob ng ilang araw.",
      "Ang malamang na saklaw para makapaghanda sa pinakamataas: hanggang {n} kaso sa 8 linggo."
+    ],
+    [
+     "Hotspot",
+     "Kapag may 3 o higit pang kaso ang isang barangay sa 4 na magkakasunod na linggo, o tumaas ang kaso nang 2 linggong sunod, ituring itong hotspot: search and destroy doon, at i-spray ang cluster na iyon lamang.",
+     "Aling mga barangay ang unang susuriin."
     ],
     [
      "Bawat linggo",
@@ -410,11 +437,16 @@
     ],
     [
      "Bawat linggo",
-     "Bantayan kung lilipat sa 'bantayan'.",
+     "Magsagawa ng search and destroy tuwing alas-4 ng hapon sa mga barangay na may pinakamaraming kaso, at bantayan kung lilipat sa 'bantayan'.",
      "Ang forecast, saklaw at threshold sa iisang tsart."
     ]
    ],
    "normal": [
+    [
+     "Bawat linggo",
+     "Ituloy ang 4 o'clock habit: lingguhang search and destroy ng pinamumugaran sa bawat barangay.",
+     "Kumpirmasyon na walang inaasahang di-pangkaraniwang pagtaas."
+    ],
     [
      "Karaniwan",
      "Ituloy ang karaniwang pagbabantay at paglilinis ng komunidad.",
@@ -516,7 +548,7 @@
     [
      "drop",
      "Search and destroy breeding sites",
-     "Cover water drums and pails. Empty and scrub vases, plant saucers and old tires every week. Clear roof gutters."
+     "Every week at 4 p.m.: cover water drums and pails, empty and scrub vases, plant saucers and old tires, and clear roof gutters."
     ],
     [
      "shirt",
@@ -531,7 +563,7 @@
     [
      "bug",
      "Support fogging only in hotspots",
-     "Fogging does little on its own. Removing breeding sites matters more."
+     "Spraying is for barangays with 3+ cases in 4 weeks, and does little on its own. Removing breeding sites matters more."
     ]
    ],
    "signs_head": "Go to the hospital now if someone with dengue has:",
@@ -563,7 +595,7 @@
     [
      "drop",
      "Hanapin at sirain ang pinamumugaran",
-     "Takpan ang mga drum at timba. Linggo-linggong alisan ng laman at kuskusin ang mga plorera, platito ng halaman at lumang gulong. Linisin ang alulod."
+     "Linggo-linggo tuwing alas-4 ng hapon: takpan ang mga drum at timba, alisan ng laman at kuskusin ang mga plorera, platito ng halaman at lumang gulong, at linisin ang alulod."
     ],
     [
      "shirt",
@@ -578,7 +610,7 @@
     [
      "bug",
      "Fogging sa hotspot lamang",
-     "Kaunti lang ang naitutulong ng fogging. Mas mahalaga ang pag-alis ng pinamumugaran."
+     "Para sa barangay na may 3+ kaso sa 4 na linggo ang pag-spray, at kaunti lang ang naitutulong nito nang mag-isa. Mas mahalaga ang pag-alis ng pinamumugaran."
     ]
    ],
    "signs_head": "Dalhin agad sa ospital kung ang may dengue ay may:",
