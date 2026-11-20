@@ -287,8 +287,12 @@ PLAYBOOK = {
 TRIGGERS = {
     "en": {
         "head": "When to act",
-        "sub": "Each action, the alert level it starts at, and what triggers it, from DOH and Quezon City practice.",
-        "cols": ("Starts at", "Action", "When"),
+        "sub": "Each action, the alert level it starts at, what triggers it (DOH and Quezon City practice), and where the current forecast says to do it now.",
+        "cols": ("Starts at", "Action", "When", "Do it now in"),
+        "now_all": "All {n} areas",
+        "now_some": "{n} areas: {names}",
+        "now_more": "+{n} more",
+        "now_none": "Not yet: no area is at this level",
         "rows": [
             ("normal", "Search and destroy",
              "Every week at 4 p.m. in every barangay: cover drums, empty vases, old tires and gutters. Keep it up even in quiet weeks."),
@@ -311,8 +315,12 @@ TRIGGERS = {
     },
     "fil": {
         "head": "Kailan kikilos",
-        "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, at ang nag-uudyok dito, ayon sa DOH at sa Quezon City.",
-        "cols": ("Simula sa", "Aksyon", "Kailan"),
+        "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, ang nag-uudyok dito (ayon sa DOH at Quezon City), at kung saan ito dapat gawin ngayon ayon sa forecast.",
+        "cols": ("Simula sa", "Aksyon", "Kailan", "Gawin ngayon sa"),
+        "now_all": "Lahat ng {n} lugar",
+        "now_some": "{n} lugar: {names}",
+        "now_more": "+{n} pa",
+        "now_none": "Hindi pa: walang lugar sa antas na ito",
         "rows": [
             ("normal", "Search and destroy",
              "Linggo-linggo tuwing alas-4 ng hapon sa bawat barangay: takpan ang mga drum, alisan ng tubig ang plorera, lumang gulong "
@@ -579,6 +587,8 @@ div[class*="st-key-feat"] [data-testid="stPageLink"] a:hover { background: var(-
 .todo.head { border-top: 0; padding-top: 0; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .todo .when { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: var(--ink); }
 .todo .do { font-size: 14px; line-height: 1.45; }
+.todo.todo4 { grid-template-columns: 110px minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, 1fr); }
+.todo .now { font-weight: 700; color: var(--ink); } .todo .now.none { font-weight: 400; color: var(--muted); }
 .todo .gives { font-size: 13.5px; line-height: 1.45; color: var(--accent-dark); background: var(--accent-soft); border-radius: 12px; padding: 8px 12px; }
 .alertbar { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 16px; font-size: 14px; line-height: 1.45; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
@@ -601,7 +611,7 @@ div[data-baseweb="select"] > div, [data-testid="stNumberInputContainer"] { borde
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(210, 59, 48, .55); } 100% { box-shadow: 0 0 0 10px rgba(210, 59, 48, 0); } }
 @media (max-width: 900px) { .story { grid-template-columns: repeat(2, 1fr); } .story::before, .story::after { display: none; }
-  .brief, .todo { grid-template-columns: 1fr; } .row { grid-template-columns: 28px minmax(0, 1fr) auto 56px; } .row .bar { display: none; } }
+  .brief, .todo, .todo.todo4 { grid-template-columns: 1fr; } .row { grid-template-columns: 28px minmax(0, 1fr) auto 56px; } .row .bar { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 """
@@ -1041,6 +1051,18 @@ def page_proof():
                          .style.format({"Error reduction from weather": "{:+.0%}"}), hide_index=True, width="stretch")
 
 
+def where_now(trig: dict, level: str, shown: int = 3) -> str:
+    """Where the current forecast says to start an action: the areas at its level or higher, worst first."""
+    at = fc_h[fc_h.level.isin(LEVELS[LEVELS.index(level):])]
+    if at.empty:
+        return trig["now_none"]
+    if len(at) == len(fc_h):
+        return trig["now_all"].format(n=len(at))
+    names = at.sort_values(["level", "q50_per100k"], ascending=False).unit_name.tolist()
+    more = f' {trig["now_more"].format(n=len(names) - shown)}' if len(names) > shown else ""
+    return trig["now_some"].format(n=len(names), names=", ".join(names[:shown]) + more)
+
+
 def page_budget():
     hero(t["plan_head"], t["plan_muted"], t["plan_sub"])
     left, right = st.columns([1, 1.5], gap="medium")
@@ -1063,10 +1085,11 @@ def page_budget():
         card_title("check", trig["head"], trig["sub"])
         head = "".join(f"<span>{c}</span>" for c in trig["cols"])
         rows = "".join(
-            f'<div class="todo"><span class="when"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{LEVEL_COLOR[lv]}"></span>'
-            f'{LEVEL_NAME[lang][lv]}</span><span class="do"><b>{a}</b></span><span class="do">{w}</span></div>'
+            f'<div class="todo todo4"><span class="when"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{LEVEL_COLOR[lv]}"></span>'
+            f'{LEVEL_NAME[lang][lv]}</span><span class="do"><b>{a}</b></span><span class="do">{w}</span>'
+            f'<span class="do now{"" if fc_h.level.isin(LEVELS[LEVELS.index(lv):]).any() else " none"}">{where_now(trig, lv)}</span></div>'
             for lv, a, w in trig["rows"])
-        html(f'<div><div class="todo head">{head}</div>{rows}</div><p style="font-size:12.5px;color:var(--muted);margin-top:10px">{trig["note"]}</p>')
+        html(f'<div><div class="todo todo4 head">{head}</div>{rows}</div><p style="font-size:12.5px;color:var(--muted);margin-top:10px">{trig["note"]}</p>')
     with right:
         if plan.empty:
             st.info("No funded actions. Increase the budget.")

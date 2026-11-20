@@ -458,12 +458,17 @@
  "TRIGGERS": {
   "en": {
    "head": "When to act",
-   "sub": "Each action, the alert level it starts at, and what triggers it, from DOH and Quezon City practice.",
+   "sub": "Each action, the alert level it starts at, what triggers it (DOH and Quezon City practice), and where the current forecast says to do it now.",
    "cols": [
     "Starts at",
     "Action",
-    "When"
+    "When",
+    "Do it now in"
    ],
+   "now_all": "All {n} areas",
+   "now_some": "{n} areas: {names}",
+   "now_more": "+{n} more",
+   "now_none": "Not yet: no area is at this level",
    "rows": [
     [
      "normal",
@@ -505,12 +510,17 @@
   },
   "fil": {
    "head": "Kailan kikilos",
-   "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, at ang nag-uudyok dito, ayon sa DOH at sa Quezon City.",
+   "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, ang nag-uudyok dito (ayon sa DOH at Quezon City), at kung saan ito dapat gawin ngayon ayon sa forecast.",
    "cols": [
     "Simula sa",
     "Aksyon",
-    "Kailan"
+    "Kailan",
+    "Gawin ngayon sa"
    ],
+   "now_all": "Lahat ng {n} lugar",
+   "now_some": "{n} lugar: {names}",
+   "now_more": "+{n} pa",
+   "now_none": "Hindi pa: walang lugar sa antas na ito",
    "rows": [
     [
      "normal",
