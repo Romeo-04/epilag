@@ -7,8 +7,8 @@ health office should do this week, and where a limited budget prevents the most 
 Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
-| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Demo video (2:50)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
-| --- | --- | --- | --- | --- | --- | --- |
+| [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Demo video (2:50)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Trust and sustainability](https://romeo-04.github.io/epilag/trust.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 
 Everything runs in your browser, with no install or account: the app is ready in about 3 seconds, and the maps and
 the game are drawn as 3D pixel art.
@@ -177,6 +177,10 @@ Every result is out of sample: each test year is forecast only from earlier year
   stayed above it for 27 weeks and peaked at 622 cases in the week ending 23 Feb 2025 (the line was 121). The 4-week
   forecasts were on *watch* from the one made on 15 Sep 2024 and on *watch* or *outbreak warning* every week after,
   through the peak. They called the outbreak, not its height: for the peak week the forecast was 237 (likely 164–338).
+- **Same budget, more cases prevented:** in the 2019 Dengue Drill, the computer player that follows EpiLag-PH's
+  alerts averts **2,243 cases vs 1,792** for the one that reacts to reports (**+25%**), with the same ₱5 million in
+  each of the 17 regions (the game's own scoring, central effect 30%, `scripts/drill_data.py`). In Quezon City,
+  8,109 cases were reported after the first *watch* and up to the February 2025 peak: the window early action targets.
 - **Honest finding on weather:** most of the skill comes from recent cases and the season. Adding rain, heat and
   humidity changed the error by about −12% to +11% depending on year and horizon (about +2% on average for regions,
   about 0% for provinces). See `reports/` and the app's *Did it work?* page.
@@ -210,6 +214,30 @@ Full write-up: [methodology page](https://romeo-04.github.io/epilag/methodology.
 | OCHA COD-AB / COD-PS (PSA-based) | PSGC codes, centroids, 2022 population | HDX, public |
 | faeldon/philippines-json-maps | map boundaries | MIT |
 
+## Deployment and sustainability
+Full write-up: [trust and sustainability page](https://romeo-04.github.io/epilag/trust.html).
+
+- **One weekly file in.** The only input a health office must send is weekly case counts per area, in the shape set
+  by the [data contract](data/contract/README.md). `scripts/validate_cases.py` rejects a bad file (non-Sunday or
+  future weeks, negative or duplicate counts) and **any column that is not a count, so patient details cannot slip in**.
+- **Checked every week.** A GitHub Actions job (`.github/workflows/weekly.yml`, Mondays 09:00 PHT) checks the
+  waiting files, runs the promotion gate and rebuilds the site. CI runs the tests, the contract and a full build on
+  every pull request.
+- **Drift is caught.** `scripts/model_gate.py` lets a retrained model go live only if, on its latest blind test year,
+  4 weeks ahead, it beats "same week last year", stays within 5% of "same as this week" and covers 70–90% with its
+  range. Otherwise the last good forecasts stay online.
+- **Scales on a laptop.** `scripts/scale_benchmark.py` times the production training code: a full retrain takes
+  25 s for 86 areas and 69 s for 1,600 (about every Philippine city and municipality) on a laptop CPU, no GPU
+  (`reports/scale_benchmark.csv`). The site is static, so more users cost nothing.
+- **Private and secure by design.** Counts only, no accounts, no cookies, no analytics; no server or database to attack.
+- **₱0 to run.** Open data, free hosting and runners, no paid APIs. MIT-licensed code (`LICENSE`); the data keep
+  their own licences.
+- **Ethics.** False alarm rates are published; nothing happens automatically; budget estimates are ranges because
+  under-reporting is uneven; barangay rankings stay with health offices.
+- **Environment.** About a minute of CPU a week, static hosting, and a budget plan that favours clean-ups over fogging.
+- **Rollout.** Pilot in Batasan Hills, Quezon City (2027–28, with a pass mark), then District 2, all of Quezon City,
+  NCR and the DOH Epidemiology Bureau. No partnership is claimed.
+
 ## Limits
 - Province data ends in January 2021, so the province view is a historical replay. Regions and Quezon City run to December 2025.
 - Reported cases undercount infections (about 4.7× in a Cebu City study; Undurraga et al., 2017).
@@ -234,6 +262,9 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt      # or .venv/bin/pip on macOS/Linux
 python scripts/build_web.py                        # app data (site/public/web/data) and EN/FIL copy
 pytest tests                                       # needs Playwright and a built site for the browser tests
+python scripts/validate_cases.py data/contract/weekly_cases_template.csv   # check a weekly case file
+python scripts/model_gate.py                       # the promotion gate on reports/
+python scripts/scale_benchmark.py                  # retrain timings at 86, 400 and 1,600 areas
 streamlit run app/streamlit_app.py                 # the original Streamlit app, kept for local use
 ```
 
@@ -279,8 +310,10 @@ docs/           the built site for GitHub Pages, plus the demo video (demo.mp4),
                 and screenshots
 src/            pipeline: fetch, clean, weather, features, backtest, alerts, reliability (alert track record), train, allocate, export
 app/            the original Streamlit app and its small data files
-tests/          allocation, JS/Python parity, game rules, site checks (Playwright), Streamlit smoke tests
-reports/        backtest, early-warning, ablation and SHAP results (CSV)
+tests/          allocation, JS/Python parity, game rules, data contract and gate, site checks (Playwright), Streamlit smoke tests
+reports/        backtest, early-warning, ablation, SHAP and scale benchmark results (CSV)
+data/contract/  the weekly case file a health office sends, with an example; data/incoming/ holds files to check
+.github/        CI on every pull request; the weekly check (contract, promotion gate, site build)
 scripts/        data for the site, voxel grids, figures, screenshots, social card
 ```
 

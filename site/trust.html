@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiLag-PH · Trust and sustainability</title>
+  <meta name="description" content="What EpiLag-PH is worth in numbers, how it is deployed and scaled, how it protects data, how it is maintained, and its ethical and environmental footprint.">
+  <meta name="theme-color" content="#FBFAF4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EpiLag-PH">
+  <meta property="og:title" content="EpiLag-PH: built to keep running, safely">
+  <meta property="og:description" content="Impact in numbers, deployment and scale, privacy and security, maintenance, ethics and environment.">
+  <meta property="og:url" content="https://romeo-04.github.io/epilag/trust.html">
+  <meta property="og:image" content="https://romeo-04.github.io/epilag/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="./"><span class="lg"><i data-icon="logo" data-size="32"></i></span><span>EpiLag-PH</span><small class="brand__sub">Trust</small></a>
+      <div class="nav__links" data-spy>
+        <a href="#impact">Impact</a><a href="#deploy">Deploy</a><a href="#scale">Scale</a><a href="#privacy">Privacy</a><a href="#maintenance">Upkeep</a><a href="#ethics">Ethics</a><a href="#environment">Environment</a>
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ============================================================ hero + weekly cycle -->
+    <section class="pg-hero surface tone-paper tx-field sf-subtle" aria-labelledby="title">
+      <div class="wrap">
+        <div class="pg-hero__grid">
+          <div>
+            <div class="label">Trust and sustainability</div>
+            <h1 id="title">Built to keep running. <span class="em">Safely, cheaply, for years.</span></h1>
+            <p class="lead">A forecast is only useful if a health office can still run it next season. This page sets out what EpiLag-PH is worth
+              in numbers, how it reaches more areas and users, how it protects data, who keeps it running, and what it costs people and the planet.</p>
+            <ul class="chips">
+              <li class="chip"><b>₱0</b> to run</li><li class="chip"><b>No</b> patient data</li><li class="chip"><b>No</b> server to attack</li><li class="chip"><b>Laptop</b> CPU retrain</li><li class="chip"><b>Open</b> code and data</li>
+            </ul>
+          </div>
+          <pixel-sprite class="pg-hero__sprite" sprite="frog" pose="watch" scale="5"></pixel-sprite>
+        </div>
+
+        <ol class="pipeline" aria-label="The weekly cycle">
+          <li data-reveal><a class="stage" href="#deploy"><span class="stage__top"><span class="stage__n px-box nums">1</span><i data-icon="file" data-size="32"></i></span><h3>Weekly file</h3><p>Cases per area per week. One CSV, no patient details.</p></a></li>
+          <li data-reveal><a class="stage" href="#deploy"><span class="stage__top"><span class="stage__n px-box nums">2</span><i data-icon="check" data-size="32"></i></span><h3>Check</h3><p>The data contract rejects bad rows and any patient column.</p></a></li>
+          <li data-reveal><a class="stage" href="#scale"><span class="stage__top"><span class="stage__n px-box nums">3</span><i data-icon="forecast" data-size="32"></i></span><h3>Forecast</h3><p>Retrain and forecast on an ordinary CPU, in about a minute.</p></a></li>
+          <li data-reveal><a class="stage" href="#maintenance"><span class="stage__top"><span class="stage__n px-box nums">4</span><i data-icon="didItWork" data-size="32"></i></span><h3>Gate</h3><p>A drifted model is held back; last week's forecasts stay up.</p></a></li>
+          <li data-reveal><a class="stage stage--final" href="#deploy"><span class="stage__top"><span class="stage__n px-box nums">5</span><i data-icon="forecastMap" data-size="32"></i></span><h3>Publish</h3><p>Static pages, open data, alert feeds. Works offline.</p></a></li>
+        </ol>
+        <p class="pipe-note">Steps 2 and 4 run automatically on GitHub every Monday; step 3 joins them once a data partner sends current weekly files.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 1 impact -->
+    <section id="impact" class="pg-sec surface tone-white" aria-labelledby="impact-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">1 · Tangible impact</div><h2 id="impact-title" class="h2-sm">Same budget, <span class="em">more cases prevented.</span></h2></div>
+          <p>All from replays of real seasons, with forecasts made only from data available at the time.</p>
+        </div>
+        <div class="stats">
+          <div class="stat stat--dark" data-reveal><b class="nums">+<span data-count="25">25</span><small>%</small></b><p>more cases averted for the same money: 2,243 vs 1,792 across the 17 regions of the 2019 Dengue Drill, ₱5M each</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-count="5">5</span> <small>weeks</small></b><p>of warning before Quezon City crossed its epidemic line in October 2024</p></div>
+          <div class="stat" data-reveal><b class="nums">8,109</b><p>cases reported in Quezon City after the first <i>watch</i> and up to the February 2025 peak: the window early action targets</p></div>
+          <div class="stat" data-reveal><b class="nums"><span data-count="30">30</span> <small>of 32</small></b><p>provinces flagged 4 weeks before crossing the threshold (2 June 2019 replay)</p></div>
+        </div>
+        <div class="grid g3 mt">
+          <div class="card" data-reveal><h3>Where the 25% comes from</h3><p>Two computer players spend the same 10 response teams (₱500,000 each) over 8 turns in each region. One sends teams where reports already passed the epidemic line; the other follows EpiLag-PH's alerts. Each team prevents 30% of the cases among the residents it reaches over the next 2–9 weeks (Bowman et al. 2016, central estimate). EpiLag-PH did better in 12 regions.</p></div>
+          <div class="card" data-reveal><h3>Who gains</h3><p>Provincial, city and municipal health offices get weeks to clean up and stock test kits and IV fluids. Households get a plain-language outlook in Filipino and English. Hospitals see fewer cases at the peak.</p></div>
+          <div class="card" data-reveal><h3>What we do not claim</h3><p>These are replays and simulations, not a field trial. The effect of a clean-up is a literature range (10–50%), and the costs are example values. The pilot below is how we would measure the real effect.</p></div>
+        </div>
+        <p class="caption">Sources: <code>scripts/drill_data.py</code> (the game's own scoring), <code>site/public/drill/qc.json</code>, <code>docs/data/replay_2019-06-02.json</code>.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 2 deploy -->
+    <section id="deploy" class="pg-sec surface tone-sky tx-rain sf-subtle" aria-labelledby="deploy-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">2 · Deployment</div><h2 id="deploy-title" class="h2-sm">One weekly file in. <span class="em">Plans out, for every area.</span></h2></div>
+          <p>Every layer is plain files, so any part can be swapped without rebuilding the rest.</p>
+        </div>
+        <div class="tbl tbl--stack" data-reveal>
+          <table>
+            <thead><tr><th scope="col">Layer</th><th scope="col">Today</th><th scope="col">In a deployment</th></tr></thead>
+            <tbody>
+              <tr><td>Case data</td><td data-th="Today">DOH data via HDX; UPRI-NOAH regions and Quezon City</td><td data-th="In a deployment">Weekly PIDSR export from the DOH Epidemiology Bureau or a city or provincial surveillance unit, in the <a href="https://github.com/Romeo-04/epilag/tree/main/data/contract">data contract</a> shape</td></tr>
+              <tr><td>Weather</td><td data-th="Today">ERA5 via the free Open-Meteo archive</td><td data-th="In a deployment">The same, or PAGASA station data</td></tr>
+              <tr><td>Checks</td><td data-th="Today"><code>validate_cases.py</code>, <code>model_gate.py</code>, tests on every change</td><td data-th="In a deployment">The same, every Monday 09:00 on GitHub Actions</td></tr>
+              <tr><td>Model</td><td data-th="Today">LightGBM, retrained on a laptop CPU</td><td data-th="In a deployment">The same, on a free GitHub runner or a health office PC</td></tr>
+              <tr><td>Delivery</td><td data-th="Today">Static site on GitHub Pages and Vercel; offline app; CSV and JSON; RSS and calendar alert feeds</td><td data-th="In a deployment">The same, plus SMS to barangay health workers through an LGU's existing SMS service</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid g3 mt">
+          <div class="card" data-reveal><h3>Any area that counts cases</h3><p>The only required input is weekly case counts per area. The data contract (<code>data/contract/</code>) spells out the columns, and the check rejects a bad file before anything is forecast from it.</p></div>
+          <div class="card" data-reveal><h3>Low bandwidth, no install</h3><p>The app opens in a browser and keeps working offline once loaded, for rural health units with weak signal. Content is in Filipino and English.</p></div>
+          <div class="card" data-reveal><h3>Plugs into other systems</h3><p>Every forecast is published as CSV and JSON with column definitions, and alerts as RSS and calendar feeds, so a DOH dashboard or a newsroom can pull them without us.</p></div>
+        </div>
+        <h3 class="mt" data-reveal>Rollout, one step at a time</h3>
+        <ol class="ladder">
+          <li class="rung" data-lv="normal" data-reveal><span class="lv">1 · Pilot, 2027–28</span><span class="rule">Batasan Hills, Quezon City's barangay with the most dengue cases</span><span class="act">2 months setup, 4 months shadow run (forecasts scored, no action), a live rainy season, then a go or no-go</span></li>
+          <li class="rung" data-lv="above" data-reveal><span class="lv">2 · District 2, Jul 2028</span><span class="rule">Payatas, Commonwealth, Holy Spirit, Bagong Silangan</span><span class="act">Only if the pilot passed: a <i>watch</i> 4+ weeks ahead, clean-up within a week, few false alarms</span></li>
+          <li class="rung" data-lv="watch" data-reveal><span class="lv">3 · All of Quezon City, Jul 2029</span><span class="rule">142 barangays, 3.08 million people</span><span class="act">Money goes first where it averts the most cases per peso</span></li>
+          <li class="rung" data-lv="warning" data-reveal><span class="lv">4 · NCR, then national, from 2030</span><span class="rule">Regional epidemiology units, then the DOH Epidemiology Bureau</span><span class="act">Province forecasts already run for all 86 units; nationally it is one scheduled job</span></li>
+        </ol>
+        <p class="caption">No partnership is claimed. The pilot is a proposal; its timeline and pass mark are the ones in the final-round deck.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 3 scale -->
+    <section id="scale" class="pg-sec surface tone-paper" aria-labelledby="scale-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">3 · Scalability</div><h2 id="scale-title" class="h2-sm">Every city and municipality <span class="em">in about a minute.</span></h2></div>
+          <p>Measured, not promised: the production training code, timed at three sizes. 19 times the areas took under 3 times as long.</p>
+        </div>
+        <div class="tbl tbl--wide" data-reveal role="region" aria-label="Retrain time by number of areas" tabindex="0">
+          <table>
+            <thead><tr><th scope="col">Areas</th><th scope="col" class="num">Training rows</th><th scope="col" class="num">Full weekly retrain</th><th scope="col">What that is</th></tr></thead>
+            <tbody>
+              <tr><td>86</td><td class="num">16,869</td><td class="num">25 seconds</td><td>today's provinces</td></tr>
+              <tr><td>400</td><td class="num">78,506</td><td class="num">39 seconds</td><td>about 5 times today</td></tr>
+              <tr><td>1,600</td><td class="num">313,888</td><td class="num best">69 seconds</td><td>about every city and municipality in the Philippines</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">A full retrain = features, then 3 quantile models with conformal calibration for each of 4 horizons. Real province case histories, copied out for the larger sizes; weather columns of the right shape. Timed on a laptop (Apple silicon, CPU only, no GPU). Reproduce with <code>python scripts/scale_benchmark.py</code>; results in <code>reports/scale_benchmark.csv</code>.</p>
+        <div class="grid g3 mt">
+          <div class="card" data-reveal><h3>More users cost nothing</h3><p>Pages and data are static files served from a content delivery network. A thousand health offices or a million residents load the same files; there is no server to overload.</p></div>
+          <div class="card" data-reveal><h3>Small downloads</h3><p>All the forecast data for 104 areas is about 1.6 MB, loaded once and then kept for offline use.</p></div>
+          <div class="card" data-reveal><h3>One model, many areas</h3><p>All areas share one model per horizon, with population as an input, so a new area needs no new model, only its weekly counts.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 4 privacy -->
+    <section id="privacy" class="pg-sec surface tone-white" aria-labelledby="privacy-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">4 · Data privacy and security</div><h2 id="privacy-title" class="h2-sm">Nothing about any patient. <span class="em">Nothing to steal.</span></h2></div>
+          <p>Designed so that the safest data is the only data it needs.</p>
+        </div>
+        <div class="grid g2">
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="database" data-size="32"></i></span><h3>Counts only</h3><p>EpiLag-PH uses one number per area per week. No names, addresses, ages or case IDs ever enter it, and the data contract check rejects any column it does not know, so a patient line list cannot slip in. That keeps it clear of the personal and sensitive personal information covered by the Data Privacy Act of 2012 (RA 10173).</p></div>
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="barangay" data-size="32"></i></span><h3>Small areas, careful handling</h3><p>The one privacy risk in counts is a very small number in a very small area. Barangay figures are estimates shared out from city totals, and barangay-level weekly data from a partner should stay with the health office, not be published, until it is aggregated.</p></div>
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="residents" data-size="32"></i></span><h3>No accounts, no tracking</h3><p>No sign-up, no cookies, no analytics. The browser stores only two conveniences on the device (whether the guide was seen and a sort order), and the game's tutorial flags. The only outside request is for the Google Fonts typeface.</p></div>
+          <div class="card" data-reveal><span class="ic px-box"><i data-icon="check" data-size="32"></i></span><h3>A small attack surface</h3><p>A static site has no database, login or server code to break into, and is served over HTTPS. Dependencies are pinned in lockfiles, and every change runs the tests before it can be merged.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 5 maintenance -->
+    <section id="maintenance" class="pg-sec surface tone-soft" aria-labelledby="maintenance-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">5 · Long-term maintenance</div><h2 id="maintenance-title" class="h2-sm">Cheap to run, <span class="em">hard to break quietly.</span></h2></div>
+          <p>The danger for any forecast is drift: it keeps publishing after it stops being right. EpiLag-PH checks itself.</p>
+        </div>
+        <div class="grid g3">
+          <div class="card card--why" data-reveal><h3>A promotion gate</h3><p>A retrained model goes live only if, on its latest blind test year, it beats "same week last year", stays within 5% of "same as this week", and its range covers 70–90%. Otherwise last week's forecasts stay up and the maintainers are told.</p><div class="callout why"><code>scripts/model_gate.py</code></div></div>
+          <div class="card card--why" data-reveal><h3>A clear owner and rhythm</h3><p>A surveillance officer at a city or provincial unit uploads one file a week; a data analyst reviews the gate each season. About 4 staff hours a week in the pilot.</p><div class="callout why">Weekly data, seasonal review</div></div>
+          <div class="card card--why" data-reveal><h3>₱0 running cost</h3><p>Open data, free hosting, free GitHub runners, no paid APIs, no GPU. Nothing to renew when a grant ends.</p><div class="callout why">Survives a budget cut</div></div>
+          <div class="card card--why" data-reveal><h3>Tests guard every change</h3><p>The app's alert levels, thresholds, replays and budget plan are tested against the Python pipeline; the game's scoring against its own rules; every page for errors, phone width, keyboard use and accessibility.</p><div class="callout why">Runs on every pull request</div></div>
+          <div class="card card--why" data-reveal><h3>Open, so it outlives us</h3><p>MIT-licensed code, every result as CSV, and a step-by-step rebuild from raw data in the README. Any LGU, university or DOH team can take it over without asking.</p><div class="callout why">No lock-in</div></div>
+          <div class="card card--why" data-reveal><h3>Simple by choice</h3><p>One model type, plain Python and static pages. A public health graduate can read the whole pipeline in an afternoon.</p><div class="callout why">Maintainable by a small team</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 ethics -->
+    <section id="ethics" class="pg-sec surface tone-white" aria-labelledby="ethics-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">6 · Ethics and equity</div><h2 id="ethics-title" class="h2-sm">A forecast advises. <span class="em">People decide.</span></h2></div>
+          <p>Each risk, and what EpiLag-PH does about it.</p>
+        </div>
+        <div class="tbl tbl--stack" data-reveal>
+          <table>
+            <thead><tr><th scope="col">Risk</th><th scope="col">What EpiLag-PH does</th></tr></thead>
+            <tbody>
+              <tr><td>False alarms waste money and trust</td><td data-th="What EpiLag-PH does">False alarm rates are published: 42–63% of <i>watch</i> alerts for regions and Quezon City in 2019–2025, 46% for provinces in 2019. <i>Watch</i> asks for cheap checks (inspect breeding sites, count test kits); only the stricter <i>outbreak warning</i> asks for a task force.</td></tr>
+              <tr><td>Automated decisions</td><td data-th="What EpiLag-PH does">Nothing happens automatically. Every alert comes with its reasons (SHAP), and the local epidemiologist makes the call. EpiLag-PH supports, and does not replace, DOH surveillance and local judgement.</td></tr>
+              <tr><td>Under-reporting is uneven</td><td data-th="What EpiLag-PH does">Reported cases undercount infections (about 4.7× in one Cebu City study), and more so where clinics are far. A budget ranked by reported cases could underweight poorer areas, so the plan shows low, central and high estimates and lets the health office replace the costs and effects with its own.</td></tr>
+              <tr><td>Stigma for flagged places</td><td data-th="What EpiLag-PH does">Barangay rankings are for health offices. The residents' page gives the whole area's outlook and the DOH 4S steps, never a list of "bad" barangays.</td></tr>
+              <tr><td>Hidden uncertainty</td><td data-th="What EpiLag-PH does">Every forecast is a range, the weak weather effect is reported openly, and every claim can be checked against the open data.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 7 environment -->
+    <section id="environment" class="pg-sec surface tone-paper tx-field sf-subtle" aria-labelledby="environment-title">
+      <div class="wrap">
+        <div class="pg-head" data-reveal>
+          <div><div class="label">7 · Environment</div><h2 id="environment-title" class="h2-sm">Light to run. <span class="em">Lighter on insecticide.</span></h2></div>
+          <p>The biggest environmental effect is not the computer. It is where the spraying goes.</p>
+        </div>
+        <div class="grid g3">
+          <div class="card" data-reveal><h3>Small compute</h3><p>No GPU and no large AI model. A full retrain is about a minute on a laptop CPU, even at 1,600 areas (<a href="#scale">see the timings</a>), once a week.</p></div>
+          <div class="card" data-reveal><h3>Static hosting</h3><p>Files served from a cache use far less energy than a server running all day, and the offline app saves repeat downloads.</p></div>
+          <div class="card" data-reveal><h3>Less blanket fogging</h3><p>The budget plan favours clean-ups and container covers (10–50% effect) over fogging (0–10%), and points the work at the areas that need it. Less spraying means less chemical exposure and slower insecticide resistance in mosquitoes.</p></div>
+        </div>
+        <div class="end surface tone-night tx-rain" data-reveal>
+          <h2 class="h2-sm">All of it is open. <span class="em">Check every claim.</span></h2>
+          <p>The data contract in <code>data/contract/</code>, the checks in <code>scripts/</code>, the weekly job in <code>.github/workflows/</code>, and every result in <code>reports/</code>.</p>
+          <div class="btn-row"><a class="btn btn--light" href="web/">Open the app <i data-icon="arrowRight" data-size="24"></i></a><a class="btn btn--dark-ghost" href="https://github.com/Romeo-04/epilag">Code on GitHub <i data-icon="external" data-size="24"></i></a><a class="btn btn--dark-ghost" href="methodology.html">Methodology</a></div>
+          <pixel-sprite class="end__frog" sprite="frog" pose="peek" scale="3"></pixel-sprite>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pg-foot">
+    <div class="wrap foot">
+      <nav class="foot__links" aria-label="More">
+        <a href="./">Overview</a><a href="web/">App</a><a href="drill/">Dengue Drill</a><a href="methodology.html">Methodology</a><a href="research.html">Research</a><a href="data/">Open data</a><a href="https://github.com/Romeo-04/epilag">Code</a>
+      </nav>
+      <span>Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH (Zenodo, ODbL) · ERA5 via Open-Meteo · OCHA COD-AB/PS</span>
+      <span>EpiLag-PH · PJDSC 2026</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/pages/trust.js"></script>
+</body>
+</html>

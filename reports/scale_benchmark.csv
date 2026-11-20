@@ -1,0 +1,4 @@
+areas,features_s,train_s,total_s,train_rows,n_features,machine
+86,0.0,25.1,25.1,16869,38,"arm64 Darwin, 15 CPU threads, no GPU"
+400,0.2,38.8,38.9,78506,38,"arm64 Darwin, 15 CPU threads, no GPU"
+1600,0.7,68.3,69.0,313888,38,"arm64 Darwin, 15 CPU threads, no GPU"

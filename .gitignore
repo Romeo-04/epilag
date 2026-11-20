@@ -10,3 +10,6 @@ site/node_modules/
 site/.vite/
 UI mockup/
 .vercel/
+.DS_Store
+# Rendered video projects and their voice and clip folders run to gigabytes; GitHub Pages publishes at most 1 GB.
+docs/reel/
