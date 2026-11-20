@@ -273,8 +273,8 @@ $("start").addEventListener("click", () => {
     + `<div class="stamp">UNPAID · ACT EARLIER</div>`;
   show("s-brief");
 });
-// the model is chosen first: each model is its own simulation, round 1 without its forecasts and round 2 with them
-$("go-r1").addEventListener("click", () => { sfx.click(); chooseModel(); });
+// round 1 starts straight away with case reports only; the model is chosen after it, for round 2
+$("go-r1").addEventListener("click", () => { sfx.click(); startRound(1); });
 
 // ------------------------------------------------------------------ the game
 const teamsIn = (k) => R.teamsIn(plan, k);
@@ -606,8 +606,8 @@ function endRound() {
     Object.entries(plan[k] || {}).forEach(([t, n]) => { for (let j = 0; j < n; j++) ts.push(+t); });
     return `<div class="panel"><b>${p.name}</b><small>${pk == null ? "No outbreak" : `Peaked ${day(WEEKS[pk])}`} · ${ts.length} team${ts.length === 1 ? "" : "s"}</small>${spark(p, WEEKS.length - 1, { teams: ts, peak: pk, cls: "" })}</div>`;
   }).join("");
-  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? `Round 2 · with ${modelOf().short} forecasts` : "Debrief"} ${icon("play", { size: 24 })}</button>`;
-  $("next-r").onclick = () => (round === 1 ? startRound(2) : versus());
+  $("r-actions").innerHTML = `<button type="button" class="btn btn--go" id="next-r">${round === 1 ? "Round 2 · choose your forecaster" : "Debrief"} ${icon("play", { size: 24 })}</button>`;
+  $("next-r").onclick = () => (round === 1 ? chooseModel() : versus());
 }
 /** The frog reacts to the grade: S/A strike then smile, B watches, C/D peeks. */
 function frogReacts(el, g) {
@@ -620,13 +620,13 @@ function chooseModel() {
   const saved = store.get("drill-model");
   if (!results[2] && modelOf(saved)) model = saved; // a first visit to this screen opens on the last model used
   const tw = TURNS[0], count = (id, lv) => region.provinces.filter((p) => (R.fcOf(p, id)[tw] || [])[0] === lv).length;
-  // before round 1 the choice opens the simulation; after a debrief it replays round 2 against the same round 1
-  const again = !!results[1];
-  $("mo-chip").textContent = again ? "Round 2 · try another forecaster" : `${region.name} · choose your forecaster`;
+  // after round 1 the choice opens round 2; after a debrief it replays round 2 against the same round 1
+  const again = !!results[2];
+  $("mo-chip").textContent = again ? "Round 2 · try another forecaster" : `${region.name} · Round 2 · choose your forecaster`;
   $("mo-title").textContent = again ? "Try another forecaster." : "Whose forecast do you trust?";
   $("mo-lead").textContent = again ? "Round 1 had no forecasts, so your result stands. Pick another model and replay round 2 with it."
-    : "Five models forecast this season 4 weeks ahead, each trained only on earlier years. Pick one. You play round 1 without it and round 2 with it, to see what it adds.";
-  $("go-r2").innerHTML = `${again ? "Start round 2" : "Start round 1"} ${icon("play", { size: 24 })}`;
+    : "You played round 1 on case reports alone. Five models forecast this season 4 weeks ahead, each trained only on earlier years. Pick one and replay the same season with its forecasts, to see what it adds.";
+  $("go-r2").innerHTML = `Start round 2 ${icon("play", { size: 24 })}`;
   $("models").innerHTML = MODELS.map((m) => {
     const flagged = count(m.id, "warning") + count(m.id, "watch");
     const tag = m.id === DEFAULT_MODEL ? "Submitted model" : m.id === "average" ? "Approximate" : results[2] && results[2].model === m.id ? "Just played" : "";
@@ -674,7 +674,7 @@ $("cmp").addEventListener("click", (e) => {
   const row = e.target.closest("tr[data-id]");
   if (row) { pickModel(row.dataset.id); renderCompare(); $("cmp-rows").querySelector(".sel .cmp__pick")?.focus(); }
 });
-$("go-r2").addEventListener("click", () => { store.set("drill-model", model); startRound(results[1] ? 2 : 1); });
+$("go-r2").addEventListener("click", () => { store.set("drill-model", model); startRound(2); });
 $("try-model").addEventListener("click", () => { sfx.click(); chooseModel(); });
 
 function versus() {
