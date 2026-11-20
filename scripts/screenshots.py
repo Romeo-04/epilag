@@ -68,7 +68,8 @@ def drill(browser, base, only):
     for _ in range(8):
         page.click("#end"); page.wait_for_timeout(1300)
     page.wait_for_timeout(2500)
-    page.click("#next-r"); page.wait_for_timeout(3000)  # round 2: EpiLag-PH intel
+    page.click("#next-r"); page.wait_for_timeout(1500)  # the forecaster chooser opens on EpiLag-PH
+    page.click("#go-r2"); page.wait_for_timeout(3000)  # round 2: EpiLag-PH intel
     for t in range(2):
         page.click(f".prow[data-k='{t + 1}']"); page.wait_for_timeout(300)
         page.click("#deploy"); page.wait_for_timeout(500)

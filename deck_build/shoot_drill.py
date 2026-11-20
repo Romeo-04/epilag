@@ -57,8 +57,8 @@ with sync_playwright() as p:
     pg.wait_for_selector("#next-r", timeout=60000)
     pg.click("#next-r")
     pg.wait_for_timeout(2500)
-    if pg.locator("#go-r1").is_visible():
-        pg.click("#go-r1")
+    if pg.locator("#go-r2").is_visible():  # the forecaster chooser between the rounds
+        pg.click("#go-r2")
         pg.wait_for_timeout(2500)
     play_round(pg, shots_at=1, prefix="drill_r2_")
     pg.wait_for_timeout(2000)
