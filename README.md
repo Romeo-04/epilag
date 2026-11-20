@@ -4,7 +4,7 @@
 Philippine provinces, regions and Quezon City. It says which areas are heading for an outbreak, what the local
 health office should do this week, and where a limited budget prevents the most cases.
 
-Entry for the Philippine Junior Data Science Challenge (PJDSC) 2026,
+Entry by **Team DiagNodes** for the Philippine Junior Data Science Challenge (PJDSC) 2026,
 *Trace the Pattern, Target the Cure: Advancing Public Health Through Data Science.*
 
 | [Website](https://romeo-04.github.io/epilag/) | [Live app](https://romeo-04.github.io/epilag/web/) | [Dengue Drill](https://romeo-04.github.io/epilag/drill/) | [Demo video (2:50)](docs/demo.mp4) | [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) | [Methodology](https://romeo-04.github.io/epilag/methodology.html) | [Trust and sustainability](https://romeo-04.github.io/epilag/trust.html) | [Open data](https://romeo-04.github.io/epilag/data/) |
@@ -14,6 +14,11 @@ Everything runs in your browser, with no install or account: the app is ready in
 the game are drawn as 3D pixel art.
 
 ![The EpiLag-PH website](docs/screenshots/landing.png)
+
+## Contents
+- **Overview:** [Watch the demo](#watch-the-demo) · [In one minute](#in-one-minute) · [Play it: Dengue Drill](#play-it-dengue-drill) · [How it works](#how-it-works) · [Who it is for](#who-it-is-for) · [What you can do](#what-you-can-do)
+- **Evidence:** [Does it work?](#does-it-work) · [Method](#method) · [Data](#data) · [Deployment and sustainability](#deployment-and-sustainability) · [Limits](#limits)
+- **For developers:** [Run it](#run-it) · [Documentation](#documentation) · [Repository](#repository) · [References](#references)
 
 ## Watch the demo
 [![EpiLag-PH demo video: Quezon City, September 2024](docs/demo-poster.jpg)](docs/demo.mp4)
@@ -248,6 +253,13 @@ Full write-up: [trust and sustainability page](https://romeo-04.github.io/epilag
 - EpiLag-PH supports, and does not replace, the judgement of local epidemiologists and DOH surveillance.
 
 ## Run it
+**Requirements:** Python 3.12 and Node.js 24 (the versions we build and test with), and Git. Clone the repository
+first:
+```bash
+git clone https://github.com/Romeo-04/epilag.git
+cd epilag
+```
+
 The website, app and game are built with Vite from `site/` into `docs/` (served by GitHub Pages):
 ```bash
 cd site
@@ -302,19 +314,58 @@ python scripts/screenshots.py        # docs/screenshots, from the built site
 ```
 </details>
 
+## Documentation
+| Document | For | What it covers |
+| --- | --- | --- |
+| [Methodology page](https://romeo-04.github.io/epilag/methodology.html) | Everyone | Data, cleaning, inputs, model, calibration, alerts, validation, pilot plan, targets and roadmap, in plain words |
+| [Trust and sustainability page](https://romeo-04.github.io/epilag/trust.html) | Health offices, partners, judges | Data privacy, the weekly cycle, the promotion gate, scale, cost, ethics and rollout |
+| [Data contract](data/contract/README.md) | Health offices, data partners | The one weekly file a health office sends, its columns and the checks it must pass |
+| [Research paper (PDF)](research/EpiLag-PH-research-paper.pdf) and [`research/README.md`](research/README.md) | Reviewers, researchers | The literature review, three other methods, new inputs and the cause of every loss |
+| [`research/results/README.md`](research/results/README.md) and [`METHODS.md`](research/results/METHODS.md) | Researchers | Every research result, the file it comes from and how each experiment ran |
+| [Open data guide](docs/data/README.md) | Researchers, newsrooms, other apps | The forecast and track-record files, their columns and the alert feeds |
+| [Slides (PDF)](docs/deck/EpiLag-PH_deck.pdf) and [`deck_build/README.md`](deck_build/README.md) | Judges, partners | The final-round deck, and how it is rebuilt from the repository's results |
+| [`src/README.md`](src/README.md) | Developers | The pipeline steps in order, with what each reads and writes |
+| [`scripts/README.md`](scripts/README.md) | Developers | What each script writes for the site, the game and the documents |
+| [`site/README.md`](site/README.md) | Developers | The website, app and game: pages, source folders and build |
+| [`tests/README.md`](tests/README.md) | Developers | What each test checks and how to run it |
+| [`reports/README.md`](reports/README.md) | Developers, reviewers | The result files and their columns |
+| [`app/README.md`](app/README.md) | Developers | The original Streamlit app and its data files |
+
 ## Repository
 ```
-site/           the website, app and game (Vite): pages, src/app (dashboard), src/drill (3D game),
-                src/landing, src/lib (pixel sprites, voxel maps, motion), public/ (data, sprites, grids)
-docs/           the built site for GitHub Pages, plus the demo video (demo.mp4), open data (data/), deck, figures
-                and screenshots
-src/            pipeline: fetch, clean, weather, features, backtest, alerts, reliability (alert track record), train, allocate, export
-app/            the original Streamlit app and its small data files
-tests/          allocation, JS/Python parity, game rules, data contract and gate, site checks (Playwright), Streamlit smoke tests
-reports/        backtest, early-warning, ablation, SHAP and scale benchmark results (CSV)
-data/contract/  the weekly case file a health office sends, with an example; data/incoming/ holds files to check
-.github/        CI on every pull request; the weekly check (contract, promotion gate, site build)
-scripts/        data for the site, voxel grids, figures, screenshots, social card
+epilag/
+├── site/           Website, app and game source (Vite). See site/README.md
+│   ├── src/        app/ (dashboard), drill/ (3D game), landing/, pages/,
+│   │               lib/ (sprites, voxel maps), css/ (design tokens)
+│   └── public/     Data, map grids, sprites and icons copied into the build
+├── docs/           The built site for GitHub Pages, plus the demo video, open data (data/),
+│                   deck (deck/), figures and screenshots. Pages are written by npm run build:
+│                   edit site/, not docs/
+├── src/            The forecasting pipeline: fetch, clean, weather, features, backtest,
+│                   alerts, train, export, and the shared rules (thresholds, reliability,
+│                   allocate). See src/README.md
+├── scripts/        Data for the site and the game, map grids, figures, screenshots.
+│                   See scripts/README.md
+├── reports/        Out-of-sample test results of the submitted model (CSV).
+│                   See reports/README.md
+├── research/       Post-first-round research: literature, model experiments, results,
+│                   analysis, paper. See research/README.md
+├── tests/          Python and browser tests (pytest, Playwright). See tests/README.md
+├── app/            The original Streamlit app and its small data files. See app/README.md
+├── data/contract/  The weekly case file a health office sends, with an example.
+│                   data/incoming/ holds files waiting to be checked
+├── .github/        CI on every pull request, and the weekly check (contract, promotion gate,
+│                   site build)
+├── deck_build/     Rebuilds the final-round deck from the repository's results.
+│                   See deck_build/README.md
+├── .streamlit/     Streamlit settings for app/
+├── requirements.txt
+│                   Python dependencies
+├── LICENSE         MIT, for the code (the data keep their own licences)
+├── vercel.json     Optional second deploy of docs/ on Vercel (the main site is GitHub Pages)
+└── data/raw/, data/processed/
+                    Raw and processed data, made by src/fetch_data.py and the pipeline
+                    (not committed)
 ```
 
 ## References
