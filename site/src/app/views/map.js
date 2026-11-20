@@ -2,7 +2,7 @@
 // barangay) with a side panel that follows it, the full table, and CSV export.
 // Drilling in updates the URL (region, area, focus) without re-rendering, so the camera flight is never cut off;
 // choosing a region in the settings re-renders and the map flies in to it from the whole country.
-import { LEVELS, fmt, fmtDay, replayClaim, toCsv } from "../logic.js";
+import { LEVELS, fmt, fmtDay, lineShare, replayClaim, toCsv } from "../logic.js";
 import { barangays, forecastFor, meta as loadMeta, table } from "../data.js";
 import { createDrillMap, loadDrillGeo } from "../../lib/drill-map.js";
 import { LV, count, details, download, esc, infoDisclosure, pill, tableHtml } from "../ui.js";
@@ -42,9 +42,9 @@ export async function render(el, ctx) {
         ${infoDisclosure(labels.about_this, `<p>${esc(t.replay_note)}</p>`)}
       </div><pixel-sprite sprite="mosquito" pose="check" scale="3"></pixel-sprite></section>` : ""}
     <div class="level-pick">
-      <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}"><button type="button" class="level-count" data-pick="${esc(lv)}" aria-expanded="false" aria-controls="level-list" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></button></li>`).join("")}</ul>
+      <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}"><button type="button" class="level-count" data-pick="${esc(lv)}" aria-expanded="false" aria-controls="level-list" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><span class="level-count__copy"><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></span><span class="level-count__chev" aria-hidden="true"></span></button></li>`).join("")}</ul>
       <p class="level-pick__scope">${esc(scope)}</p>
-      <div class="level-list" id="level-list" aria-live="polite" hidden></div>
+      <div class="level-drawer" data-open="false"><div class="level-drawer__inner"><section class="level-list" id="level-list" aria-live="polite"></section></div></div>
     </div>
     <div class="map-page-grid map-page-grid--drill">
       <section class="card map-card">
@@ -69,25 +69,37 @@ export async function render(el, ctx) {
 
   // ---------------------------------------------------------------- which areas are at each level
   // A count opens the list of its areas; an area flies the map there once the map is ready.
-  const pickBox = el.querySelector(".level-pick"), levelList = el.querySelector("#level-list");
+  const pickBox = el.querySelector(".level-pick"), drawer = pickBox.querySelector(".level-drawer"), levelList = el.querySelector("#level-list");
+  // how close each forecast is to its own outbreak line, as on the overview: 0% usual for the season, 100% the line
+  const meterAt = (v) => `${(Math.min(Math.max(v ?? 0, 0), 1.25) / 1.25 * 100).toFixed(1)}%`;
   let nameOf = (r) => r.unit_name, goTo = null, openLv = null;
   function showLevel(lv) {
     openLv = openLv === lv ? null : lv;
     pickBox.querySelectorAll(".level-count").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.pick === openLv)));
-    if (!openLv) { levelList.hidden = true; return; }
-    const rows = fcH.filter((r) => r.level === openLv).sort((a, b) => b.q50_per100k - a.q50_per100k);
+    drawer.dataset.open = String(!!openLv);
+    if (!openLv) return;
+    const rows = fcH.filter((r) => r.level === openLv).map((r) => ({ ...r, share: lineShare(r.q50, r.alert, r.epidemic) }))
+      .sort((a, b) => (b.share ?? -Infinity) - (a.share ?? -Infinity) || b.q50_per100k - a.q50_per100k);
     levelList.dataset.lv = LV[openLv];
-    levelList.innerHTML = `<h3>${esc(ctx.levelName(openLv))} · ${esc(wk)}</h3>${rows.length
-      ? `<div class="dpanel__chips">${rows.map((r) => `<button type="button" class="dpanel__chip" data-goto="${esc(r.unit_id)}"><span class="sq"></span>${esc(nameOf(r))} <span class="nums">${fmt(r.q50)} ${esc(labels.cases_n)}</span></button>`).join("")}</div><p>${esc(L.lv_hint)}</p>`
-      : `<p>${esc(L.lv_none)}</p>`}`;
-    levelList.hidden = false;
+    levelList.innerHTML = `<header class="level-list__head"><span class="sq sq--round"></span><h3>${esc(ctx.levelName(openLv))} · ${esc(wk)}</h3>
+        <span class="level-list__n nums">${esc(rows.length === 1 ? L.lv_n_one : fill(L.lv_n, { n: rows.length }))}</span>
+        <button type="button" class="level-list__close" data-close>${esc(L.lv_close)}</button></header>
+      ${rows.length ? `<ol class="level-list__rows">${rows.map((r, i) => `<li><button type="button" class="level-row" data-goto="${esc(r.unit_id)}" aria-label="${esc(`${nameOf(r)}: ${fmt(r.q50)} ${labels.cases_n}${r.share == null ? "" : `, ${Math.round(r.share * 100)}%`}`)}">
+          <span class="level-row__rank nums">${i + 1}</span><span class="level-row__copy"><b>${esc(nameOf(r))}</b></span>
+          <span class="level-row__cases nums">${fmt(r.q50)}<small>${esc(labels.cases_n)}</small></span>
+          ${r.share == null ? "" : `<span class="rise-meter" aria-hidden="true"><i class="rise-meter__run" style="left:0;width:${meterAt(r.share)}"></i><i class="rise-meter__to" style="left:${meterAt(r.share)}"></i><i class="rise-meter__line"></i></span>`}
+        </button></li>`).join("")}</ol><p class="level-list__foot">${esc(L.lv_hint)}</p>`
+        : `<p class="level-list__empty">${esc(L.lv_none)}</p>`}`;
   }
   const onPick = (e) => {
     const b = e.target.closest("[data-pick]");
     if (b) { showLevel(b.dataset.pick); return; }
+    if (e.target.closest("[data-close]")) { const lv = openLv; showLevel(lv); pickBox.querySelector(`[data-pick="${CSS.escape(lv)}"]`)?.focus(); return; }
     const a = e.target.closest("[data-goto]");
     if (a && goTo) goTo(a.dataset.goto);
   };
+  const onPickKey = (e) => { if (e.key === "Escape" && openLv) { const lv = openLv; showLevel(lv); pickBox.querySelector(`[data-pick="${CSS.escape(lv)}"]`)?.focus(); } };
+  pickBox.addEventListener("keydown", onPickKey);
   pickBox.addEventListener("click", onPick);
 
   // ---------------------------------------------------------------- data for every level
@@ -364,6 +376,7 @@ export async function render(el, ctx) {
 
   return () => {
     pickBox.removeEventListener("click", onPick);
+    pickBox.removeEventListener("keydown", onPickKey);
     dpanel.removeEventListener("click", onPanelClick); dpanel.removeEventListener("pointerover", onPanelOver); dpanel.removeEventListener("pointerleave", onPanelLeave);
     input.removeEventListener("input", show); input.removeEventListener("keydown", onKey); input.removeEventListener("blur", onBlur); list.removeEventListener("pointerdown", onDown);
     map.dispose();

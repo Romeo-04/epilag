@@ -33,7 +33,7 @@ These hold rules that the web app mirrors in JavaScript, so they use pandas only
 
 | File | What it does |
 | --- | --- |
-| `thresholds.py` | The usual level (mean of the same week ±2 in earlier years) and the epidemic line (usual + 2 SD) per area and week of the year |
+| `thresholds.py` | The usual level (mean of the same week ±2 in earlier years) and the epidemic line (usual + 2 SD) per area and week of the year; `line_share` places a count on that scale (0 = usual, 1 = the epidemic line) for the web app's "Rising toward an outbreak" list |
 | `reliability.py` | Each area's alert track record: how often its past *watch* and *outbreak warning* weeks were right, and how many outbreak starts were flagged |
 | `allocate.py` | The budget plan: funds the actions that avert the most forecast cases per peso (fractional knapsack) |
 
