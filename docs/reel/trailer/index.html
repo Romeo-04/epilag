@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EpiLag-PH · trailer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Brand tokens (site/src/css/tokens.css) and the Dengue Drill night palette, as in docs/reel. */
+  :root {
+    --ink: #071711; --paper: #FBFAF4; --forest: #08754F; --forest-deep: #055C3E; --amber: #F5A51C;
+    --warn: #F04B2A; --watch: #F58220; --red: #FF7A5C;
+    --night: #0B1630; --night-2: #142250; --night-line: #2E3F7A; --night-text: #EEF2FF; --night-muted: #A3B0DB; --teal: #2FD6C3;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --W: 1920px; --H: 1080px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: var(--W); height: var(--H); overflow: hidden; background: #000; }
+  body { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; color: var(--night-text); -webkit-font-smoothing: antialiased; transform-origin: 0 0; }
+  canvas.spr { display: block; image-rendering: pixelated; }
+  .abs { position: absolute; } .fill { position: absolute; inset: 0; }
+
+  /* ---- the picture: always 1920 x 1080, full frame, no chrome. Portrait shows it as a band over its own blur. */
+  #pic { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+  .scene { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+  .cam { position: absolute; inset: 0; transform-origin: 0 0; }
+  .dark { background: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 4px, radial-gradient(120% 90% at 70% 0%, #1B2B63, var(--night) 62%); }
+  .black { background: radial-gradient(90% 80% at 50% 40%, #0E1A3A, #050A18 70%); }
+  .light { background: var(--paper); color: var(--ink); }
+  .green { background: linear-gradient(rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px, linear-gradient(90deg, rgba(255, 255, 255, .045) 2px, transparent 2px) 0 0 / 48px 48px,
+    radial-gradient(110% 120% at 85% 10%, #0E8C5F 0%, var(--forest) 45%, var(--forest-deep) 100%); }
+  .glow { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .5; pointer-events: none; }
+  .cloud { position: absolute; filter: brightness(.6) saturate(.8); }
+  .plabel { position: absolute; font-family: var(--mono); font-size: 20px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #BFE2EC; transform: translateX(-50%); white-space: nowrap; }
+  .count { position: absolute; font-family: var(--mono); font-size: 40px; font-weight: 800; color: var(--amber); letter-spacing: .06em; }
+  .chart { position: absolute; image-rendering: pixelated; transform-origin: 0 0; }
+  .note { position: absolute; font-family: var(--mono); font-size: 20px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; color: var(--night-muted); }
+  .osd { position: absolute; font-family: var(--mono); font-weight: 800; font-size: 46px; letter-spacing: .08em; color: #fff; text-shadow: 3px 0 0 rgba(240, 75, 42, .7), -3px 0 0 rgba(47, 214, 195, .7); }
+  .scan { position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0, 0, 0, .22) 0 2px, transparent 2px 5px); pointer-events: none; }
+  .gap { position: absolute; height: 54px; border: 5px solid var(--forest); border-top: 0; border-radius: 0 0 14px 14px; }
+  .gap p { position: absolute; top: 64px; left: -200px; right: -200px; text-align: center; font-size: 40px; font-weight: 900; color: var(--forest); letter-spacing: -.02em; white-space: nowrap; }
+  .toast { position: absolute; width: 620px; padding: 22px 24px; border-radius: 22px; background: rgba(251, 250, 244, .97); color: var(--ink); display: grid; grid-template-columns: 60px 1fr; gap: 6px 18px;
+    box-shadow: 0 0 0 1.5px rgba(7, 23, 17, .08), 0 30px 60px -20px rgba(0, 0, 0, .55); }
+  .toast .ico { grid-row: span 3; width: 60px; height: 60px; border-radius: 14px; background: var(--forest); display: grid; place-items: center; overflow: hidden; }
+  .toast .app { font-size: 17px; font-weight: 700; color: #7D8A82; display: flex; justify-content: space-between; }
+  .toast .ttl { font-size: 30px; font-weight: 900; letter-spacing: -.02em; }
+  .toast .msg { font-size: 20px; line-height: 1.35; color: #4A5A51; }
+  /* live captures fill the frame; the camera flies inside the page */
+  .foot { position: absolute; inset: 0; overflow: hidden; }
+  .foot .page { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; will-change: transform; }
+  .foot img { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; display: block; visibility: hidden; }
+  .foot .ring { position: absolute; border: 4px solid var(--amber); border-radius: 10px; box-shadow: 0 0 0 3000px rgba(7, 23, 17, .34), 0 0 40px rgba(245, 165, 28, .6); opacity: 0; }
+  .dim { position: absolute; inset: 0; background: #050A18; opacity: 0; }
+  #fx { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+  #white { position: absolute; inset: 0; z-index: 31; background: #fff; opacity: 0; pointer-events: none; }
+
+  /* ---- portrait: the band and its blurred backdrop are the rendered picture frames */
+  #back, #band { position: absolute; display: none; overflow: hidden; }
+  .port #back, .port #band { display: block; }
+  #back { inset: 0; background: #050A18; }
+  #back img { position: absolute; left: 50%; top: 50%; height: 118%; transform: translate(-50%, -50%); filter: blur(46px) brightness(.42) saturate(1.25); }
+  #band { left: 0; width: 1080px; box-shadow: 0 -2px 0 rgba(255, 255, 255, .22), 0 2px 0 rgba(255, 255, 255, .22), 0 40px 90px rgba(0, 0, 0, .55); }
+  #band img { position: absolute; top: 0; left: 50%; height: 100%; transform: translateX(-50%); }
+
+  /* ---- the type, laid out per frame */
+  #text { position: absolute; inset: 0; z-index: 35; pointer-events: none; }
+  #scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; background: linear-gradient(to top, rgba(5, 10, 24, .97) 0%, rgba(5, 10, 24, .9) 52%, rgba(5, 10, 24, 0) 100%); opacity: 0; }
+  .port #scrim { display: none; }
+  .titles { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 0 110px; text-align: center; }
+  .port .titles { padding: 0 60px; gap: 30px; }
+  .ln { font-size: 112px; font-weight: 900; letter-spacing: -.045em; line-height: .96; text-transform: uppercase; text-wrap: balance; text-shadow: 0 6px 0 rgba(0, 0, 0, .35), 0 0 60px rgba(5, 10, 24, .7); }
+  .port .ln { font-size: 122px; }
+  .ln.sm { font-size: 96px; } .port .ln.sm { font-size: 88px; }
+  .ln.xl { font-size: 190px; letter-spacing: -.06em; } .port .ln.xl { font-size: 220px; }
+  .kicker { display: inline-flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 26px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); }
+  .kicker::before { content: ""; width: 12px; height: 12px; background: currentColor; flex: none; }
+  .port .kicker { font-size: 28px; }
+  .c-red { color: var(--red); } .c-amber { color: var(--amber); } .c-teal { color: var(--teal); } .c-dim { color: var(--night-muted); }
+  .meta { position: absolute; left: 70px; bottom: 104px; max-width: 1250px; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+  .meta .sub { flex-basis: 100%; }
+  .port .meta { flex-direction: column; flex-wrap: nowrap; }
+  .port .meta { left: 50px; right: 50px; bottom: auto; top: 250px; max-width: none; align-items: center; text-align: center; gap: 22px; }
+  .tag { display: inline-flex; align-items: center; gap: 10px; padding: 7px 13px; background: var(--amber); color: var(--ink); font-family: var(--mono); font-size: 19px; font-weight: 800; letter-spacing: .12em; }
+  .tag b { opacity: .55; font-weight: 800; }
+  .port .tag { font-size: 26px; padding: 10px 18px; }
+  .ttl { font-size: 50px; font-weight: 900; letter-spacing: -.035em; line-height: 1; text-transform: uppercase; text-wrap: balance; text-shadow: 0 5px 0 rgba(0, 0, 0, .4); }
+  .port .ttl { font-size: 96px; }
+  .sub { font-family: var(--mono); font-size: 19px; font-weight: 700; line-height: 1.45; color: #C9D3F2; text-wrap: balance; }
+  .port .sub { position: absolute; left: 60px; right: 60px; font-size: 30px; text-align: center; color: var(--night-text); }
+  .chip { position: absolute; display: inline-flex; align-items: baseline; gap: 14px; padding: 11px 18px; background: var(--paper); color: var(--ink); font-size: 24px; font-weight: 800; letter-spacing: -.01em;
+    box-shadow: 8px 8px 0 var(--amber), 0 30px 60px -20px rgba(0, 0, 0, .7); white-space: nowrap; }
+  .chip b { font-size: 42px; font-weight: 900; letter-spacing: -.04em; color: var(--forest); line-height: 1; }
+  .chip b small { font-size: 24px; color: #7D8A82; }
+  .port .chip { font-size: 30px; padding: 16px 24px; } .port .chip b { font-size: 58px; } .port .chip b small { font-size: 32px; }
+  .stats { position: absolute; right: 70px; top: 90px; display: flex; flex-direction: column; gap: 14px; align-items: flex-end; }
+  .stat { display: flex; align-items: baseline; gap: 16px; padding: 10px 20px 12px; background: rgba(5, 10, 24, .78); box-shadow: 8px 8px 0 rgba(0, 0, 0, .35); }
+  .stat b { font-size: 92px; font-weight: 900; letter-spacing: -.05em; line-height: .9; font-variant-numeric: tabular-nums; }
+  .stat span { font-family: var(--mono); font-size: 18px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--night-muted); line-height: 1.35; text-align: left; }
+  .port .stats { left: 40px; right: 40px; top: 290px; flex-direction: row; gap: 0; align-items: flex-start; justify-content: space-between; }
+  .port .stat { flex-direction: column; align-items: center; gap: 12px; flex: 1; background: none; box-shadow: none; padding: 0; }
+  .port .stat b { font-size: 140px; } .port .stat span { font-size: 23px; text-align: center; }
+  .lag { display: flex; align-items: flex-start; justify-content: center; gap: 30px; margin-top: 30px; }
+  .lag .ev { display: flex; flex-direction: column; align-items: center; gap: 14px; font-family: var(--mono); font-size: 22px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .lag .tile { width: 160px; height: 160px; display: grid; place-items: center; background: var(--night-2); border: 4px solid var(--night-line); box-shadow: inset 4px 4px 0 rgba(255, 255, 255, .08), inset -4px -4px 0 rgba(0, 0, 0, .3), 8px 8px 0 rgba(0, 0, 0, .3); }
+  .lag .ev:last-child .tile { border-color: var(--warn); }
+  .lag .ar { width: 40px; height: 12px; margin-top: 74px; background: var(--night-muted); -webkit-mask: repeating-linear-gradient(90deg, #000 0 10px, transparent 10px 14px); mask: repeating-linear-gradient(90deg, #000 0 10px, transparent 10px 14px); }
+  .port .lag { gap: 16px; } .port .lag .tile { width: 190px; height: 190px; } .port .lag .ar { width: 28px; margin-top: 89px; }
+  .brk { width: 900px; max-width: 86%; height: 30px; border: 5px solid var(--warn); border-top: 0; margin-top: 6px; }
+  .brk + p { font-family: var(--mono); font-size: 30px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--red); }
+  .logo { position: relative; width: 260px; height: 260px; flex: none; margin-bottom: 14px; }
+  .logo .frame, .logo .tile { position: absolute; inset: 0; --c: 13px; clip-path: polygon(0 calc(var(--c) * 2), var(--c) calc(var(--c) * 2), var(--c) var(--c), calc(var(--c) * 2) var(--c), calc(var(--c) * 2) 0,
+      calc(100% - var(--c) * 2) 0, calc(100% - var(--c) * 2) var(--c), calc(100% - var(--c)) var(--c), calc(100% - var(--c)) calc(var(--c) * 2), 100% calc(var(--c) * 2),
+      100% calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c) * 2), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c) * 2) calc(100% - var(--c)), calc(100% - var(--c) * 2) 100%,
+      calc(var(--c) * 2) 100%, calc(var(--c) * 2) calc(100% - var(--c)), var(--c) calc(100% - var(--c)), var(--c) calc(100% - var(--c) * 2), 0 calc(100% - var(--c) * 2)); }
+  .logo .frame { inset: -15px; background: var(--paper); }
+  .logo .tile { background: var(--forest); }
+  .logo i { position: absolute; }
+  .word { font-size: 190px; font-weight: 900; letter-spacing: -.05em; line-height: 1; text-shadow: 0 6px 0 rgba(0, 0, 0, .2); }
+  .port .word { font-size: 172px; }
+  .tagl { font-size: 54px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15; }
+  .tagl span { color: rgba(255, 255, 255, .72); }
+  .port .tagl { font-size: 58px; } .port .tagl span { display: block; }
+  .url { display: inline-flex; padding: 22px 38px; background: var(--paper); color: var(--forest); font-size: 42px; font-weight: 800; letter-spacing: -.02em; box-shadow: 10px 10px 0 var(--ink); margin-top: 10px; }
+  .cta { display: flex; gap: 18px; align-items: center; font-family: var(--mono); font-size: 24px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .cta i { width: 10px; height: 10px; background: var(--amber); }
+  .port .cta { flex-direction: column; gap: 14px; font-size: 26px; } .port .cta i { display: none; }
+  .credits { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255, 255, 255, .7); line-height: 1.9; text-wrap: balance; }
+  #bug { position: absolute; left: 56px; top: 44px; display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 18px; font-weight: 800; letter-spacing: .14em; color: #fff; mix-blend-mode: difference; opacity: 0; }
+  #bug i { width: 10px; height: 10px; background: #fff; }
+  .port #bug { left: 50%; top: 150px; transform: translateX(-50%); font-size: 21px; mix-blend-mode: normal; color: rgba(255, 255, 255, .6); }
+  #cap { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 39; width: max-content; max-width: 1400px; padding: 10px 22px 12px; text-align: center; border-radius: 12px;
+    background: rgba(5, 10, 24, .74); font-size: 26px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: #fff; opacity: 0; }
+  .port #cap { bottom: 310px; max-width: 960px; font-size: 42px; font-weight: 700; padding: 14px 26px 16px; border-radius: 16px; }
+  #cap span { opacity: .42; } #cap span.on { opacity: 1; } #cap span.now { color: var(--amber); opacity: 1; }
+  #grain { position: absolute; inset: 0; z-index: 45; width: 100%; height: 100%; opacity: .07; mix-blend-mode: overlay; image-rendering: pixelated; pointer-events: none; }
+  #vignette { position: absolute; inset: 0; z-index: 44; pointer-events: none; background: radial-gradient(130% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, .38)); }
+  #fade { position: absolute; inset: 0; z-index: 50; background: #000; opacity: 0; pointer-events: none; }
+  .picmode #text, .picmode #cap, .picmode #grain, .picmode #vignette { display: none; }
+  #play { position: fixed; inset: 0; z-index: 99; display: grid; place-items: center; background: rgba(5, 10, 24, .55); color: #fff; font: 800 40px "Inter Tight", sans-serif; cursor: pointer; text-align: center; padding: 40px; }
+</style>
+</head>
+<body>
+<div id="back"><img alt=""></div>
+<div id="band"><img alt=""></div>
+<div id="pic"><canvas id="fx" width="1920" height="1080"></canvas><div id="white"></div></div>
+<div id="text"><div id="scrim"></div><div id="bug"><i></i>EPILAG-PH</div></div>
+<div id="cap"></div>
+<canvas id="grain" width="480" height="270"></canvas>
+<div id="vignette"></div>
+<div id="fade"></div>
+
+<script src="../gsap.min.js"></script>
+<script src="../../film/data.js"></script>
+<script src="sprites.js"></script>
+<script src="vo.js"></script>
+<script src="clips.js"></script>
+<script>
+"use strict";
+// One timeline, three views of it:
+//   index.html        landscape 1920 x 1080: the picture full frame, the type over it
+//   index.html?pic    the picture alone, framed so its centre survives the portrait crop (rendered to out/pic/)
+//   index.html?port   portrait 1080 x 1920 (Instagram Reels): those picture frames as a band over their own blur,
+//                     the title stacked above and the captions below
+// The voice-over sets the clock (scripts/trailer_voice.py); scripts/record_trailer.py renders it frame by frame.
+const PORT = /port/.test(location.search), PICMODE = /pic/.test(location.search), NARROW = PORT || PICMODE;
+const Wd = PORT ? 1080 : 1920, Ht = PORT ? 1920 : 1080;
+const BAND = { y: 610, h: 720 };  // portrait: the picture's middle 1620 px, at 2/3 scale
+document.documentElement.style.setProperty("--W", Wd + "px"); document.documentElement.style.setProperty("--H", Ht + "px");
+document.body.classList.toggle("port", PORT); document.body.classList.toggle("picmode", PICMODE);
+const FPS = 30, $ = (id) => document.getElementById(id), pic = $("pic"), text = $("text");
+if (PORT) { pic.style.display = "none"; Object.assign($("band").style, { top: BAND.y + "px", height: BAND.h + "px" }); }
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = { out: (k) => 1 - Math.pow(1 - k, 4), inOut: (k) => k < .5 ? 8 * k ** 4 : 1 - Math.pow(-2 * k + 2, 4) / 2 };
+function rng(seed) { let s = seed % 2147483647 || 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+const el = (tag, cls, html, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; parent.append(e); return e; };
+const animated = [];
+function sprite(sheet, poses, scale, parent, flip) {
+  const frames = poses.split(",").map((p) => bake(sheet, p, flip)), cv = el("canvas", "spr", null, parent);
+  cv.width = frames[0].width; cv.height = frames[0].height; cv.style.width = cv.width * scale + "px"; cv.style.height = cv.height * scale + "px";
+  cv.getContext("2d").drawImage(frames[0], 0, 0);
+  if (frames.length > 1) animated.push({ cv, frames, fps: 10, k: 0 });
+  return cv;
+}
+const MOSQ = [bake("mosquito", "fly1"), bake("mosquito", "fly2"), bake("mosquito", "fly1", true), bake("mosquito", "fly2", true)];
+
+// ---------------------------------------------------------------- the clock
+const ORDER = ["hook", "bill", "surge", "late", "brand", "rewind", "see", "act", "spend", "guide", "test", "losses", "drill", "close"];
+const PAUSE = { hook: 1.3, bill: .55, surge: .8, late: .6, brand: .7, rewind: 1.9, see: 5.0, act: .6, spend: .6, guide: .6, test: .9, losses: .7, drill: .9, close: 11.4 };
+const LINE = Object.fromEntries(VO.lines.map((l) => [l.id, l]));
+const VO_AT = {};
+{ let t = 0; for (const id of ORDER) { VO_AT[id] = t + PAUSE[id]; t = VO_AT[id] + LINE[id].dur; } }
+const A = (id) => VO_AT[id], E = (id) => VO_AT[id] + LINE[id].dur;
+const norm = (s) => s.toLowerCase().replace(/[^a-z0-9-]/g, "");
+function W(id, word, nth = 1) {  // when the voice says a word (the nth time) in a line
+  const ws = LINE[id].words;
+  for (let i = 0, seen = 0; i < ws.length; i++) if (norm(ws[i].w) === norm(word) && ++seen === nth) return VO_AT[id] + ws[i].t;
+  throw new Error(`no "${word}" in ${id}`);
+}
+const mid = (a, b) => (E(a) + A(b)) / 2;
+const C = { breed: W("hook", "Water") - .45, bill: W("bill", "The") - .5, surge: mid("bill", "surge"), late: mid("surge", "late"), ask: mid("late", "brand"), brand: W("brand", "This") - .25,
+  rewind: A("rewind") - .5, play: W("rewind", "replay") - .15, sizzle: E("rewind") + .55, see: A("see") - .55,
+  act: mid("see", "act"), spend: mid("act", "spend"), guide: mid("spend", "guide"),
+  test: mid("guide", "test"), test2: W("test", "19") - .25, losses: mid("test", "losses"), losses2: W("losses", "We") - .25,
+  drill: mid("losses", "drill"), drill2: W("drill", "Play") - .25, montage: E("drill") + .4, again: A("close") - .7, end: W("close", "EpiLag-PH") - .3 };
+const TOTAL = +(C.end + 6.2).toFixed(2);
+
+const tl = gsap.timeline({ paused: true, defaults: { ease: "expo.out", duration: 1 } });
+const cues = { whoosh: [], impact: [], tick: [], glitch: [], riser: [], tape: [] };
+const layers = [];
+const layer = (a, b, draw) => layers.push({ a, b, draw });  // drawn per frame from the clock (picture only)
+function scene(cls, a, b) {
+  const s = el("section", "scene " + cls, null, pic);
+  pic.insertBefore(s, $("fx"));
+  tl.set(s, { visibility: "visible" }, Math.max(0, a)).set(s, { visibility: "hidden" }, b);
+  return s;
+}
+const up = (sel, at, o = {}) => tl.fromTo(sel, { autoAlpha: 0, y: o.y ?? 40 }, { autoAlpha: 1, y: 0, duration: o.dur ?? .8, stagger: o.stagger ?? 0, ease: "expo.out" }, at);
+const hide = (sel, at, dur = .25) => tl.to(sel, { autoAlpha: 0, duration: dur, ease: "power2.in" }, at);
+function shake(at, amp = 12, dur = .4) {
+  layer(at, at + dur, (k) => { const a = (1 - k / dur) * amp; pic.style.translate = `${(Math.sin(k * 90) * a).toFixed(1)}px ${(Math.cos(k * 77) * a).toFixed(1)}px`; });
+  layer(at + dur, at + dur + .06, () => { pic.style.translate = ""; });
+}
+function slamIn(node, at, o = {}) {  // a line of type lands like a stamp
+  tl.fromTo(node, { autoAlpha: 0, scale: o.from ?? 1.6 }, { autoAlpha: 1, scale: 1, duration: .3, ease: "steps(6)" }, at);
+  if (o.hit !== false) cues.impact.push(at + .24);
+  if (o.shake !== false) shake(at + .24);
+}
+function flash(at, dur = .28, a = .85) { tl.fromTo("#white", { opacity: a }, { opacity: 0, duration: dur, ease: "power2.out", immediateRender: false }, at); }
+
+// ---------------------------------------------------------------- transitions and weather (in the picture)
+const fx = $("fx").getContext("2d");
+function pixelWipe(at, dur, colors, dir, seed) {  // squares bloom to cover the frame, the cut happens under them, then they shrink away
+  const r = rng(seed), cell = 80, cells = [];
+  for (let y = 0; y < 14; y++) for (let x = 0; x < 24; x++) {
+    const along = dir === "down" ? y / 13 : dir === "diag" ? (x / 23 + y / 13) / 2 : x / 23;
+    cells.push({ x: x * cell, y: y * cell, o: along * .7 + r() * .3, c: colors[Math.floor(r() * colors.length)] });
+  }
+  layer(at - dur / 2, at + dur / 2, (lt) => {
+    const k = lt / dur;
+    for (const c of cells) {
+      const s = clamp((2 * k - .8 * c.o) / .2) - clamp((2 * k - 1 - .8 * c.o) / .2);
+      if (s <= 0) continue;
+      const z = Math.ceil(s * cell / 8) * 8;
+      fx.fillStyle = c.c; fx.fillRect(c.x + (cell - z) / 2, c.y + (cell - z) / 2, z, z);
+    }
+  });
+  cues.whoosh.push(at);
+}
+function glitch(at, dur = .32) {
+  const r = rng(Math.round(at * 100)), bands = Array.from({ length: 40 }, () => [r(), r(), r(), r()]);
+  layer(at, at + dur, (lt) => {
+    const f = Math.floor(lt * FPS);
+    for (let i = 0; i < 14; i++) {
+      const b = bands[(i * 7 + f * 3) % bands.length];
+      fx.fillStyle = ["rgba(240,75,42,.75)", "rgba(47,214,195,.7)", "rgba(255,255,255,.85)", "#050A18"][Math.floor(b[2] * 4)];
+      fx.fillRect(b[0] * 1920 - 200, b[1] * 1080, 300 + b[3] * 1200, 6 + b[3] * 40);
+    }
+    pic.style.transform = `translate(${(bands[f % 40][0] - .5) * 40}px, 0) skewX(${(bands[f % 40][1] - .5) * 6}deg)`;
+  });
+  layer(at + dur, at + dur + .06, () => { pic.style.transform = ""; });
+  cues.glitch.push(at);
+}
+// pixel rain; with a word, the drops gather into it and wash away again
+function rain(parent, a, b, o = {}) {
+  const cv = el("canvas", "fill", null, parent); cv.width = 1920; cv.height = 1080;
+  const g = cv.getContext("2d"), r = rng(o.seed || 7);
+  const drops = Array.from({ length: o.n || 240 }, () => ({ x: Math.floor(r() * 240) * 8, v: 900 + r() * 700, p: r() * 1400, a: .2 + r() * .5 }));
+  const pts = [];
+  if (o.word) document.fonts.load("900 210px 'Inter Tight'").then(() => {
+    const off = document.createElement("canvas"); off.width = 1920; off.height = 1080;
+    const x = off.getContext("2d");
+    x.fillStyle = "#fff"; x.font = "900 210px 'Inter Tight'"; x.textAlign = "center"; x.textBaseline = "middle"; x.letterSpacing = "-8px";
+    x.fillText(o.word, 960, 440);
+    const d = x.getImageData(0, 0, 1920, 1080).data;
+    for (let y = 0; y < 1080; y += 8) for (let xx = 0; xx < 1920; xx += 8) if (d[(y * 1920 + xx) * 4 + 3] > 128)
+      pts.push({ x: xx, y, land: o.land + (xx / 1920) * .9 + r() * .35, leave: o.leave + (xx / 1920) * .6 + r() * .5, s: r() });
+  });
+  layer(a, b, (lt) => {
+    g.clearRect(0, 0, 1920, 1080);
+    for (const f of o.flash || []) if (lt > f && lt < f + .35) { g.fillStyle = `rgba(191,226,236,${(.3 * (1 - (lt - f) / .35)).toFixed(3)})`; g.fillRect(0, 0, 1920, 1080); }
+    for (const d of drops) { const y = ((d.p + lt * d.v) % 1300) - 120; g.fillStyle = `rgba(191,226,236,${d.a})`; g.fillRect(d.x, Math.round(y / 8) * 8, 4, 20); }
+    for (const p of pts) {
+      if (lt < p.land) { const y = p.y - (p.land - lt) * 1500; if (y > -40) { g.fillStyle = "rgba(191,226,236,.85)"; g.fillRect(p.x, Math.round(y / 8) * 8, 4, 18); } }
+      else if (lt < p.leave) { g.fillStyle = lt - p.land < .12 ? "#FFFFFF" : (p.s < .08 ? "#F5A51C" : "#EEF2FF"); g.fillRect(p.x, p.y, 7, 7); }
+      else { const k = lt - p.leave, y = p.y + 900 * k * k; g.fillStyle = `rgba(191,226,236,${clamp(1 - k / 1.4).toFixed(3)})`; g.fillRect(p.x, Math.round(y / 8) * 8, 4, 12 + k * 30); }
+    }
+  });
+}
+function skyline(parent, seed) {
+  const cv = el("canvas", "abs", null, parent); cv.width = 1920; cv.height = 360;
+  Object.assign(cv.style, { left: 0, bottom: 0 });
+  const g = cv.getContext("2d"), r = rng(seed);
+  for (let x = 0; x < 1920;) {
+    const w = 80 + Math.floor(r() * 7) * 16, h = 110 + Math.floor(r() * 14) * 16;
+    g.fillStyle = r() < .5 ? "#0A1430" : "#0C1838"; g.fillRect(x, 360 - h, w - 8, h);
+    for (let wy = 360 - h + 16; wy < 340; wy += 24) for (let wx = x + 12; wx < x + w - 24; wx += 20) if (r() < .32) { g.fillStyle = r() < .2 ? "#F5A51C" : "#F2E3B3"; g.globalAlpha = .4 + r() * .4; g.fillRect(wx, wy, 8, 8); g.globalAlpha = 1; }
+    x += w;
+  }
+}
+const cell = 8, q = (v) => Math.round(v / cell) * cell;
+function pxRect(g, c, x, y, w, h) { g.fillStyle = c; g.fillRect(q(x), q(y), Math.max(cell, q(w)), Math.max(cell, q(h))); }
+function pxEllipse(g, c, cx, cy, rx, ry, fill = () => true) {
+  g.fillStyle = c;
+  for (let y = -ry; y <= ry; y += cell) for (let x = -rx; x <= rx; x += cell) if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1 && fill(x, y)) g.fillRect(q(cx + x), q(cy + y), cell, cell);
+}
+function camSet(cam, pt, s, at) { tl.set(cam, { x: 960 - s * pt[0], y: 540 - s * pt[1], scale: s, transformOrigin: "0 0" }, at); }
+function camTo(cam, pt, s, at, dur = 1.2, e = "expo.inOut") { tl.to(cam, { x: 960 - s * pt[0], y: 540 - s * pt[1], scale: s, duration: dur, ease: e }, at); cues.whoosh.push(at + dur * .45); }
+
+// ---------------------------------------------------------------- the type layer
+// In landscape the type sits over the full-frame picture. In portrait the picture is a band: chapter titles stack
+// above it, slams land on it, and `full` blocks hide the band and sit on the blurred backdrop alone.
+const fulls = [];
+function titles(a, b, o = {}) {  // a centred column of lines
+  const box = el("div", "titles", null, text);
+  if (PORT && !o.full) Object.assign(box.style, { top: BAND.y + "px", bottom: "auto", height: BAND.h + "px" });
+  if (o.full) fulls.push([a - .15, b, o.bright ?? .62]);
+  tl.set(box, { autoAlpha: 0 }, 0).set(box, { autoAlpha: 1 }, Math.max(0, a - .3));
+  if (o.out !== false) tl.to(box, { autoAlpha: 0, scale: o.outScale ?? 1.12, duration: .22, ease: "power3.in" }, b - .22);
+  if (o.kicker) up(el("div", "kicker", o.kicker, box), o.kickerAt ?? a, { y: 16, dur: .5 });
+  (o.lines || []).forEach((l) => { const n = el("div", "ln " + (l.cls || ""), l.text, box); l.soft ? up(n, l.at, { y: 30 }) : slamIn(n, l.at, { from: l.from, shake: l.shake }); if (l.out) hide(n, l.out, .15); });
+  if (o.drift !== false) tl.fromTo(box, { scale: 1 }, { scale: 1.05, duration: Math.max(.5, b - a - .3), ease: "none" }, a);
+  return box;
+}
+function meta(a, b, m) {  // chapter tag, title and one line under it
+  const box = el("div", "meta", null, text), tag = el("div", "tag", `<b>${m.n}</b>/ ${m.tag}`, box), ttl = el("div", "ttl", m.title, box);
+  const sub = m.sub ? el("div", "sub", m.sub, PORT ? text : box) : null;
+  if (sub && PORT) sub.style.top = BAND.y + BAND.h + 44 + "px";
+  tl.set([box, sub].filter(Boolean), { autoAlpha: 0 }, 0).set(box, { autoAlpha: 1 }, a);
+  tl.fromTo(tag, { autoAlpha: 0, x: PORT ? 0 : -50, scale: PORT ? .5 : 1 }, { autoAlpha: 1, x: 0, scale: 1, duration: .4, ease: "back.out(2.4)" }, a + .05);
+  tl.fromTo(ttl, { autoAlpha: 0, y: 60, skewY: 4 }, { autoAlpha: 1, y: 0, skewY: 0, duration: .55 }, a + .12);
+  if (sub) { tl.fromTo(sub, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: .6 }, a + .35); hide(sub, b - .18, .16); }
+  hide(box, b - .18, .16);
+  cues.tick.push(a + .1);
+  if (!PORT) tl.to("#scrim", { opacity: 1, duration: .3, ease: "none" }, a).to("#scrim", { opacity: 0, duration: .2, ease: "none" }, b - .2);
+}
+function chip(html, at, out, row = 0) {
+  const n = el("div", "chip", html, text);
+  Object.assign(n.style, PORT ? { left: "36px", top: BAND.y + BAND.h - 118 - row * 118 + "px" } : { right: "70px", bottom: 112 + row * 84 + "px" });
+  tl.fromTo(n, { autoAlpha: 0, x: PORT ? -60 : 60, scale: .85 }, { autoAlpha: 1, x: 0, scale: 1, duration: .45, ease: "back.out(2.2)" }, at);
+  hide(n, out, .2);
+  cues.tick.push(at + .08);
+}
+function brandLogo(parent, at, seed) {  // the pixel mark flies together, tile by tile
+  const bx = el("div", "logo", `<div class="frame"></div><div class="tile"></div>`, parent), r = rng(seed), cs = 260 / 16;
+  LOGO.forEach((row, y) => [...row].forEach((ch, x) => {
+    if (!LOGO_COL[ch]) return;
+    const i = el("i", "", null, bx);
+    Object.assign(i.style, { left: x * cs + "px", top: (y + 3) * cs + "px", width: cs + .5 + "px", height: cs + .5 + "px", background: LOGO_COL[ch] });
+    const [p, k2, k] = [r(), r(), r()];
+    tl.fromTo(i, { x: (p - .5) * 1800, y: (k2 - .5) * 1100, rotate: (k - .5) * 540, scale: 2.5, autoAlpha: 0 }, { x: 0, y: 0, rotate: 0, scale: 1, autoAlpha: 1, duration: .8, ease: "expo.out" }, at + k * .4);
+  }));
+  tl.fromTo(bx.querySelectorAll(".tile, .frame"), { scale: 0 }, { scale: 1, duration: .45, ease: "back.out(2)" }, at + .45);
+  cues.impact.push(at + .7);
+  return bx;
+}
+
+// ---------------------------------------------------------------- live captures: the image follows the clock, one frame at a time
+const clips = [], pending = [];
+function updateClips(t) {
+  for (const c of clips) {
+    const on = t >= c.a - .02 && t < c.b;
+    c.img.style.visibility = on ? "visible" : "hidden";
+    if (t < c.a - .5 || t > c.b) continue;
+    const k = Math.min(c.n - 1, Math.max(0, Math.round((Math.max(t, c.a) - c.a) * c.rate * FPS + c.from * FPS)));
+    if (c.img.dataset.k === String(k)) continue;
+    c.img.dataset.k = k;
+    c.img.src = `clips/${c.name}/${String(k).padStart(4, "0")}.jpg`;
+    pending.push(c.img.decode().catch(() => {}));
+  }
+}
+// A shot fills the frame with the real interface. Each segment plays one captured clip, and its camera moves
+// between boxes given in page pixels (1440 x 900). The landscape frames a box in 16:9; the portrait's picture
+// frames it in the middle 3:2, so the same box is whole inside the band.
+const PW = 1440, PH = 900, FULL = [0, 0, PW, PH];
+const SAFE = NARROW ? 1 : .74;  // landscape: the bottom of the frame belongs to the title strip, so subjects are framed above it
+function frameBox(b, pad) {
+  const asp = NARROW ? 1.5 : 16 / 9, maxH = NARROW ? PH : 810;
+  let w = Math.max(760, b[2] + 2 * pad, (b[3] + 2 * pad) * asp / SAFE), h = w / asp;
+  if (h > maxH) { h = maxH; w = h * asp; }
+  if (w > PW) { w = PW; h = w / asp; }
+  const hs = h * SAFE;  // the part of the frame the subject may use; the page may run out under the strip
+  const x = clamp(b[0] + b[2] / 2 - w / 2, 0, PW - w), y = clamp(b[1] + b[3] / 2 - hs / 2, 0, PH - hs), fw = h * 16 / 9;
+  return [x - (fw - w) / 2, y, fw, h];  // the 16:9 picture around it
+}
+function shot(a, b, o) {
+  const s = scene(o.night ? "dark" : "light", a, b), foot = el("div", "foot", null, s), page = el("div", "page", null, foot), ring = el("div", "ring", null, page), dim = el("div", "dim", null, s);
+  if (o.night) s.style.background = "#0B1630";
+  const segs = o.segs.map((g, i) => ({ ...g, at: i ? g.at : a, end: o.segs[i + 1]?.at ?? b })), keys = [];
+  segs.forEach((g, i) => {
+    const img = el("img", "", null, page); page.insertBefore(img, ring);
+    const n = CLIPS[g.clip].n, len = g.end - g.at, from = g.from ?? .2;
+    clips.push({ img, name: g.clip, a: g.at, b: g.end + (i === segs.length - 1 ? .6 : 0), from, n, rate: g.rate ?? clamp((n / FPS - from - .15) / len, .45, 2.2) });
+    if (i) {  // a whip between segments: the cut hides in the blur
+      const at = g.at, dir = i % 2 ? 1 : -1;
+      layer(at - .16, at + .3, (lt) => { const k = lt - .16, off = k < 0 ? -dir * 900 * ease.inOut(clamp((k + .16) / .16)) : dir * 900 * (1 - ease.out(clamp(k / .3))); foot.style.translate = `${off.toFixed(1)}px 0`; foot.style.filter = `blur(${(Math.abs(off) / 30).toFixed(1)}px)`; });
+      layer(at + .3, at + .36, () => { foot.style.translate = ""; foot.style.filter = ""; });
+      cues.whoosh.push(at);
+      if (g.hit) { flash(at, .22, .6); cues.impact.push(at); }
+    }
+    (g.cams || [{ box: FULL }]).forEach((c, j) => {
+      const bx = (NARROW && c.port) || c.box || FULL;
+      keys.push({ at: j ? c.at : g.at, cut: !j, dur: c.dur ?? 1.0, r: frameBox(bx, c.pad ?? 30), ring: c.ring ? bx : null, push: c.push ?? .07 });
+    });
+  });
+  keys.sort((x, y) => x.at - y.at);
+  layer(a - .1, b + .1, (lt, t) => {
+    let cur = keys[0].r, k0 = keys[0];
+    for (const k of keys) {
+      if (t < k.at) break;
+      const p = k.cut ? 1 : ease.inOut(clamp((t - k.at) / k.dur));
+      cur = cur.map((v, i) => v + (k.r[i] - v) * p); k0 = k;
+    }
+    const z = 1 + k0.push * clamp((t - k0.at) / 4);  // the camera never rests: a slow push after every move
+    const w = cur[2] / z, h = cur[3] / z, x = cur[0] + (cur[2] - w) / 2, y = cur[1] + (cur[3] - h) / 2, sc = 1920 / w;
+    page.style.transform = `translate(${(-x * sc).toFixed(2)}px, ${(-y * sc).toFixed(2)}px) scale(${sc.toFixed(4)})`;
+    if (k0.ring) {
+      const on = clamp((t - k0.at - (k0.cut ? .2 : k0.dur * .6)) / .25);
+      Object.assign(ring.style, { left: k0.ring[0] - 8 + "px", top: k0.ring[1] - 8 + "px", width: k0.ring[2] + 16 + "px", height: k0.ring[3] + 16 + "px", borderWidth: 5 / sc + "px", opacity: on });
+    } else ring.style.opacity = 0;
+  });
+  tl.fromTo(foot, { scale: 1.12 }, { scale: 1, duration: .7, ease: "expo.out" }, a);
+  (o.dims || []).forEach(([d0, d1, v]) => tl.to(dim, { opacity: v ?? .6, duration: .15, ease: "none" }, d0).to(dim, { opacity: 0, duration: .2, ease: "none" }, d1));
+  return s;
+}
+const B = (clip, k, i) => { const b = CLIPS[clip].boxes[k]; return i === undefined ? b : b[i]; };
+const join = (a, b) => { const x = Math.min(a[0], b[0]), y = Math.min(a[1], b[1]); return [x, y, Math.max(a[0] + a[2], b[0] + b[2]) - x, Math.max(a[1] + a[3], b[1] + b[3]) - y]; };
+
+// ================================================================ 1 · the rains, then what the water breeds
+{
+  const s = scene("black", 0, C.breed + .6), cam = el("div", "cam", null, s);
+  [[300, -10, 8, 40], [860, -40, 6, -30], [1300, 20, 8, 50]].forEach(([x, y, sc, d], i) => { const c = sprite("props", "cloud", sc, cam, i === 2); c.classList.add("cloud"); Object.assign(c.style, { left: x + "px", top: y + "px" }); tl.fromTo(c, { x: 0 }, { x: d * 3, duration: C.breed + .6, ease: "steps(24)" }, 0); });
+  rain(cam, 0, C.breed + .6, { word: "QUEZON CITY", land: .8, leave: Math.max(4.0, C.breed - 1.5), flash: [.4, W("hook", "The") - .1] });
+  const k = el("div", "kicker", "September 2024", cam);
+  Object.assign(k.style, { position: "absolute", left: "50%", top: "640px", translate: "-50% 0" });
+  up(k, W("hook", "September") - .1, { y: 20 });
+  tl.fromTo(cam, { scale: 1.08, transformOrigin: "50% 50%" }, { scale: 1, duration: C.breed, ease: "none" }, 0);
+  const b = scene("", C.breed - .6, C.surge + .5), bc = el("div", "cam", null, b);
+  b.style.background = "linear-gradient(#142250,#0B1630)";
+  tl.to(cam, { y: -1080, duration: 1.1, ease: "expo.inOut" }, C.breed - .5).fromTo(bc, { y: 1080 }, { y: 0, duration: 1.1, ease: "expo.inOut" }, C.breed - .5);
+  cues.whoosh.push(C.breed);
+
+  const st = el("canvas", "fill", null, bc); st.width = 1920; st.height = 1080;
+  const g = st.getContext("2d"), r = rng(9);
+  const objs = [{ x: 500, y: 740, at: W("hook", "old"), kind: "tire", name: "old tire" }, { x: 960, y: 740, at: W("hook", "gutters"), kind: "gutter", name: "gutter" }, { x: 1420, y: 740, at: W("hook", "flower"), kind: "pot", name: "flower pot" }];
+  objs.forEach((o) => { const l = el("div", "plabel", o.name, bc); Object.assign(l.style, { left: o.x + "px", top: "850px" }); up(l, o.at, { y: 16, dur: .5 }); cues.tick.push(o.at); });
+  const dark = W("hook", "dark") - .2, born = W("hook", "mosquitoes") - .2, rush = W("bill", "The") - .35;
+  const drops = Array.from({ length: 140 }, () => ({ x: Math.floor(r() * 240) * 8, v: 700 + r() * 500, p: r() * 1300 }));
+  layer(C.breed - .6, C.surge + .5, (lt, t) => {
+    g.clearRect(0, 0, 1920, 1080);
+    const night = clamp((t - dark) / 1.2);
+    for (const d of drops) { const y = ((d.p + lt * d.v) % 1150) - 80; g.fillStyle = `rgba(191,226,236,${.35 - night * .2})`; g.fillRect(d.x, q(y), 4, 16); }
+    pxRect(g, "#0A1228", 0, 800, 1920, 280); pxRect(g, "#16255A", 0, 800, 1920, 8);
+    for (const o of objs) {
+      const k = clamp((t - o.at + .15) / .4), lvl = clamp((t - o.at - .1) / 1.1);
+      if (k <= 0) continue;
+      const pop = ease.out(k), wob = Math.sin(t * 3 + o.x) * 6 * lvl;
+      g.save(); g.translate(o.x, o.y + (1 - pop) * 60); g.globalAlpha = pop; g.translate(-o.x, -o.y);
+      if (o.kind === "tire") {
+        pxEllipse(g, "#151515", o.x, o.y, 168, 72); pxEllipse(g, "#2B2B2B", o.x, o.y - 8, 160, 56, (dx, dy) => dy < -24); pxEllipse(g, "#060A14", o.x, o.y, 104, 36);
+        if (lvl) pxEllipse(g, "#2C7FB0", o.x, o.y + 4, 96 * lvl, 30 * lvl);
+        if (lvl > .6) pxEllipse(g, "#5FB7DE", o.x + wob, o.y, 40, 8);
+      } else if (o.kind === "gutter") {
+        pxRect(g, "#8E959B", o.x - 190, o.y - 50, 380, 104); pxRect(g, "#5E656B", o.x - 190, o.y + 46, 380, 8); pxRect(g, "#0A1228", o.x - 172, o.y - 50, 344, 80);
+        if (lvl) pxRect(g, "#2C7FB0", o.x - 172, o.y + 30 - 72 * lvl, 344, 72 * lvl);
+        if (lvl > .6) pxRect(g, "#5FB7DE", o.x - 120 + wob * 3, o.y + 30 - 72 * lvl, 80, 8);
+      } else {
+        for (let yy = 0; yy < 150; yy += 8) { const w = 260 - yy * .5; pxRect(g, yy < 24 ? "#E07A5F" : "#C8553D", o.x - w / 2, o.y - 90 + yy, w, 8); }
+        pxEllipse(g, "#5A2A1E", o.x, o.y - 86, 112, 16);
+        if (lvl) pxEllipse(g, "#2C7FB0", o.x, o.y - 86, 104 * lvl, 12);
+        pxRect(g, "#3D6B35", o.x - 8, o.y - 210, 16, 120); pxEllipse(g, "#6E9A4A", o.x - 40, o.y - 200, 40, 24); pxEllipse(g, "#6E9A4A", o.x + 44, o.y - 170, 40, 24);
+      }
+      if (t > dark && lvl > .5) for (let i = 0; i < 6; i++) pxRect(g, "#F2E3B3", o.x - 60 + i * 24 + Math.sin(t * 6 + i) * 6, (o.kind === "pot" ? o.y - 88 : o.y) + Math.cos(t * 5 + i * 2) * 4, 8, 8);  // larvae
+      g.restore();
+    }
+    const dk = night * .45 + clamp((t - rush) / .5) * .35;
+    if (dk) { g.fillStyle = `rgba(3,6,16,${dk.toFixed(3)})`; g.fillRect(0, 0, 1920, 1080); }
+  });
+  const sw = el("canvas", "fill", null, bc); sw.width = 1920; sw.height = 1080;
+  const sg = sw.getContext("2d"), rr = rng(21), cnt = el("div", "count", "", bc);
+  Object.assign(cnt.style, { left: "50%", top: "90px", translate: "-50% 0" });
+  const bugs = Array.from({ length: 256 }, (_, i) => ({ o: objs[i % 3], ax: 240 + rr() * 460, ay: 120 + rr() * 220, fx: .4 + rr() * .9, fy: .6 + rr() * 1.1, ph: rr() * 6.28, s: 2 + Math.floor(rr() * 2) }));
+  layer(C.breed - .6, C.surge + .5, (lt, t) => {
+    sg.clearRect(0, 0, 1920, 1080);
+    const n = t < born ? 0 : Math.min(256, 2 ** Math.floor((t - born) / .22));
+    cnt.textContent = n && t < rush ? `× ${n}` : "";
+    const rk = ease.inOut(clamp((t - rush) / .9)), hold = clamp((t - rush - .9) / 4);
+    sg.imageSmoothingEnabled = false;
+    for (let i = 0; i < n; i++) {
+      const b2 = bugs[i], age = clamp((t - born - Math.log2(i + 1) * .22) / .8);
+      const ox = b2.o.x, oy = b2.o.y - 40, cx = 960 + Math.sin(t * b2.fx + b2.ph) * b2.ax, cy = 470 + Math.cos(t * b2.fy + b2.ph * 1.3) * b2.ay;
+      const x = ox + (cx - ox) * ease.out(age), y = oy + (cy - oy) * ease.out(age), m = 1 + rk * 1.5 + hold * .5;
+      const sx = 960 + (x - 960) * m, sy = 540 + (y - 540) * m, sc = b2.s * (1 + rk * 2.2 + hold * .6);
+      const img = MOSQ[(Math.floor(t * 12 + i) % 2) + (Math.sin(t * b2.fx + b2.ph) < 0 ? 2 : 0)];
+      sg.globalAlpha = clamp(age * 3) * (1 - rk * .45);
+      sg.drawImage(img, Math.round(sx), Math.round(sy), img.width * sc, img.height * sc);
+    }
+    sg.globalAlpha = 1;
+  });
+  tl.fromTo(bc, { scale: 1 }, { scale: 1.1, transformOrigin: "50% 70%", duration: C.surge - C.breed, ease: "none", immediateRender: false }, C.breed + .6);
+  titles(C.bill, C.surge - .1, { lines: [{ text: "The rain is free.", at: W("bill", "The") - .12 }, { text: "The dengue bill comes later.", cls: "c-red", at: W("bill", "The", 2) - .12 }] });
+  pixelWipe(C.surge, .9, ["#F04B2A", "#C93A20", "#0B1630", "#F58220"], "right", 5);
+}
+
+// ---------------------------------------------------------------- Quezon City's season (as in docs/film)
+const QS = QC.stats, wk = (d) => QC.weeks.indexOf(d);
+const fmtDay = (d) => new Date(d + "T00:00:00").toLocaleString("en", { day: "numeric", month: "short", year: "numeric" });
+function qcChart(cv, replay) {
+  const W2 = 880, H2 = 700, P = { l: 70, r: 10, t: 40, b: 60 };
+  cv.width = W2; cv.height = H2;
+  const g = cv.getContext("2d"), n = QC.weeks.length, slot = (W2 - P.l - P.r) / n, bw = Math.floor(slot) - 4, top = 720, px = (v) => Math.round(v / 4) * 4;
+  const x = (i) => Math.round(P.l + i * slot), y = (v) => px(H2 - P.b - Math.min(v, top) / top * (H2 - P.t - P.b));
+  const muted = replay ? "#7D8A82" : "#A3B0DB", grid = replay ? "rgba(7,23,17,.08)" : "rgba(255,255,255,.07)";
+  function draw(t, grow = 3.6) {
+    g.clearRect(0, 0, W2, H2); g.font = "700 18px 'Inter Tight', sans-serif";
+    for (let v = 0; v <= 700; v += 100) { g.fillStyle = grid; g.fillRect(P.l, y(v), W2 - P.l - P.r, 2); g.fillStyle = muted; g.textAlign = "right"; g.fillText(v, P.l - 14, y(v) + 6); }
+    g.textAlign = "left";
+    QC.weeks.forEach((w, i) => { if (+w.slice(8) <= 7) g.fillText(new Date(w + "T00:00:00").toLocaleString("en", { month: "short" }), x(i), H2 - P.b + 34); });
+    for (let i = 0; i < n; i++) {
+      const c = QC.cases[i], k = replay ? 1 : clamp((t - i / n * grow) / .35);
+      if (!k) continue;
+      g.fillStyle = replay ? "#D7DACE" : c > QC.epi[i] ? "#F04B2A" : "#3A4C8C";
+      const h = px((H2 - P.b - y(c)) * k); g.fillRect(x(i), H2 - P.b - h, bw, h);
+    }
+    g.fillStyle = replay ? "rgba(7,23,17,.55)" : "rgba(255,255,255,.78)";
+    for (let i = 0; i < n * (replay ? 1 : clamp((t + .4) / 1.2)); i++) for (let k = 0; k < slot - 6; k += 10) g.fillRect(x(i) + k, y(QC.epi[i]) - 2, 6, 4);
+    if (!replay) return;
+    if (t > 2.4) { const m = wk(QS.crossed); g.fillStyle = "#071711"; for (let v = y(690); v < H2 - P.b; v += 14) g.fillRect(x(m) + bw / 2 - 2, v, 4, 8); }
+    const shown = Math.floor(Math.max(0, t - 1.0) / 4.2 * n);
+    for (let i = 0; i < Math.min(n, shown); i++) {
+      const f = QC.fc[i]; if (!f) continue;
+      g.fillStyle = { warning: "#F04B2A", watch: "#F58220", above: "#F7C928" }[f[0]] || "#9AA69E";
+      g.globalAlpha = .38; g.fillRect(x(i), y(f[3]), bw, y(f[1]) - y(f[3]));
+      g.globalAlpha = 1; g.fillRect(x(i) - 2, y(f[2]) - 4, bw + 4, 8);
+    }
+  }
+  return { draw, x: (i) => x(i) + bw / 2, y };
+}
+
+// ================================================================ 2 · the surge: the camera rides the season
+{
+  const s = scene("dark", C.surge - .5, C.late + .45), cam = el("div", "cam", null, s), L = 410, T = 110, sc = 1.25;
+  el("div", "glow", null, s).style.cssText = "left:1100px;top:-200px;width:900px;height:800px;background:#7A1E14";
+  const cv = el("canvas", "chart", null, cam); s.append(cam);
+  Object.assign(cv.style, { left: L + "px", top: T + "px", width: "880px", height: "700px", transform: `scale(${sc})` });
+  const ch = qcChart(cv, false), go = A("surge") - .3, pk = W("surge", "622"), grow = pk - go + .15, at = (i, v) => [L + ch.x(i) * sc, T + ch.y(v) * sc];
+  layer(C.surge - .5, C.late + .45, (lt, t) => ch.draw(t - go, grow));
+  const nl = el("div", "note", "Epidemic line", cam), np = el("div", "note c-red", `▼ ${QS.peak} cases · ${fmtDay(QS.peak_week)}`, cam);
+  Object.assign(nl.style, { left: at(0, 0)[0] - 10 + "px", top: at(0, QC.epi[0])[1] - 46 + "px" });
+  Object.assign(np.style, { left: at(wk(QS.peak_week), 0)[0] - 400 + "px", top: at(0, QS.peak)[1] - 44 + "px" });
+  up(nl, go + .7, { y: 10, dur: .5 });
+  camSet(cam, at(wk(QS.crossed), 260), 1.9, C.surge - .5);
+  camTo(cam, at(wk(QS.peak_week) - 3, 420), 1.5, go + .2, grow - .5, "power1.inOut");  // riding up the bars as they grow
+  camTo(cam, at(wk(QS.peak_week), QS.peak - 140), 1.8, pk - .35, .5, "expo.out");
+  tl.fromTo(np, { autoAlpha: 0, scale: .5 }, { autoAlpha: 1, scale: 1, duration: .5, ease: "back.out(2.2)" }, pk - .05);
+  cues.impact.push(pk); shake(pk, 16, .5); flash(pk, .25, .5);
+  camTo(cam, [960, 540], 1, W("surge", "Five") - .45, .9);
+  tl.to(cam, { scale: 1.06, x: "-=58", y: "-=32", duration: C.late - W("surge", "Five"), ease: "none" }, W("surge", "Five") + .5);
+  const st = el("div", "stats", null, text);
+  [[`<b class="c-red">${QS.peak}</b><span>cases in<br>a single week</span>`, pk], [`<b class="c-red">5×</b><span>the epidemic<br>line</span>`, W("surge", "Five")], [`<b>${QS.weeks_above}</b><span>weeks<br>above it</span>`, W("surge", "27")]]
+    .forEach(([h, t0], i) => { const r = el("div", "stat", h, st); tl.set(r, { autoAlpha: 0 }, 0); slamIn(r, t0 - .1, { from: 1.7, hit: i > 0, shake: i > 0 }); });
+  hide(st, C.late - .15, .15);
+  glitch(C.late - .12);
+}
+
+// ================================================================ 3 · the lag
+{
+  const s = scene("dark", C.late, C.ask + .45);
+  el("div", "glow", null, s).style.cssText = "left:460px;top:160px;width:1000px;height:760px;background:#7A1E14;opacity:.4";
+  const cut = W("late", "because") - .2;
+  const c = titles(C.late, C.ask, { full: true, kicker: "There is just one problem", kickerAt: C.late + .1, lines: [{ text: "They saw it <span class='c-red'>late.</span>", at: W("late", "saw") - .15 }] });
+  const lag = el("div", "lag", null, c), span = E("late") - cut - .6;
+  [["props", "cloud", 3, "Rain"], ["mosquito", "fly1,fly2", 3, "Mosquitoes"], ["props", "people", 2, "People sick"], ["props", "hospital", 2, "Counted"]].forEach(([sh, po, x, name], i) => {
+    if (i) { const ar = el("div", "ar", null, lag); tl.fromTo(ar, { autoAlpha: 0 }, { autoAlpha: 1, duration: .2 }, cut + i * span / 4 - .1); }
+    const ev = el("div", "ev", null, lag), tile = el("div", "tile", null, ev);
+    sprite(sh, po, PORT ? x + (x < 3 ? 1 : 0) : x, tile); ev.append(name);
+    tl.fromTo(ev, { autoAlpha: 0, scale: .3 }, { autoAlpha: 1, scale: 1, duration: .5, ease: "back.out(2.2)" }, cut + i * span / 4);
+    cues.tick.push(cut + i * span / 4 + .05);
+  });
+  const brk = el("div", "brk", null, c), p = el("p", "", "weeks after the rain that caused them", c);
+  tl.fromTo(brk, { autoAlpha: 0, scaleX: 0, transformOrigin: "0 50%" }, { autoAlpha: 1, scaleX: 1, duration: .8, ease: "steps(12)" }, W("late", "weeks") - .2);
+  up(p, W("late", "weeks") + .1, { y: 14, dur: .5 });
+  cues.riser.push([C.brand - 2.4, C.brand]);
+  pixelWipe(C.ask, .8, ["#050A18", "#0B1630", "#142250"], "down", 7);
+}
+
+// ================================================================ 4 · the question, and the answer
+{
+  const s0 = scene("black", C.ask, C.brand + .7);
+  el("div", "glow", null, s0).style.cssText = "left:460px;top:160px;width:1000px;height:760px;background:#08754F;opacity:.35";
+  const qb = titles(C.ask, C.brand + .05, { full: true, outScale: 1.4 }), ln = el("div", "ln", "", qb);
+  const words = LINE.brand.words.filter((w) => VO_AT.brand + w.t < C.brand - .05);
+  ln.innerHTML = words.map((w, i) => `<span style="display:inline-block;${i >= 4 ? "color:var(--amber)" : ""}">${w.w}</span>`).join(" ");
+  [...ln.children].forEach((sp, i) => tl.fromTo(sp, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: .35, ease: "back.out(2)" }, VO_AT.brand + words[i].t - .08));
+
+  const s = scene("green", C.brand, C.rewind + .05);
+  tl.fromTo(s, { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(110% at 50% 50%)", duration: .6, ease: "steps(10)" }, C.brand).set(s, { clipPath: "none" }, C.brand + .6);
+  cues.whoosh.push(C.brand + .3);
+  const c = titles(C.brand, C.rewind + .02, { full: true, bright: 1.25, out: false });
+  tl.set(c, { autoAlpha: 0 }, C.rewind);
+  brandLogo(c, C.brand + .1, 3);
+  const word = el("div", "word", "EpiLag-PH", c), tag = el("div", "tagl", "See dengue coming. <span>Act weeks earlier.</span>", c);
+  slamIn(word, W("brand", "EpiLag-PH") - .1, { from: 1.4 });
+  up(tag, E("brand") + .05, { y: 30 });
+  flash(W("brand", "EpiLag-PH") + .14, .5, .5);
+  glitch(C.rewind - .05); cues.tape.push(C.rewind);
+}
+
+// ================================================================ 5 · rewind, then the alert that came five weeks early
+{
+  const s = scene("dark", C.rewind, C.sizzle + .45), ra = el("div", "fill", null, s), rb = el("div", "fill light", null, s), L = 410, T = 110, sc = 1.25;
+  const c1 = el("canvas", "chart", null, ra); el("div", "scan", null, ra);
+  Object.assign(c1.style, { left: L + "px", top: T + "px", width: "880px", height: "700px", transform: `scale(${sc})` });
+  const osd1 = el("div", "osd", "◀◀ REWIND", ra), osd2 = el("div", "osd", "", ra);
+  Object.assign(osd1.style, { left: "250px", top: "70px" }); Object.assign(osd2.style, { right: "250px", top: "70px" });
+  const back = qcChart(c1, false), len = C.play - C.rewind;
+  layer(C.rewind, C.play, (lt) => back.draw(4.4 - 3.8 * ease.inOut(clamp(lt / (len - .2)))));
+  const weeks = QC.weeks.slice(0, wk(QS.peak_week) + 1).reverse(), stop = weeks.indexOf(QS.first_flag);
+  layer(C.rewind, C.play, (lt) => {
+    osd2.textContent = fmtDay(weeks[Math.floor(ease.inOut(clamp(lt / (len - .4))) * stop)]).toUpperCase();
+    osd1.style.opacity = Math.floor(lt * 3) % 2 ? .35 : 1;
+    const f = Math.floor(lt * FPS), r = rng(f + 3);
+    for (let i = 0; i < 3; i++) { fx.fillStyle = "rgba(255,255,255,.08)"; fx.fillRect(0, (r() * 1080 + lt * 900) % 1080, 1920, 10 + r() * 50); }
+  });
+  tl.fromTo(ra, { scale: 1 }, { scale: 1.12, duration: len, ease: "power2.in" }, C.rewind);
+  tl.set(rb, { visibility: "hidden" }, 0).set(rb, { visibility: "visible" }, C.play).set(ra, { visibility: "hidden" }, C.play);
+  flash(C.play, .25, 1); cues.impact.push(C.play);
+  const cam = el("div", "cam", null, rb), c2 = el("canvas", "chart", null, cam);
+  Object.assign(c2.style, { left: L + "px", top: T + "px", width: "880px", height: "700px", transform: `scale(${sc})` });
+  const rep = qcChart(c2, true);
+  layer(C.play, C.sizzle + .5, (lt) => rep.draw(lt + .2));
+  const nk = el("div", "note", "Replay · only the data of the time", cam), nc = el("div", "note", `▼ crossed the epidemic line · ${fmtDay(QS.crossed)}`, cam);
+  Object.assign(nk.style, { left: L + "px", top: "62px", color: "#08754F" });
+  const i0 = wk(QS.first_flag), i1 = wk(QS.crossed), gx0 = L + rep.x(i0) * sc, gx1 = L + rep.x(i1) * sc;
+  Object.assign(nc.style, { left: gx1 - 14 + "px", top: T + rep.y(720) * sc - 40 + "px", color: "#071711" });
+  up(nk, C.play + .1, { y: 16, dur: .5 }); up(nc, C.play + 2.0, { y: -10, dur: .5 });
+  const gap = el("div", "gap", `<p>${Math.round((new Date(QS.crossed) - new Date(QS.first_flag)) / 6048e5)} weeks early</p>`, cam);
+  Object.assign(gap.style, { left: gx0 + "px", width: gx1 - gx0 + "px", top: "255px" });
+  const sep = W("rewind", "September", 2), five = W("rewind", "five"), wa = W("rewind", "Watch");
+  camSet(cam, [960, 540], 1, C.play);
+  camTo(cam, [(gx0 + gx1) / 2 + 40, 430], 1.7, sep - .5, 1.2);
+  tl.set(gap, { autoAlpha: 0 }, 0).set(gap, { autoAlpha: 1 }, five - .3);
+  tl.fromTo(gap, { clipPath: "inset(0 100% -200px 0)" }, { clipPath: "inset(0 0% -200px 0)", duration: .8, ease: "steps(10)" }, five - .3).set(gap, { clipPath: "none" }, five + .55);
+  cues.tick.push(five);
+  camTo(cam, [1010, 560], 1.12, wa - 1.0, 1.0);
+  const toast = el("div", "toast", `<div class="ico"></div><div class="app"><span>EpiLag-PH</span><span>15 Sep 2024</span></div><div class="ttl">Quezon City → <span style="color:var(--watch);display:inline-block">Watch</span></div><div class="msg">About 251 cases likely in 4 weeks (152–360). Check breeding sites, ready the teams.</div>`, rb);
+  sprite("frog", "peek", 1, toast.querySelector(".ico"));
+  Object.assign(toast.style, { left: "1030px", top: "560px" });
+  tl.fromTo(toast, { autoAlpha: 0, x: 260, scale: .9 }, { autoAlpha: 1, x: 0, scale: 1, duration: .6, ease: "back.out(1.6)" }, wa - .9);
+  cues.impact.push(wa - .7);
+  tl.to(toast.querySelector(".ttl span"), { scale: 1.2, transformOrigin: "0 50%", duration: .18, yoyo: true, repeat: 3 }, wa - .05);
+  meta(sep - .3, C.sizzle, { n: "▶", tag: "REPLAY 2024", title: "Flagged five weeks early", sub: "Forecasts made with only the data of the time" });
+  cues.riser.push([C.sizzle - 1.2, C.sizzle]);
+}
+
+// ================================================================ 6 · sizzle: five cuts on the beat
+{
+  const cutsz = [["map", "See it.", B("map", "map"), .3], ["area", "Plan it.", join(B("area", "hero"), B("area", "kpi", 0)), .3], ["budget", "Fund it.", B("budget", "out"), 2.4], ["research_methods", "Test it.", [140, 60, 1160, 700], .6], ["drill_play", "Play it.", [0, 60, 1000, 840], 4.2]];
+  const d = (C.see - C.sizzle) / cutsz.length;
+  cutsz.forEach(([clip, word, box, from], i) => {
+    const a = C.sizzle + i * d;
+    shot(a, a + d, { night: clip.startsWith("drill"), segs: [{ clip, from, rate: 1.6, cams: [{ box, pad: 20, push: .5 }] }], dims: [[a, a + d, .45]] });
+    flash(a, .2, .9); cues.impact.push(a);
+    titles(a, a + d, { lines: [{ text: word, cls: "xl" + (i === 4 ? " c-amber" : ""), at: a + .02, from: 2.2, shake: false }], drift: false });
+  });
+}
+
+// ================================================================ 7 · the product, in four chapters
+function chapter(a, b, m, segs, extra = {}) { shot(a, b, { segs, ...extra }); meta(a + .15, b, m); flash(a, .2, .7); cues.impact.push(a); }
+chapter(C.see, C.act, { n: "01", tag: "SEE", title: "Dengue, 2 to 8 weeks ahead", sub: "104 areas · every province, every region, Quezon City" },
+  [{ clip: "map", from: .3, cams: [{ box: B("map", "map"), pad: 40 }, { at: W("see", "104") - .5, box: B("map", "rank"), pad: 40, dur: 1.1 }, { at: W("see", "every") - .3, box: [978, 520, 405, 300], pad: 30, dur: 1.6, ring: true }] }]);
+chip("<b>2–8</b>weeks ahead, with a likely range", W("see", "2") - .1, W("see", "104") - .3);
+chip("<b>104</b>areas, every week", W("see", "104"), C.act - .25);
+chapter(C.act, C.spend, { n: "02", tag: "ACT", title: "A plan, not just a number", sub: "What to do this week, and why the area is flagged" },
+  [{ clip: "area", from: .3, cams: [{ box: join(B("area", "hero"), B("area", "kpi", 0)), pad: 40 }, { at: W("act", "plan") - .45, box: B("area", "playbook"), pad: 40, dur: .9, ring: true }] },
+    { clip: "why", at: W("act", "why") - .25, cams: [{ box: B("why", "chart"), pad: 30 }] }]);
+chapter(C.spend, C.guide, { n: "03", tag: "SPEND", title: "The most cases prevented per peso", sub: "Ranked for your budget, down to the barangay" },
+  [{ clip: "budget", from: .5, cams: [{ box: B("budget", "input"), pad: 90 }, { at: W("spend", "ranks") - .45, box: B("budget", "out"), pad: 50, dur: .9, ring: true }, { at: W("spend", "prevent") - .4, box: B("budget", "spend"), pad: 30, dur: .9 }] },
+    { clip: "barangays", at: W("spend", "down") - .25, cams: [{ box: B("barangays", "chart"), pad: 24 }] }]);
+chapter(C.guide, C.test, { n: "04", tag: "FOR EVERYONE", title: "A guided tour. English or Filipino.", sub: "Short labels, numbers first" },
+  [{ clip: "guide", from: .6, rate: 1.5, cams: [{ box: [330, 110, 780, 620], pad: 20 }] },
+    { clip: "lang", at: W("guide", "In") - .2, from: .3, rate: 1.4, cams: [{ box: B("lang", "switch"), pad: 160 }, { at: W("guide", "Filipino") - .5, box: join(B("lang", "strip"), [288, 300, 1112, 250]), pad: 20, dur: .8 }] }]);
+pixelWipe(C.test, .8, ["#050A18", "#0B1630", "#F04B2A"], "right", 11);
+
+// ================================================================ 8 · the research: we tried to break it
+function blackCard(a, b, html, glow) {
+  const s = scene("black", a, b + .05);
+  el("div", "glow", null, s).style.cssText = `left:460px;top:160px;width:1000px;height:760px;background:${glow};opacity:.4`;
+  titles(a, b + .03, { full: true, lines: [{ text: html, at: a + .22 }] });
+}
+blackCard(C.test, C.test2, "Then we tried to <span class='c-red'>break it.</span>", "#7A1E14");
+{
+  const sl = [[W("test", "19"), "19", "studies reviewed"], [W("test", "Three"), "3", "rival methods, one test"], [W("test", "12"), "12<small>/24</small>", "checks: the lowest error"], [W("test", "5"), "5<small>/6</small>", "test years: beat the simple rules"]];
+  chapter(C.test2, C.losses, { n: "05", tag: "TEST", title: "We tested our own model", sub: "4 methods · 6 unseen years · 4 lead times" },
+    [{ clip: "research_top", from: .2, cams: [{ box: [150, 90, 760, 330], pad: 30 }] },
+      { clip: "research_methods", at: W("test", "Three") - .2, from: .3, cams: [{ box: [150, 150, 720, 480], pad: 20 }, { at: W("test", "Ours") - .4, box: [150, 250, 760, 330], pad: 10, dur: .9 }, { at: W("test", "beat") - .4, box: [150, 560, 1140, 330], pad: 10, dur: 1.0 }] }]);
+  sl.forEach(([at, n, lab], i) => chip(`<b>${n.replace(/<small>/, "<small> ")}</b>${lab}`, at - .05, i < 3 ? sl[i + 1][0] - .2 : C.losses - .25));
+}
+blackCard(C.losses, C.losses2, "It lost <span class='c-red'>three times.</span>", "#7A1E14");
+chapter(C.losses2, C.drill, { n: "06", tag: "OWN IT", title: "Every loss, traced to its cause", sub: "Published in full, with the limits" },
+  [{ clip: "research_losses", from: .3, cams: [{ box: [150, 60, 1140, 420], pad: 10 }, { at: W("losses", "published") - .5, box: [150, 330, 1140, 500], pad: 10, dur: 1.0 }] }]);
+chip("<b>3</b>losses · 3 causes", W("losses", "cause") - .1, C.drill - .25);
+pixelWipe(C.drill, .8, ["#0B1630", "#142250", "#2E3F7A", "#F5A51C"], "diag", 15);
+
+// ================================================================ 9 · Dengue Drill
+blackCard(C.drill, C.drill2, "Don’t take our <span class='c-amber'>word for it.</span>", "#2E3F7A");
+cues.riser.push([C.drill2 - 1.6, C.drill2]);
+{
+  const ch = W("drill", "Choose") - .25, an = W("drill", "and") - .2;
+  shot(C.drill2, C.montage, { night: true, segs: [{ clip: "drill_intro", from: 1.0, rate: 1.4, cams: [{ box: FULL, port: [40, 0, 1200, 900] }, { at: W("drill", "18") - .4, box: [60, 380, 520, 300], pad: 60, dur: .7 }, { at: W("drill", "Ten") - .3, box: FULL, port: [40, 0, 1200, 900], dur: .7 }] },
+    { clip: "drill_models", at: ch, from: .8, rate: 1.5, hit: true, cams: [{ box: join(B("drill_models", "title"), B("drill_models", "models")), pad: 20 }, { at: ch + 1.2, box: B("drill_models", "models"), pad: 10, dur: 1.0 }] },
+    { clip: "drill_play", at: an, from: 3.4, rate: 1.2, hit: true, cams: [{ box: FULL, port: [0, 0, 1200, 900] }] }] });
+  flash(C.drill2, .2, .7); cues.impact.push(C.drill2);
+  meta(C.drill2 + .15, ch, { n: "07", tag: "PLAY", title: "Dengue Drill", sub: "Get ahead of a real dengue season" });
+  meta(ch + .1, an, { n: "07", tag: "PLAY", title: "Whose forecast do you trust?", sub: "EpiLag-PH, three rivals, or the average" });
+  meta(an + .1, C.montage, { n: "07", tag: "PLAY", title: "The real cases keep score", sub: "Quezon City 2024–25, barangay by barangay" });
+  chip("<b>18</b>real seasons", W("drill", "18") - .05, W("drill", "Ten") - .15);
+  chip("<b>10</b>teams", W("drill", "Ten"), W("drill", "Eight") - .15);
+  chip("<b>8</b>turns", W("drill", "Eight"), ch - .25);
+}
+{ // the montage: no voice, the music carries it. Six cuts, a word on each.
+  const m = C.montage, cutsm = [
+    ["drill_play", 3.6, 1.5, [0, 60, 1000, 840], "Send the teams."], ["drill_play", 6.6, 1.6, [300, 180, 620, 520], "End the turn."], ["drill_play", 9.4, 1.6, [0, 60, 1000, 840], "Watch it spread."],
+    ["drill_report", .5, 1.2, FULL, "Count the cases."], ["drill_vs", .5, 1.0, FULL, "Did the forecast help?"], ["drill_models", 1.0, 1.6, B("drill_models", "models"), "Try another model."]];
+  const d = (C.again - m) / cutsm.length;
+  cutsm.forEach(([clip, from, rate, box, word], i) => {
+    const a = m + i * d, isFull = box === FULL;
+    shot(a, a + d + (i === cutsm.length - 1 ? .1 : 0), { night: true, segs: [{ clip, from, rate, cams: [{ box, port: isFull ? [120, 0, 1200, 900] : box, pad: 10, push: .35 }] }], dims: [[a, a + d, .4]] });
+    flash(a, .2, .85); cues.impact.push(a);
+    titles(a, a + d, { lines: [{ text: word, cls: i === 4 ? "c-amber" : "", at: a + .03, from: 2, shake: false }], drift: false });
+  });
+  glitch(C.again - .15);
+}
+
+// ================================================================ 10 · the rains again, and the end card
+{
+  const s = scene("black", C.again, C.end + .5), cam = el("div", "cam", null, s);
+  skyline(cam, 4);
+  rain(cam, C.again, C.end + .5, { seed: 31, flash: [W("close", "This") - C.again - .05] });
+  tl.fromTo(cam, { scale: 1.1, transformOrigin: "50% 60%" }, { scale: 1, duration: C.end - C.again + .5, ease: "none" }, C.again);
+  titles(C.again + .2, C.end - .1, { lines: [{ text: "The rains will come again.", cls: "sm c-dim", at: W("close", "The") - .1, soft: true }, { text: "This time, <span class='c-amber'>see dengue coming.</span>", at: W("close", "This") - .12 }] });
+  pixelWipe(C.end, .9, ["#08754F", "#055C3E", "#0E8C5F", "#F5A51C"], "diag", 19);
+  const e = scene("green", C.end - .45, TOTAL + .1), k = titles(C.end + .05, TOTAL + 1, { full: true, bright: 1.25, out: false, drift: false });
+  fulls[fulls.length - 1][0] = C.end - .3;
+  k.style.gap = PORT ? "38px" : "24px";
+  const lg = brandLogo(k, C.end + .1, 17);
+  if (!PORT) { lg.style.width = lg.style.height = "200px"; lg.style.zoom = .78; }
+  const word = el("div", "word", "EpiLag-PH", k), tag = el("div", "tagl", "See dengue coming. <span>Act weeks earlier.</span>", k);
+  const url = el("div", "url", "romeo-04.github.io/epilag", k), cta = el("div", "cta", "<span>Open the dashboard</span><i></i><span>Play Dengue Drill</span><i></i><span>Read the research</span>", k);
+  const cr = el("div", "credits", "PJDSC 2026 · Data: DOH Epidemiology Bureau via HDX · UPRI-NOAH · ERA5 via Open-Meteo · OCHA COD", k);
+  slamIn(word, C.end + .75, { from: 1.4 });
+  up(tag, C.end + 1.3, { y: 30 }); up(url, C.end + 1.8, { y: 30 }); up(cta, C.end + 2.2, { y: 20 }); up(cr, C.end + 2.6, { y: 16 });
+  tl.fromTo("#fade", { opacity: 0 }, { opacity: 1, duration: 1.1, ease: "power1.in" }, TOTAL - 1.1);
+  tl.to({}, { duration: .01 }, TOTAL);
+}
+tl.fromTo("#bug", { opacity: 0 }, { opacity: 1, duration: .4 }, C.see).to("#bug", { opacity: 0, duration: .3 }, C.again);
+
+// ---------------------------------------------------------------- captions, on the words
+const cap = $("cap");
+const capChunks = VO.lines.flatMap((l) => {
+  const base = VO_AT[l.id], out = [], max = PORT ? 7 : 13; let start = 0;
+  l.words.forEach((w, i) => {
+    const last = i === l.words.length - 1, stop = /[.?!:]$/.test(w.w) && i - start >= 2, long = i - start + 1 >= max && /[,]$/.test(w.w) || i - start + 1 >= max + 3;
+    if (!(last || stop || long)) return;
+    const ws = l.words.slice(start, i + 1), node = document.createElement("div");
+    node.innerHTML = ws.map((x) => `<span>${x.w}</span>`).join(" ");
+    out.push({ a: base + ws[0].t - .12, b: last ? base + l.dur + .35 : base + l.words[i + 1].t - .12, el: node, spans: [...node.children], words: ws, base });
+    start = i + 1;
+  });
+  return out;
+});
+let capNow = null;
+function captions(t) {
+  const line = t < C.end - .2 ? capChunks.find((l) => t >= l.a && t <= l.b) : null;
+  if (line !== capNow) { cap.replaceChildren(...(line ? [line.el] : [])); capNow = line; }
+  cap.style.opacity = line ? clamp(Math.min((t - line.a) / .12, (line.b - t) / .18)) : 0;
+  if (line) line.spans.forEach((sp, i) => { const w = line.words[i], at = line.base + w.t; sp.className = t >= at + w.d ? "on" : t >= at ? "now" : ""; });
+}
+const grain = $("grain").getContext("2d"), noise = [];
+for (let k = 0; k < 6; k++) {
+  const img = grain.createImageData(480, 270), r = rng(100 + k);
+  for (let i = 0; i < img.data.length; i += 4) { const v = r() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  noise.push(img);
+}
+
+// ---------------------------------------------------------------- portrait: the band and backdrop follow the rendered picture
+const bandImg = $("band").firstChild, backImg = $("back").firstChild;
+let picFrame = -1;
+function portrait(t) {
+  const f = Math.min(Math.floor(TOTAL * FPS) - 1, Math.round(t * FPS));
+  if (f !== picFrame) {
+    picFrame = f;
+    const src = `out/pic/${String(f).padStart(5, "0")}.jpg`;
+    bandImg.src = src; backImg.src = src;
+    pending.push(bandImg.decode().catch(() => {}), backImg.decode().catch(() => {}));
+  }
+  let k = 0, bright = .42;
+  for (const [a, b, br] of fulls) { const v = clamp(Math.min((t - a) / .25, (b - t) / .25)); if (v > k) { k = v; bright = .42 + (br - .42) * v; } }
+  $("band").style.opacity = 1 - k;
+  backImg.style.filter = `blur(${46 - 10 * k}px) brightness(${bright.toFixed(3)}) saturate(1.25)`;
+}
+
+// ---------------------------------------------------------------- render one frame at time t (the recorder awaits this)
+window.TOTAL = TOTAL;
+window.REEL = { total: TOTAL, fps: FPS, w: Wd, h: Ht, vo: VO.lines.map((l) => ({ id: l.id, at: VO_AT[l.id], dur: l.dur })), cues,
+  marks: { ...C, hookLine: W("hook", "The") - .1, mosq: W("hook", "mosquitoes"), word: W("brand", "EpiLag-PH") } };
+window.render = async function (t) {
+  tl.seek(t, false);
+  if (PORT) portrait(t);
+  else {
+    fx.clearRect(0, 0, 1920, 1080);
+    for (const L of layers) if (t >= L.a && t <= L.b) L.draw(t - L.a, t);
+    updateClips(t);
+  }
+  for (const a of animated) {
+    const k = Math.floor(t * a.fps) % a.frames.length;
+    if (k !== a.k) { const g = a.cv.getContext("2d"); g.clearRect(0, 0, a.cv.width, a.cv.height); g.drawImage(a.frames[k], 0, 0); a.k = k; }
+  }
+  if (!PICMODE) { captions(t); grain.putImageData(noise[Math.floor(t * FPS) % noise.length], 0, 0); }
+  await Promise.all(pending.splice(0));
+};
+window.ready = Promise.all([document.fonts.ready, document.fonts.load("900 100px 'Inter Tight'"), document.fonts.load("800 20px 'JetBrains Mono'")]);
+
+// ---------------------------------------------------------------- preview: plays in real time (#t=42 starts at 42 s; #mute for no voice)
+if (!location.hash.includes("record")) {
+  const fit = () => { document.body.style.transform = `scale(${Math.min(innerWidth / Wd, innerHeight / Ht)})`; };
+  fit(); addEventListener("resize", fit);
+  const btn = document.createElement("div"); btn.id = "play"; btn.textContent = PORT ? "▶ Play the trailer (portrait needs the rendered picture frames in out/pic/)" : "▶ Play the trailer"; document.body.append(btn);
+  const startAt = +(location.hash.match(/t=([\d.]+)/) || [0, 0])[1];
+  window.ready.then(() => window.render(startAt));
+  btn.onclick = () => {
+    btn.remove();
+    const t0 = performance.now() - startAt * 1000, mute = location.hash.includes("mute");
+    const voices = VO.lines.map((l) => ({ at: VO_AT[l.id], a: new Audio(`vo/${l.id}.wav`), done: mute || VO_AT[l.id] < startAt }));
+    const loop = (now) => {
+      const t = (now - t0) / 1000;
+      voices.forEach((v) => { if (!v.done && t >= v.at) { v.done = true; v.a.play(); } });
+      window.render(Math.min(t, TOTAL));
+      if (t < TOTAL) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  };
+}
+</script>
+</body>
+</html>

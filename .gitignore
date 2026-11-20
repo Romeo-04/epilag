@@ -9,3 +9,8 @@ reports_streamlit.log
 site/node_modules/
 site/.vite/
 UI mockup/
+docs/reel/clips/
+docs/reel/trailer/clips/
+docs/reel/trailer/out/
+reel_stills/
+docs/reel/flow/out/

@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EpiLag-PH · system flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<!--
+  EpiLag-PH, the system flow video: one forecast (Quezon City, made on 15 Sep 2024) followed through the whole
+  system, from the data row to LightGBM, the alert, the dashboard and the game. 1920 x 1080, 30 fps.
+
+  One seekable timeline: render(t) draws the frame at t seconds (scripts/record_flow.py records it frame by frame).
+  Every scene starts on its line of the voice-over and every highlight lands on a spoken word (vo.js, from
+  scripts/flow_voice.py). The app and the game are real screen captures (clips/, scripts/flow_capture.py).
+  Every number on screen comes from the repo; docs/reel/flow/SCRIPT.md lists where.
+
+  Preview: open this file in Chrome and press play (#t=40 starts at 40 s, #mute without the guide voice).
+-->
+<style>
+  :root {
+    --ink: #071711; --paper: #FBFAF4; --forest: #08754F; --forest-deep: #055C3E; --forest-soft: #E3F0E7;
+    --sage: #789373; --sage-soft: #E9EDE3; --amber: #F5A51C; --line: #E4E4D9; --line-strong: #CFD2C4;
+    --muted: #4A5A51; --soft: #63706A;
+    --warn: #F04B2A; --watch: #F58220; --above: #F7C928; --normal: #0C7A55;
+    --night: #0B1630; --night-2: #142250; --night-line: #2E3F7A;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+  body { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; transform-origin: 0 0; }
+  #stage { position: absolute; inset: 0; overflow: hidden; background: var(--paper); }
+  #dots { position: absolute; left: -1600px; top: -1200px; width: 5200px; height: 3600px; background-image: radial-gradient(circle, #D9DACB 1.6px, transparent 1.9px); background-size: 32px 32px; }
+  .abs { position: absolute; }
+  canvas.px { image-rendering: pixelated; display: block; }
+  svg.px { display: block; }
+
+  /* ---- header: brand, step, title */
+  #brand { position: absolute; left: 64px; top: 44px; display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 30px; letter-spacing: -.01em; }
+  #brand .tile { width: 44px; height: 44px; border-radius: 11px; background: var(--forest); display: grid; place-items: center; }
+  .kicker { position: absolute; left: 64px; top: 116px; font-size: 22px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--forest); white-space: nowrap; }
+  .title { position: absolute; left: 64px; top: 146px; font-size: 50px; font-weight: 800; letter-spacing: -.025em; white-space: nowrap; }
+
+  /* ---- the graph (world coordinates; the camera moves it) */
+  #graph { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+  #edges { position: absolute; left: 0; top: 0; overflow: visible; }
+  #edges .base { fill: none; stroke: var(--line-strong); stroke-width: 2.4; }
+  #edges .lit { fill: none; stroke: var(--forest); stroke-width: 3.4; stroke-linecap: round; }
+  .node { position: absolute; }
+  .node .box { position: absolute; left: 0; top: 0; background: #fff; border: 2px solid var(--line); border-radius: 24px; display: grid; place-items: center;
+    box-shadow: 0 1px 0 rgba(7, 23, 17, .04), 0 10px 24px -16px rgba(7, 23, 17, .35); }
+  .node .ring { position: absolute; inset: -10px; border-radius: 32px; border: 3px solid var(--forest); box-shadow: 0 0 0 8px rgba(8, 117, 79, .12); opacity: 0; }
+  .node .ping { position: absolute; inset: -4px; border-radius: 28px; border: 3px solid var(--forest); opacity: 0; }
+  .node .badge { position: absolute; right: -12px; top: -12px; width: 30px; height: 30px; border-radius: 50%; background: var(--forest); color: #fff; display: grid; place-items: center; opacity: 0;
+    font-size: 17px; font-weight: 900; box-shadow: 0 0 0 3px var(--paper); }
+  .node .lab { position: absolute; white-space: nowrap; }
+  .node .lab b { display: block; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .node .lab span { display: block; font-size: 15px; font-weight: 500; color: var(--soft); margin-top: 2px; }
+  .node.big .lab b { font-size: 23px; font-weight: 800; }
+  .chip { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; background: #fff; border: 2px solid var(--line-strong); border-radius: 10px; padding: 7px 13px;
+    font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--ink); box-shadow: 0 8px 18px -12px rgba(7, 23, 17, .45); }
+  .chip em { font-style: normal; color: var(--forest); }
+  .chip.watch { background: var(--watch); border-color: var(--watch); color: var(--ink); font-size: 17px; }
+  .chip.green { border-color: var(--forest); }
+
+  /* ---- panels (screen coordinates, right side) */
+  .panel { position: absolute; left: 936px; top: 226px; width: 924px; background: #fff; border-radius: 18px; overflow: hidden; opacity: 0;
+    box-shadow: 0 0 0 1.5px var(--line), 0 30px 60px -30px rgba(7, 23, 17, .45); }
+  .panel .bar { height: 44px; background: var(--ink); color: #E9F3EC; display: flex; align-items: center; gap: 12px; padding: 0 18px; font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .panel .bar .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--forest); box-shadow: 0 0 0 3px rgba(8, 117, 79, .35); }
+  .panel .bar .rt { margin-left: auto; color: #9DBDAC; }
+  .panel .body { padding: 26px 30px 28px; }
+  .panel .foot { font-family: var(--mono); font-size: 13px; color: var(--soft); margin-top: 18px; }
+  .panel h3 { font-size: 26px; font-weight: 800; letter-spacing: -.015em; }
+  .panel .sub { font-size: 16px; color: var(--muted); margin-top: 4px; }
+  /* browser frame for the real captures */
+  .browser .bar { background: #E9EDE3; color: var(--muted); letter-spacing: 0; text-transform: none; font-weight: 500; }
+  .browser .bar i { width: 12px; height: 12px; border-radius: 50%; background: #CFD2C4; display: block; }
+  .browser .bar .url { margin-left: 10px; background: #fff; border-radius: 8px; padding: 6px 14px; font-size: 14px; color: var(--ink); flex: 0 1 460px; }
+  .browser .bar .live { margin-left: auto; font-weight: 800; color: var(--forest); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; display: flex; gap: 8px; align-items: center; }
+  .browser .bar .live::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--warn); }
+  .browser.night .bar { background: #142250; color: #A3B0DB; } .browser.night .bar .url { background: #0B1630; color: #EEF2FF; } .browser.night .bar i { background: #2E3F7A; }
+  .browser.night .bar .live { color: #2FD6C3; }
+  .screen { position: relative; width: 924px; height: 578px; overflow: hidden; background: #F3F2EA; }
+  .screen.night { background: var(--night); }
+  .screen .cam { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; }
+  .screen img { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; opacity: 0; }
+
+  /* data panel */
+  .frow { display: grid; grid-template-columns: 250px 1fr; align-items: center; gap: 18px; padding: 11px 0; border-top: 1.5px solid var(--line); }
+  .frow .k { font-size: 18px; font-weight: 700; }
+  .frow .k small { display: block; font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--soft); margin-top: 2px; }
+  .frow .v { font-size: 18px; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; white-space: nowrap; }
+  .frow .v b { color: var(--ink); font-weight: 800; }
+  .num { font-family: var(--mono); font-weight: 800; font-size: 20px; color: var(--ink); background: var(--forest-soft); border-radius: 7px; padding: 3px 9px; }
+  .cell { width: 30px; height: 26px; border-radius: 5px; background: #E6F3F6; border: 1.5px solid #BFE2EC; }
+  /* model grid */
+  .mgrid { display: grid; grid-template-columns: 150px repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+  .mgrid .h { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--soft); text-align: center; align-self: end; }
+  .mgrid .rl { font-size: 17px; font-weight: 700; align-self: center; }
+  .mgrid .rl small { display: block; font-family: var(--mono); font-size: 12px; color: var(--soft); font-weight: 500; }
+  .mcell { height: 50px; border-radius: 10px; border: 2px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  /* alert rules */
+  .rule { display: grid; grid-template-columns: 220px 1fr; align-items: center; gap: 18px; padding: 15px 18px; border-radius: 14px; border: 2px solid var(--line); margin-top: 10px; position: relative; }
+  .rule .lv { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; }
+  .rule .lv i { width: 16px; height: 16px; border-radius: 4px; display: block; }
+  .rule .tx { font-size: 18px; color: var(--muted); }
+  .rule .tx b { color: var(--ink); }
+  .rule .qc { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-weight: 800; font-size: 16px; background: var(--watch); color: var(--ink); border-radius: 8px; padding: 6px 12px; opacity: 0; }
+  .defs { display: flex; gap: 12px; margin-top: 14px; }
+  .defs div { flex: 1; border-radius: 12px; background: var(--sage-soft); padding: 12px 16px; font-size: 17px; color: var(--muted); }
+  .defs b { color: var(--ink); display: block; font-size: 18px; }
+  /* shap bars */
+  .sbar { display: grid; grid-template-columns: 230px 1fr 70px; align-items: center; gap: 16px; margin-top: 18px; }
+  .sbar .k { font-size: 20px; font-weight: 700; }
+  .sbar .k small { display: block; font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--soft); }
+  .sbar .tr { height: 30px; background: var(--sage-soft); border-radius: 8px; overflow: hidden; }
+  .sbar .fl { height: 100%; width: 0; background: var(--forest); border-radius: 8px; }
+  .sbar .p { font-family: var(--mono); font-weight: 800; font-size: 22px; text-align: right; }
+
+  /* ---- caption and progress */
+  #caption { position: absolute; left: 64px; top: 968px; font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  #caption > div { position: absolute; left: 0; top: 0; opacity: 0; }
+  #caption b { color: var(--forest); font-weight: 800; }
+  #caption em { font-style: normal; font-weight: 800; color: #C25A00; }
+  #progress { position: absolute; left: 0; bottom: 0; height: 7px; background: var(--forest); width: 0; }
+
+  /* ---- title and end cards */
+  .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; text-align: center; }
+  #intro .logo { width: 132px; height: 132px; border-radius: 32px; background: var(--forest); display: grid; place-items: center; box-shadow: 0 30px 60px -30px rgba(5, 92, 62, .8); }
+  #intro h1 { font-size: 112px; font-weight: 900; letter-spacing: -.04em; margin-top: 30px; }
+  #intro p { font-size: 30px; font-weight: 600; color: var(--muted); margin-top: 10px; }
+  #intro .flow { display: flex; gap: 14px; align-items: center; margin-top: 34px; font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--forest); }
+  #intro .flow span { background: #fff; border: 2px solid var(--line); border-radius: 10px; padding: 8px 14px; color: var(--ink); }
+  #outro { background: rgba(251, 250, 244, .82); }
+  #outro .k { font-size: 21px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--forest); }
+  #outro h2 { font-size: 64px; font-weight: 900; letter-spacing: -.03em; margin-top: 14px; }
+  #outro h2 em { font-style: normal; color: #C25A00; }
+  #outro .stats { display: flex; gap: 18px; margin-top: 40px; }
+  .stat { width: 300px; background: #fff; border: 2px solid var(--line); border-radius: 20px; padding: 26px 20px 22px; opacity: 0; box-shadow: 0 20px 40px -30px rgba(7, 23, 17, .5); }
+  .stat b { display: block; font-size: 66px; font-weight: 900; letter-spacing: -.03em; color: var(--forest); line-height: 1; }
+  .stat b.o { color: #D96A00; }
+  .stat span { display: block; font-size: 18px; font-weight: 600; color: var(--muted); margin-top: 12px; line-height: 1.3; }
+  #outro .lock { display: flex; align-items: center; gap: 16px; margin-top: 54px; font-size: 40px; font-weight: 900; letter-spacing: -.02em; opacity: 0; }
+  #outro .lock .tile { width: 58px; height: 58px; border-radius: 15px; background: var(--forest); display: grid; place-items: center; }
+  #outro .url { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--forest); margin-top: 12px; opacity: 0; }
+  #fade { position: absolute; inset: 0; background: var(--paper); opacity: 0; pointer-events: none; }
+
+  #play { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9; background: var(--ink); color: #fff; font-size: 40px; font-weight: 800; padding: 28px 48px; border-radius: 20px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="dots"></div>
+  <div id="graph"><svg id="edges" width="1920" height="1080"></svg></div>
+  <div id="brand"><div class="tile" data-logo="28"></div>EpiLag-PH</div>
+  <div id="heads"></div>
+  <div id="panels"></div>
+  <div id="caption"></div>
+  <div id="intro" class="card">
+    <div class="logo" data-logo="96"></div>
+    <h1>EpiLag-PH</h1>
+    <p>How it works: one forecast, followed through the whole system.</p>
+    <div class="flow"><span>Public data</span>→<span>LightGBM</span>→<span>Alert</span>→<span>Dashboard</span>→<span>Dengue Drill</span></div>
+  </div>
+  <div id="outro" class="card">
+    <div class="k">Quezon City · 2024–25 season · replayed with the forecasts of the time</div>
+    <h2>Watch on 15 Sep → line crossed 20 Oct → <em>5 weeks early</em></h2>
+    <div class="stats">
+      <div class="stat"><b class="o">5 wk</b><span>warning before the<br>epidemic line was crossed</span></div>
+      <div class="stat"><b>622</b><span>cases in the peak week, Feb 2025<br>27 weeks above the line</span></div>
+      <div class="stat"><b>30 / 32</b><span>provinces flagged 4 weeks<br>ahead · 2019 replay</span></div>
+      <div class="stat"><b>104</b><span>areas, forecast<br>2–8 weeks ahead</span></div>
+    </div>
+    <div class="lock"><div class="tile" data-logo="40"></div>EpiLag-PH</div>
+    <div class="url">epilag.vercel.app &nbsp;·&nbsp; github.com/Romeo-04/epilag</div>
+  </div>
+  <div id="progress"></div>
+  <div id="fade"></div>
+</div>
+
+<script src="vo.js"></script>
+<script src="assets.js"></script>
+<script src="clips.js"></script>
+<script>
+"use strict";
+const FPS = 30, END_HOLD = 3.2, $ = (s) => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), lerp = (a, b, k) => a + (b - a) * k;
+const ease = { out: (k) => 1 - (1 - k) ** 3, inOut: (k) => (k < .5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2), back: (k) => 1 + 2.2 * (k - 1) ** 3 + 1.2 * (k - 1) ** 2 };
+// 0 -> 1 -> 0 over [a, b], fading in for fi and out for fo seconds
+const env = (t, a, b, fi = .35, fo = .35) => clamp(Math.min((t - a) / fi, (b - t) / fo));
+const ramp = (t, a, d = .45) => ease.out(clamp((t - a) / d));
+
+// ---------------------------------------------------------------- the clock: scenes start on their lines
+const VO = window.VO, GAP = VO.gap, S = {}, LINE = {}, ORDER = VO.lines.map((l) => l.id);
+let clock = VO.lead;
+for (const l of VO.lines) { S[l.id] = clock; LINE[l.id] = l; clock += l.dur + GAP + (l.pad || 0); }
+const TOTAL = +(clock + END_HOLD).toFixed(2);
+const NEXT = (id) => S[ORDER[ORDER.indexOf(id) + 1]] ?? TOTAL;
+const norm = (w) => w.toLowerCase().replace(/[^a-z0-9]/g, "");
+function W(id, word, nth = 0) {  // when a word of a line is said
+  let c = 0;
+  for (const w of LINE[id].words) if (norm(w.w).startsWith(norm(word)) && c++ === nth) return S[id] + w.t;
+  throw new Error(`no word "${word}" in ${id}`);
+}
+const cues = { tick: [], whoosh: [], hit: [], chime: [] };
+
+// ---------------------------------------------------------------- pixel art: the site's icons and sprites
+const A = window.ASSETS, ICOL = { "#": "#071711", "+": "#E3F0E7", a: "#F5A51C" };
+function iconSVG(name, px, colors = ICOL) {
+  const [grid, rows] = A.icons[name], w = Math.max(...rows.map((r) => r.length));
+  const ox = Math.floor((grid - w) / 2), oy = Math.floor((grid - rows.length) / 2), paths = {};
+  rows.forEach((row, y) => { for (let x = 0; x < row.length;) { const c = row[x]; if (!colors[c]) { x++; continue; } let e = x; while (e < row.length && row[e] === c) e++; paths[c] = (paths[c] || "") + `M${x + ox} ${y + oy}h${e - x}v1h${x - e}z`; x = e; } });
+  return `<svg class="px" width="${px}" height="${px}" viewBox="0 0 ${grid} ${grid}" shape-rendering="crispEdges">${Object.entries(paths).map(([c, d]) => `<path fill="${colors[c]}" d="${d}"/>`).join("")}</svg>`;
+}
+function spriteCanvas(sheet, pose, box) {  // cropped to its pixels, scaled by a whole number to fit the box
+  const S_ = A.sprites[sheet], rows = S_.poses[pose];
+  let x0 = 99, y0 = 99, x1 = -1, y1 = -1;
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c !== ".") { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); } }));
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, k = Math.max(1, Math.round(box / Math.max(bw, bh)));
+  const cv = document.createElement("canvas"); cv.className = "px"; cv.width = bw * k; cv.height = bh * k;
+  const g = cv.getContext("2d");
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c !== "." && S_.palette[c]) { g.fillStyle = S_.palette[c]; g.fillRect((x - x0) * k, (y - y0) * k, k, k); } }));
+  return cv;
+}
+document.querySelectorAll("[data-logo]").forEach((el) => { el.innerHTML = iconSVG("logo", +el.dataset.logo, { "#": "#071711", "+": "#FBFAF4", a: "#F5A51C" }); });
+const el = (tag, cls, html, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.append(e); return e; };
+
+// ---------------------------------------------------------------- the graph: what the system is made of (README.md, src/)
+const N = {
+  doh: { x: 170, y: 297, w: 80, side: "in", name: "DOH dengue reports", sub: "via HDX · provinces", icon: ["spr", "mosquito", "clipboard"] },
+  noah: { x: 170, y: 447, w: 80, side: "in", name: "UPRI-NOAH cases", sub: "regions · Quezon City", icon: ["spr", "props", "hospital"] },
+  era5: { x: 170, y: 597, w: 80, side: "in", name: "ERA5 weather", sub: "rain · heat · humidity", icon: ["spr", "props", "cloud"] },
+  pop: { x: 170, y: 747, w: 80, side: "in", name: "PSA population", sub: "via OCHA", icon: ["spr", "props", "people"] },
+  feat: { x: 420, y: 522, w: 100, name: "Feature row", sub: "per area, per week", icon: ["ico", "database"] },
+  lgbm: { x: 645, y: 522, w: 128, big: true, name: "LightGBM", sub: "quantile · q10 q50 q90", icon: ["spr", "props", "tree"] },
+  conf: { x: 870, y: 522, w: 100, name: "Conformal range", sub: "calibrated to 80%", icon: ["ico", "forecast"] },
+  alert: { x: 1085, y: 522, w: 100, name: "Alert engine", sub: "usual · epidemic line", icon: ["ico", "alert"] },
+  o_over: { x: 1325, y: 262, w: 84, side: "out", name: "Overview + 3D map", sub: "act now · drill-down map", icon: ["ico", "forecastMap"] },
+  o_area: { x: 1325, y: 366, w: 84, side: "out", name: "Area plan", sub: "checklist · report card", icon: ["ico", "actionPlan"] },
+  o_budget: { x: 1325, y: 470, w: 84, side: "out", name: "Budget plan", sub: "cases averted per peso", icon: ["spr", "props", "broom"] },
+  o_res: { x: 1325, y: 574, w: 84, side: "out", name: "For residents", sub: "Filipino · English · SMS", icon: ["ico", "residents"] },
+  o_drill: { x: 1325, y: 678, w: 84, side: "out", name: "Dengue Drill", sub: "the game", icon: ["spr", "frog", "watch"] },
+  o_data: { x: 1325, y: 782, w: 84, side: "out", name: "Open data", sub: "CSV · JSON", icon: ["ico", "downloadBox"] },
+};
+const INPUTS = ["doh", "noah", "era5", "pop"], OUTPUTS = ["o_over", "o_area", "o_budget", "o_res", "o_drill", "o_data"];
+const graph = $("#graph"), svg = $("#edges"), NS = "http://www.w3.org/2000/svg";
+const ORDERED = [...INPUTS, "feat", "lgbm", "conf", "alert", ...OUTPUTS];
+ORDERED.forEach((id, i) => {
+  const n = N[id], w = n.w, d = el("div", "node" + (n.big ? " big" : ""), null, graph);
+  d.style.left = `${n.x - w / 2}px`; d.style.top = `${n.y - w / 2}px`; d.style.width = d.style.height = `${w}px`;
+  const box = el("div", "box", null, d); box.style.width = box.style.height = `${w}px`; box.style.borderRadius = `${w * .26}px`;
+  const art = Math.round(w * .56);
+  if (n.icon[0] === "ico") box.innerHTML = iconSVG(n.icon[1], A.icons[n.icon[1]][0] === 12 ? Math.round(art / 12) * 12 : Math.round(art / 16) * 16);
+  else box.append(spriteCanvas(n.icon[1], n.icon[2], art));
+  n.ring = el("div", "ring", null, d); n.ping = el("div", "ping", null, d); n.badge = el("div", "badge", "✓", d);
+  const lab = el("div", "lab", `<b>${n.name}</b><span>${n.sub}</span>`, d);
+  if (n.side === "out") { lab.style.left = `${w + 18}px`; lab.style.top = `${w / 2 - 25}px`; }
+  else { lab.style.left = "50%"; lab.style.transform = "translateX(-50%)"; lab.style.top = `${w + 12}px`; lab.style.textAlign = "center"; }
+  n.el = d; n.order = i;
+});
+const E = {};
+function edge(a, b) {
+  const A_ = N[a], B = N[b], x1 = A_.x + A_.w / 2, x2 = B.x - B.w / 2, dx = (x2 - x1) * .55;
+  const d = `M${x1} ${A_.y} C${x1 + dx} ${A_.y} ${x2 - dx} ${B.y} ${x2} ${B.y}`;
+  const base = document.createElementNS(NS, "path"); base.setAttribute("d", d); base.setAttribute("class", "base");
+  const lit = document.createElementNS(NS, "path"); lit.setAttribute("d", d); lit.setAttribute("class", "lit");
+  svg.append(base, lit);
+  const len = base.getTotalLength();
+  lit.style.strokeDasharray = `${len} ${len}`;
+  base.style.strokeDasharray = `${len} ${len}`;
+  E[`${a}>${b}`] = { a, b, base, lit, len, pts: Array.from({ length: 101 }, (_, k) => base.getPointAtLength(len * k / 100)) };
+}
+INPUTS.forEach((i) => edge(i, "feat")); edge("feat", "lgbm"); edge("lgbm", "conf"); edge("conf", "alert"); OUTPUTS.forEach((o) => edge("alert", o));
+const dots = [];  // pulse dots, reused
+for (let i = 0; i < 14; i++) {
+  const g = document.createElementNS(NS, "g");
+  g.innerHTML = `<circle r="17" fill="rgba(8,117,79,.18)"/><circle r="9" fill="#08754F" stroke="#fff" stroke-width="3"/>`;
+  g.style.display = "none"; svg.append(g); dots.push(g);
+}
+const at = (e, k) => { const p = e.pts, f = clamp(k) * 100, i = Math.min(99, Math.floor(f)), r = f - i; return [lerp(p[i].x, p[i + 1].x, r), lerp(p[i].y, p[i + 1].y, r)]; };
+
+// ---------------------------------------------------------------- scenes: when each part of the graph is in focus
+const sceneOf = (t) => ORDER.reduce((cur, id) => (t >= S[id] - .25 ? id : cur), ORDER[0]);
+const FOCUS = {
+  intro: [], system: ORDERED, data: [...INPUTS, "feat"], model: ["feat", "lgbm", "conf"], alert: ["conf", "alert"], why: ["lgbm", "alert", "o_area"],
+  dashboard: ["alert", "o_over"], map: ["alert", "o_over"], area: ["alert", "o_area"], budget: ["alert", "o_budget"], lang: ["alert", "o_res"], drill: ["alert", "o_drill"], close: ORDERED,
+};
+// the camera, per scene: world point (fx, fy) shown at screen point (ax, ay), scale s
+const CAM = {
+  intro: [844, 530, 960, 600, .9], system: [844, 530, 960, 590, 1.04], data: [300, 525, 420, 600, 1.12], model: [645, 525, 470, 600, 1.12],
+  alert: [900, 525, 470, 600, 1.1], why: [900, 525, 470, 600, 1.1], dashboard: [1250, 525, 470, 600, 1.08], map: [1250, 525, 470, 600, 1.08], area: [1250, 525, 470, 600, 1.08], budget: [1250, 525, 470, 600, 1.08], lang: [1250, 525, 470, 600, 1.08],
+  drill: [1250, 525, 470, 600, 1.08], close: [844, 530, 960, 560, .92],
+};
+function camera(t) {
+  let cur = CAM.intro;
+  for (const id of ORDER) {
+    const a = S[id] - .55, k = ease.inOut(clamp((t - a) / 1.15));
+    if (t < a) break;
+    cur = cur.map((v, i) => lerp(v, CAM[id][i], k));
+  }
+  const [fx, fy, ax, ay, s] = cur;
+  return `translate(${(ax - fx * s).toFixed(2)}px, ${(ay - fy * s).toFixed(2)}px) scale(${s.toFixed(4)})`;
+}
+
+// ---------------------------------------------------------------- pulses: data moving through the system, on the words
+const P = [];
+function pulse(a, b, t, d = .75) {
+  const id = sceneOf(t + .3);
+  P.push({ e: E[`${a}>${b}`], t, d, end: NEXT(id) - .2, to: b });
+  cues.tick.push(t + d);
+}
+function build() {
+  // the system, in one sweep
+  const sys = W("system", "Four");
+  INPUTS.forEach((i, k) => pulse(i, "feat", sys + .1 + k * .1));
+  pulse("feat", "lgbm", W("system", "LightGBM") - .35, .6); pulse("lgbm", "conf", W("system", "sits"), .5); pulse("conf", "alert", W("system", "middle"), .5);
+  OUTPUTS.forEach((o, k) => pulse("alert", o, W("system", "Everything") + k * .12, .7));
+  // step 1: the inputs fill the row
+  pulse("noah", "feat", W("data", "recent") - .5); pulse("doh", "feat", W("data", "recent") - .35);
+  pulse("era5", "feat", W("data", "rain") - .5); pulse("era5", "feat", W("data", "humidity") - .5, .6); pulse("pop", "feat", W("data", "season") - .3, .6);
+  // step 2: the row into LightGBM, the range out of it
+  pulse("feat", "lgbm", S.model - .05, .8); pulse("lgbm", "conf", W("model", "Conformal") - .35, .7);
+  // step 3: the alert
+  pulse("conf", "alert", S.alert - .05, .7);
+  pulse("alert", "o_area", W("why", "SHAP") + .1, .8);
+  // step 4 and 5: out to the dashboard and the game
+  pulse("alert", "o_over", W("dashboard", "dashboard") - .5, .8); pulse("alert", "o_over", S.map - .1, .7); pulse("alert", "o_area", W("area", "checklist") - .45, .7);
+  pulse("alert", "o_budget", W("budget", "budget") - .4, .8);
+  pulse("alert", "o_res", W("lang", "Every") - .35, .8);
+  pulse("alert", "o_drill", W("drill", "Dengue") - .45, .8);
+}
+build();
+// node badges: done once a step has finished with it
+const DONE = { feat: W("data", "season") + .5, lgbm: W("model", "Conformal"), conf: S.alert + .4, alert: W("alert", "Watch") + .2 };
+
+// chips riding the graph (world coordinates)
+const CHIPS = [
+  { html: "Quezon City · 15 Sep 2024 · <em>1 row</em>", x: 520, y: 438, a: W("data", "season") + .4, b: W("model", "Conformal") + .1, cls: "green" },
+  { html: "4 wk: <em>251</em> · 152–360", x: 758, y: 438, a: W("model", "Conformal") + .5, b: NEXT("alert") - .2, cls: "green" },
+  { html: "▲ WATCH", x: 1085, y: 432, a: W("alert", "Watch") - .05, b: NEXT("drill") - .2, cls: "watch", hit: true },
+];
+CHIPS.forEach((c) => { c.el = el("div", "chip " + c.cls, c.html, graph); c.el.style.left = `${c.x}px`; c.el.style.top = `${c.y}px`; if (c.hit) cues.chime.push(c.a); });
+
+// ---------------------------------------------------------------- header: step label and title per scene
+const HEADS = {
+  system: ["The system", "Public data in. One forecaster. Every output."],
+  data: ["Step 1 · Data", "A week of data becomes one row"],
+  model: ["Step 2 · LightGBM", "One row becomes a forecast with a range"],
+  alert: ["Step 3 · Alert", "A forecast becomes an alert level"],
+  why: ["Step 3 · Alert", "…and every alert says why"],
+  dashboard: ["Step 4 · Dashboard", "An alert becomes a plan for the week"],
+  map: ["Step 4 · Dashboard", "From the whole country to one barangay"],
+  area: ["Step 4 · Dashboard", "A plan for every area, and a report card"],
+  budget: ["Step 4 · Dashboard", "A budget becomes a ranked plan"],
+  lang: ["Step 4 · Dashboard", "English or Filipino, even by text"],
+  drill: ["Step 5 · Dengue Drill", "The same forecasts, as a game"],
+};
+const heads = $("#heads");
+for (const [id, [k, t]] of Object.entries(HEADS)) { HEADS[id] = { k: el("div", "kicker", k, heads), t: el("div", "title", t, heads) }; }
+const CAPS = {
+  system: "Public data in → <b>one LightGBM forecaster</b> → everything the health office sees.",
+  data: "Quezon City, week ending <b>15 Sep 2024</b>: one row, built the same way for <b>104 areas</b>, every week.",
+  model: "<b>12 models</b>: low · middle · high × 2, 4, 6, 8 weeks ahead. The range is calibrated to hold <b>80%</b>.",
+  alert: "Quezon City's 4-week high end, <b>360</b>, crosses the epidemic line → <em>Watch</em>.",
+  why: "Every forecast is explained: <b>recent cases</b> first, then <b>rain</b> and the <b>season</b>.",
+  dashboard: "The forecasts become the <b>live dashboard</b>: act now, the trend, rising fastest, this week's to-do list.",
+  map: "Click down the 3D map: <b>NCR</b> → <b>Quezon City</b> → <b>Batasan Hills</b>, each with its own forecast.",
+  area: "Every area: a checklist, and a <b>report card</b> of past forecasts. Quezon City: <b>7 of 8</b> weeks right.",
+  budget: "A budget becomes a plan: the most <b>cases averted per peso</b>, down to the barangay.",
+  lang: "Every screen in <b>English or Filipino</b>, and a <b>one-SMS outlook</b> for phones without data.",
+  drill: "<b>Dengue Drill</b>: the same forecasts as game intel, scored on the <b>real cases</b>.",
+};
+for (const [id, h] of Object.entries(CAPS)) CAPS[id] = el("div", "", h, $("#caption"));
+
+// ---------------------------------------------------------------- panels
+const panels = $("#panels"), PANELS = [];
+function panel(id, html, { a, b, cls = "", bar, right = "" }) {
+  const p = el("div", "panel " + cls, `<div class="bar">${bar}<span class="rt">${right}</span></div>${html}`, panels);
+  PANELS.push({ p, a, b }); cues.whoosh.push(a);
+  return p;
+}
+const span = (id) => [S[id] - .05, NEXT(id) - .25];
+
+// Step 1: the row (src/features.py; Quezon City from site/public/web/data/region_qc_history.json)
+const QC = [80, 102, 140, 133, 195, 229, 222, 232, 207, 216, 297];  // weeks ending 7 Jul ... 15 Sep 2024
+const bars = QC.map((v, i) => `<rect x="${i * 34}" y="${88 - v * .28}" width="26" height="${v * .28}" rx="4" fill="${i >= 7 ? "#08754F" : "#CFD2C4"}"/>`).join("");
+const pData = panel("data", `<div class="body">
+  <h3>Quezon City · week ending 15 Sep 2024</h3><div class="sub">One row per area per week. These are the model's inputs.</div>
+  <div style="margin-top:14px">
+    <div class="frow" data-w="recent"><div class="k">Recent cases<small>y_lag0 … y_lag3 · 4/12-wk means</small></div>
+      <div class="v"><svg width="370" height="90" style="margin:-6px 0">${bars}</svg><span class="num">297</span><span class="num">216</span><span class="num">207</span><span class="num">232</span></div></div>
+    <div class="frow" data-w="trend"><div class="k">Trend<small>y_trend</small></div><div class="v"><b>232 → 297</b> in 3 weeks · rising</div></div>
+    <div class="frow" data-w="last"><div class="k">Same week last year<small>y_lastyear</small></div><div class="v"><span class="num">111</span> week ending 17 Sep 2023</div></div>
+    <div class="frow" data-w="rain"><div class="k">Rain, each of 12 weeks<small>rain_lag0 … rain_lag11</small></div><div class="v">${"<i class='cell'></i>".repeat(12)}<span>+ 4/8/12-wk totals</span></div></div>
+    <div class="frow" data-w="heat"><div class="k">Heat and humidity<small>temp_lag* · rh_lag*</small></div><div class="v">0, 2, 4, 6 and 8 weeks back · hottest day</div></div>
+    <div class="frow" data-w="season"><div class="k">Season and size<small>woy_sin/cos · log_pop</small></div><div class="v">week <b>37</b> of 52 · population <b>2,960,048</b></div></div>
+  </div>
+  <div class="foot">src/features.py · weather: ERA5 via Open-Meteo · cases: UPRI-NOAH weekly series</div></div>`, { a: S.data + .15, b: NEXT("data") - .25, bar: '<i class="dot"></i>features.py · one row', right: "104 areas × every week" });
+const ROWS = [...pData.querySelectorAll(".frow")].map((r) => ({ r, at: W("data", r.dataset.w) - .15 }));
+
+// Step 2: LightGBM (src/backtest.py) and the 4-week forecast made on 15 Sep 2024 (region_qc_backtest.json)
+const Q = [["low", "q10", "10th percentile"], ["middle", "q50", "median"], ["high", "q90", "90th percentile"]], H = [2, 4, 6, 8];
+const pModel = panel("model", `<div class="body" style="padding-bottom:22px">
+  <h3>Quantile LightGBM: 3 estimates × 4 horizons</h3><div class="sub">Gradient-boosted trees. Each model learns one percentile of next weeks' cases.</div>
+  <div class="mgrid"><div></div>${H.map((h) => `<div class="h">${h} weeks ahead</div>`).join("")}
+  ${Q.map(([w, q, s]) => `<div class="rl">${w[0].toUpperCase() + w.slice(1)} · ${q}<small>${s}</small></div>${H.map((h) => `<div class="mcell" data-q="${w}" data-h="${h}"></div>`).join("")}`).join("")}</div>
+  <svg id="fan" width="864" height="262" style="margin-top:18px;overflow:visible"></svg>
+  <div class="foot">12 models · 400 trees each · learning rate 0.03 · 31 leaves · trained only on years before 2024 · src/backtest.py</div></div>`,
+  { a: S.model + .1, b: NEXT("model") - .25, bar: '<i class="dot"></i>LightGBM · quantile regression', right: "objective = quantile" });
+const CELLS = [...pModel.querySelectorAll(".mcell")].map((c) => { c.append(spriteCanvas("props", "tree", 28), spriteCanvas("props", "tree", 28)); return { c, q: c.dataset.q, h: +c.dataset.h }; });
+// the fan chart: cases by week, 7 Jul -> 20 Oct 2024; forecast made 15 Sep for 13 Oct
+const fan = $("#fan"), X = (i) => 40 + i * 52, Y = (v) => 232 - v * .52;
+const ACT = [319, 269, 305, 307];  // what happened, weeks ending 22 Sep ... 13 Oct
+fan.innerHTML = `
+  ${[0, 100, 200, 300, 400].map((v) => `<line x1="40" x2="830" y1="${Y(v)}" y2="${Y(v)}" stroke="#E4E4D9"/><text x="30" y="${Y(v) + 5}" text-anchor="end" font-size="13" fill="#63706A" font-family="JetBrains Mono">${v}</text>`).join("")}
+  <text x="${X(0)}" y="258" font-size="13" fill="#63706A" font-family="JetBrains Mono">7 Jul</text><text x="${X(10)}" y="258" font-size="13" fill="#071711" font-weight="700" text-anchor="middle" font-family="JetBrains Mono">15 Sep</text>
+  <text x="${X(14)}" y="258" font-size="13" fill="#071711" font-weight="700" text-anchor="middle" font-family="JetBrains Mono">13 Oct</text>
+  <line x1="${X(10)}" x2="${X(10)}" y1="20" y2="232" stroke="#071711" stroke-dasharray="4 5"/><text x="${X(10) - 8}" y="48" text-anchor="end" font-size="14" font-weight="700" fill="#071711">forecast made</text>
+  <polyline points="${QC.map((v, i) => `${X(i)},${Y(v)}`).join(" ")}" fill="none" stroke="#071711" stroke-width="3.5" stroke-linejoin="round"/>
+  <polygon id="cone" points="${X(10)},${Y(297)} ${X(14)},${Y(360)} ${X(14)},${Y(152)}" fill="rgba(8,117,79,.16)"/>
+  <line id="mid" x1="${X(10)}" y1="${Y(297)}" x2="${X(14)}" y2="${Y(251)}" stroke="#08754F" stroke-width="3" stroke-dasharray="7 6"/>
+  <g id="qlo"><circle cx="${X(14)}" cy="${Y(152)}" r="7" fill="#fff" stroke="#08754F" stroke-width="3"/><text x="${X(14) + 16}" y="${Y(152) + 5}" font-size="17" font-weight="800" fill="#08754F" font-family="JetBrains Mono">q10 152</text></g>
+  <g id="qmid"><circle cx="${X(14)}" cy="${Y(251)}" r="9" fill="#08754F" stroke="#fff" stroke-width="3"/><text x="${X(14) + 16}" y="${Y(251) + 6}" font-size="20" font-weight="800" fill="#08754F" font-family="JetBrains Mono">q50 251</text></g>
+  <g id="qhi"><circle cx="${X(14)}" cy="${Y(360)}" r="7" fill="#fff" stroke="#08754F" stroke-width="3"/><text x="${X(14) + 16}" y="${Y(360) + 5}" font-size="17" font-weight="800" fill="#08754F" font-family="JetBrains Mono">q90 360</text></g>
+  <g id="act"><polyline points="${[297, ...ACT].map((v, i) => `${X(10 + i)},${Y(v)}`).join(" ")}" fill="none" stroke="#63706A" stroke-width="2.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+    ${ACT.map((v, i) => `<circle cx="${X(11 + i)}" cy="${Y(v)}" r="5" fill="#63706A"/>`).join("")}
+    <text x="300" y="20" font-size="15" font-weight="700" fill="#4A5A51">··●·· what happened: 307 on 13 Oct, inside the range</text></g>
+  <g font-size="15" font-weight="700"><line x1="60" x2="84" y1="15" y2="15" stroke="#071711" stroke-width="3.5"/><text x="92" y="20" fill="#071711">reported</text><line x1="170" x2="194" y1="15" y2="15" stroke="#08754F" stroke-width="3" stroke-dasharray="7 4"/><text x="202" y="20" fill="#08754F">forecast</text></g>`;
+const FAN = { lo: $("#qlo"), mid: $("#qmid"), hi: $("#qhi"), cone: $("#cone"), line: $("#mid"), act: $("#act") };
+
+// Step 3: the alert rule (src/train_final.py)
+const pAlert = panel("alert", `<div class="body">
+  <h3>Compared with Quezon City's own past</h3><div class="sub">Same weeks of the year (±2), earlier years only.</div>
+  <div class="defs"><div><b>Usual level</b>the average</div><div><b>Epidemic line</b>average + 2 standard deviations</div></div>
+  <div style="margin-top:8px">
+    <div class="rule" data-lv="out"><div class="lv"><i style="background:var(--warn)"></i>Outbreak warning</div><div class="tx">the <b>middle</b> (q50) is over the epidemic line</div></div>
+    <div class="rule" data-lv="watch"><div class="lv"><i style="background:var(--watch)"></i>Watch</div><div class="tx">the <b>high end</b> (q90) is over the epidemic line</div><div class="qc">QC: q90 360 ▲</div></div>
+    <div class="rule" data-lv="above"><div class="lv"><i style="background:var(--above)"></i>Above usual</div><div class="tx">the <b>middle</b> is over the usual level</div></div>
+    <div class="rule" data-lv="normal"><div class="lv"><i style="background:var(--normal)"></i>Normal</div><div class="tx">otherwise</div></div>
+  </div>
+  <div class="foot">checked top to bottom; the first rule that holds is the level · src/train_final.py, level()</div></div>`,
+  { a: S.alert + .1, b: NEXT("alert") - .25, bar: '<i class="dot"></i>Alert engine · the rule', right: "4 levels" });
+const RULES = Object.fromEntries([...pAlert.querySelectorAll(".rule")].map((r) => [r.dataset.lv, r]));
+
+// Step 3b: SHAP (reports/shap_region_qc.csv, 4 weeks ahead, share of mean |SHAP|)
+const SH = [["Recent cases", "y_lag* · means · trend", 68.4, "recent"], ["Rain", "12 weekly lags + totals", 17.6, "rain"], ["Season", "week of the year", 11.0, "season"], ["Population", "log_pop", 3.0, "season"]];
+const pWhy = panel("why", `<div class="body">
+  <h3>What the forecast leans on</h3><div class="sub">SHAP values, grouped. Each area's page shows its own.</div>
+  ${SH.map(([k, s, v]) => `<div class="sbar"><div class="k">${k}<small>${s}</small></div><div class="tr"><div class="fl"></div></div><div class="p">${Math.round(v)}%</div></div>`).join("")}
+  <div class="foot">share of mean |SHAP| · 4 weeks ahead · 17 regions + Quezon City · reports/shap_region_qc.csv</div></div>`,
+  { a: S.why + .05, b: NEXT("why") - .25, bar: '<i class="dot"></i>SHAP · why this forecast', right: "explained, not a black box" });
+const SBARS = [...pWhy.querySelectorAll(".sbar")].map((r, i) => ({ fl: r.querySelector(".fl"), r, v: SH[i][2], at: W("why", SH[i][3]) - .1 + (i === 3 ? .35 : 0) }));
+
+// Steps 4 and 5: the real app and game, as captured (docs/reel/trailer/clips)
+const SCREENS = [];
+function screen(id, url, segs, { a, b, night = false, live = "real capture" }) {
+  const p = panel(id, `<div class="screen${night ? " night" : ""}"><div class="cam"></div></div>`, { a, b, cls: "browser" + (night ? " night" : ""),
+    bar: `<i></i><i></i><i></i><span class="url">${url}</span><span class="live">${live}</span>` });
+  const cam = p.querySelector(".cam"), sc = { cam, segs: segs.map((g, i) => ({ ...g, a: g.a, b: segs[i + 1]?.a ?? b })) };
+  for (const g of sc.segs) {
+    g.img = el("img", "", null, cam); g.n = CLIPS[g.clip].n; g.from ??= .3;
+    g.rate ??= clamp((g.n / FPS - g.from - .1) / (g.b - g.a), .5, 1.6);
+  }
+  SCREENS.push(sc);
+}
+const B = (clip, name) => CLIPS[clip].boxes[name];
+const join_ = (...bs) => { const x0 = Math.min(...bs.map((b) => b[0])), y0 = Math.min(...bs.map((b) => b[1])), x1 = Math.max(...bs.map((b) => b[0] + b[2])), y1 = Math.max(...bs.map((b) => b[1] + b[3])); return [x0, y0, x1 - x0, y1 - y0]; };
+const APP = "epilag.vercel.app/web/";
+// sync: [[video time, clip frame], ...] lands a capture's marks (its clicks and scrolls) on the spoken words
+const MK = (clip, name) => CLIPS[clip].marks[name];
+screen("dashboard", APP, [
+  { clip: "overview", a: S.dashboard, sync: [[W("dashboard", "action") - .25, MK("overview", "strip")], [W("dashboard", "trend") - .3, MK("overview", "trend")], [W("dashboard", "to-do") - .45, MK("overview", "do")]],
+    zoom: [[W("dashboard", "action") - .3, B("overview", "strip")], [W("dashboard", "trend") - .35, join_(B("overview", "trend"), B("overview", "do"))]] },
+], { a: S.dashboard + .05, b: NEXT("dashboard") - .25 });
+screen("map", APP + "?page=map", [
+  { clip: "drillmap", a: S.map, sync: [[W("map", "NCR") - .3, MK("drillmap", "ncr")], [W("map", "Quezon") - .45, MK("drillmap", "qc")], [W("map", "Batasan") - .45, MK("drillmap", "bgy")]],
+    zoom: [[S.map + .2, [288, 233, 1112, 667]]] },
+], { a: S.map + .05, b: NEXT("map") - .25 });
+screen("area", APP, [
+  { clip: "area", a: S.area, sync: [[W("area", "checklist") - .2, MK("area", "todo")], [W("area", "report") - .7, MK("area", "scroll")]],
+    zoom: [[W("area", "checklist") - .3, join_(B("area", "hero"), B("area", "playbook"))], [W("area", "report") + .2, B("area", "card")]] },
+], { a: S.area + .05, b: NEXT("area") - .25 });
+screen("budget", APP, [
+  { clip: "budget", a: S.budget, zoom: [[W("budget", "ranks") - .1, [288, 177, 1112, 440]]] },
+  { clip: "barangays", a: W("budget", "barangay") - .55, from: .2 },
+], { a: S.budget + .05, b: NEXT("budget") - .25 });
+// the language switch lands on "Filipino", then the residents' text message
+screen("lang", APP, [
+  { clip: "lang", a: S.lang, sync: [[W("lang", "Filipino") - .2, MK("lang", "flip")]], zoom: [[S.lang - 1, [0, 0, 940, 590]]] },
+  { clip: "sms", a: W("lang", "residents") - .35, sync: [[W("lang", "text") - .2, MK("sms", "sms")]], zoom: [[W("lang", "text") - .3, [B("sms", "sms")[0], B("sms", "sms")[1], 760, B("sms", "sms")[3]]]] },
+], { a: S.lang + .05, b: NEXT("lang") - .25 });
+screen("drill", "epilag.vercel.app/drill/", [
+  { clip: "drill_intro", a: S.drill, from: .4 },
+  { clip: "drill_models", a: W("drill", "choose") - .3, from: 1.2, zoom: [[W("drill", "choose") + .3, join_(B("drill_models", "title"), B("drill_models", "models"))]] },
+  { clip: "drill_play", a: W("drill", "play") - .2, from: 2 },
+], { a: S.drill + .05, b: NEXT("drill") - .25, night: true });
+
+// ---------------------------------------------------------------- per-frame updates
+const pending = [];
+function camFor(box) {  // a transform that frames a page box inside the 924 x 578 screen
+  const W_ = 924, H_ = 578, base = W_ / 1440;
+  if (!box) return [base, 0, 0];
+  const pad = 26, s = Math.min(W_ / (box[2] + 2 * pad), H_ / (box[3] + 2 * pad), base * 1.9);
+  const sx = Math.max(base, s);
+  let x = box[0] + box[2] / 2 - W_ / sx / 2, y = box[1] + box[3] / 2 - H_ / sx / 2;
+  x = clamp(x, 0, 1440 - W_ / sx); y = clamp(y, 0, 900 - H_ / sx);
+  return [sx, x, y];
+}
+function syncFrame(sy, t) {  // piecewise linear through the sync points, real time (rate 1) outside them
+  if (t <= sy[0][0]) return sy[0][1] - (sy[0][0] - t) * FPS;
+  for (let i = 1; i < sy.length; i++) if (t <= sy[i][0]) return lerp(sy[i - 1][1], sy[i][1], (t - sy[i - 1][0]) / (sy[i][0] - sy[i - 1][0]));
+  const l = sy[sy.length - 1]; return l[1] + (t - l[0]) * FPS;
+}
+function updateScreens(t) {
+  for (const sc of SCREENS) {
+    let view = camFor(null);
+    for (const g of sc.segs) {
+      const on = env(t, g.a, g.b + .25, .25, .25);
+      g.img.style.opacity = on.toFixed(3);
+      if (t < g.a - .4 || t > g.b + .3) continue;
+      const k = Math.min(g.n - 1, Math.max(0, Math.round(g.sync ? syncFrame(g.sync, Math.max(t, g.a)) : (g.from + Math.max(0, t - g.a) * g.rate) * FPS)));
+      if (g.img.dataset.k !== String(k)) { g.img.dataset.k = k; g.img.src = `clips/${g.clip}/${String(k).padStart(4, "0")}.jpg`; pending.push(g.img.decode().catch(() => {})); }
+      if (t >= g.a - .05 && t < g.b) {  // this segment's camera: from the whole page to each box in turn
+        let v = camFor(null);
+        for (const [zt, box] of g.zoom || []) { const k2 = ease.inOut(clamp((t - zt) / .9)); if (k2 > 0) v = v.map((x, i) => lerp(x, camFor(box)[i], k2)); }
+        view = v;
+      }
+    }
+    sc.cam.style.transform = `scale(${view[0].toFixed(4)}) translate(${(-view[1]).toFixed(1)}px, ${(-view[2]).toFixed(1)}px)`;
+  }
+}
+
+function render_(t) {
+  const scene = sceneOf(t);
+  // intro and graph
+  const introOn = env(t, -1, S.system - .1, .01, .5);
+  $("#intro").style.opacity = introOn;
+  $("#intro").style.transform = `scale(${(1 + .05 * (1 - introOn) + .015 * clamp(t / 6)).toFixed(4)})`;
+  $("#brand").style.opacity = clamp((t - S.system + .3) / .4) * (1 - clamp((t - W("close", "Quezon") + .3) / .4));
+  graph.style.transform = camera(t);
+  const outroOn = clamp((t - (S.close - .1)) / .6);
+  graph.style.filter = outroOn > 0 ? `blur(${(outroOn * 5).toFixed(2)}px)` : "";
+  $("#dots").style.transform = graph.style.transform;
+
+  // nodes: appear in order, then follow the focus of each scene
+  const appear = S.system - .45;
+  for (const id of ORDERED) {
+    const n = N[id], ka = ease.back(clamp((t - appear - n.order * .055) / .45));
+    let focus = 0;
+    for (const sid of ORDER) { const v = env(t, S[sid] - .4, NEXT(sid) - .2, .5, .01); if (v > 0) focus = Math.max(focus, v * (FOCUS[sid].includes(id) ? 1 : .32)); }
+    if (scene === "close") focus = 1;
+    n.el.style.opacity = (clamp(ka) * Math.max(focus, t < S.data - .4 ? 1 : 0)).toFixed(3);
+    n.el.style.transform = `scale(${(.6 + .4 * ka).toFixed(4)})`;
+    // ring: on while the node's own step runs
+    const act = (scene === "data" && (INPUTS.includes(id) || id === "feat")) || (scene === "model" && (id === "lgbm" || (id === "conf" && t > W("model", "Conformal")))) ||
+      (["alert", "why"].includes(scene) && id === "alert") || (scene === "why" && id === "lgbm") || (["dashboard", "map"].includes(scene) && id === "o_over") || (scene === "area" && id === "o_area") ||
+      (scene === "budget" && id === "o_budget") || (scene === "lang" && id === "o_res") || (scene === "drill" && id === "o_drill");
+    n.ringK = lerp(n.ringK || 0, act ? 1 : 0, 1);  // stateless: recomputed every frame
+    n.ring.style.opacity = act ? (.75 + .25 * Math.sin(t * 5)).toFixed(3) : 0;
+    let ping = 0;
+    for (const p of P) if (p.to === id) { const dt = t - (p.t + p.d); if (dt >= 0 && dt < .7) ping = Math.max(ping, 1 - dt / .7); }
+    n.ping.style.opacity = (ping * .9).toFixed(3); n.ping.style.transform = `scale(${(1 + .5 * (1 - ping)).toFixed(3)})`;
+    n.badge.style.opacity = DONE[id] ? (ramp(t, DONE[id], .3) * (scene === "close" ? 0 : 1)).toFixed(3) : 0;
+    n.badge.style.transform = `scale(${DONE[id] ? ease.back(clamp((t - DONE[id]) / .35)).toFixed(3) : 0})`;
+  }
+  // edges: drawn in after both ends appear; lit while data passes in this scene
+  for (const e of Object.values(E)) {
+    const k = ease.out(clamp((t - appear - Math.max(N[e.a].order, N[e.b].order) * .055 - .2) / .5));
+    e.base.style.strokeDashoffset = (e.len * (1 - k)).toFixed(1);
+    let lit = 0, alpha = 0;
+    for (const p of P) if (p.e === e && t >= p.t) { const a = env(t, p.t, p.end, .01, .4); if (a > alpha) { alpha = a; lit = ease.inOut(clamp((t - p.t) / p.d)); } }
+    if (scene === "close") { const kk = ease.inOut(clamp((t - W("close", "pipeline") + .2 - (N[e.a].order + N[e.b].order) * .03) / .6)); if (kk > alpha) { alpha = kk; lit = 1; } }
+    e.lit.style.strokeDashoffset = (e.len * (1 - lit)).toFixed(1); e.lit.style.opacity = alpha.toFixed(3);
+  }
+  // pulse dots
+  let di = 0;
+  for (const p of P) {
+    const k = (t - p.t) / p.d;
+    if (k < 0 || k > 1 || di >= dots.length) continue;
+    const [x, y] = at(p.e, ease.inOut(k)), g = dots[di++];
+    g.style.display = ""; g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(.6 + .4 * Math.sin(Math.PI * k) + .25).toFixed(3)})`);
+  }
+  for (; di < dots.length; di++) dots[di].style.display = "none";
+  // chips
+  for (const c of CHIPS) { const v = env(t, c.a, c.b, .3, .3); c.el.style.opacity = v.toFixed(3); c.el.style.transform = `translate(-50%, -50%) scale(${(.8 + .2 * ease.back(clamp((t - c.a) / .35))).toFixed(3)})`; }
+
+  // header and caption
+  for (const [id, h] of Object.entries(HEADS)) {
+    const v = env(t, S[id] - .2, NEXT(id) - .2, .45, .25), same = HEADS[ORDER[ORDER.indexOf(id) - 1]] && LINE[id].step === LINE[ORDER[ORDER.indexOf(id) - 1]].step;
+    const vk = same ? env(t, S[id] - .2, NEXT(id) - .2, .01, .25) * (t >= S[id] - .2 ? 1 : 0) : v;
+    h.k.style.opacity = (id === "why" ? 0 : vk).toFixed(3); h.t.style.opacity = v.toFixed(3);
+    h.t.style.transform = `translateY(${((1 - ease.out(clamp((t - S[id] + .2) / .5))) * 18).toFixed(1)}px)`;
+  }
+  HEADS.alert.k.style.opacity = env(t, S.alert - .2, NEXT("why") - .2, .45, .25).toFixed(3);
+  HEADS.dashboard.k.style.opacity = env(t, S.dashboard - .2, NEXT("lang") - .2, .45, .25).toFixed(3); for (const id of ["map", "area", "budget", "lang"]) HEADS[id].k.style.opacity = 0;
+  for (const [id, c] of Object.entries(CAPS)) {
+    const v = env(t, S[id] + .2, NEXT(id) - .25, .4, .25);
+    c.style.opacity = v.toFixed(3); c.style.transform = `translateY(${((1 - ease.out(clamp((t - S[id] - .2) / .5))) * 12).toFixed(1)}px)`;
+  }
+
+  // panels in and out
+  for (const { p, a, b } of PANELS) {
+    const v = env(t, a, b, .45, .3);
+    p.style.opacity = v.toFixed(3);
+    p.style.transform = `translateX(${((1 - ease.out(clamp((t - a) / .55))) * 70).toFixed(1)}px) scale(${(.97 + .03 * ease.out(clamp((t - a) / .55))).toFixed(4)})`;
+  }
+  // step 1 rows
+  for (const { r, at: a } of ROWS) { const v = ramp(t, a, .4); r.style.opacity = (.18 + .82 * v).toFixed(3); r.style.transform = `translateX(${((1 - v) * 14).toFixed(1)}px)`; r.style.background = `rgba(227,240,231,${(env(t, a, a + 1.6, .2, .6) * .9).toFixed(3)})`; }
+  // step 2 grid and fan
+  const rowAt = { low: W("model", "low"), middle: W("model", "middle"), high: W("model", "high") }, colA = W("model", "2"), colB = W("model", "ahead");
+  for (const { c, q, h } of CELLS) {
+    const at_ = Math.max(rowAt[q], colA + (colB - colA) * (H.indexOf(h) / 3)), v = ramp(t, at_ - .05, .3);
+    c.style.opacity = (.25 + .75 * v).toFixed(3);
+    c.style.borderColor = h === 4 && t > W("model", "Conformal") - .2 ? "#08754F" : v > .5 ? "#CFD2C4" : "#E4E4D9";
+    c.style.background = h === 4 && t > W("model", "Conformal") - .2 ? "#E3F0E7" : "#fff";
+  }
+  FAN.lo.style.opacity = ramp(t, rowAt.low, .3); FAN.mid.style.opacity = ramp(t, rowAt.middle, .3); FAN.hi.style.opacity = ramp(t, rowAt.high, .3);
+  FAN.line.style.opacity = ramp(t, rowAt.middle, .4);
+  const g = ease.inOut(clamp((t - W("model", "widens") + .2) / .9));
+  FAN.cone.setAttribute("points", `${X(10)},${Y(297)} ${X(14)},${Y(251 + (360 - 251) * g)} ${X(14)},${Y(251 - (251 - 152) * g)}`);
+  FAN.cone.style.opacity = g > 0 ? 1 : 0;
+  FAN.act.style.opacity = ramp(t, W("model", "outcomes") - .2, .5);
+  // step 3 rules
+  const watchAt = W("alert", "Watch"), outAt = W("alert", "Outbreak");
+  for (const [lv, r] of Object.entries(RULES)) {
+    let hl = 0, col = "#E4E4D9";
+    if (lv === "watch") { hl = ramp(t, watchAt - .15, .3); col = "#F58220"; }
+    if (lv === "out") { hl = env(t, outAt - .15, NEXT("alert"), .3, .01) * .55; col = "#F04B2A"; }
+    if (lv === "above" || lv === "normal") hl = 0;
+    r.style.borderColor = hl > .05 ? col : "#E4E4D9"; r.style.background = `rgba(${lv === "watch" ? "245,130,32" : "240,75,42"},${(hl * .1).toFixed(3)})`;
+    r.style.transform = `scale(${(1 + .02 * (lv === "watch" ? env(t, watchAt - .15, watchAt + .6, .15, .4) : 0)).toFixed(4)})`;
+    r.style.opacity = (lv === "above" || lv === "normal" ? .55 + .45 * (1 - ramp(t, W("alert", "High") - .2, .4)) : 1).toFixed(3);
+  }
+  RULES.watch.querySelector(".qc").style.opacity = ramp(t, watchAt + .1, .3);
+  // step 3b SHAP bars
+  for (const { fl, at: a, v } of SBARS) fl.style.width = `${(ease.out(clamp((t - a) / .8)) * v / 68.4 * 100).toFixed(2)}%`;
+  updateScreens(t);
+
+  // close: the result, then the brand
+  $("#outro").style.opacity = outroOn.toFixed(3);
+  const st = [...document.querySelectorAll(".stat")];
+  st.forEach((s, i) => { const a = W("close", "Watch") - .2 + i * .22, v = ease.back(clamp((t - a) / .45)); s.style.opacity = clamp((t - a) / .3).toFixed(3); s.style.transform = `translateY(${((1 - v) * 24).toFixed(1)}px)`; });
+  $("#outro .lock").style.opacity = ramp(t, W("close", "EpiLag") - .3, .5); $("#outro .url").style.opacity = ramp(t, W("close", "EpiLag"), .5);
+  $("#outro h2").style.opacity = ramp(t, S.close + .1, .5); $("#outro .k").style.opacity = ramp(t, S.close, .5);
+  $("#progress").style.width = `${(t / TOTAL * 100).toFixed(3)}%`;
+  $("#fade").style.opacity = clamp((t - (TOTAL - .6)) / .6).toFixed(3);
+  $("#caption").style.opacity = 1 - outroOn;
+}
+cues.hit.push(W("close", "Watch") - .2, W("close", "EpiLag") - .3);
+for (const id of ["system", "data", "model", "alert", "dashboard", "budget", "drill", "close"]) cues.whoosh.push(S[id] - .5);
+
+window.TOTAL = TOTAL;
+window.REEL = { total: TOTAL, fps: FPS, w: 1920, h: 1080, cues, vo: VO.lines.map((l) => ({ id: l.id, at: S[l.id], dur: l.dur })) };
+window.render = async function (t) { render_(t); await Promise.all(pending.splice(0)); };
+window.ready = Promise.all([document.fonts.ready, document.fonts.load("800 50px 'Inter Tight'"), document.fonts.load("700 15px 'JetBrains Mono'")]);
+
+// ---------------------------------------------------------------- preview: plays in real time (#t=42 starts at 42 s; #mute for no voice)
+if (!location.hash.includes("record")) {
+  const fit = () => { document.body.style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`; };
+  fit(); addEventListener("resize", fit);
+  const btn = el("div", "", "▶ Play", document.body); btn.id = "play";
+  const startAt = +(location.hash.match(/t=([\d.]+)/) || [0, 0])[1];
+  window.ready.then(() => window.render(startAt));
+  btn.onclick = () => {
+    btn.remove();
+    const t0 = performance.now() - startAt * 1000, mute = location.hash.includes("mute");
+    const voices = VO.lines.map((l) => ({ at: S[l.id], a: new Audio(`vo/${l.id}.wav`), done: mute || S[l.id] < startAt }));
+    const loop = (now) => {
+      const t = (now - t0) / 1000;
+      voices.forEach((v) => { if (!v.done && t >= v.at) { v.done = true; v.a.play(); } });
+      window.render(Math.min(t, TOTAL));
+      if (t < TOTAL) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  };
+}
+</script>
+</body>
+</html>
