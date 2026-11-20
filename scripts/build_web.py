@@ -81,7 +81,7 @@ def i18n() -> dict:
     for node in tree.body:
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             found[node.targets[0].id] = node.value
-    out = {name: ast.literal_eval(found[name]) for name in ("PANELS", "T", "ALERT_TEXT", "PLAYBOOK", "FEATURES", "PUBLIC")}
+    out = {name: ast.literal_eval(found[name]) for name in ("PANELS", "T", "ALERT_TEXT", "PLAYBOOK", "TRIGGERS", "FEATURES", "PUBLIC")}
     levels = ast.literal_eval(found["LEVELS"])
     out["LEVELS"] = levels
     out["LEVEL_NAME"] = eval(compile(ast.Expression(found["LEVEL_NAME"]), "LEVEL_NAME", "eval"),  # noqa: S307
