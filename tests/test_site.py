@@ -32,7 +32,7 @@ AXE = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
 VIEWS = ["home", "map", "unit", "budget", "public", "qc", "proof", "about"]
 APP = [f"web/?page={v}&panel={p}&mode={m}&lang={l}" for v in VIEWS for p in ("region_qc", "province")
        for m in ("latest", "replay") for l in ("en", "fil")]
-PAGES = ["", "drill/", "methodology.html", "research.html", "data/"]
+PAGES = ["", "drill/", "methodology.html", "research.html", "data/", "trust.html"]
 
 
 class _Handler(SimpleHTTPRequestHandler):
