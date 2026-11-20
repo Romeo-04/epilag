@@ -67,6 +67,7 @@ const PAGES = {
   methodology: "methodology.html",
   research: "research.html",
   data: "data/index.html",
+  trust: "trust.html",
 };
 
 export default defineConfig({

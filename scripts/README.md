@@ -13,6 +13,15 @@ Files written to `site/public/` are copied into the built site (`docs/`) by `npm
 | `export_open_data.py` | `docs/data/` | Open forecasts and track records as CSV and JSON, the RSS alert feed and the calendar feed |
 | `landing_data.py` | `site/public/data/` | The landing page's 2 June 2019 replay, and a recheck of the "30 of 32 provinces" claim |
 
+## Weekly checks
+| Script | Writes | What for |
+| --- | --- | --- |
+| `validate_cases.py` | nothing | Checks a weekly case file against the [data contract](../data/contract/README.md); exits 1 on an error, so the weekly job stops |
+| `model_gate.py` | nothing | The promotion gate: a retrained model goes live only if its latest test year still beats the baselines and its range covers 70–90%; exits 1 otherwise |
+| `scale_benchmark.py` | `reports/scale_benchmark.csv` | Times a full retrain with the production code at 86, 400 and 1,600 areas |
+
+Both checks run in CI on every pull request and in the weekly job (`.github/workflows/`).
+
 ## Dengue Drill (the game)
 | Script | Writes | What for |
 | --- | --- | --- |

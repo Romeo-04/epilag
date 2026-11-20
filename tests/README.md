@@ -22,4 +22,5 @@ playwright install chromium     # Playwright itself is in requirements.txt
 | `test_site.py` | Every page loads with no console errors or failed requests, has no sideways scroll at 390 and 1440 px, works with reduced motion and the keyboard, passes an accessibility scan, works offline after one visit, and prints the area report on one page | Yes |
 | `test_research_page.py` | Every number on the Research page matches the committed result files (through `scripts/research_numbers.py`) | Yes |
 | `test_open_data.py` | The open data files in `docs/data/` match the alert track record, and the RSS and calendar feeds are valid | No |
+| `test_contract.py` | The data contract check (`scripts/validate_cases.py`) passes the example file and rejects missing columns, bad dates, negative or duplicate counts and patient columns, and warns on spikes, new area codes and gaps; the promotion gate (`scripts/model_gate.py`) passes the committed backtests and fails a drifted model | No |
 | `test_app.py` | The original Streamlit app renders every page without errors, for both panels and both languages (Streamlit's own test runner) | No |

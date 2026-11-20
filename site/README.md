@@ -21,6 +21,7 @@ The data the pages load comes from the Python side: run `python scripts/build_we
 | `/web/` | `web/index.html`, `src/app/` | The dashboard for health offices: overview, forecast map, area pages, budget plan, proof, residents' page |
 | `/drill/` | `drill/index.html`, `src/drill/` | Dengue Drill, the 3D game |
 | `/methodology.html` | `methodology.html`, `src/pages/methodology.js` | How the system works, the pilot plan and the roadmap |
+| `/trust.html` | `trust.html`, `src/pages/trust.js` | Trust and sustainability: data privacy, the weekly cycle, the promotion gate, scale, cost and rollout |
 | `/research.html` | `research.html`, `src/pages/research.js` | The research after the first round, with a reader for its documents |
 | `/data/` | `data/index.html`, `src/pages/data.js` | Open data downloads and alert feeds |
 
@@ -30,7 +31,7 @@ The data the pages load comes from the Python side: run `python scripts/build_we
 | `app/` | The dashboard. `logic.js` holds the alert, threshold, replay and track-record rules (mirrored from `src/` in Python and checked by `tests/test_web_logic.py`); `data.js` loads the JSON; `views/` has one file per page (`home`, `map`, `unit`, `budget`, `proof`, `public`, `qc`, `about`); `i18n.json` has the English and Filipino text |
 | `drill/` | Dengue Drill. `rules.js` scores the game (checked against `scripts/drill_data.py` by `tests/test_drill_rules.py`); `board.js` and `world.js` draw the 3D island |
 | `landing/` | The landing page's intro and closing scenes |
-| `pages/` | The methodology, research and open-data pages |
+| `pages/` | The methodology, trust, research and open-data pages |
 | `lib/` | Shared pieces: the pixel sprites, voxel maps, icons, navigation and motion helpers |
 | `css/` | The design system: `tokens.css` (colours, type, spacing), then `base`, `components` and `surfaces` |
 | `sw.js` | The service worker that makes the dashboard work offline after one visit |

@@ -1,0 +1,46 @@
+# The weekly cycle, every Monday 09:00 Philippine time (01:00 UTC), and on demand.
+#
+# 1. Check every weekly case file waiting in data/incoming/ against the data contract (data/contract/README.md).
+#    A bad file stops the run: nothing is forecast from it, and GitHub e-mails the maintainers that the run failed.
+# 2. Run the promotion gate on the latest backtests. A drifted model fails here and the last good forecasts stay online.
+# 3. Rebuild the site so the published pages, open data and alert feeds match what is in the repository.
+#
+# Retraining itself (src/train_final.py) needs the raw weekly series; it joins this job once a data partner sends
+# current weekly files. On a laptop CPU a full retrain takes about a minute, even for 1,600 areas (reports/scale_benchmark.csv).
+name: Weekly check
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install pandas numpy pyarrow
+      - name: Check incoming weekly case files
+        run: |
+          shopt -s nullglob
+          files=(data/incoming/*.csv)
+          if [ ${#files[@]} -eq 0 ]; then echo "No new weekly files this week."; exit 0; fi
+          python scripts/validate_cases.py "${files[@]}"
+      - name: Promotion gate
+        run: python scripts/model_gate.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Rebuild the site
+        working-directory: site
+        run: npm ci && npm run build
