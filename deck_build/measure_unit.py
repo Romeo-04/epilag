@@ -1,4 +1,4 @@
-"""Bounding boxes (as % of the screenshot) of the parts of the area page we label on slide 16."""
+"""Bounding boxes (as % of the screenshot) of the parts of the area page we label on slide 15."""
 import json
 
 from playwright.sync_api import sync_playwright
