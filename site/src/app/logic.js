@@ -48,6 +48,30 @@ export function alertLevel(q50, q90, alert, epidemic) {
 }
 
 /**
+ * src/thresholds.py line_share(): where a weekly count sits between its area's usual level for that week of the
+ * year (0) and its epidemic line (1). It compares each area with its own past, so population, how much dengue an
+ * area usually has, the season and how completely it reports all cancel out. The gap is at least the Poisson
+ * spread (2 x sqrt of the usual level, and 2 cases), so an area with a flat history does not swing wildly.
+ */
+export function lineShare(cases, alert, epidemic) {
+  if (!isNum(cases) || !isNum(alert) || !isNum(epidemic)) return null;
+  return (cases - alert) / Math.max(epidemic - alert, 2 * Math.sqrt(Math.max(alert, 1)));
+}
+
+/**
+ * Areas heading toward their own outbreak line: the forecast is above usual and higher on that scale than the
+ * latest reported week. Ranked by where the forecast lands, then by how far it moves.
+ * rows: forecast rows of one horizon; nowBy: unit -> cases in the forecast week; thr: thresholds() map.
+ */
+export function risingToward(rows, nowBy, thr, n = 5) {
+  return rows.map((r) => {
+    const now = nowBy.get(r.unit_id), t = thr.get(`${r.unit_id}|${woy(r.week)}`);
+    return { ...r, now, from: t ? lineShare(now, t.alert, t.epidemic) : null, to: lineShare(r.q50, r.alert, r.epidemic) };
+  }).filter((r) => r.from != null && r.to != null && r.to > 0 && r.to > r.from)
+    .sort((a, b) => b.to - a.to || (b.to - b.from) - (a.to - a.from)).slice(0, n);
+}
+
+/**
  * src/thresholds.py: per unit and week of year, from the history passed in (earlier years only):
  * alert = mean of the same weeks (+-2) in those years, epidemic = mean + 2 SD (sample SD; 0 if one value).
  * Returns Map "unit|woy" -> {alert, epidemic, count}.

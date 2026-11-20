@@ -7,6 +7,7 @@ same JSON the app loads:
   - thresholds (src/thresholds.py), replay forecasts and the "30 of 32" claim (replay_forecast in the app)
   - the budget plan (src/allocate.py) across budgets of PHP 0.5M-20M
   - the alert track record per area (src/reliability.py), latest and as a replay sees it
+  - the overview's "Rising toward an outbreak" list (src/thresholds.py line_share)
   - the one-SMS resident message: every level, language and area fits in 160 GSM-7 characters
 Skipped when Playwright or the built app is missing.
 """
@@ -26,7 +27,7 @@ DOCS = ROOT / "docs"
 DATA = DOCS / "web" / "data"
 sys.path.insert(0, str(ROOT / "src"))
 from allocate import Action, allocate  # noqa: E402
-from thresholds import thresholds  # noqa: E402
+from thresholds import line_share, thresholds  # noqa: E402
 from reliability import track_record  # noqa: E402
 
 playwright = pytest.importorskip("playwright.sync_api")
@@ -267,3 +268,33 @@ def test_sms_fits_one_message(page):
         assert set(m) <= GSM7, set(m) - GSM7
     # the longest real name fits without being shortened
     assert any(names[-1] in m for m in msgs)
+
+
+@pytest.mark.parametrize("panel,h", [("region_qc", 4), ("region_qc", 8), ("province", 4), ("province", 8)])
+def test_rising_toward_matches(page, panel, h):
+    """Each area's latest week and forecast, as a share of the way from its usual level to its outbreak line."""
+    fc = _frame(panel, "forecast")
+    fc = fc[fc.horizon == h].copy()
+    as_of = fc.week.max()
+    hist = _frame(panel, "history")
+    now = hist[(hist.week == as_of) & hist.cases.notna()].set_index("unit_id").cases
+    thr = _frame(panel, "thresholds").set_index(["unit_id", "woy"])
+    w = min(int(as_of.isocalendar().week), 52)
+    fc = fc[fc.unit_id.isin(now.index)]
+    fc["now"] = fc.unit_id.map(now)
+    t = thr.loc[[(u, w) for u in fc.unit_id]]
+    fc["from_"] = line_share(fc.now.values, t.alert.values, t.epidemic.values)
+    fc["to"] = line_share(fc.q50, fc.alert, fc.epidemic)
+    py = fc[(fc.to > 0) & (fc.to > fc.from_)].assign(rise=lambda d: d.to - d.from_)
+    py = py.sort_values(["to", "rise"], ascending=False).head(5)
+    js = page.evaluate("""async ([panel, h]) => {
+        const l = window.epilag.logic, d = window.epilag.data;
+        const fc = (await d.table(panel, "forecast")).filter(r => r.horizon === h);
+        const asOf = Math.max(...fc.map(r => r.week));
+        const now = new Map((await d.table(panel, "history")).filter(r => r.week === asOf && r.cases != null).map(r => [r.unit_id, r.cases]));
+        const thr = new Map((await d.table(panel, "thresholds")).map(r => [`${r.unit_id}|${r.woy}`, r]));
+        return l.risingToward(fc, now, thr).map(r => [r.unit_id, r.from, r.to]); }""", [panel, h])
+    assert [u for u, _, _ in js] == py.unit_id.tolist()
+    for (_, f, to), (_, r) in zip(js, py.iterrows()):
+        assert f == pytest.approx(r.from_, rel=1e-9, abs=1e-9)
+        assert to == pytest.approx(r.to, rel=1e-9, abs=1e-9)
