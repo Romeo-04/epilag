@@ -1,6 +1,6 @@
 # Final-round deck: source
 
-The 20-slide deck for the PJDSC 2026 final round. The files people open are
+The 19-slide deck for the PJDSC 2026 final round. The files people open are
 [`docs/deck/EpiLag-PH_deck.pdf`](../docs/deck/EpiLag-PH_deck.pdf) and the editable
 [`docs/deck/EpiLag-PH_deck.pptx`](../docs/deck/EpiLag-PH_deck.pptx) (fonts embedded). Both were finished by hand in
 PowerPoint; the PDF is exported from it.
@@ -10,7 +10,7 @@ from a file in the repo (`reports/`, `research/results/`, `docs/data/`, `site/pu
 
 | File | What it does |
 |---|---|
-| `build_deck.py` | Builds all 20 slides as one HTML page, `docs/deck/final/index.html` (a build output, not committed) |
+| `build_deck.py` | Builds all 19 slides as one HTML page, `docs/deck/final/index.html` (a build output, not committed) |
 | `annotations.py` | The red hand-drawn notes and arrows, in slide coordinates |
 | `art.py`, `outro_art.py` | Pixel-art maps, icons and the frog-and-mosquito closing scene, drawn from the app's sprites and map data |
 | `deck.css`, `deck_v2.css`, `deck_v4.css` | Styles, applied in that order |
@@ -31,4 +31,4 @@ The rendering uses Microsoft Edge through Playwright (`channel="msedge"`). The f
 IBM Plex Mono (free, Google Fonts); install them before rendering or opening the PowerPoint to edit it.
 
 Image credits: bottle-cap photo, Public Health Image Library, CDC (#26033, public domain). The three photographs on
-slides 3, 4 and 18 are AI-generated illustrations.
+slides 3, 4 and 17 are AI-generated illustrations.

@@ -17,14 +17,14 @@ ANN = {
         dict(t="set once, the same<br>for every test year", x=1010, y=880, w=280, a=(1000, 890, 960, 870)),
         dict(t="filled = raw range, dashed = calibrated", x=1320, y=605, w=520)],
     10: [dict(t="the model never sees the year it is tested on", x=330, y=760, w=620, a=(900, 770, 1030, 648))],
-    11: [dict(t="2023, a flat year: almost<br>every method lost", x=1150, y=905, w=360, a=(1260, 905, 1300, 830))],
-    12: [dict(t="falls further behind<br>the further ahead it looks", x=230, y=405, w=330)],
-    13: [dict(t="called the outbreak,<br>not its full height", x=740, y=880, w=300, a=(1000, 895, 1140, 760))],
-    14: [dict(t="the 2 we missed", x=110, y=960, w=240, arrows=[(170, 960, 150, 760), (260, 960, 400, 830)]),
+    11: [dict(t="2023, a flat year:<br>almost every method lost", x=1396, y=634, w=360, a=(1388, 652, 1334, 622)),
+         dict(t="falls further behind<br>the further ahead", x=548, y=798, w=260)],
+    12: [dict(t="called the outbreak,<br>not its full height", x=740, y=880, w=300, a=(1000, 895, 1140, 760))],
+    13: [dict(t="the 2 we missed", x=110, y=960, w=240, arrows=[(170, 960, 150, 760), (260, 960, 400, 830)]),
          dict(t="2023: the only year we lost<br>to “same as this week”", x=1560, y=585, w=340, a=(1555, 640, 1190, 662))],
-    15: [dict(t="green = helped the forecast", x=1540, y=900, w=320)],
-    17: [dict(t="same outbreak data, now playable", x=1380, y=880, w=420)],
-    18: [dict(t="each step must prove itself first", x=1380, y=940, w=460)],
+    14: [dict(t="green = helped the forecast", x=1540, y=900, w=320)],
+    16: [dict(t="same outbreak data, now playable", x=1380, y=880, w=420)],
+    17: [dict(t="each step must prove itself first", x=1380, y=940, w=460)],
 }
 
 

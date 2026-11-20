@@ -1,4 +1,4 @@
-"""Build the EpiLag-PH final-round deck (20 slides, 1920x1080) as one HTML file.
+"""Build the EpiLag-PH final-round deck (19 slides, 1920x1080) as one HTML file.
 
 Run from the repo root:  python deck_build/build_deck.py
 Output: docs/deck/final/index.html (+ assets/). Render with deck_build/render.py [--pdf].
@@ -286,7 +286,7 @@ S.append(slide(8, "Data", "Feature Engineering", "The literature's lags, turned 
 <div class="f8"><div class="frs">{f8}<div class="fr axisrow"><div class="fn"></div>{axis8}</div><div class="axlab">weeks before the forecast is made</div></div>
 <div class="f8side"><div class="big">38</div><div class="cap">inputs per province forecast. Regions and Quezon City use 26: rain, but not heavy-rain days, temperature or humidity.</div>
 <div class="rule2">Every input is known on the day the forecast is made. No future data, ever.</div></div></div>''',
-    "src/features.py, feature_columns(). Temperature and humidity were tested for regions in the research (slide 15)."))
+    "src/features.py, feature_columns(). Temperature and humidity were tested for regions in the research (slide 14)."))
 
 # ================================================================== 9 Model (technical)
 S.append(slide(9, "Model", "Model", "Quantile LightGBM with conformal calibration: a forecast, a likely range, and an alert.", f'''
@@ -339,7 +339,7 @@ S.append(slide(10, "Model", "Validation", "Expanding-window time split: every te
  <div class="vm"><b>4 scores</b><span>error (MAE), range coverage, outbreaks caught, false alarms</span></div></div></div>''',
     "src/backtest.py, src/alerts.py; research/results/METHODS.md. An outbreak start is the first of 2 or more weeks above the epidemic line."))
 
-# ================================================================== 11 Model comparison heat grid
+# ================================================================== 11 Model comparison and trade-offs: heat grid
 mods = [("lightgbm", "LightGBM"), ("negbin", "Negative binomial"), ("random_forest", "Random forest"), ("sarimax", "SARIMAX"), ("blend_all4", "Average of the four")]
 order = list(relp.index)
 
@@ -366,14 +366,8 @@ for mkey, mlab in mods:
         gap = " gap" if k % 4 == 0 and k else ""
         rowsg += f'<div class="hg-c{gap}" style="background:{heat(v)}" title="{v:.2f}"></div>'
 hz = "".join(f'<div class="hg-hz">{hh}</div>' for (_, _, hh) in order)
-S.append(slide(11, "Model", "Model Comparison", "Four methods on the same test, plus their average. Each square is one check.", f'''
-<div class="hg"><div></div>{hdr}<div class="hg-n sm">weeks ahead</div>{hz}{rowsg}</div>
-<div class="hgleg"><span>beat “same as this week” by more</span><i style="background:rgba(18,128,74,1)"></i><i style="background:rgba(18,128,74,.5)"></i><i style="background:rgba(18,128,74,.15)"></i><i style="background:rgba(210,59,48,.3)"></i><i style="background:rgba(210,59,48,1)"></i><span>did worse than “same as this week”</span></div>
-<div class="hgfacts"><span><b>{wins['lightgbm']} of 24</b> lowest error: LightGBM</span><span><b>{wins['negbin']}</b> negative binomial</span><span><b>{wins['sarimax']}</b> SARIMAX</span><span><b>{wins['random_forest']}</b> random forest</span></div>''',
-    "Color = error divided by the error of “same as this week” (research/results/model_comparison.csv, rel_mae_vs_persistence). Prov = provinces; Reg = regions and Quezon City."))
-
-# ================================================================== 12 Decisions and trade-offs
-W2, H2, L2, R2, T2, B2 = 760, 420, 80, 240, 24, 56
+# line chart and short limits for the same slide
+W2, H2, L2, R2, T2, B2 = 660, 236, 70, 230, 14, 40
 X2 = lambda hh: L2 + (hh - 2) / 6 * (W2 - L2 - R2)  # noqa: E731
 Y2 = lambda v: T2 + (1 - (v + 2) / 16) * (H2 - T2 - B2)  # noqa: E731
 g2 = "".join(f'<line x1="{L2}" x2="{W2-R2}" y1="{Y2(v):.1f}" y2="{Y2(v):.1f}" class="grid"/><text x="{L2-12}" y="{Y2(v)+6:.1f}" class="tick" text-anchor="end">{"+" if v>0 else ""}{v}%</text>' for v in (0, 4, 8, 12))
@@ -383,18 +377,21 @@ for col, nm, color, wdt in [("negbin", "Neg. binomial", "var(--ink)", 3), ("rand
     pts = [(X2(hh), Y2(rel.loc[hh, col])) for hh in (2, 4, 6, 8)]
     l2 += f'<path d="{path(*zip(*pts))}" fill="none" stroke="{color}" stroke-width="{wdt}"/><circle cx="{pts[-1][0]:.1f}" cy="{pts[-1][1]:.1f}" r="5" fill="{color}"/>'
     l2 += f'<text x="{pts[-1][0]+14:.1f}" y="{pts[-1][1]+6:.1f}" class="{"mk" if wdt==3 else "lbl"}">{nm} {rel.loc[8, col]:+.0f}%</text>'
-lims = [("Record surges", "2019 rose past anything in training. Trees can't extrapolate; a simpler model did better at 2 weeks."),
-        ("Quiet years", "2023 was the flattest year, and its calibration year's model ran low, so the range came out too wide (92%)."),
-        ("False alarms, on purpose", "About half of Watch alerts are false. A Watch costs a clean-up drive; Outbreak warning is stricter."),
-        ("Better inputs, not yet live", "Neighbours' cases, temperature and humidity improved 21 of 24 checks, but were chosen after seeing the test years.")]
-S.append(slide(12, "Model", "Decisions and Trade-offs", "Why we kept LightGBM, and where it still falls short.", f'''
-<div class="d14"><div><div class="kicker">How much less accurate than LightGBM, by weeks ahead</div><svg viewBox="0 0 {W2} {H2}" width="{W2}" height="{H2}">{g2}{x2t}{l2}</svg>
-<div class="why"><span><b>{wins['lightgbm']} of 24</b> most accurate</span><span><b>holds up</b> at 8 weeks</span><span><b>explains</b> each forecast</span></div>
-<div class="cap">The average of the four was slightly more accurate, but caught fewer outbreaks early ({warn['blend_all4']}% vs {warn['lightgbm']}%). For early warning, a missed outbreak costs more.</div></div>
-<div class="limcol"><div class="kicker">Where it falls short</div>{"".join(f'<div class="lim2"><b>{a}</b><p>{b}</p></div>' for a, b in lims)}</div></div>''',
-    "research/results/model_comparison.csv; research/analysis/causes.md; research/results/README.md (final variables)."))
+shorts = [("Record surges", "2019 rose past anything in training"),
+          ("Quiet years", "2023's range came out too wide (92%)"),
+          ("False alarms", "about half of Watch alerts, on purpose"),
+          ("Better inputs", "not live yet: chosen after seeing the test years")]
+S.append(slide(11, "Model", "Model Comparison and Trade-offs", "Four methods on the same blind test, plus their average. Each square is one check.", f'''
+<div class="hg mg"><div></div>{hdr}<div class="hg-n sm">weeks ahead</div>{hz}{rowsg}</div>
+<div class="hgleg"><span>beat “same as this week” by more</span><i style="background:rgba(18,128,74,1)"></i><i style="background:rgba(18,128,74,.5)"></i><i style="background:rgba(18,128,74,.15)"></i><i style="background:rgba(210,59,48,.3)"></i><i style="background:rgba(210,59,48,1)"></i><span>did worse than “same as this week”</span></div>
+<div class="mgrow"><div class="mgchart"><div class="kicker">How much less accurate than LightGBM, by weeks ahead</div><svg viewBox="0 0 {W2} {H2}" width="{W2}" height="{H2}">{g2}{x2t}{l2}</svg></div>
+<div class="mgwhy"><div class="kicker">Why we kept LightGBM</div><div class="mgfacts">
+<div><b>{wins['lightgbm']} of 24</b><span>checks with the lowest error, the most of any method</span></div>
+<div><b>{warn['lightgbm']}% vs {warn['blend_all4']}%</b><span>outbreaks caught early, vs the slightly more accurate average of the four</span></div></div></div>
+<div class="mgshort"><div class="kicker">Where it falls short</div>{"".join(f'<p><b>{a}:</b> {b}</p>' for a, b in shorts)}</div></div>''',
+    "Color = error divided by the error of “same as this week”. Prov = provinces; Reg = regions and QC. research/results/model_comparison.csv; research/analysis/causes.md."))
 
-# ================================================================== 13 Results: QC
+# ================================================================== 12 Results: QC
 W, H, L, R, T, B = 1180, 600, 70, 30, 30, 60
 x0, x1 = qcb.target_week.min(), qcb.target_week.max()
 X = lambda d: L + (pd.Timestamp(d) - x0) / (x1 - x0) * (W - L - R)  # noqa: E731
@@ -423,14 +420,14 @@ svg11 = f'''<svg viewBox="0 0 {W} {H}" width="{W}" height="{H}">{grid}{xt}<path 
 {marker("2025-02-15", "Outbreak declared", "15 Feb", 20, left=True)}
 <text x="{X(pk.target_week)+16:.1f}" y="{Y(pk.actual)+8:.1f}" class="mk">{int(pk.actual)}</text><text x="{X(pk.target_week)+16:.1f}" y="{Y(pk.actual)+34:.1f}" class="mks">peak week</text>
 <text x="{W-R}" y="{Y(qcb.epidemic.iloc[-1])+34:.1f}" class="lbl" text-anchor="end">epidemic line</text></svg>'''
-S.append(slide(13, "Results", "Results", "It saw Quezon City's outbreak coming five weeks early.", f'''
+S.append(slide(12, "Results", "Results", "It saw Quezon City's outbreak coming five weeks early.", f'''
 <div class="row"><div><div class="legend"><span><i style="background:var(--accent);opacity:.35"></i>likely range, forecast 4 weeks ahead</span><span><i style="background:var(--ink)"></i>reported cases</span><span><i style="background:var(--red);width:14px;height:14px;border-radius:50%"></i>week above the epidemic line</span></div>{svg11}
 </div>
 <div class="stack"><div class="card"><div class="big green">5 weeks</div><div class="cap">of warning before Quezon City crossed its epidemic line in 2024</div></div>
 <div class="card"><div class="big">{int(pk.q50)}</div><div class="cap">forecast for the peak week, against {int(pk.actual)} reported. The alert was right; the size was not.</div></div></div></div>''',
     "Quezon City, weekly reported cases, Sep 2024 to Mar 2025. Forecasts use only data available at the time. Sources: Pelitro (2026); EpiLag-PH backtests."))
 
-# ================================================================== 14 Results: nationwide
+# ================================================================== 13 Results: nationwide
 COL = {"hit": "#D23B30", "miss": "#14211B", "no": "#D8E0DA"}
 
 
@@ -457,7 +454,7 @@ for i, (lab, s1, s2) in enumerate(sk):
     bars12 += f'<rect x="250" y="{y+8}" width="{max(s1,0)/100*bw12:.0f}" height="24" rx="5" fill="var(--accent)"/><text x="{250+max(s1,0)/100*bw12+10:.0f}" y="{y+28}" class="mks">{s1:.0f}%</text>'
     w2 = abs(s2) / 100 * bw12
     bars12 += f'<rect x="250" y="{y+38}" width="{max(w2,3):.0f}" height="20" rx="5" fill="{"var(--ink)" if s2 >= 0 else "var(--red)"}"/><text x="{250+max(w2,3)+10:.0f}" y="{y+55}" class="mks">{"" if s2 >= 0 else "+"}{abs(s2):.0f}% {"less" if s2 >= 0 else "more"}</text>'
-S.append(slide(14, "Results", "Results", f"Nationwide, the 2019 replay flagged {claim['flagged']} of {claim['crossed']} provinces before they crossed the line.", f'''
+S.append(slide(13, "Results", "Results", f"Nationwide, the 2019 replay flagged {claim['flagged']} of {claim['crossed']} provinces before they crossed the line.", f'''
 <div class="r12"><div class="mapwrap">{map12}
 <div class="mlegend"><span><i style="background:{COL['hit']}"></i>crossed the line, flagged 4 weeks ahead <b>{claim['flagged']}</b></span><span><i style="background:{COL['miss']}"></i>crossed, missed <b>{claim['crossed']-claim['flagged']}</b></span><span><i style="background:{COL['no']}"></i>did not cross</span></div></div>
 <div><div class="kicker">Error cut, 4 weeks ahead</div><div class="lg12"><span><i style="background:var(--accent)"></i>vs “same week last year”</span><span><i style="background:var(--ink)"></i>vs “same as this week”</span></div>
@@ -465,7 +462,7 @@ S.append(slide(14, "Results", "Results", f"Nationwide, the 2019 replay flagged {
 <div class="cap">Ranges held 70 to 92% of real weeks across test years (target 80%).</div></div></div>''',
     "Forecasts made 2 Jun 2019 for 30 Jun 2019 (docs/data/replay_2019-06-02.json). Error: reports/backtest_province.csv, reports/backtest_region_qc.csv (mean absolute error)."))
 
-# ================================================================== 15 Key drivers: SHAP + factor tests
+# ================================================================== 14 Key drivers: SHAP + factor tests
 # a) SHAP waterfall for QC's latest 4-week forecast
 wf_order = ["Recent cases", "Time of year", "Rain", "Population"]
 wfv = [float(qc_drv.get(k, 0)) for k in wf_order]
@@ -515,7 +512,7 @@ for i, lab in enumerate(labs_f):
         shape = f'<circle cx="{dx(vv):.0f}" cy="{y}" r="10" fill="{"var(--accent)" if v < 0 else "var(--red)"}"/>' if p == "region_qc" else f'<rect x="{dx(vv)-9:.0f}" y="{y-9}" width="18" height="18" rx="3" fill="{"var(--accent)" if v < 0 else "var(--red)"}"/>'
         dp += shape
 dp = f'<svg viewBox="0 0 520 {len(labs_f)*54+40}" width="520" height="{len(labs_f)*54+40}">{dp}</svg>'
-S.append(slide(15, "Results", "Key Drivers", "What the forecast relies on, and which factors earn their place.", f"""
+S.append(slide(14, "Results", "Key Drivers", "What the forecast relies on, and which factors earn their place.", f"""
 <div class="k15">
  <div class="kp"><div class="kicker">1  SHAP: one forecast, explained</div><div class="take">Recent cases pulled Quezon City's forecast down; the season pushed it up.</div>{wf}
   <div class="legend3"><span><i style="background:var(--red)"></i>raised the forecast</span><span><i style="background:var(--accent)"></i>lowered it</span></div></div>
@@ -525,7 +522,7 @@ S.append(slide(15, "Results", "Key Drivers", "What the forecast relies on, and w
   <div class="legend3"><span>● regions and QC</span><span>■ provinces</span></div></div>
 </div>""", "SHAP: Lundberg and Lee (2017). Quezon City latest forecast (region_qc_drivers.json); shares: shap_groups.csv; tests: feature_groups.csv (add), proposed_features.csv (neighbours)."))
 
-# ================================================================== 16 System: health offices
+# ================================================================== 15 System: health offices
 badges = [(1, 17.6, 32), (2, 48.4, 29), (3, 20.6, 49.4), (4, 20.6, 73)]
 bd = "".join(f'<span class="badge-n" style="left:{x}%;top:{y}%">{n}</span>' for n, x, y in badges)
 expl = [("Alert level", "Watch: the high estimate crosses the city's own epidemic line"),
@@ -535,13 +532,13 @@ expl = [("Alert level", "Watch: the high estimate crosses the city's own epidemi
 ex = "".join(f'<div class="ex16"><span>{k+1}</span><div><b>{a}</b><small>{b}</small></div></div>' for k, (a, b) in enumerate(expl))
 thumbs = [("app_onboarding.png", "Onboarding guide"), ("app_map.png", "Outbreak map"), ("app_budget.png", "Budget plan")]
 th = "".join(f'<figure class="thumb"><img src="assets/{f}"><figcaption>{c}</figcaption></figure>' for f, c in thumbs)
-S.append(slide(16, "System", "The System, for Health Offices", "From a forecast to this week's action plan, for Quezon City on 15 Sep 2024.", f'''
+S.append(slide(15, "System", "The System, for Health Offices", "From a forecast to this week's action plan, for Quezon City on 15 Sep 2024.", f'''
 <div class="sys"><div class="lapwrap">{laptop("assets/app_unit.png", 960).replace('<div class="cam"></div>', '<div class="cam"></div>' + f'<div class="bdl">{bd}</div>')}</div>
 <div class="sysside">{ex}<div class="thumbs">{th}</div><div class="try2"><img src="{QR_URI}" alt="QR code to epilag.vercel.app"><div><span>Try it live</span><b>epilag.vercel.app</b></div></div></div></div>''',
     "Live app (epilag.vercel.app), area detail page, replay of the forecast made 15 Sep 2024."))
 
-# ================================================================== 17 Residents and Dengue Drill
-S.append(slide(17, "System", "The System, for Residents and Training", "Plain words for households. A game that lets you feel the five weeks.", f'''
+# ================================================================== 16 Residents and Dengue Drill
+S.append(slide(16, "System", "The System, for Residents and Training", "Plain words for households. A game that lets you feel the five weeks.", f'''
 <div class="s17"><div class="phonewrap">{phone("assets/phone_public_fil.png", 600)}<div class="cap" style="width:290px;font-size:20px">Residents' page in Filipino</div></div>
 <div class="drill"><div class="dpair"><figure><img src="assets/drill_title.png"><figcaption><b>Dengue Drill:</b> pick a real outbreak to run</figcaption></figure>
 <figure><img src="assets/drill_r2_board.png"><figcaption><b>In play:</b> the outbreak board, with EpiLag-PH intel</figcaption></figure></div>
@@ -550,7 +547,7 @@ S.append(slide(17, "System", "The System, for Residents and Training", "Plain wo
 <div class="ttb"><div class="b g" style="flex:11"><b>11</b> regions, more cases averted</div><div class="b n" style="flex:1"><b>1</b></div><div class="b r" style="flex:5"><b>5</b> fewer</div></div></div></div>''',
     "Live app and Dengue Drill (epilag.vercel.app). Drill result checked in tests/test_drill_rules.py."))
 
-# ================================================================== 18 Scaling roadmap
+# ================================================================== 17 Scaling roadmap
 # First barangay = highest average yearly cases of QC's 142 (UPRI NOAH 2010-2025): Batasan Hills, 327 a year.
 # Cases averted per season = season cases x 65% in the 24 busiest weeks (QC median, 2014-24 seasons)
 #   x 30% of residents covered per 8-week round (src/allocate.py max coverage) x effect 10/30/50% (allocate.py).
@@ -569,7 +566,7 @@ avB, avB25, avD2, avQC = av(typ_b), av(first.DC_2025), av(typ_d2), av(typ_qc)
 avDec = [round(v * 0.65) for v in avB]  # Jul-Dec holds ~65% of a QC season
 POP_B, POP_QC, PESO = 168_770, 3_084_270, 15  # PSA 2024 census (POPCEN); app's example cost per resident covered
 round_b, round_qc = POP_B * 0.30 * PESO / 1e6, POP_QC * 0.30 * PESO / 1e6
-print("slide 18:", first.Barangay, round(first.avg), "typical", typ_b, avB, avB25, avDec, "D2", round(typ_d2), avD2, round(d2_share, 3), "QC", round(typ_qc), avQC, round(round_b, 2), round(round_qc, 1))
+print("slide 17:", first.Barangay, round(first.avg), "typical", typ_b, avB, avB25, avDec, "D2", round(typ_d2), avD2, round(d2_share, 3), "QC", round(typ_qc), avQC, round(round_b, 2), round(round_qc, 1))
 
 months = [("Setup", 2, "data link"), ("Shadow run", 4, "forecasts scored, no action"), ("Live: rainy season", 6, "a Watch triggers clean-up within a week"),
           ("Early-year tail", 3, "2025 peaked in Feb"), ("Evaluate", 3, "go or no-go")]
@@ -596,19 +593,19 @@ body18 = f"""
 <p class="pass"><b>Pass mark:</b> a Watch 4+ weeks before cases cross the epidemic line, clean-up within a week, few false alarms.</p>
 <div class="bcost"><div><b>₱0</b><small>to run EpiLag-PH; about 4 staff hours a week</small></div><div><b>₱{round_b:.2f}M</b><small>per clean-up round; 3 rounds: ₱{3*round_b:.1f}M a season, less if it shifts clean-ups already planned</small></div></div></div>
 <div class="scale"><div class="kicker">Then grow, one step at a time</div>{sth}</div></div>"""
-S.append(slide(18, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's barangay with the most dengue cases. Prove it. Then grow.", body18,
+S.append(slide(17, "Impact", "Impact and Scaling Plan", "Start in Batasan Hills, Quezon City's barangay with the most dengue cases. Prove it. Then grow.", body18,
     "Estimates. Cases averted = season cases × 65% in the 24 busiest weeks × 30% of residents reached × effect 10/30/50% (Bowman 2016). Clean-up round: 30% of residents at the app's example cost of ₱15 each. Population: PSA 2024 census. No partnership is claimed."))
 
-# ================================================================== 19 Outro
+# ================================================================== 18 Outro
 S.append(f'''<section class="slide dark outro"><img class="half" src="assets/frog_outro.png" alt="The EpiLag-PH frog catching a mosquito">{top(None)}
 <div class="outrotext"><div class="alertcard"><span>EpiLag-PH, Quezon City</span><b>Watch</b><small>5 weeks ahead</small></div>
 <h1 class="statement">Next rainy season, we don't have to wait for the count.</h1>
 <p class="close">Dengue is common.<br>Common shouldn't mean <span class="red">acceptable</span>.</p><div class="tryd"><img src="{QR_URI}" alt=""><b>epilag.vercel.app</b></div></div>
-<div class="foot"><span>Team DiagNodes, PJDSC 2026</span><span>19</span></div></section>''')
+<div class="foot"><span>Team DiagNodes, PJDSC 2026</span><span>18</span></div></section>''')
 
-# ================================================================== 20 References
+# ================================================================== 19 References
 refs = (BUILD / "references.html").read_text(encoding="utf8")
-S.append(slide(20, None, "References", "APA 7th edition.", f'<div class="refs">{refs}</div>', ""))
+S.append(slide(19, None, "References", "APA 7th edition.", f'<div class="refs">{refs}</div>', ""))
 
 CSS = (BUILD / "deck.css").read_text(encoding="utf8") + (BUILD / "deck_v2.css").read_text(encoding="utf8") + (BUILD / "deck_v4.css").read_text(encoding="utf8")
 FONTS = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,700&family=Caveat:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"

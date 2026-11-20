@@ -1,4 +1,4 @@
-"""Fresh screenshots of the live app for the deck (slides 16-17)."""
+"""Fresh screenshots of the live app for the deck (slides 15-16)."""
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright

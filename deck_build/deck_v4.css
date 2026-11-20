@@ -74,3 +74,14 @@ blockquote.onphoto cite{display:block;font-size:19px;color:#BFD0C7;font-style:no
 .s18 .sv{text-align:right}.s18 .sv b{display:block;font-size:42px;line-height:1;color:var(--accent)}.s18 .sv small{display:block;font-size:15px;line-height:1.3;color:var(--muted);margin-top:2px}
 .s18 .sstep p{font-size:17px;line-height:1.35;color:var(--muted);margin:8px 0 0 60px}.s18 .sstep p.c{color:var(--ink);font-weight:600;margin-top:4px}
 .s18 ~ .foot span:first-child{max-width:1560px}
+
+/* slide 11: model comparison and trade-offs on one slide */
+.hg.mg{margin-top:22px;row-gap:5px}.hg.mg .hg-c{height:52px}.hg.mg .hg-n{font-size:21px}.hg.mg .hg-n small{font-size:15px}
+.mg+.hgleg{margin-top:14px;font-size:17px}
+.mgrow{display:flex;gap:56px;margin-top:30px;align-items:flex-start}
+.mgrow .kicker{font-size:16px;margin-bottom:10px}
+.mgchart{flex:0 0 660px}.mgchart svg .mk{font-size:20px}.mgchart svg .lbl,.mgchart svg .tick{font-size:17px}
+.mgwhy{flex:0 0 330px}.mgfacts{display:flex;flex-direction:column;gap:18px}
+.mgfacts b{display:block;font-size:34px;color:var(--accent);line-height:1.1}.mgfacts span{font-size:18px;color:var(--muted);line-height:1.3;display:block;margin-top:4px}
+.mgshort{flex:1;border-left:5px solid var(--amber);padding-left:22px}
+.mgshort p{font-size:18px;color:var(--muted);line-height:1.3;margin:0 0 9px}.mgshort b{color:var(--ink)}
