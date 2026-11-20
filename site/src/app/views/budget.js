@@ -1,13 +1,24 @@
 // Action plan: budget, cases averted, spend by area, and the funded plan; costs and effects sit in a drawer.
 import { allocate, fmt, toCsv } from "../logic.js";
 import { barChart } from "../chart.js";
-import { cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
+import { LV, LV_HEIGHT, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
 const A = "Clean-up drive + container covers", B = "Targeted fogging";
 const inputs = { budget: 5_000_000, costA: 15, effA: [0.1, 0.5], costB: 25, effB: [0, 0.1] };
 
 export function render(el, ctx) {
-  const { t, labels, fc } = ctx;
+  const { t, labels, fc, lang, i18n } = ctx;
+  const trig = i18n.TRIGGERS[lang];
+  // where the current forecast says to start each action: areas at its level or higher, worst first
+  const fcH = ctx.fcH || [];
+  const whereNow = (lv) => {
+    const at = fcH.filter((r) => LV_HEIGHT[r.level] >= LV_HEIGHT[lv])
+      .sort((a, b) => LV_HEIGHT[b.level] - LV_HEIGHT[a.level] || b.q50_per100k - a.q50_per100k);
+    if (!at.length) return `<span class="todo__now todo__now--none">${esc(trig.now_none)}</span>`;
+    if (at.length === fcH.length) return `<span class="todo__now">${esc(trig.now_all.replace("{n}", at.length))}</span>`;
+    const names = at.slice(0, 3).map((r) => r.unit_name).join(", ") + (at.length > 3 ? ` ${trig.now_more.replace("{n}", at.length - 3)}` : "");
+    return `<span class="todo__now">${esc(trig.now_some.replace("{n}", at.length).replace("{names}", names))}</span>`;
+  };
   const actionName = (name) => name === A ? labels.clean_up : labels.fogging;
   const effField = (id, [lo, hi]) => `<div class="effect"><span class="field__label">${esc(labels.effect_short)}</span>
     <div class="effect__pair"><label>${esc(labels.low)}<input type="range" id="${id}-lo" min="0" max="0.8" step="0.05" value="${lo}"><output>${pct(lo)}</output></label>
@@ -27,6 +38,10 @@ export function render(el, ctx) {
       </section>
       <div class="plan-out" id="out"></div>
     </div>
+    <section class="card triggers">${cardTitle("check", trig.head)}<p class="small muted">${esc(trig.sub)}</p>
+      <ol class="todo todo--3"><li class="todo__row todo__head">${trig.cols.map((c) => `<span>${esc(c)}</span>`).join("")}</li>
+        ${trig.rows.map(([lv, a, w]) => `<li class="todo__row"><span class="todo__when"><span class="sq sq--round" data-lv="${LV[lv]}"></span> ${esc(ctx.levelName(lv))}</span><b>${esc(a)}</b><span>${esc(w)}</span>${whereNow(lv)}</li>`).join("")}</ol>
+      <p class="small muted">${esc(trig.note)}</p></section>
     <section class="card">${cardTitle("forecastMap", t.spend_chart)}<div id="spend" class="chart-box"></div></section>
     ${details(t.plan, `<div id="plan-table"></div>`)}`;
 

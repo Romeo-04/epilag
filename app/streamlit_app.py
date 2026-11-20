@@ -283,6 +283,67 @@ PLAYBOOK = {
     },
 }
 
+# When each action starts and what triggers it (Action plan page): (level it starts at, action, trigger).
+TRIGGERS = {
+    "en": {
+        "head": "When to act",
+        "sub": "Each action, the alert level it starts at, what triggers it (DOH and Quezon City practice), and where the current forecast says to do it now.",
+        "cols": ("Starts at", "Action", "When", "Do it now in"),
+        "now_all": "All {n} areas",
+        "now_some": "{n} areas: {names}",
+        "now_more": "+{n} more",
+        "now_none": "Not yet: no area is at this level",
+        "rows": [
+            ("normal", "Search and destroy",
+             "Every week at 4 p.m. in every barangay: cover drums, empty vases, old tires and gutters. Keep it up even in quiet weeks."),
+            ("above usual", "4S reminder to households",
+             "When cases trend above the usual level: search and destroy, self-protection, early consultation, fogging only in hotspots."),
+            ("watch", "Larviciding",
+             "Water that cannot be drained or covered, such as canals, ponds and tanks, in the top barangays."),
+            ("watch", "Test kits, IV fluids and spraying teams",
+             "Check stocks and get teams ready so they can start within days."),
+            ("watch", "Cluster spraying (fogging)",
+             "Only in a barangay with 3+ cases in 4 consecutive weeks (DOH clustering), or cases rising 2 weeks in a row. "
+             "Spray that cluster, not the whole city, together with search and destroy there."),
+            ("outbreak warning", "Task force and public advisory",
+             "As soon as the middle forecast passes the epidemic threshold."),
+            ("outbreak warning", "Hospital fast lanes",
+             "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."),
+        ],
+        "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 "
+                "dengue responses. In the budget below, fogging money is meant for cluster areas only.",
+    },
+    "fil": {
+        "head": "Kailan kikilos",
+        "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, ang nag-uudyok dito (ayon sa DOH at Quezon City), at kung saan ito dapat gawin ngayon ayon sa forecast.",
+        "cols": ("Simula sa", "Aksyon", "Kailan", "Gawin ngayon sa"),
+        "now_all": "Lahat ng {n} lugar",
+        "now_some": "{n} lugar: {names}",
+        "now_more": "+{n} pa",
+        "now_none": "Hindi pa: walang lugar sa antas na ito",
+        "rows": [
+            ("normal", "Search and destroy",
+             "Linggo-linggo tuwing alas-4 ng hapon sa bawat barangay: takpan ang mga drum, alisan ng tubig ang plorera, lumang gulong "
+             "at alulod. Ituloy kahit tahimik ang linggo."),
+            ("above usual", "Paalala ng 4S sa mga tahanan",
+             "Kapag mas mataas sa karaniwan ang kaso: search and destroy, proteksyon sa sarili, maagang konsulta, fogging sa hotspot lamang."),
+            ("watch", "Paglalagay ng larvicide",
+             "Sa tubig na hindi maalis o matakpan, gaya ng kanal, sapa at tangke, sa mga nangungunang barangay."),
+            ("watch", "Test kit, IV fluids at spraying team",
+             "Suriin ang stock at ihanda ang mga team para makapagsimula sa loob ng ilang araw."),
+            ("watch", "Pag-spray sa cluster (fogging)",
+             "Sa barangay lamang na may 3 o higit pang kaso sa 4 na magkakasunod na linggo (clustering ayon sa DOH), o tumaas ang kaso "
+             "nang 2 linggong sunod. I-spray ang cluster, hindi ang buong lungsod, kasabay ng search and destroy doon."),
+            ("outbreak warning", "Task force at abiso sa publiko",
+             "Kapag lumampas na sa epidemic threshold ang gitnang forecast."),
+            ("outbreak warning", "Dengue fast lane sa ospital",
+             "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."),
+        ],
+        "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue "
+                "noong 2022 at 2025. Sa budget sa ibaba, para lamang sa mga cluster ang pondo sa fogging.",
+    },
+}
+
 FEATURES = {
     "en": {
         "map": ("Colours every area by alert level 2–8 weeks ahead, with a likely range.",
@@ -526,6 +587,8 @@ div[class*="st-key-feat"] [data-testid="stPageLink"] a:hover { background: var(-
 .todo.head { border-top: 0; padding-top: 0; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .todo .when { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: var(--ink); }
 .todo .do { font-size: 14px; line-height: 1.45; }
+.todo.todo4 { grid-template-columns: 110px minmax(0, .9fr) minmax(0, 1.3fr) minmax(0, 1fr); }
+.todo .now { font-weight: 700; color: var(--ink); } .todo .now.none { font-weight: 400; color: var(--muted); }
 .todo .gives { font-size: 13.5px; line-height: 1.45; color: var(--accent-dark); background: var(--accent-soft); border-radius: 12px; padding: 8px 12px; }
 .alertbar { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 16px; font-size: 14px; line-height: 1.45; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
@@ -548,7 +611,7 @@ div[data-baseweb="select"] > div, [data-testid="stNumberInputContainer"] { borde
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(210, 59, 48, .55); } 100% { box-shadow: 0 0 0 10px rgba(210, 59, 48, 0); } }
 @media (max-width: 900px) { .story { grid-template-columns: repeat(2, 1fr); } .story::before, .story::after { display: none; }
-  .brief, .todo { grid-template-columns: 1fr; } .row { grid-template-columns: 28px minmax(0, 1fr) auto 56px; } .row .bar { display: none; } }
+  .brief, .todo, .todo.todo4 { grid-template-columns: 1fr; } .row { grid-template-columns: 28px minmax(0, 1fr) auto 56px; } .row .bar { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 """
@@ -988,6 +1051,18 @@ def page_proof():
                          .style.format({"Error reduction from weather": "{:+.0%}"}), hide_index=True, width="stretch")
 
 
+def where_now(trig: dict, level: str, shown: int = 3) -> str:
+    """Where the current forecast says to start an action: the areas at its level or higher, worst first."""
+    at = fc_h[fc_h.level.isin(LEVELS[LEVELS.index(level):])]
+    if at.empty:
+        return trig["now_none"]
+    if len(at) == len(fc_h):
+        return trig["now_all"].format(n=len(at))
+    names = at.sort_values(["level", "q50_per100k"], ascending=False).unit_name.tolist()
+    more = f' {trig["now_more"].format(n=len(names) - shown)}' if len(names) > shown else ""
+    return trig["now_some"].format(n=len(names), names=", ".join(names[:shown]) + more)
+
+
 def page_budget():
     hero(t["plan_head"], t["plan_muted"], t["plan_sub"])
     left, right = st.columns([1, 1.5], gap="medium")
@@ -1005,6 +1080,16 @@ def page_budget():
         Action("Targeted fogging", cost_b, eff_b[0], sum(eff_b) / 2, eff_b[1], 0.10),
     )
     plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions)
+    trig = TRIGGERS[lang]
+    with st.container(key="card_triggers"):
+        card_title("check", trig["head"], trig["sub"])
+        head = "".join(f"<span>{c}</span>" for c in trig["cols"])
+        rows = "".join(
+            f'<div class="todo todo4"><span class="when"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{LEVEL_COLOR[lv]}"></span>'
+            f'{LEVEL_NAME[lang][lv]}</span><span class="do"><b>{a}</b></span><span class="do">{w}</span>'
+            f'<span class="do now{"" if fc_h.level.isin(LEVELS[LEVELS.index(lv):]).any() else " none"}">{where_now(trig, lv)}</span></div>'
+            for lv, a, w in trig["rows"])
+        html(f'<div><div class="todo todo4 head">{head}</div>{rows}</div><p style="font-size:12.5px;color:var(--muted);margin-top:10px">{trig["note"]}</p>')
     with right:
         if plan.empty:
             st.info("No funded actions. Increase the budget.")
