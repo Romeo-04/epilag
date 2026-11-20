@@ -302,23 +302,31 @@ python scripts/screenshots.py        # docs/screenshots, from the built site
 ```
 epilag/
 ├── site/           Website, app and game source (Vite). See site/README.md
-│   ├── src/        app/ (dashboard), drill/ (3D game), landing/, pages/, lib/ (sprites, voxel maps), css/ (design tokens)
+│   ├── src/        app/ (dashboard), drill/ (3D game), landing/, pages/,
+│   │               lib/ (sprites, voxel maps), css/ (design tokens)
 │   └── public/     Data, map grids, sprites and icons copied into the build
-├── docs/           The built site served by GitHub Pages, plus the demo video, open data (data/), deck (deck/),
-│                   figures and screenshots. The pages are written by npm run build: edit site/, not docs/
-├── src/            The forecasting pipeline: fetch, clean, weather, features, backtest, alerts, train, export,
-│                   and the shared rules (thresholds, reliability, allocate). See src/README.md
-├── scripts/        Data for the site and the game, map grids, figures, screenshots. See scripts/README.md
-├── reports/        Out-of-sample test results of the submitted model (CSV). See reports/README.md
-├── research/       Post-first-round research: literature, model experiments, results, analysis, paper.
-│                   See research/README.md
+├── docs/           The built site for GitHub Pages, plus the demo video, open data (data/),
+│                   deck (deck/), figures and screenshots. Pages are written by npm run build:
+│                   edit site/, not docs/
+├── src/            The forecasting pipeline: fetch, clean, weather, features, backtest,
+│                   alerts, train, export, and the shared rules (thresholds, reliability,
+│                   allocate). See src/README.md
+├── scripts/        Data for the site and the game, map grids, figures, screenshots.
+│                   See scripts/README.md
+├── reports/        Out-of-sample test results of the submitted model (CSV).
+│                   See reports/README.md
+├── research/       Post-first-round research: literature, model experiments, results,
+│                   analysis, paper. See research/README.md
 ├── tests/          Python and browser tests (pytest, Playwright). See tests/README.md
 ├── app/            The original Streamlit app and its small data files. See app/README.md
-├── deck_build/     Rebuilds the final-round deck from the repository's results. See deck_build/README.md
+├── deck_build/     Rebuilds the final-round deck from the repository's results.
+│                   See deck_build/README.md
 ├── .streamlit/     Streamlit settings for app/
-├── requirements.txt  Python dependencies
+├── requirements.txt
+│                   Python dependencies
 ├── vercel.json     Optional second deploy of docs/ on Vercel (the main site is GitHub Pages)
-└── data/           Raw and processed data, created by src/fetch_data.py and the pipeline (not committed)
+└── data/           Raw and processed data, made by src/fetch_data.py and the pipeline
+                    (not committed)
 ```
 
 ## References
