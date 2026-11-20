@@ -333,7 +333,9 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .todo { margin: 0; padding: 0; list-style: none; }
 .todo__row { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.4; }
 .todo__when { font-weight: 800; }
-.todo--3 .todo__row { grid-template-columns: 150px minmax(0, 0.8fr) minmax(0, 2fr); }
+.todo--3 .todo__row { grid-template-columns: 130px minmax(0, .8fr) minmax(0, 1.6fr) minmax(0, 1fr); }
+.todo__now { font-weight: 700; }
+.todo__now--none { font-weight: 400; color: var(--muted); }
 .todo__head { border-top: 0; padding-top: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .triggers { display: grid; gap: 8px; }
 .plan-inputs { display: grid; gap: 10px; }
