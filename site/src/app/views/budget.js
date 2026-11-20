@@ -1,13 +1,14 @@
 // Action plan: budget, cases averted, spend by area, and the funded plan; costs and effects sit in a drawer.
 import { allocate, fmt, toCsv } from "../logic.js";
 import { barChart } from "../chart.js";
-import { cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
+import { LV, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
 const A = "Clean-up drive + container covers", B = "Targeted fogging";
 const inputs = { budget: 5_000_000, costA: 15, effA: [0.1, 0.5], costB: 25, effB: [0, 0.1] };
 
 export function render(el, ctx) {
-  const { t, labels, fc } = ctx;
+  const { t, labels, fc, lang, i18n } = ctx;
+  const trig = i18n.TRIGGERS[lang];
   const actionName = (name) => name === A ? labels.clean_up : labels.fogging;
   const effField = (id, [lo, hi]) => `<div class="effect"><span class="field__label">${esc(labels.effect_short)}</span>
     <div class="effect__pair"><label>${esc(labels.low)}<input type="range" id="${id}-lo" min="0" max="0.8" step="0.05" value="${lo}"><output>${pct(lo)}</output></label>
@@ -27,6 +28,10 @@ export function render(el, ctx) {
       </section>
       <div class="plan-out" id="out"></div>
     </div>
+    <section class="card triggers">${cardTitle("check", trig.head)}<p class="small muted">${esc(trig.sub)}</p>
+      <ol class="todo todo--3"><li class="todo__row todo__head">${trig.cols.map((c) => `<span>${esc(c)}</span>`).join("")}</li>
+        ${trig.rows.map(([lv, a, w]) => `<li class="todo__row"><span class="todo__when"><span class="sq sq--round" data-lv="${LV[lv]}"></span> ${esc(ctx.levelName(lv))}</span><b>${esc(a)}</b><span>${esc(w)}</span></li>`).join("")}</ol>
+      <p class="small muted">${esc(trig.note)}</p></section>
     <section class="card">${cardTitle("forecastMap", t.spend_chart)}<div id="spend" class="chart-box"></div></section>
     ${details(t.plan, `<div id="plan-table"></div>`)}`;
 

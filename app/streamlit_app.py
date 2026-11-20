@@ -283,6 +283,59 @@ PLAYBOOK = {
     },
 }
 
+# When each action starts and what triggers it (Action plan page): (level it starts at, action, trigger).
+TRIGGERS = {
+    "en": {
+        "head": "When to act",
+        "sub": "Each action, the alert level it starts at, and what triggers it, from DOH and Quezon City practice.",
+        "cols": ("Starts at", "Action", "When"),
+        "rows": [
+            ("normal", "Search and destroy",
+             "Every week at 4 p.m. in every barangay: cover drums, empty vases, old tires and gutters. Keep it up even in quiet weeks."),
+            ("above usual", "4S reminder to households",
+             "When cases trend above the usual level: search and destroy, self-protection, early consultation, fogging only in hotspots."),
+            ("watch", "Larviciding",
+             "Water that cannot be drained or covered, such as canals, ponds and tanks, in the top barangays."),
+            ("watch", "Test kits, IV fluids and spraying teams",
+             "Check stocks and get teams ready so they can start within days."),
+            ("watch", "Cluster spraying (fogging)",
+             "Only in a barangay with 3+ cases in 4 consecutive weeks (DOH clustering), or cases rising 2 weeks in a row. "
+             "Spray that cluster, not the whole city, together with search and destroy there."),
+            ("outbreak warning", "Task force and public advisory",
+             "As soon as the middle forecast passes the epidemic threshold."),
+            ("outbreak warning", "Hospital fast lanes",
+             "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."),
+        ],
+        "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 "
+                "dengue responses. In the budget below, fogging money is meant for cluster areas only.",
+    },
+    "fil": {
+        "head": "Kailan kikilos",
+        "sub": "Bawat aksyon, ang antas ng alerto kung kailan ito sinisimulan, at ang nag-uudyok dito, ayon sa DOH at sa Quezon City.",
+        "cols": ("Simula sa", "Aksyon", "Kailan"),
+        "rows": [
+            ("normal", "Search and destroy",
+             "Linggo-linggo tuwing alas-4 ng hapon sa bawat barangay: takpan ang mga drum, alisan ng tubig ang plorera, lumang gulong "
+             "at alulod. Ituloy kahit tahimik ang linggo."),
+            ("above usual", "Paalala ng 4S sa mga tahanan",
+             "Kapag mas mataas sa karaniwan ang kaso: search and destroy, proteksyon sa sarili, maagang konsulta, fogging sa hotspot lamang."),
+            ("watch", "Paglalagay ng larvicide",
+             "Sa tubig na hindi maalis o matakpan, gaya ng kanal, sapa at tangke, sa mga nangungunang barangay."),
+            ("watch", "Test kit, IV fluids at spraying team",
+             "Suriin ang stock at ihanda ang mga team para makapagsimula sa loob ng ilang araw."),
+            ("watch", "Pag-spray sa cluster (fogging)",
+             "Sa barangay lamang na may 3 o higit pang kaso sa 4 na magkakasunod na linggo (clustering ayon sa DOH), o tumaas ang kaso "
+             "nang 2 linggong sunod. I-spray ang cluster, hindi ang buong lungsod, kasabay ng search and destroy doon."),
+            ("outbreak warning", "Task force at abiso sa publiko",
+             "Kapag lumampas na sa epidemic threshold ang gitnang forecast."),
+            ("outbreak warning", "Dengue fast lane sa ospital",
+             "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."),
+        ],
+        "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue "
+                "noong 2022 at 2025. Sa budget sa ibaba, para lamang sa mga cluster ang pondo sa fogging.",
+    },
+}
+
 FEATURES = {
     "en": {
         "map": ("Colours every area by alert level 2–8 weeks ahead, with a likely range.",
@@ -1005,6 +1058,15 @@ def page_budget():
         Action("Targeted fogging", cost_b, eff_b[0], sum(eff_b) / 2, eff_b[1], 0.10),
     )
     plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions)
+    trig = TRIGGERS[lang]
+    with st.container(key="card_triggers"):
+        card_title("check", trig["head"], trig["sub"])
+        head = "".join(f"<span>{c}</span>" for c in trig["cols"])
+        rows = "".join(
+            f'<div class="todo"><span class="when"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{LEVEL_COLOR[lv]}"></span>'
+            f'{LEVEL_NAME[lang][lv]}</span><span class="do"><b>{a}</b></span><span class="do">{w}</span></div>'
+            for lv, a, w in trig["rows"])
+        html(f'<div><div class="todo head">{head}</div>{rows}</div><p style="font-size:12.5px;color:var(--muted);margin-top:10px">{trig["note"]}</p>')
     with right:
         if plan.empty:
             st.info("No funded actions. Increase the budget.")
