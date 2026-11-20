@@ -2,7 +2,7 @@
 // barangay) with a side panel that follows it, the full table, and CSV export.
 // Drilling in updates the URL (region, area, focus) without re-rendering, so the camera flight is never cut off;
 // choosing a region in the settings re-renders and the map flies in to it from the whole country.
-import { LEVELS, fmt, fmtDay, replayClaim, toCsv } from "../logic.js";
+import { LEVELS, fmt, fmtDay, lineShare, replayClaim, toCsv } from "../logic.js";
 import { barangays, forecastFor, meta as loadMeta, table } from "../data.js";
 import { createDrillMap, loadDrillGeo } from "../../lib/drill-map.js";
 import { LV, count, details, download, esc, infoDisclosure, pill, tableHtml } from "../ui.js";
@@ -23,6 +23,13 @@ export async function render(el, ctx) {
   const table_ = [...fcH].sort((a, b) => b.q50_per100k - a.q50_per100k);
   const n = (lv) => fcH.filter((r) => r.level === lv).length;
   const claim = mode === "replay" ? replayClaim(fcH) : null;
+  // what the level counts cover, e.g. "17 regions and Quezon City, 8 wk ahead"
+  const wk = labels.wk_short.replace("{h}", horizon);
+  const hasQC = fcH.some((r) => r.unit_id === "QC");
+  const scope = fill(L.lv_scope, {
+    areas: panel === "province" ? fill(L.lv_provinces, { n: fcH.length }) : `${fill(L.lv_regions, { n: fcH.length - (hasQC ? 1 : 0) })}${hasQC ? L.lv_and_qc : ""}`,
+    w: wk,
+  });
   const saveAll = () => {
     const cols = Object.keys(fc[0]).filter((k) => !["test_year"].includes(k));
     download(`epilag_forecast_${panel}_${mode}.csv`, toCsv(fc, cols.map((k) => [k, (r) => (k.includes("week") ? new Date(r[k] * 864e5).toISOString().slice(0, 10) : r[k])])), "text/csv");
@@ -34,7 +41,11 @@ export async function render(el, ctx) {
         <div class="replay-result" data-crossed="${claim.crossed}" data-flagged="${claim.flagged}"><strong>${count(claim.flagged)}</strong><small>/ ${claim.crossed} ${esc(labels.flagged_early.replace("{h}", horizon))}</small></div>
         ${infoDisclosure(labels.about_this, `<p>${esc(t.replay_note)}</p>`)}
       </div><pixel-sprite sprite="mosquito" pose="check" scale="3"></pixel-sprite></section>` : ""}
-    <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></li>`).join("")}</ul>
+    <div class="level-pick">
+      <ul class="level-counts" aria-label="${esc(t.level)}">${LEVELS.slice().reverse().map((lv) => `<li data-lv="${LV[lv]}"><button type="button" class="level-count" data-pick="${esc(lv)}" aria-expanded="false" aria-controls="level-list" title="${esc(t[`${LV[lv]}_d`])}"><span class="sq sq--round${lv === LEVELS[3] && n(lv) ? " lv--pulse" : ""}"></span><span class="level-count__copy"><b class="nums">${count(n(lv))}</b><span>${esc(ctx.levelName(lv))}</span></span><span class="level-count__chev" aria-hidden="true"></span></button></li>`).join("")}</ul>
+      <p class="level-pick__scope">${esc(scope)}</p>
+      <div class="level-drawer" data-open="false"><div class="level-drawer__inner"><section class="level-list" id="level-list" aria-live="polite"></section></div></div>
+    </div>
     <div class="map-page-grid map-page-grid--drill">
       <section class="card map-card">
         <div class="map-card__head">
@@ -56,6 +67,41 @@ export async function render(el, ctx) {
     ]))}`;
   ctx.topDownload(t.download_all, saveAll);
 
+  // ---------------------------------------------------------------- which areas are at each level
+  // A count opens the list of its areas; an area flies the map there once the map is ready.
+  const pickBox = el.querySelector(".level-pick"), drawer = pickBox.querySelector(".level-drawer"), levelList = el.querySelector("#level-list");
+  // how close each forecast is to its own outbreak line, as on the overview: 0% usual for the season, 100% the line
+  const meterAt = (v) => `${(Math.min(Math.max(v ?? 0, 0), 1.25) / 1.25 * 100).toFixed(1)}%`;
+  let nameOf = (r) => r.unit_name, goTo = null, openLv = null;
+  function showLevel(lv) {
+    openLv = openLv === lv ? null : lv;
+    pickBox.querySelectorAll(".level-count").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.pick === openLv)));
+    drawer.dataset.open = String(!!openLv);
+    if (!openLv) return;
+    const rows = fcH.filter((r) => r.level === openLv).map((r) => ({ ...r, share: lineShare(r.q50, r.alert, r.epidemic) }))
+      .sort((a, b) => (b.share ?? -Infinity) - (a.share ?? -Infinity) || b.q50_per100k - a.q50_per100k);
+    levelList.dataset.lv = LV[openLv];
+    levelList.innerHTML = `<header class="level-list__head"><span class="sq sq--round"></span><h3>${esc(ctx.levelName(openLv))} · ${esc(wk)}</h3>
+        <span class="level-list__n nums">${esc(rows.length === 1 ? L.lv_n_one : fill(L.lv_n, { n: rows.length }))}</span>
+        <button type="button" class="level-list__close" data-close>${esc(L.lv_close)}</button></header>
+      ${rows.length ? `<ol class="level-list__rows">${rows.map((r, i) => `<li><button type="button" class="level-row" data-goto="${esc(r.unit_id)}" aria-label="${esc(`${nameOf(r)}: ${fmt(r.q50)} ${labels.cases_n}${r.share == null ? "" : `, ${Math.round(r.share * 100)}%`}`)}">
+          <span class="level-row__rank nums">${i + 1}</span><span class="level-row__copy"><b>${esc(nameOf(r))}</b></span>
+          <span class="level-row__cases nums">${fmt(r.q50)}<small>${esc(labels.cases_n)}</small></span>
+          ${r.share == null ? "" : `<span class="rise-meter" aria-hidden="true"><i class="rise-meter__run" style="left:0;width:${meterAt(r.share)}"></i><i class="rise-meter__to" style="left:${meterAt(r.share)}"></i><i class="rise-meter__line"></i></span>`}
+        </button></li>`).join("")}</ol><p class="level-list__foot">${esc(L.lv_hint)}</p>`
+        : `<p class="level-list__empty">${esc(L.lv_none)}</p>`}`;
+  }
+  const onPick = (e) => {
+    const b = e.target.closest("[data-pick]");
+    if (b) { showLevel(b.dataset.pick); return; }
+    if (e.target.closest("[data-close]")) { const lv = openLv; showLevel(lv); pickBox.querySelector(`[data-pick="${CSS.escape(lv)}"]`)?.focus(); return; }
+    const a = e.target.closest("[data-goto]");
+    if (a && goTo) goTo(a.dataset.goto);
+  };
+  const onPickKey = (e) => { if (e.key === "Escape" && openLv) { const lv = openLv; showLevel(lv); pickBox.querySelector(`[data-pick="${CSS.escape(lv)}"]`)?.focus(); } };
+  pickBox.addEventListener("keydown", onPickKey);
+  pickBox.addEventListener("click", onPick);
+
   // ---------------------------------------------------------------- data for every level
   // Regions and Quezon City follow the current settings when they are on the Regions data, otherwise the latest run.
   // Provinces follow the settings when they are on the Provinces data, otherwise the latest province run (Jan 2021).
@@ -76,6 +122,8 @@ export async function render(el, ctx) {
   const histOf = (rows) => { const m = new Map(); for (const r of rows) { if (!m.has(r.unit_id)) m.set(r.unit_id, []); m.get(r.unit_id).push(r); } for (const v of m.values()) v.sort((a, b) => a.week - b.week); return m; };
   const rHist = histOf(regionHist), pHist = histOf(provHist);
   const names = drillNames(mAll, L.special);
+  nameOf = (r) => (r.unit_id === "QC" ? names.city : names.region[r.unit_id]?.short || names.province[r.unit_id] || r.unit_name);
+  if (openLv) { const lv = openLv; openLv = null; showLevel(lv); }
 
   const fcOf = (node) => (!node ? null : node.kind === "province" ? pFc.get(node.id) : node.kind === "barangay" ? null : rFc.get(node.id)) || null;
   const lvOf = (node) => { const f = fcOf(node); return f ? LV[f.level] : "none"; };
@@ -269,6 +317,11 @@ export async function render(el, ctx) {
     },
   });
   if (!el.isConnected) { map.dispose(); return; }
+  goTo = (id) => {
+    if (!map.get(id)) return;
+    map.go(id);
+    box.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+  };
 
   // panel: drill from rows and chips, highlight on hover, links out
   const onPanelClick = (e) => {
@@ -322,6 +375,8 @@ export async function render(el, ctx) {
   input.addEventListener("input", show); input.addEventListener("keydown", onKey); input.addEventListener("blur", onBlur); list.addEventListener("pointerdown", onDown);
 
   return () => {
+    pickBox.removeEventListener("click", onPick);
+    pickBox.removeEventListener("keydown", onPickKey);
     dpanel.removeEventListener("click", onPanelClick); dpanel.removeEventListener("pointerover", onPanelOver); dpanel.removeEventListener("pointerleave", onPanelLeave);
     input.removeEventListener("input", show); input.removeEventListener("keydown", onKey); input.removeEventListener("blur", onBlur); list.removeEventListener("pointerdown", onDown);
     map.dispose();

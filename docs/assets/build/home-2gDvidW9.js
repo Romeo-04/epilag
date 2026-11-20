@@ -1,0 +1,48 @@
+import{_ as e,b as t,i as n,p as r,r as i,s as a,t as o,w as ee}from"./logic-zL9vvAdH.js";import{c as s,i as te,l as ne,r as re}from"./data-DTVSnubn.js";import{h as ie,i as c,o as ae,r as l,s as u,t as d,u as f}from"./ui-CEa7NwmP.js";import{t as oe}from"./chart-D3vHY7o_.js";import{i as se,n as ce,r as le,t as ue}from"./drill-names-BviuhGPO.js";var de=`el-priority-sort`,fe=()=>{try{return localStorage.getItem(de)===`reliable`?`reliable`:`cases`}catch{return`cases`}};async function p(r,p){let{t:g,labels:_,lang:v,i18n:_e,fc:y,fcH:b,horizon:x,mode:S,panel:C,area:w,regionMeta:T}=p,E=Math.max(...b.map(e=>e.week)),D=e=>b.filter(t=>t.level===e).length,O=D(o[3]),k=D(o[2]),ve=D(o[1]),A=n(y,b),j=A.filter(e=>e.level===o[2]||e.level===o[3]).slice(0,4),M=j.length?j:A.filter(e=>e.level===o[1]).slice(0,3),N=await ne(p),ye=e=>N.get(e.unit_id)?.reliability??-1,be=e=>[...A].sort(e===`reliable`?(e,t)=>(o.indexOf(t.level)>=2)-(o.indexOf(e.level)>=2)||ye(t)-ye(e)||t.q50_per100k-e.q50_per100k:(e,t)=>t.q50_per100k-e.q50_per100k).slice(0,6),P=fe(),F=be(P),xe=S===`replay`?pe(_,x,b):O+k===0?me(g,_):``,Se=new Set(b.map(e=>e.unit_id)),I=await s(C,`history`),L=new Map(I.filter(e=>e.week===E&&Se.has(e.unit_id)&&e.cases!=null).map(e=>[e.unit_id,e.cases])),R=[...new Set(y.map(e=>e.horizon))].sort((e,t)=>e-t),z=e=>y.filter(t=>t.horizon===e).reduce((e,t)=>e+t.q50,0),B=[...L.values()].reduce((e,t)=>e+t,0),V=L.size?z(x)/Math.max(B,1)-1:null,Ce=S===`replay`?t(I.filter(e=>e.week<Date.UTC(ee(E),0,1)/864e5)):new Map((await s(C,`thresholds`)).map(e=>[`${e.unit_id}|${e.woy}`,e])),H=e(b,L,Ce);r.innerHTML=`
+    <section class="card status-strip" data-guide="status" aria-labelledby="home-act-title">
+      <div class="status-strip__lead"><span class="home-eyebrow" id="home-act-title">${u(_.act_now)}</span><div class="status-strip__total">${c(O+k)}<span>${u(_.on_alert)}</span></div></div>
+      <div class="status-strip__levels" aria-label="${u(_.act_now)}">
+        ${m(o[3],`warning`,O,g)}${m(o[2],`watch`,k,g)}${m(o[1],`above`,ve,g)}
+      </div>
+      <div class="status-strip__message">${xe}</div>
+    </section>
+
+    <div class="overview-insights">
+      <section class="card" data-guide="trend">
+        ${l(`areaDetail`,_.trend,_.trend_sub)}
+        ${V==null?``:`<div class="trend-head" data-dir="${V>0?`up`:`down`}"><b class="nums">${V>0?`▲`:`▼`} ${Math.abs(Math.round(V*100))}%</b><span>${u(_.vs_now.replace(`{h}`,x))}</span></div>`}
+        <div id="home-trend" class="chart-box"></div>
+      </section>
+      <section class="card" data-guide="rising">
+        ${l(`alert`,_.rising,_.rising_sub)}
+        ${H.length?`<ol class="priority-list">${H.map((e,t)=>he(e,t,p)).join(``)}</ol>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${u(_.no_rising)}</div></div>`}
+      </section>
+      <section class="card" data-guide="do">
+        ${l(`check`,_.do_week)}
+        ${M.length?`<div class="do-list">${M.slice(0,3).map(e=>ge(e,p)).join(``)}</div>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${u(_.quiet)}</div></div>`}
+      </section>
+    </div>
+
+    <div class="overview-grid" aria-label="${u(g.nav_map)}">
+      <section class="card overview-map" data-guide="map">
+        ${l(`forecastMap`,g.nav_map)}
+        <div class="home-map" id="home-map" role="img" aria-label="${u(g.nav_map)}"></div>
+        <div class="map-footer"><ul class="home-legend">${o.map(e=>`<li data-lv="${d[e]}"><span class="sq sq--round"></span>${u(p.levelName(e))}</li>`).join(``)}</ul>
+          <a class="inline-link" href="?page=map" data-go="map">${u(g.open_map)} <i data-icon="arrowRight" data-size="18"></i></a></div>
+      </section>
+
+      <aside class="card overview-priority" data-guide="priority">
+        <div class="priority-head">${l(`alert`,g.rank)}<div class="seg seg--sm priority-sort" id="priority-sort"></div></div>
+        ${F.length?`<ol class="priority-list" id="home-priority">${F.map((e,t)=>h(e,t,p,N)).join(``)}</ol>`:`<div class="empty-state"><span class="empty-state__icon"><i data-icon="check" data-size="20"></i></span><div>${u(_.quiet)}</div></div>`}
+        <div class="priority-list__footer"><a class="inline-link" href="?page=map" data-go="map">${u(_.all_areas)} <i data-icon="arrowRight" data-size="18"></i></a></div>
+      </aside>
+    </div>`,r.querySelectorAll(`[data-go]`).forEach(e=>e.addEventListener(`click`,t=>{t.ctrlKey||t.metaKey||t.shiftKey||t.altKey||(t.preventDefault(),p.go(e.dataset.go,e.dataset.u?{area:e.dataset.u}:{}))})),r.querySelector(`#story-btn`)?.addEventListener(`click`,()=>p.set({panel:`province`,mode:`replay`,region:null,area:null})),p.topDownload(g.download_brief,()=>ae(`epilag_action_brief.md`,i(M,{t:g,lang:v,i18n:_e,panelLabel:p.panelLabel,horizon:x,asOf:E}),`text/markdown`));let we=r.querySelector(`#priority-sort`),U=()=>ie(we,_.sort_by,[[`cases`,_.sort_cases],[`reliable`,_.sort_reliable]],P,e=>{P=e;try{localStorage.setItem(de,e)}catch{}let t=r.querySelector(`#home-priority`);t&&(t.innerHTML=be(e).map((e,t)=>h(e,t,p,N)).join(``)),U()});U();let W=oe(r.querySelector(`#home-trend`),{height:170,text:!0,categories:[_.now,...R.map(e=>_.wk_ahead.replace(`{h}`,e))],groups:[{values:[B,...R.map(z)],colors:[`#8A9891`,...R.map(e=>e===x?`#08754F`:`#9FCBA6`)]}]}),G=r.querySelector(`#home-map`),K=new Map(b.map(e=>[e.unit_id,e])),[Te,Ee,q]=await Promise.all([se(),te(),C===`province`?re({panel:`region_qc`,mode:`latest`,origin:null}):null]);if(!r.isConnected)return W;if(q){let e=[...new Set(q.map(e=>e.horizon))].sort((e,t)=>Math.abs(e-x)-Math.abs(t-x))[0];for(let t of q)t.horizon===e&&!K.has(t.unit_id)&&K.set(t.unit_id,t)}let J=_.dmap,De=e=>(e&&e.kind!==`barangay`?K.get(e.id):null)||null,Y=await le(G,{geo:Te,names:ue(Ee,J.special),text:J,compact:!0,pixel:2,initial:C===`province`&&T?T.id:null,level:e=>{let t=De(e);return t?d[t.level]:`none`},expected:()=>0,maxExpected:1,legend:()=>``,tip(e){let t=De(e);return`<b>${u(t?.unit_name||e.name)}</b>${t?`${f(p,t.level)}<span>${a(t.q50)} (${a(t.q10)}–${a(t.q90)})</span>`:`<span>${u(J.no_forecast)}</span>`}`},onPick(e){p.go(`map`,ce(e,C))}});if(!r.isConnected)return Y.dispose(),W;let X=()=>Y.hover(w&&Y.get(w)?w:null);X();let Oe=()=>X();G.addEventListener(`pointerleave`,Oe);let Z=r.querySelector(`#home-priority`),Q=e=>{let t=e.target.closest(`[data-u]`)?.dataset.u;Y.hover(t&&Y.get(t)?t:null)},$=()=>X();return Z?.addEventListener(`pointerover`,Q),Z?.addEventListener(`pointerleave`,$),Z?.addEventListener(`focusin`,Q),Z?.addEventListener(`focusout`,$),()=>{W(),G.removeEventListener(`pointerleave`,Oe),Z?.removeEventListener(`pointerover`,Q),Z?.removeEventListener(`pointerleave`,$),Z?.removeEventListener(`focusin`,Q),Z?.removeEventListener(`focusout`,$),Y.dispose()}}function m(e,t,n,r){return`<div class="status-level" data-lv="${d[e]}"><span class="sq sq--round"></span><span class="status-level__copy"><b class="nums">${c(n)}</b><span>${u(r[`${t}_n`])}</span></span></div>`}function pe(e,t,n){let i=r(n);return`<p><b>${i.flagged} / ${i.crossed}</b> ${u(e.flagged_early.replace(`{h}`,t))}</p>`}function me(e,t){return`<div class="status-message__title">${u(t.quiet)}</div><button type="button" class="btn btn--ghost btn--sm" id="story-btn">${u(e.replay_story)}</button>`}function h(e,t,n,r){let i=r?.get(e.unit_id),o=i?.reliability==null?``:` · <span class="rel" data-grade="${u(i.grade.replace(` `,`-`))}">${u(n.labels.pct_right.replace(`{p}`,Math.round(i.reliability*100)))}</span>`;return`<li><a class="priority-row" href="?page=unit&area=${encodeURIComponent(e.unit_id)}" data-u="${u(e.unit_id)}" data-go="unit" aria-label="${u(`${e.unit_name}, ${n.levelName(e.level)}`)}" title="${u(`${n.t.range}: ${a(e.q10)}–${a(e.q90)}`)}">
+    <span class="priority-row__rank">${t+1}</span><span class="priority-row__copy"><b>${u(e.unit_name)}</b><small>${a(e.q50)} ${u(n.labels.cases_n)}</small></span>
+    <span class="priority-row__level">${f(n,e.level)}<small>${e.q50_per100k.toFixed(1)} ${u(n.labels.per100k_short)}${o}</small></span></a></li>`}var g=1.25,_=e=>`${(Math.min(Math.max(e,0),g)/g*100).toFixed(1)}%`,v=e=>`${Math.round(e*100)}%`;function he(e,t,n){let r=n.labels,i=e.from<=0?r.rise_usual:v(e.from);return`<li><a class="priority-row rise-row" data-lv="${d[e.level]}" href="?page=unit&area=${encodeURIComponent(e.unit_id)}" data-u="${u(e.unit_id)}" data-go="unit"
+      aria-label="${u(`${e.unit_name}: ${r.rise_now} ${i}, ${r.rise_fc} ${v(e.to)}. ${n.levelName(e.level)}`)}">
+    <span class="priority-row__rank">${t+1}</span>
+    <span class="priority-row__copy"><b>${u(e.unit_name)}</b><small>${a(e.now)} → ${a(e.q50)} ${u(r.cases_n)} · ${u(n.levelName(e.level))}</small>
+      <span class="rise-meter" aria-hidden="true"><i class="rise-meter__run" style="left:${_(e.from)};width:calc(${_(e.to)} - ${_(e.from)})"></i>
+        <i class="rise-meter__from" style="left:${_(e.from)}"></i><i class="rise-meter__to" style="left:${_(e.to)}"></i><i class="rise-meter__line"></i></span></span>
+    <span class="rise-pct nums"><small>${u(i)} →</small><b>${v(e.to)}</b></span></a></li>`}function ge(e,t){return`<a class="do-row" data-lv="${d[e.level]}" href="?page=unit&area=${encodeURIComponent(e.unit_id)}" data-u="${u(e.unit_id)}" data-go="unit">
+    <span class="do-row__name">${u(e.unit_name)} ${f(t,e.level)}</span><small>${u(t.labels.level_action[e.level])}</small></a>`}export{p as render};
