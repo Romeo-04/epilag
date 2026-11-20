@@ -372,8 +372,6 @@ def test_phone_game_board_and_area_sheet(base, browser):
     pg.evaluate("localStorage.setItem('drill-tour', '1')")  # skip the walkthrough
     pg.locator("#start").tap()
     pg.locator("#go-r1").tap()
-    pg.locator(".model").first.tap()
-    pg.locator("#go-r2").tap()
     pg.wait_for_timeout(1500)
     assert pg.locator("#board-wrap").bounding_box()["height"] >= 380
     pg.locator("#plist .prow__pick").nth(1).tap()
