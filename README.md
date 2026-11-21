@@ -231,8 +231,11 @@ Full write-up: [methodology page](https://romeo-04.github.io/epilag/methodology.
 - **Thresholds:** per area and week of year, from earlier years only: *usual* = mean,
   *epidemic* = mean + 2 SD (a common surveillance rule).
 - **Explanations:** SHAP values, grouped into recent cases, season, rain by week, humidity and temperature.
-- **Budget:** fractional knapsack on cases averted per peso. Effects are cautious ranges based on
-  Bowman et al. (2016). Costs are example values for the LGU to replace.
+- **Budget:** fractional knapsack on cases averted per peso, counting forecast cases in weeks 3–8 ahead
+  (people who fall ill in the next 2 weeks are mostly already infected). Effects are cautious ranges based on
+  Bowman et al. (2016). Costs are example values for the LGU to replace. A curve shows cases averted at every
+  budget, so the point where extra money buys less is visible. It is a scenario from those assumptions; the
+  averted cases are not tested the way the forecast is.
 
 ## Data
 | Source | Use | Licence / access |

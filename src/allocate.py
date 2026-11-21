@@ -1,11 +1,15 @@
 """Budget allocation: where does each peso avert the most forecast dengue cases?
 
-For each unit and action, expected cases averted = forecast cases in the next 8 weeks
+For each unit and action, expected cases averted = forecast cases in weeks 3-8 ahead
 x share of the population covered x action effect. Cost = people covered x cost per person.
+Weeks 1-2 are left out: people who fall ill in the next two weeks are mostly already infected,
+so an action started now cannot prevent them.
 Value per peso is constant within a (unit, action), so the best plan under a budget is a
 fractional knapsack: fund the highest cases-averted-per-peso first, up to each action's max
 coverage, until the money runs out. Effects are ranges (low/central/high), so the plan is
-chosen on the central effect and reported with all three.
+chosen on the central effect and reported with all three. budget_curve() gives the same plan
+for every budget at once: cases averted rise in straight lines between the points where the next
+(unit, action) starts, and flatten as the money reaches lower-risk areas.
 
 Effect sizes are deliberately cautious placeholders anchored to the evidence:
   community clean-up + container covers: Bowman et al. (2016) meta-analysis, OR 0.22
@@ -35,21 +39,25 @@ DEFAULT_ACTIONS = (
 )
 
 
-def expected_cases_8wk(forecast: pd.DataFrame) -> pd.DataFrame:
-    """Sum of weekly forecasts over the next 8 weeks, interpolated from the 2/4/6/8-week horizons."""
+PREVENTABLE_WEEKS = range(3, 9)  # weeks ahead an action started now can still affect
+
+
+def expected_cases_8wk(forecast: pd.DataFrame, weeks_ahead=range(1, 9)) -> pd.DataFrame:
+    """Sum of weekly forecasts over the given weeks ahead (default 1-8), interpolated from the 2/4/6/8-week
+    horizons."""
     rows = []
     for unit_id, f in forecast.groupby("unit_id"):
         f = f.set_index("horizon").sort_index()
-        weeks = pd.Index(range(1, 9), name="horizon")
+        weeks = pd.Index(list(weeks_ahead), name="horizon")
         interp = f[["q10", "q50", "q90"]].reindex(f.index.union(weeks)).interpolate("index").bfill().loc[weeks]
         rows.append({"unit_id": unit_id, "unit_name": f.unit_name.iloc[0], "population": f.population.iloc[0],
                      "cases_low": interp.q10.sum(), "cases_mid": interp.q50.sum(), "cases_high": interp.q90.sum()})
     return pd.DataFrame(rows)
 
 
-def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> pd.DataFrame:
-    """Return the funded (unit, action) lines with spend and cases averted (low/central/high)."""
-    units = expected_cases_8wk(forecast)
+def _options(forecast: pd.DataFrame, actions) -> pd.DataFrame:
+    """Every (unit, action) pair with its cost cap and cases averted per peso, best value first."""
+    units = expected_cases_8wk(forecast, PREVENTABLE_WEEKS)
     options = []
     for a in actions:
         o = units.copy()
@@ -61,10 +69,13 @@ def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> 
         o["effects"] = [(a.effect_low, a.effect_central, a.effect_high)] * len(o)
         o["cost_per_person"] = a.cost_per_person
         options.append(o)
-    opts = pd.concat(options, ignore_index=True).sort_values("averted_per_peso", ascending=False)
+    return pd.concat(options, ignore_index=True).sort_values("averted_per_peso", ascending=False, kind="stable")
 
+
+def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> pd.DataFrame:
+    """Return the funded (unit, action) lines with spend and cases averted (low/central/high)."""
     plan, left = [], float(budget)
-    for o in opts.itertuples():
+    for o in _options(forecast, actions).itertuples():
         if left <= 0 or o.averted_per_peso <= 0:
             break
         spend = min(left, o.max_cost)
@@ -82,3 +93,20 @@ def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> 
     cols = ["unit_id", "unit_name", "action", "spend", "people_covered", "share_covered",
             "averted_low", "averted_mid", "averted_high"]
     return pd.DataFrame(plan, columns=cols)
+
+
+def budget_curve(forecast: pd.DataFrame, actions=DEFAULT_ACTIONS) -> pd.DataFrame:
+    """Total cases averted (low/central/high) against budget, at each point where the plan starts funding the
+    next (unit, action). Between two points the totals rise in a straight line, so interpolating this table
+    gives allocate()'s totals for any budget. Starts at a zero budget and ends where everything is funded."""
+    rows = [{"spend": 0.0, "averted_low": 0.0, "averted_mid": 0.0, "averted_high": 0.0}]
+    for o in _options(forecast, actions).itertuples():
+        if o.averted_per_peso <= 0:
+            break
+        lo, mid, hi = o.effects
+        last = rows[-1]
+        rows.append({"spend": last["spend"] + o.max_cost,
+                     "averted_low": last["averted_low"] + o.cases_low * o.max_people / o.population * lo,
+                     "averted_mid": last["averted_mid"] + o.cases_mid * o.max_people / o.population * mid,
+                     "averted_high": last["averted_high"] + o.cases_high * o.max_people / o.population * hi})
+    return pd.DataFrame(rows)
