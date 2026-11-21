@@ -236,8 +236,10 @@ Full write-up: [methodology page](https://romeo-04.github.io/epilag/methodology.
   Bowman et al. (2016). Costs are example values for the LGU to replace. A curve shows cases averted at every
   budget, so the point where extra money buys less is visible. It is a scenario from those assumptions; the
   averted cases are not tested the way the forecast is. Each area's current alert level decides which actions it
-  can get (fogging only at watch or higher), and a plan by area lists what is funded there and the other actions
-  its level calls for, which have no cost or effect estimate.
+  can get (fogging only at watch or higher). By default the worst level is funded first, with cases averted per
+  peso deciding only within a level; a switch ranks on cases averted per peso alone, which averts more cases but
+  can pass over areas at outbreak warning. A plan by area lists what is funded there and the other actions its
+  level calls for, which have no cost or effect estimate, and a note says why fogging gets no money when it gets none.
 
 ## Data
 | Source | Use | Licence / access |

@@ -313,8 +313,8 @@ TRIGGERS = {
              "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."),
         ],
         "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 "
-                "dengue responses. The budget below follows these levels: clean-up is funded in every area, fogging only in areas at "
-                "watch or higher, and inside those areas only the clusters should be sprayed.",
+                "dengue responses. The budget below follows these levels: by default it funds the worst level first, it allows "
+                "fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
         # rows funded from the budget (search and destroy as the clean-up drive, cluster spraying as fogging)
         "costed": (0, 4),
         "plan_head": "Plan by area",
@@ -323,6 +323,12 @@ TRIGGERS = {
         "plan_cols": ("Area", "Level", "Funded from the budget", "Cases averted", "Also due at this level"),
         "plan_unfunded": "Not funded at this budget",
         "plan_nothing": "Nothing else yet",
+        "priority": "Spend first on",
+        "priority_opts": ("The worst alert level", "The most cases averted per peso"),
+        "fog_level": "No fogging money: no area is at watch or higher.",
+        "fog_ratio": "No fogging money: at these costs and effects, clean-up prevents about {x}× more cases per peso in "
+                     "the same area, so the budget runs out before fogging's turn.",
+        "fog_zero": "No fogging money: its middle effect is set to zero.",
     },
     "fil": {
         "head": "Kailan kikilos",
@@ -351,9 +357,9 @@ TRIGGERS = {
              "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."),
         ],
         "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue "
-                "noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: may pondo ang paglilinis sa bawat lugar, ang "
-                "fogging sa mga lugar lamang na nasa Bantayan o mas mataas, at sa loob ng mga lugar na iyon, ang mga cluster lamang "
-                "ang dapat i-spray.",
+                "noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: karaniwang inuuna nito ang pinakamataas na "
+                "antas, pinapayagan lamang nito ang fogging sa mga lugar na nasa Bantayan o mas mataas, at sa loob ng mga lugar na "
+                "iyon, ang mga cluster lamang ang dapat i-spray.",
         "costed": (0, 4),
         "plan_head": "Plano bawat lugar",
         "plan_sub": "Ang antas ng alerto ng bawat lugar ang nagpapasya ng mga aksyon nito. Galing sa budget ang paglilinis at "
@@ -362,6 +368,12 @@ TRIGGERS = {
         "plan_cols": ("Lugar", "Antas", "May pondo mula sa budget", "Kasong maiiwasan", "Dapat ding gawin sa antas na ito"),
         "plan_unfunded": "Walang pondo sa budget na ito",
         "plan_nothing": "Wala pang iba",
+        "priority": "Unang gastusan ang",
+        "priority_opts": ("Pinakamataas na antas ng alerto", "Pinakamaraming kasong maiiwasan bawat piso"),
+        "fog_level": "Walang pondo sa fogging: walang lugar na nasa Bantayan o mas mataas.",
+        "fog_ratio": "Walang pondo sa fogging: sa mga gastos at epektong ito, mga {x}× na mas maraming kaso bawat piso ang "
+                     "naiiwasan ng paglilinis sa parehong lugar, kaya nauubos ang budget bago umabot sa fogging.",
+        "fog_zero": "Walang pondo sa fogging: zero ang gitnang epekto nito.",
     },
 }
 
@@ -1105,6 +1117,19 @@ def area_plan(plan: pd.DataFrame, trig: dict) -> pd.DataFrame:
     return pd.DataFrame(out, columns=list(trig["plan_cols"]))
 
 
+def fog_note(plan: pd.DataFrame, actions, levels: dict, trig: dict) -> str:
+    """Why the plan funds no fogging, or "" when it funds some."""
+    clean, fog = actions
+    if (plan.action == fog.name).any():
+        return ""
+    if not any(LEVELS.index(lv) >= LEVELS.index(fog.min_level) for lv in levels.values()):
+        return trig["fog_level"]
+    if fog.effect_central <= 0:
+        return trig["fog_zero"]
+    x = (clean.effect_central / clean.cost_per_person) / (fog.effect_central / fog.cost_per_person)
+    return trig["fog_ratio"].format(x=f"{x:.0f}" if x >= 10 else f"{x:.1f}")
+
+
 def page_budget():
     hero(t["plan_head"], t["plan_muted"], t["plan_sub"])
     left, right = st.columns([1, 1.5], gap="medium")
@@ -1121,10 +1146,12 @@ def page_budget():
         Action("Clean-up drive + container covers", cost_a, eff_a[0], sum(eff_a) / 2, eff_a[1], 0.30),
         Action("Targeted fogging", cost_b, eff_b[0], sum(eff_b) / 2, eff_b[1], 0.10, "watch"),
     )
+    trig = TRIGGERS[lang]
+    with left, st.container(key="card_priority"):
+        worst_first = st.radio(trig["priority"], trig["priority_opts"], key="priority") == trig["priority_opts"][0]
     # each area only gets the actions its current alert level calls for (the "When to act" table)
     levels = dict(zip(fc_h.unit_id, fc_h.level))
-    plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions, levels)
-    trig = TRIGGERS[lang]
+    plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions, levels, "level" if worst_first else "value")
     with st.container(key="card_triggers"):
         card_title("check", trig["head"], trig["sub"])
         head = "".join(f"<span>{c}</span>" for c in trig["cols"])
@@ -1157,6 +1184,9 @@ def page_budget():
     with st.container(key="card_area_plan"):
         card_title("check", trig["plan_head"], trig["plan_sub"])
         st.dataframe(area_plan(plan, trig), hide_index=True, width="stretch")
+        note = fog_note(plan, actions, levels, trig)
+        if note:
+            st.caption(note)
     out = pd.DataFrame({
         t["area"]: plan.unit_name, "Action": plan.action, "Spend (PHP)": plan.spend.round(0).astype(int),
         "People covered": plan.people_covered.round(0).astype(int),

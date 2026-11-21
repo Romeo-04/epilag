@@ -100,3 +100,28 @@ def test_budget_curve_follows_the_levels():
     for budget in (0, 3000, 9000, 1e9):
         plan = allocate(fc, budget, LEVELLED, levels)
         assert plan.averted_mid.sum() == pytest.approx(np.interp(budget, curve.spend, curve.averted_mid))
+
+
+def test_worst_level_is_funded_first_unless_priority_is_value():
+    # B has the higher case rate but is normal; A is at outbreak warning, so A is funded first by default.
+    fc = forecast([("A", 1000, 10.0), ("B", 1000, 50.0)])
+    levels = {"A": "outbreak warning", "B": "normal"}
+    assert allocate(fc, 1000, ONE_ACTION, levels).unit_id.tolist() == ["A"]
+    assert allocate(fc, 1000, ONE_ACTION, levels, priority="value").unit_id.tolist() == ["B"]
+
+
+def test_level_priority_skips_zero_value_options_without_stopping():
+    fc = forecast([("A", 1000, 0.0), ("B", 1000, 50.0)])
+    plan = allocate(fc, 1e9, ONE_ACTION, {"A": "outbreak warning", "B": "normal"})
+    assert plan.unit_id.tolist() == ["B"]
+
+
+@pytest.mark.parametrize("priority", ["level", "value"])
+def test_budget_curve_matches_allocate_under_either_priority(priority):
+    fc = forecast([("A", 1000, 10.0), ("B", 1000, 50.0), ("C", 4000, 20.0), ("D", 2000, 0.0)])
+    levels = {"A": "watch", "B": "normal", "C": "outbreak warning", "D": "outbreak warning"}
+    curve = budget_curve(fc, LEVELLED, levels, priority)
+    for budget in (0, 2500, 9000, 17000, 1e9):
+        plan = allocate(fc, budget, LEVELLED, levels, priority)
+        for k in ("averted_low", "averted_mid", "averted_high"):
+            assert plan[k].sum() == pytest.approx(np.interp(budget, curve.spend, curve[k]))

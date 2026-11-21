@@ -4,7 +4,7 @@ import { barChart, curveChart } from "../chart.js";
 import { LV, LV_HEIGHT, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
 const A = "Clean-up drive + container covers", B = "Targeted fogging";
-const inputs = { budget: 5_000_000, costA: 15, effA: [0.1, 0.5], costB: 25, effB: [0, 0.1] };
+const inputs = { priority: "level", budget: 5_000_000, costA: 15, effA: [0.1, 0.5], costB: 25, effB: [0, 0.1] };
 
 export function render(el, ctx) {
   const { t, labels, fc, lang, i18n } = ctx;
@@ -28,6 +28,7 @@ export function render(el, ctx) {
     <div class="grid grid--plan">
       <section class="card plan-inputs">
         <label class="field"><span class="field__label">${esc(t.budget)}</span><input type="number" id="budget" min="0" step="500000" value="${inputs.budget}" inputmode="numeric"></label>
+        <label class="field"><span class="field__label">${esc(trig.priority)}</span><select id="priority">${["level", "value"].map((v, i) => `<option value="${v}"${inputs.priority === v ? " selected" : ""}>${esc(trig.priority_opts[i])}</option>`).join("")}</select></label>
         <details class="plan-assume"><summary>${esc(labels.assumptions)}</summary><div class="plan-assume__body">
           <div class="kicker">${esc(labels.clean_up)}</div>
           <label class="field"><span class="field__label">${esc(labels.cost_short)}</span><input type="number" id="costA" step="1" min="1" value="${inputs.costA}"></label>${effField("effA", inputs.effA)}
@@ -38,7 +39,7 @@ export function render(el, ctx) {
       </section>
       <div class="plan-out" id="out"></div>
     </div>
-    <section class="card area-plan">${cardTitle("check", trig.plan_head)}<p class="small muted">${esc(trig.plan_sub)}</p><div id="area-plan"></div></section>
+    <section class="card area-plan">${cardTitle("check", trig.plan_head)}<p class="small muted">${esc(trig.plan_sub)}</p><div id="area-plan"></div><p class="small muted" id="fog-note" style="margin-top:10px"></p></section>
     <section class="card">${cardTitle("actionPlan", labels.curve_head)}<p class="small muted">${esc(labels.curve_sub)}</p>
       <div id="curve" class="chart-box"></div><p class="small" id="curve-note" style="margin-top:10px"></p><p class="small muted">${esc(labels.curve_scenario)}</p></section>
     <section class="card triggers">${cardTitle("check", trig.head)}<p class="small muted">${esc(trig.sub)}</p>
@@ -54,7 +55,7 @@ export function render(el, ctx) {
 
   function update() {
     const v = (id) => Number(el.querySelector(`#${id}`).value);
-    Object.assign(inputs, { budget: Math.max(0, v("budget")), costA: Math.max(0.01, v("costA")), costB: Math.max(0.01, v("costB")),
+    Object.assign(inputs, { priority: el.querySelector("#priority").value, budget: Math.max(0, v("budget")), costA: Math.max(0.01, v("costA")), costB: Math.max(0.01, v("costB")),
       effA: [Math.min(v("effA-lo"), v("effA-hi")), Math.max(v("effA-lo"), v("effA-hi"))],
       effB: [Math.min(v("effB-lo"), v("effB-hi")), Math.max(v("effB-lo"), v("effB-hi"))] });
     el.querySelectorAll(".effect input").forEach((i) => { i.nextElementSibling.textContent = pct(Number(i.value)); });
@@ -63,9 +64,10 @@ export function render(el, ctx) {
       { name: B, cost_per_person: inputs.costB, effect_low: inputs.effB[0], effect_central: (inputs.effB[0] + inputs.effB[1]) / 2, effect_high: inputs.effB[1], max_coverage: 0.1, min_level: "watch" },
     ];
     const fc4 = fc.filter((r) => [2, 4, 6, 8].includes(r.horizon));
-    plan = allocate(fc4, inputs.budget, actions, levels);
-    drawCurve(budgetCurve(fc4, actions, levels));
+    plan = allocate(fc4, inputs.budget, actions, levels, inputs.priority);
+    drawCurve(budgetCurve(fc4, actions, levels, inputs.priority));
     drawAreaPlan();
+    el.querySelector("#fog-note").textContent = fogNote(actions);
     const out = el.querySelector("#out");
     if (!plan.length) out.innerHTML = `<div class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.results)}</b><p>${esc(labels.no_funded)}</p></div></div>`;
     else {
@@ -111,11 +113,22 @@ export function render(el, ctx) {
         return due.length ? due.join(" · ") : `<span class="muted">${esc(trig.plan_nothing)}</span>`; }, "wrap"],
     ]);
   }
+  // why the plan funds no fogging, or "" when it funds some (app/streamlit_app.py fog_note)
+  function fogNote([clean, fog]) {
+    if (plan.some((r) => r.action === B)) return "";
+    if (!fcH.some((r) => LEVELS.indexOf(r.level) >= LEVELS.indexOf(fog.min_level))) return trig.fog_level;
+    if (!(fog.effect_central > 0)) return trig.fog_zero;
+    const x = (clean.effect_central / clean.cost_per_person) / (fog.effect_central / fog.cost_per_person);
+    return trig.fog_ratio.replace("{x}", x >= 10 ? Math.round(x) : x.toFixed(1));
+  }
   function drawCurve(curve) {
     const full = curve[curve.length - 1].spend, b = inputs.budget;
-    // where each extra peso buys half as much as the first: the curve's bend, which the chart should show
+    // past this budget every extra peso buys less than half as much as the first: the curve's bend, which the chart
+    // should show. With the worst level funded first the slope can rise again, so it is the last point above half.
     const slope = (i) => (curve[i].averted_mid - curve[i - 1].averted_mid) / (curve[i].spend - curve[i - 1].spend);
-    const hi = curve.findIndex((_, i) => i > 1 && slope(i) < slope(1) / 2), half = hi > 0 ? curve[hi - 1].spend : full;
+    let last = 1;
+    for (let i = 2; i < curve.length; i++) if (slope(i) >= slope(1) / 2) last = i;
+    const hi = last < curve.length - 1 ? last + 1 : -1, half = hi > 0 ? curve[last].spend : full;
     // show the bend and four times the budget (at least ₱20M), but not far past the point where every area is funded
     const xMax = Math.max(Math.min(Math.max(4 * b, 20e6, half * 1.25), full * 1.1), b * 1.1, 1e6);
     const xs = [...new Set([...Array.from({ length: 81 }, (_, i) => (xMax * i) / 80), ...curve.map((p) => p.spend).filter((v) => v < xMax)])].sort((a, c) => a - c);
