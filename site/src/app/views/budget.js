@@ -1,6 +1,6 @@
 // Action plan: budget, cases averted, spend by area, and the funded plan; costs and effects sit in a drawer.
 import { LEVELS, allocate, budgetCurve, curveAt, fmt, toCsv } from "../logic.js";
-import { barChart, curveChart } from "../chart.js";
+import { curveChart } from "../chart.js";
 import { LV, LV_HEIGHT, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
 const A = "Clean-up drive + container covers", B = "Targeted fogging";
@@ -46,10 +46,9 @@ export function render(el, ctx) {
       <ol class="todo todo--3"><li class="todo__row todo__head">${trig.cols.map((c) => `<span>${esc(c)}</span>`).join("")}</li>
         ${trig.rows.map(([lv, a, w]) => `<li class="todo__row"><span class="todo__when"><span class="sq sq--round" data-lv="${LV[lv]}"></span> ${esc(ctx.levelName(lv))}</span><b>${esc(a)}</b><span>${esc(w)}</span>${whereNow(lv)}</li>`).join("")}</ol>
       <p class="small muted">${esc(trig.note)}</p></section>
-    <section class="card">${cardTitle("forecastMap", t.spend_chart)}<div id="spend" class="chart-box"></div></section>
     ${details(t.plan, `<div id="plan-table"></div>`)}`;
 
-  let plan = [], disposeChart = null, disposeCurve = null;
+  let plan = [], disposeCurve = null;
   // each area only gets the actions its current alert level calls for (the "When to act" table)
   const levels = Object.fromEntries(fcH.map((r) => [r.unit_id, r.level]));
 
@@ -77,20 +76,14 @@ export function render(el, ctx) {
         <pixel-sprite class="hero-card__sprite" sprite="props" pose="broom" scale="2"></pixel-sprite></section>`;
       hydrateCounts(out);
     }
-    const byArea = new Map();
-    for (const r of plan) { const a = byArea.get(r.unit_name) || { [A]: 0, [B]: 0, total: 0 }; a[r.action] += r.spend; a.total += r.spend; byArea.set(r.unit_name, a); }
-    const top = [...byArea].sort((x, y) => y[1].total - x[1].total).slice(0, 12);
-    disposeChart?.();
-    disposeChart = top.length ? barChart(el.querySelector("#spend"), { categories: top.map(([n]) => n), mode: "stack", horizontal: true, fmt: (v) => `₱${short(v)}`,
-      groups: [{ label: labels.clean_up, color: "#08754F", values: top.map(([, a]) => a[A]) }, { label: labels.fogging, color: "#F7C928", values: top.map(([, a]) => a[B]) }] }) : null;
-    if (!top.length) el.querySelector("#spend").innerHTML = "";
     el.querySelector("#plan-table").innerHTML = tableHtml(plan, [[t.area, (r) => esc(r.unit_name)], [labels.action, (r) => esc(actionName(r.action))],
       [labels.spend, (r) => fmt(r.spend), "num"], [labels.people_covered, (r) => fmt(r.people_covered), "num"],
       [labels.cases_low, (r) => fmt(r.averted_low), "num"], [labels.cases_central, (r) => fmt(r.averted_mid), "num"],
       [labels.cases_high, (r) => fmt(r.averted_high), "num"]]);
   }
-  // one row per area that is funded or above normal, worst level first: what the budget funds there, the cases it
-  // averts, and the other actions its level calls for (the uncosted rows of the "When to act" table)
+  // the plan grouped by alert level, worst first. Each group names the other actions its level calls for once (the
+  // uncosted rows of the "When to act" table), lists its funded areas with a spend bar and the cases averted, and
+  // folds its unfunded areas into one line. Normal areas only appear when they get money.
   function drawAreaPlan() {
     const by = new Map();
     for (const r of plan) {
@@ -98,20 +91,36 @@ export function render(el, ctx) {
       a.spend[r.action] += r.spend; a.total += r.spend; a.lo += r.averted_low; a.mid += r.averted_mid; a.hi += r.averted_high;
       by.set(r.unit_id, a);
     }
-    const rank = (r) => LEVELS.indexOf(r.level);
-    const rows = fcH.filter((r) => by.has(r.unit_id) || r.level !== LEVELS[0])
-      .sort((x, y) => rank(y) - rank(x) || (by.get(y.unit_id)?.total || 0) - (by.get(x.unit_id)?.total || 0) || y.q50_per100k - x.q50_per100k);
-    const [cArea, cLevel, cFunded, cAverted, cDue] = trig.plan_cols;
-    el.querySelector("#area-plan").innerHTML = tableHtml(rows, [
-      [cArea, (r) => `<b>${esc(r.unit_name)}</b>`],
-      [cLevel, (r) => `<span class="sq sq--round" data-lv="${LV[r.level]}"></span> ${esc(ctx.levelName(r.level))}`],
-      [cFunded, (r) => { const a = by.get(r.unit_id);
-        const parts = a ? [[A, a.spend[A]], [B, a.spend[B]]].filter(([, v]) => v > 0).map(([n, v]) => `${esc(actionName(n))} ₱${short(v)}`) : [];
-        return parts.length ? parts.join("<br>") : `<span class="muted">${esc(trig.plan_unfunded)}</span>`; }],
-      [cAverted, (r) => { const a = by.get(r.unit_id); return a ? `${fmt(a.mid)} <span class="muted">(${fmt(a.lo)}–${fmt(a.hi)})</span>` : "–"; }, "num"],
-      [cDue, (r) => { const due = trig.rows.filter(([lv], i) => !trig.costed.includes(i) && rank({ level: lv }) <= rank(r)).map(([, a]) => esc(a));
-        return due.length ? due.join(" · ") : `<span class="muted">${esc(trig.plan_nothing)}</span>`; }, "wrap"],
-    ]);
+    const need = fcH.filter((r) => r.level !== LEVELS[0]), maxTotal = Math.max(1, ...[...by.values()].map((a) => a.total));
+    const [cArea, , cFunded, cAverted] = trig.plan_cols;
+    const summary = need.length ? labels.plan_summary.replace("{funded}", need.filter((r) => by.has(r.unit_id)).length).replace("{n}", need.length) : labels.plan_summary_none;
+    const pctOf = (v) => `${((v / maxTotal) * 100).toFixed(2)}%`;
+    const row = (r) => { const a = by.get(r.unit_id);
+      const parts = [[A, a.spend[A]], [B, a.spend[B]]].filter(([, v]) => v > 0);
+      const detail = parts.map(([n, v]) => `${actionName(n)} ₱${short(v)}`).join(" · ");
+      return `<li class="ap__row"><b class="ap__name">${esc(r.unit_name)}</b>
+        <span class="ap__bar" role="img" aria-label="${esc(detail)}" title="${esc(detail)}">${parts.map(([n, v]) => `<i class="ap__seg ap__seg--${n === A ? "clean" : "fog"}" style="width:${pctOf(v)}"></i>`).join("")}</span>
+        <span class="ap__spend nums">₱${short(a.total)}</span>
+        <span class="ap__cases"><b class="nums">${fmt(a.mid)}</b><small class="nums">${fmt(a.lo)}–${fmt(a.hi)}</small></span></li>`; };
+    const groups = LEVELS.slice().reverse().map((lv) => {
+      const at = fcH.filter((r) => r.level === lv);
+      const funded = at.filter((r) => by.has(r.unit_id)).sort((x, y) => by.get(y.unit_id).total - by.get(x.unit_id).total);
+      const unfunded = lv === LEVELS[0] ? [] : at.filter((r) => !by.has(r.unit_id)).sort((x, y) => y.q50_per100k - x.q50_per100k);
+      if (!funded.length && !unfunded.length) return "";
+      const n = funded.length + unfunded.length;
+      const due = trig.rows.filter(([l], i) => !trig.costed.includes(i) && LEVELS.indexOf(l) <= LEVELS.indexOf(lv)).map(([, a]) => esc(a));
+      return `<section class="level-list ap__group" data-lv="${LV[lv]}">
+        <header class="level-list__head"><span class="sq sq--round"></span><h3>${esc(ctx.levelName(lv))}</h3><span class="level-list__n nums">${esc(n === 1 ? labels.plan_area_one : labels.plan_areas.replace("{n}", n))}</span></header>
+        ${due.length ? `<p class="ap__also"><span>${esc(labels.plan_also)}</span>${due.join(" · ")}</p>` : ""}
+        ${funded.length ? `<ul class="ap__rows">${funded.map(row).join("")}</ul>` : ""}
+        ${unfunded.length ? `<p class="ap__unfunded">${esc(labels.plan_unfunded_list.replace("{names}", unfunded.map((r) => r.unit_name).join(", ")))}</p>` : ""}
+      </section>`;
+    }).join("");
+    el.querySelector("#area-plan").innerHTML = `<div class="ap">
+      <div class="ap__top"><p class="ap__summary">${esc(summary)}</p>
+        <span class="ap__legend"><span><i class="ap__key ap__seg--clean"></i>${esc(labels.clean_up)}</span><span><i class="ap__key ap__seg--fog"></i>${esc(labels.fogging)}</span></span></div>
+      ${plan.length ? `<div class="ap__cols" aria-hidden="true"><span>${esc(cArea)}</span><span>${esc(cFunded)}</span><span>${esc(cAverted)}</span></div>` : ""}
+      ${groups}</div>`;
   }
   // why the plan funds no fogging, or "" when it funds some (app/streamlit_app.py fog_note)
   function fogNote([clean, fog]) {
@@ -148,7 +157,7 @@ export function render(el, ctx) {
     [labels.cases_central, (r) => Math.round(r.averted_mid)], [labels.cases_high, (r) => Math.round(r.averted_high)]]), "text/csv");
   ctx.topDownload(t.download_plan, savePlan);
   update();
-  return () => { disposeChart?.(); disposeCurve?.(); };
+  return () => { disposeCurve?.(); };
 }
 
 const pct = (v) => `${Math.round(v * 100)}%`;
