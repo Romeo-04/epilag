@@ -506,7 +506,22 @@
      "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."
     ]
    ],
-   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. In the budget below, fogging money is meant for cluster areas only."
+   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. The budget below follows these levels: clean-up is funded in every area, fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
+   "costed": [
+    0,
+    4
+   ],
+   "plan_head": "Plan by area",
+   "plan_sub": "Each area's alert level decides its actions. Clean-up and fogging come out of the budget. The other actions its level calls for are listed without a cost or cases averted: there is no good estimate of either here.",
+   "plan_cols": [
+    "Area",
+    "Level",
+    "Funded from the budget",
+    "Cases averted",
+    "Also due at this level"
+   ],
+   "plan_unfunded": "Not funded at this budget",
+   "plan_nothing": "Nothing else yet"
   },
   "fil": {
    "head": "Kailan kikilos",
@@ -558,7 +573,22 @@
      "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."
     ]
    ],
-   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sa budget sa ibaba, para lamang sa mga cluster ang pondo sa fogging."
+   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: may pondo ang paglilinis sa bawat lugar, ang fogging sa mga lugar lamang na nasa Bantayan o mas mataas, at sa loob ng mga lugar na iyon, ang mga cluster lamang ang dapat i-spray.",
+   "costed": [
+    0,
+    4
+   ],
+   "plan_head": "Plano bawat lugar",
+   "plan_sub": "Ang antas ng alerto ng bawat lugar ang nagpapasya ng mga aksyon nito. Galing sa budget ang paglilinis at fogging. Nakalista ang iba pang aksyon na hinihingi ng antas nito nang walang gastos o kasong maiiwasan: wala pang maayos na tantiya ng alinman dito.",
+   "plan_cols": [
+    "Lugar",
+    "Antas",
+    "May pondo mula sa budget",
+    "Kasong maiiwasan",
+    "Dapat ding gawin sa antas na ito"
+   ],
+   "plan_unfunded": "Walang pondo sa budget na ito",
+   "plan_nothing": "Wala pang iba"
   }
  },
  "FEATURES": {

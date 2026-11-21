@@ -786,3 +786,6 @@ body.sidebar-collapsed .sidebar__language .seg { justify-self: center; }
 .dmap--compact .dmap__crumbs, .dmap--compact .dmap__ctls, .dmap--compact .dmap__legend, .dmap--compact .dmap__mini, .dmap--compact .dmap__hint { display: none; }
 .dmap--compact .dmap__gl { cursor: default; }
 .dmap--compact .dmap__lbl.tag { font-size: 10px; }
+.area-plan .tbl-wrap { max-height: 440px; }
+.area-plan .tbl td { vertical-align: top; }
+.area-plan .tbl td.wrap { white-space: normal; min-width: 200px; }

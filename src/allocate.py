@@ -10,6 +10,8 @@ coverage, until the money runs out. Effects are ranges (low/central/high), so th
 chosen on the central effect and reported with all three. budget_curve() gives the same plan
 for every budget at once: cases averted rise in straight lines between the points where the next
 (unit, action) starts, and flatten as the money reaches lower-risk areas.
+Each action starts at an alert level (Action.min_level, the "When to act" table in the app). Given each unit's
+current level, the plan only funds the actions that level calls for, so fogging goes only to areas at watch or higher.
 
 Effect sizes are deliberately cautious placeholders anchored to the evidence:
   community clean-up + container covers: Bowman et al. (2016) meta-analysis, OR 0.22
@@ -31,12 +33,15 @@ class Action:
     effect_central: float
     effect_high: float
     max_coverage: float  # max share of a unit's population this action can reach in 8 weeks
+    min_level: str = "normal"  # the alert level the action starts at (one of LEVELS)
 
 
 DEFAULT_ACTIONS = (
     Action("Clean-up drive + container covers", 15.0, 0.10, 0.30, 0.50, 0.30),
-    Action("Targeted fogging", 25.0, 0.00, 0.05, 0.10, 0.10),
+    Action("Targeted fogging", 25.0, 0.00, 0.05, 0.10, 0.10, "watch"),
 )
+
+LEVELS = ("normal", "above usual", "watch", "outbreak warning")
 
 
 PREVENTABLE_WEEKS = range(3, 9)  # weeks ahead an action started now can still affect
@@ -55,12 +60,15 @@ def expected_cases_8wk(forecast: pd.DataFrame, weeks_ahead=range(1, 9)) -> pd.Da
     return pd.DataFrame(rows)
 
 
-def _options(forecast: pd.DataFrame, actions) -> pd.DataFrame:
-    """Every (unit, action) pair with its cost cap and cases averted per peso, best value first."""
+def _options(forecast: pd.DataFrame, actions, levels=None) -> pd.DataFrame:
+    """Every (unit, action) pair with its cost cap and cases averted per peso, best value first. With `levels`
+    (unit_id -> alert level; a unit not in it counts as normal), only the actions each unit's level has reached."""
     units = expected_cases_8wk(forecast, PREVENTABLE_WEEKS)
     options = []
     for a in actions:
         o = units.copy()
+        if levels is not None:
+            o = o[o.unit_id.map(levels).fillna(LEVELS[0]).map(LEVELS.index) >= LEVELS.index(a.min_level)].copy()
         o["action"] = a.name
         o["max_people"] = o.population * a.max_coverage
         o["max_cost"] = o.max_people * a.cost_per_person
@@ -72,10 +80,11 @@ def _options(forecast: pd.DataFrame, actions) -> pd.DataFrame:
     return pd.concat(options, ignore_index=True).sort_values("averted_per_peso", ascending=False, kind="stable")
 
 
-def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> pd.DataFrame:
-    """Return the funded (unit, action) lines with spend and cases averted (low/central/high)."""
+def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS, levels=None) -> pd.DataFrame:
+    """Return the funded (unit, action) lines with spend and cases averted (low/central/high). With `levels`
+    (unit_id -> alert level), each unit only gets the actions its level calls for."""
     plan, left = [], float(budget)
-    for o in _options(forecast, actions).itertuples():
+    for o in _options(forecast, actions, levels).itertuples():
         if left <= 0 or o.averted_per_peso <= 0:
             break
         spend = min(left, o.max_cost)
@@ -95,12 +104,12 @@ def allocate(forecast: pd.DataFrame, budget: float, actions=DEFAULT_ACTIONS) -> 
     return pd.DataFrame(plan, columns=cols)
 
 
-def budget_curve(forecast: pd.DataFrame, actions=DEFAULT_ACTIONS) -> pd.DataFrame:
+def budget_curve(forecast: pd.DataFrame, actions=DEFAULT_ACTIONS, levels=None) -> pd.DataFrame:
     """Total cases averted (low/central/high) against budget, at each point where the plan starts funding the
     next (unit, action). Between two points the totals rise in a straight line, so interpolating this table
     gives allocate()'s totals for any budget. Starts at a zero budget and ends where everything is funded."""
     rows = [{"spend": 0.0, "averted_low": 0.0, "averted_mid": 0.0, "averted_high": 0.0}]
-    for o in _options(forecast, actions).itertuples():
+    for o in _options(forecast, actions, levels).itertuples():
         if o.averted_per_peso <= 0:
             break
         lo, mid, hi = o.effects

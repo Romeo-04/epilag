@@ -235,7 +235,9 @@ Full write-up: [methodology page](https://romeo-04.github.io/epilag/methodology.
   (people who fall ill in the next 2 weeks are mostly already infected). Effects are cautious ranges based on
   Bowman et al. (2016). Costs are example values for the LGU to replace. A curve shows cases averted at every
   budget, so the point where extra money buys less is visible. It is a scenario from those assumptions; the
-  averted cases are not tested the way the forecast is.
+  averted cases are not tested the way the forecast is. Each area's current alert level decides which actions it
+  can get (fogging only at watch or higher), and a plan by area lists what is funded there and the other actions
+  its level calls for, which have no cost or effect estimate.
 
 ## Data
 | Source | Use | Licence / access |

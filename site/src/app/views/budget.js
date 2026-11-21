@@ -1,5 +1,5 @@
 // Action plan: budget, cases averted, spend by area, and the funded plan; costs and effects sit in a drawer.
-import { allocate, budgetCurve, curveAt, fmt, toCsv } from "../logic.js";
+import { LEVELS, allocate, budgetCurve, curveAt, fmt, toCsv } from "../logic.js";
 import { barChart, curveChart } from "../chart.js";
 import { LV, LV_HEIGHT, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
@@ -38,6 +38,7 @@ export function render(el, ctx) {
       </section>
       <div class="plan-out" id="out"></div>
     </div>
+    <section class="card area-plan">${cardTitle("check", trig.plan_head)}<p class="small muted">${esc(trig.plan_sub)}</p><div id="area-plan"></div></section>
     <section class="card">${cardTitle("actionPlan", labels.curve_head)}<p class="small muted">${esc(labels.curve_sub)}</p>
       <div id="curve" class="chart-box"></div><p class="small" id="curve-note" style="margin-top:10px"></p><p class="small muted">${esc(labels.curve_scenario)}</p></section>
     <section class="card triggers">${cardTitle("check", trig.head)}<p class="small muted">${esc(trig.sub)}</p>
@@ -48,6 +49,8 @@ export function render(el, ctx) {
     ${details(t.plan, `<div id="plan-table"></div>`)}`;
 
   let plan = [], disposeChart = null, disposeCurve = null;
+  // each area only gets the actions its current alert level calls for (the "When to act" table)
+  const levels = Object.fromEntries(fcH.map((r) => [r.unit_id, r.level]));
 
   function update() {
     const v = (id) => Number(el.querySelector(`#${id}`).value);
@@ -57,11 +60,12 @@ export function render(el, ctx) {
     el.querySelectorAll(".effect input").forEach((i) => { i.nextElementSibling.textContent = pct(Number(i.value)); });
     const actions = [
       { name: A, cost_per_person: inputs.costA, effect_low: inputs.effA[0], effect_central: (inputs.effA[0] + inputs.effA[1]) / 2, effect_high: inputs.effA[1], max_coverage: 0.3 },
-      { name: B, cost_per_person: inputs.costB, effect_low: inputs.effB[0], effect_central: (inputs.effB[0] + inputs.effB[1]) / 2, effect_high: inputs.effB[1], max_coverage: 0.1 },
+      { name: B, cost_per_person: inputs.costB, effect_low: inputs.effB[0], effect_central: (inputs.effB[0] + inputs.effB[1]) / 2, effect_high: inputs.effB[1], max_coverage: 0.1, min_level: "watch" },
     ];
     const fc4 = fc.filter((r) => [2, 4, 6, 8].includes(r.horizon));
-    plan = allocate(fc4, inputs.budget, actions);
-    drawCurve(budgetCurve(fc4, actions));
+    plan = allocate(fc4, inputs.budget, actions, levels);
+    drawCurve(budgetCurve(fc4, actions, levels));
+    drawAreaPlan();
     const out = el.querySelector("#out");
     if (!plan.length) out.innerHTML = `<div class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.results)}</b><p>${esc(labels.no_funded)}</p></div></div>`;
     else {
@@ -83,6 +87,30 @@ export function render(el, ctx) {
       [labels.cases_low, (r) => fmt(r.averted_low), "num"], [labels.cases_central, (r) => fmt(r.averted_mid), "num"],
       [labels.cases_high, (r) => fmt(r.averted_high), "num"]]);
   }
+  // one row per area that is funded or above normal, worst level first: what the budget funds there, the cases it
+  // averts, and the other actions its level calls for (the uncosted rows of the "When to act" table)
+  function drawAreaPlan() {
+    const by = new Map();
+    for (const r of plan) {
+      const a = by.get(r.unit_id) || { spend: { [A]: 0, [B]: 0 }, total: 0, lo: 0, mid: 0, hi: 0 };
+      a.spend[r.action] += r.spend; a.total += r.spend; a.lo += r.averted_low; a.mid += r.averted_mid; a.hi += r.averted_high;
+      by.set(r.unit_id, a);
+    }
+    const rank = (r) => LEVELS.indexOf(r.level);
+    const rows = fcH.filter((r) => by.has(r.unit_id) || r.level !== LEVELS[0])
+      .sort((x, y) => rank(y) - rank(x) || (by.get(y.unit_id)?.total || 0) - (by.get(x.unit_id)?.total || 0) || y.q50_per100k - x.q50_per100k);
+    const [cArea, cLevel, cFunded, cAverted, cDue] = trig.plan_cols;
+    el.querySelector("#area-plan").innerHTML = tableHtml(rows, [
+      [cArea, (r) => `<b>${esc(r.unit_name)}</b>`],
+      [cLevel, (r) => `<span class="sq sq--round" data-lv="${LV[r.level]}"></span> ${esc(ctx.levelName(r.level))}`],
+      [cFunded, (r) => { const a = by.get(r.unit_id);
+        const parts = a ? [[A, a.spend[A]], [B, a.spend[B]]].filter(([, v]) => v > 0).map(([n, v]) => `${esc(actionName(n))} ₱${short(v)}`) : [];
+        return parts.length ? parts.join("<br>") : `<span class="muted">${esc(trig.plan_unfunded)}</span>`; }],
+      [cAverted, (r) => { const a = by.get(r.unit_id); return a ? `${fmt(a.mid)} <span class="muted">(${fmt(a.lo)}–${fmt(a.hi)})</span>` : "–"; }, "num"],
+      [cDue, (r) => { const due = trig.rows.filter(([lv], i) => !trig.costed.includes(i) && rank({ level: lv }) <= rank(r)).map(([, a]) => esc(a));
+        return due.length ? due.join(" · ") : `<span class="muted">${esc(trig.plan_nothing)}</span>`; }, "wrap"],
+    ]);
+  }
   function drawCurve(curve) {
     const full = curve[curve.length - 1].spend, b = inputs.budget;
     // where each extra peso buys half as much as the first: the curve's bend, which the chart should show
@@ -102,7 +130,7 @@ export function render(el, ctx) {
   }
   el.querySelector(".plan-inputs").addEventListener("input", update);
   const savePlan = () => download("epilag_funded_plan.csv", toCsv(plan, [
-    [t.area, (r) => r.unit_name], [labels.action, (r) => actionName(r.action)], [labels.spend, (r) => Math.round(r.spend)],
+    [t.area, (r) => r.unit_name], [trig.plan_cols[1], (r) => ctx.levelName(levels[r.unit_id] || LEVELS[0])], [labels.action, (r) => actionName(r.action)], [labels.spend, (r) => Math.round(r.spend)],
     [labels.people_covered, (r) => Math.round(r.people_covered)], [labels.cases_low, (r) => Math.round(r.averted_low)],
     [labels.cases_central, (r) => Math.round(r.averted_mid)], [labels.cases_high, (r) => Math.round(r.averted_high)]]), "text/csv");
   ctx.topDownload(t.download_plan, savePlan);
