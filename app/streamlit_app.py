@@ -55,7 +55,7 @@ T = {
         "up": "pushes the forecast up", "down": "pulls the forecast down",
         "budget": "Budget (PHP)", "cost": "Cost per person covered (PHP, example value)",
         "effect": "Effect on cases: low / high", "plan": "Funded actions",
-        "averted": "Cases averted in 8 weeks", "averted_range": "low–high",
+        "averted": "Cases averted, weeks 3–8 ahead", "averted_range": "low–high",
         "qc_head": "Quezon City barangays", "qc_muted": "where to look first",
         "qc_note": ("Weekly forecasts are city-wide. Barangay data is yearly only, so the city forecast "
                     "is shared out by each barangay's share of cases in 2022-2025."),
@@ -91,7 +91,8 @@ T = {
                          "gain at 4-8 weeks in some years and none in others, so EpiLag works with data LGUs already have."),
         "tables": "Full results (tables)",
         "plan_head": "Action plan", "plan_muted": "where each peso works hardest",
-        "plan_sub": ("Ranks where each peso prevents the most forecast cases over the next 8 weeks. "
+        "plan_sub": ("Ranks where each peso prevents the most forecast cases in weeks 3–8 ahead "
+                     "(people who fall ill in the next 2 weeks are mostly already infected). "
                      "Costs are example values: replace them with your LGU's own costs."),
         "per_case": "Pesos per case averted", "people": "People reached", "spend_chart": "Spend by area",
         "plan_gives": ("EpiLag-PH supplies the forecast and the ranking; you supply the costs. "
@@ -129,7 +130,7 @@ T = {
         "up": "nagpapataas ng forecast", "down": "nagpapababa ng forecast",
         "budget": "Budget (PHP)", "cost": "Gastos bawat taong maaabot (PHP, halimbawa lamang)",
         "effect": "Epekto sa kaso: mababa / mataas", "plan": "Mga gawaing popondohan",
-        "averted": "Kasong maiiwasan sa 8 linggo", "averted_range": "mababa–mataas",
+        "averted": "Kasong maiiwasan, ika-3 hanggang ika-8 linggo", "averted_range": "mababa–mataas",
         "qc_head": "Mga barangay ng Quezon City", "qc_muted": "saan unang titingin",
         "qc_note": ("Ang lingguhang forecast ay para sa buong lungsod. Taunan lang ang datos ng barangay, kaya "
                     "hinati ang forecast ayon sa bahagi ng bawat barangay sa mga kaso noong 2022-2025."),
@@ -166,7 +167,8 @@ T = {
                          "dagdag ng lagay ng panahon, kaya gumagana ang EpiLag sa datos na mayroon na ang LGU."),
         "tables": "Buong resulta (talahanayan)",
         "plan_head": "Plano ng aksyon", "plan_muted": "kung saan pinakamabisa ang bawat piso",
-        "plan_sub": ("Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa susunod na 8 linggo. "
+        "plan_sub": ("Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa ika-3 hanggang ika-8 linggo "
+                     "(karamihan ng magkakasakit sa susunod na 2 linggo ay may impeksiyon na). "
                      "Halimbawa lamang ang mga gastos: palitan ng sariling gastos ng LGU."),
         "per_case": "Piso bawat kasong naiwasan", "people": "Taong maaabot", "spend_chart": "Gastos bawat lugar",
         "plan_gives": ("Ang EpiLag-PH ang nagbibigay ng forecast at pagkakasunod-sunod; ikaw ang naglalagay ng gastos. "

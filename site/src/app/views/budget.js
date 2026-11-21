@@ -1,6 +1,6 @@
 // Action plan: budget, cases averted, spend by area, and the funded plan; costs and effects sit in a drawer.
-import { allocate, fmt, toCsv } from "../logic.js";
-import { barChart } from "../chart.js";
+import { allocate, budgetCurve, curveAt, fmt, toCsv } from "../logic.js";
+import { barChart, curveChart } from "../chart.js";
 import { LV, LV_HEIGHT, cardTitle, count, details, download, esc, hydrateCounts, tableHtml } from "../ui.js";
 
 const A = "Clean-up drive + container covers", B = "Targeted fogging";
@@ -38,6 +38,8 @@ export function render(el, ctx) {
       </section>
       <div class="plan-out" id="out"></div>
     </div>
+    <section class="card">${cardTitle("actionPlan", labels.curve_head)}<p class="small muted">${esc(labels.curve_sub)}</p>
+      <div id="curve" class="chart-box"></div><p class="small" id="curve-note" style="margin-top:10px"></p><p class="small muted">${esc(labels.curve_scenario)}</p></section>
     <section class="card triggers">${cardTitle("check", trig.head)}<p class="small muted">${esc(trig.sub)}</p>
       <ol class="todo todo--3"><li class="todo__row todo__head">${trig.cols.map((c) => `<span>${esc(c)}</span>`).join("")}</li>
         ${trig.rows.map(([lv, a, w]) => `<li class="todo__row"><span class="todo__when"><span class="sq sq--round" data-lv="${LV[lv]}"></span> ${esc(ctx.levelName(lv))}</span><b>${esc(a)}</b><span>${esc(w)}</span>${whereNow(lv)}</li>`).join("")}</ol>
@@ -45,7 +47,7 @@ export function render(el, ctx) {
     <section class="card">${cardTitle("forecastMap", t.spend_chart)}<div id="spend" class="chart-box"></div></section>
     ${details(t.plan, `<div id="plan-table"></div>`)}`;
 
-  let plan = [], disposeChart = null;
+  let plan = [], disposeChart = null, disposeCurve = null;
 
   function update() {
     const v = (id) => Number(el.querySelector(`#${id}`).value);
@@ -57,7 +59,9 @@ export function render(el, ctx) {
       { name: A, cost_per_person: inputs.costA, effect_low: inputs.effA[0], effect_central: (inputs.effA[0] + inputs.effA[1]) / 2, effect_high: inputs.effA[1], max_coverage: 0.3 },
       { name: B, cost_per_person: inputs.costB, effect_low: inputs.effB[0], effect_central: (inputs.effB[0] + inputs.effB[1]) / 2, effect_high: inputs.effB[1], max_coverage: 0.1 },
     ];
-    plan = allocate(fc.filter((r) => [2, 4, 6, 8].includes(r.horizon)), inputs.budget, actions);
+    const fc4 = fc.filter((r) => [2, 4, 6, 8].includes(r.horizon));
+    plan = allocate(fc4, inputs.budget, actions);
+    drawCurve(budgetCurve(fc4, actions));
     const out = el.querySelector("#out");
     if (!plan.length) out.innerHTML = `<div class="card empty-state"><span class="empty-state__icon"><i data-icon="info" data-size="20"></i></span><div><b>${esc(labels.results)}</b><p>${esc(labels.no_funded)}</p></div></div>`;
     else {
@@ -79,6 +83,23 @@ export function render(el, ctx) {
       [labels.cases_low, (r) => fmt(r.averted_low), "num"], [labels.cases_central, (r) => fmt(r.averted_mid), "num"],
       [labels.cases_high, (r) => fmt(r.averted_high), "num"]]);
   }
+  function drawCurve(curve) {
+    const full = curve[curve.length - 1].spend, b = inputs.budget;
+    // where each extra peso buys half as much as the first: the curve's bend, which the chart should show
+    const slope = (i) => (curve[i].averted_mid - curve[i - 1].averted_mid) / (curve[i].spend - curve[i - 1].spend);
+    const hi = curve.findIndex((_, i) => i > 1 && slope(i) < slope(1) / 2), half = hi > 0 ? curve[hi - 1].spend : full;
+    // show the bend and four times the budget (at least ₱20M), but not far past the point where every area is funded
+    const xMax = Math.max(Math.min(Math.max(4 * b, 20e6, half * 1.25), full * 1.1), b * 1.1, 1e6);
+    const xs = [...new Set([...Array.from({ length: 81 }, (_, i) => (xMax * i) / 80), ...curve.map((p) => p.spend).filter((v) => v < xMax)])].sort((a, c) => a - c);
+    const pts = xs.map((v) => curveAt(curve, v)), now = curveAt(curve, b);
+    disposeCurve?.();
+    disposeCurve = curveChart(el.querySelector("#curve"), { x: xs, y: pts.map((p) => p.averted_mid), lo: pts.map((p) => p.averted_low), hi: pts.map((p) => p.averted_high),
+      color: "#08754F", xFmt: (v) => `₱${short(v)}`, fmt: (v) => fmt(v), tipTitle: (v) => `₱${short(v)}`,
+      mark: { x: b, label: `${labels.curve_you}: ${fmt(now.averted_mid)}` }, labels: { line: labels.curve_line, band: labels.curve_band } });
+    const first = curveAt(curve, 1e6).averted_mid, next = curveAt(curve, b + 1e6).averted_mid - now.averted_mid;
+    const bend = hi > 0 ? ` ${labels.curve_half.replace("{x}", `₱${short(half)}`)}` : "";
+    el.querySelector("#curve-note").textContent = `${labels.curve_first.replace("{n}", fmt(first))}${bend} ${b >= full ? labels.curve_full : labels.curve_next.replace("{n}", fmt(next))}`;
+  }
   el.querySelector(".plan-inputs").addEventListener("input", update);
   const savePlan = () => download("epilag_funded_plan.csv", toCsv(plan, [
     [t.area, (r) => r.unit_name], [labels.action, (r) => actionName(r.action)], [labels.spend, (r) => Math.round(r.spend)],
@@ -86,7 +107,7 @@ export function render(el, ctx) {
     [labels.cases_central, (r) => Math.round(r.averted_mid)], [labels.cases_high, (r) => Math.round(r.averted_high)]]), "text/csv");
   ctx.topDownload(t.download_plan, savePlan);
   update();
-  return () => disposeChart?.();
+  return () => { disposeChart?.(); disposeCurve?.(); };
 }
 
 const pct = (v) => `${Math.round(v * 100)}%`;

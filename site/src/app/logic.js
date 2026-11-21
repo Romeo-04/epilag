@@ -234,8 +234,9 @@ const groupBy = (rows, key) => {
   return m;
 };
 
-/** expected_cases_8wk(): weekly forecasts summed over weeks 1-8, interpolated from the available horizons. */
-export function expectedCases8wk(forecast) {
+/** expected_cases_8wk(): weekly forecasts summed over weeks `from`-`to` ahead (default 1-8), interpolated from the
+ * available horizons. */
+export function expectedCases8wk(forecast, [from, to] = [1, 8]) {
   const out = [];
   for (const [unit_id, f] of groupBy(forecast, "unit_id")) {
     const pts = [...f].sort((a, b) => a.horizon - b.horizon);
@@ -249,7 +250,7 @@ export function expectedCases8wk(forecast) {
       }
       return pts[pts.length - 1][k];
     };
-    const sum = (k) => { let s = 0; for (let h = 1; h <= 8; h++) s += at(k, h); return s; };
+    const sum = (k) => { let s = 0; for (let h = from; h <= to; h++) s += at(k, h); return s; };
     out.push({ unit_id, unit_name: f[0].unit_name, population: f[0].population,
       cases_low: sum("q10"), cases_mid: sum("q50"), cases_high: sum("q90") });
   }
@@ -262,12 +263,12 @@ export const DEFAULT_ACTIONS = [
   { name: "Targeted fogging", cost_per_person: 25, effect_low: 0, effect_central: 0.05, effect_high: 0.1, max_coverage: 0.1 },
 ];
 
-/**
- * allocate(): fractional knapsack on cases averted per peso. Funds the best (unit, action) first, up to each
- * action's max coverage, until the budget runs out. Returns the funded lines (low / central / high averted).
- */
-export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
-  const units = expectedCases8wk(forecast);
+/** src/allocate.py PREVENTABLE_WEEKS: weeks 1-2 ahead are mostly people already infected. */
+export const PREVENTABLE_WEEKS = [3, 8];
+
+/** src/allocate.py _options(): every (unit, action) with its cost cap and cases averted per peso, best first. */
+function allocOptions(forecast, actions) {
+  const units = expectedCases8wk(forecast, PREVENTABLE_WEEKS);
   const opts = [];
   for (const a of actions) {
     for (const u of units) {
@@ -278,9 +279,17 @@ export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
     }
   }
   opts.sort((x, y) => y.averted_per_peso - x.averted_per_peso);
+  return opts;
+}
+
+/**
+ * allocate(): fractional knapsack on cases averted per peso. Funds the best (unit, action) first, up to each
+ * action's max coverage, until the budget runs out. Returns the funded lines (low / central / high averted).
+ */
+export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
   const plan = [];
   let left = Number(budget);
-  for (const o of opts) {
+  for (const o of allocOptions(forecast, actions)) {
     if (left <= 0 || !(o.averted_per_peso > 0)) break;
     const spend = Math.min(left, o.max_cost);
     const share = spend / o.cost_per_person / o.population;
@@ -291,6 +300,32 @@ export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
     left -= spend;
   }
   return plan;
+}
+
+/**
+ * budget_curve(): total cases averted (low / central / high) at each budget where the plan starts funding the next
+ * (unit, action), from 0 to everything funded. Straight lines between points; curveAt() reads any budget.
+ */
+export function budgetCurve(forecast, actions = DEFAULT_ACTIONS) {
+  const pts = [{ spend: 0, averted_low: 0, averted_mid: 0, averted_high: 0 }];
+  for (const o of allocOptions(forecast, actions)) {
+    if (!(o.averted_per_peso > 0)) break;
+    const last = pts[pts.length - 1], share = o.max_cost / o.cost_per_person / o.population;
+    const [lo, mid, hi] = o.effects;
+    pts.push({ spend: last.spend + o.max_cost, averted_low: last.averted_low + o.cases_low * share * lo,
+      averted_mid: last.averted_mid + o.cases_mid * share * mid, averted_high: last.averted_high + o.cases_high * share * hi });
+  }
+  return pts;
+}
+
+/** The budget curve's totals at one budget (linear between points, flat past the last). */
+export function curveAt(curve, budget) {
+  const i = curve.findIndex((p) => p.spend >= budget);
+  if (i < 0) return { ...curve[curve.length - 1], spend: budget };
+  if (i === 0) return { ...curve[0] };
+  const a = curve[i - 1], b = curve[i], f = (budget - a.spend) / (b.spend - a.spend);
+  const at = (k) => a[k] + (b[k] - a[k]) * f;
+  return { spend: budget, averted_low: at("averted_low"), averted_mid: at("averted_mid"), averted_high: at("averted_high") };
 }
 
 /** brief_table(): per area, the level at the chosen horizon, the peak week, and the 8-week totals. */
