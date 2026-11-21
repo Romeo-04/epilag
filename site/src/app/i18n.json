@@ -77,7 +77,7 @@
    "cost": "Cost per person covered (PHP, example value)",
    "effect": "Effect on cases: low / high",
    "plan": "Funded actions",
-   "averted": "Cases averted in 8 weeks",
+   "averted": "Cases averted, weeks 3–8 ahead",
    "averted_range": "low–high",
    "qc_head": "Quezon City barangays",
    "qc_muted": "where to look first",
@@ -144,7 +144,7 @@
    "tables": "Full results (tables)",
    "plan_head": "Action plan",
    "plan_muted": "where each peso works hardest",
-   "plan_sub": "Ranks where each peso prevents the most forecast cases over the next 8 weeks. Costs are example values: replace them with your LGU's own costs.",
+   "plan_sub": "Ranks where each peso prevents the most forecast cases in weeks 3–8 ahead (people who fall ill in the next 2 weeks are mostly already infected). Costs are example values: replace them with your LGU's own costs.",
    "per_case": "Pesos per case averted",
    "people": "People reached",
    "spend_chart": "Spend by area",
@@ -214,7 +214,7 @@
    "cost": "Gastos bawat taong maaabot (PHP, halimbawa lamang)",
    "effect": "Epekto sa kaso: mababa / mataas",
    "plan": "Mga gawaing popondohan",
-   "averted": "Kasong maiiwasan sa 8 linggo",
+   "averted": "Kasong maiiwasan, ika-3 hanggang ika-8 linggo",
    "averted_range": "mababa–mataas",
    "qc_head": "Mga barangay ng Quezon City",
    "qc_muted": "saan unang titingin",
@@ -281,7 +281,7 @@
    "tables": "Buong resulta (talahanayan)",
    "plan_head": "Plano ng aksyon",
    "plan_muted": "kung saan pinakamabisa ang bawat piso",
-   "plan_sub": "Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa susunod na 8 linggo. Halimbawa lamang ang mga gastos: palitan ng sariling gastos ng LGU.",
+   "plan_sub": "Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa ika-3 hanggang ika-8 linggo (karamihan ng magkakasakit sa susunod na 2 linggo ay may impeksiyon na). Halimbawa lamang ang mga gastos: palitan ng sariling gastos ng LGU.",
    "per_case": "Piso bawat kasong naiwasan",
    "people": "Taong maaabot",
    "spend_chart": "Gastos bawat lugar",
@@ -506,7 +506,30 @@
      "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."
     ]
    ],
-   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. In the budget below, fogging money is meant for cluster areas only."
+   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. The budget below follows these levels: by default it funds the worst level first, it allows fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
+   "costed": [
+    0,
+    4
+   ],
+   "plan_head": "Plan by area",
+   "plan_sub": "Each area's alert level decides its actions. Clean-up and fogging come out of the budget. The other actions its level calls for are listed without a cost or cases averted: there is no good estimate of either here.",
+   "plan_cols": [
+    "Area",
+    "Level",
+    "Funded from the budget",
+    "Cases averted",
+    "Also due at this level"
+   ],
+   "plan_unfunded": "Not funded at this budget",
+   "plan_nothing": "Nothing else yet",
+   "priority": "Spend first on",
+   "priority_opts": [
+    "The worst alert level",
+    "The most cases averted per peso"
+   ],
+   "fog_level": "No fogging money: no area is at watch or higher.",
+   "fog_ratio": "No fogging money: at these costs and effects, clean-up prevents about {x}× more cases per peso in the same area, so the budget runs out before fogging's turn.",
+   "fog_zero": "No fogging money: its middle effect is set to zero."
   },
   "fil": {
    "head": "Kailan kikilos",
@@ -558,7 +581,30 @@
      "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."
     ]
    ],
-   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sa budget sa ibaba, para lamang sa mga cluster ang pondo sa fogging."
+   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: karaniwang inuuna nito ang pinakamataas na antas, pinapayagan lamang nito ang fogging sa mga lugar na nasa Bantayan o mas mataas, at sa loob ng mga lugar na iyon, ang mga cluster lamang ang dapat i-spray.",
+   "costed": [
+    0,
+    4
+   ],
+   "plan_head": "Plano bawat lugar",
+   "plan_sub": "Ang antas ng alerto ng bawat lugar ang nagpapasya ng mga aksyon nito. Galing sa budget ang paglilinis at fogging. Nakalista ang iba pang aksyon na hinihingi ng antas nito nang walang gastos o kasong maiiwasan: wala pang maayos na tantiya ng alinman dito.",
+   "plan_cols": [
+    "Lugar",
+    "Antas",
+    "May pondo mula sa budget",
+    "Kasong maiiwasan",
+    "Dapat ding gawin sa antas na ito"
+   ],
+   "plan_unfunded": "Walang pondo sa budget na ito",
+   "plan_nothing": "Wala pang iba",
+   "priority": "Unang gastusan ang",
+   "priority_opts": [
+    "Pinakamataas na antas ng alerto",
+    "Pinakamaraming kasong maiiwasan bawat piso"
+   ],
+   "fog_level": "Walang pondo sa fogging: walang lugar na nasa Bantayan o mas mataas.",
+   "fog_ratio": "Walang pondo sa fogging: sa mga gastos at epektong ito, mga {x}× na mas maraming kaso bawat piso ang naiiwasan ng paglilinis sa parehong lugar, kaya nauubos ang budget bago umabot sa fogging.",
+   "fog_zero": "Walang pondo sa fogging: zero ang gitnang epekto nito."
   }
  },
  "FEATURES": {
