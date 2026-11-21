@@ -193,20 +193,23 @@ def test_allocate_matches(page, panel, budget):
 
 
 @pytest.mark.parametrize("panel", ["region_qc", "province"])
-def test_allocate_by_level_matches(page, panel):
+@pytest.mark.parametrize("priority", ["level", "value"])
+@pytest.mark.parametrize("budget", [5_000_000, 1e9])
+def test_allocate_by_level_matches(page, panel, priority, budget):
     # Mixed levels, so some areas are cut off from fogging: the same lines come out of both apps.
     m = _meta(panel)
     fc = _frame(panel, "forecast")
     fc["unit_name"] = fc.unit_id.map(m["names"])
     fc["population"] = fc.unit_id.map(m["population"])
     levels = {u: LEVELS[i % 4] for i, u in enumerate(sorted(fc.unit_id.unique()))}
-    py = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], 1e9, levels=levels)
-    assert set(py.action) == {"Clean-up drive + container covers", "Targeted fogging"}
+    py = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, levels=levels, priority=priority)
+    if budget == 1e9:
+        assert set(py.action) == {"Clean-up drive + container covers", "Targeted fogging"}
     assert (py[py.action == "Targeted fogging"].unit_id.map(levels).map(LEVELS.index) >= 2).all()
-    js = pd.DataFrame(page.evaluate("""async ([panel, levels]) => {
+    js = pd.DataFrame(page.evaluate("""async ([panel, levels, budget, priority]) => {
         const rows = await window.epilag.data.forecastFor({ panel, mode: "latest" });
-        return window.epilag.logic.allocate(rows.filter(r => [2, 4, 6, 8].includes(r.horizon)), 1e9, undefined, levels); }""",
-                                    [panel, levels]), columns=py.columns)
+        return window.epilag.logic.allocate(rows.filter(r => [2, 4, 6, 8].includes(r.horizon)), budget, undefined, levels, priority); }""",
+                                    [panel, levels, budget, priority]), columns=py.columns)
     assert list(zip(js.unit_id, js.action)) == list(zip(py.unit_id, py.action))
     assert js.averted_mid.tolist() == pytest.approx(py.averted_mid.tolist(), rel=1e-9)
 

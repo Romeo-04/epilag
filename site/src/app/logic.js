@@ -266,35 +266,39 @@ export const DEFAULT_ACTIONS = [
 /** src/allocate.py PREVENTABLE_WEEKS: weeks 1-2 ahead are mostly people already infected. */
 export const PREVENTABLE_WEEKS = [3, 8];
 
-/** src/allocate.py _options(): every (unit, action) with its cost cap and cases averted per peso, best first. With
- * `levels` (unit_id -> alert level; an area not in it counts as normal), only the actions each area's level has reached. */
-function allocOptions(forecast, actions, levels) {
+/** src/allocate.py _options(): every (unit, action) with its cost cap and cases averted per peso, in funding order.
+ * With `levels` (unit_id -> alert level; an area not in it counts as normal), only the actions each area's level has
+ * reached, and with priority "level" the worst level first, best value first within a level. */
+function allocOptions(forecast, actions, levels, priority = "level") {
   const units = expectedCases8wk(forecast, PREVENTABLE_WEEKS);
   const opts = [];
   for (const a of actions) {
     const from = LEVELS.indexOf(a.min_level || LEVELS[0]);
     for (const u of units) {
-      if (levels && LEVELS.indexOf(levels[u.unit_id] || LEVELS[0]) < from) continue;
+      const level_rank = LEVELS.indexOf((levels && levels[u.unit_id]) || LEVELS[0]);
+      if (levels && level_rank < from) continue;
       const max_people = u.population * a.max_coverage;
-      opts.push({ ...u, action: a.name, max_cost: max_people * a.cost_per_person, cost_per_person: a.cost_per_person,
+      opts.push({ ...u, action: a.name, level_rank, max_cost: max_people * a.cost_per_person, cost_per_person: a.cost_per_person,
         averted_per_peso: (u.cases_mid / u.population) * a.effect_central / a.cost_per_person,
         effects: [a.effect_low, a.effect_central, a.effect_high] });
     }
   }
-  opts.sort((x, y) => y.averted_per_peso - x.averted_per_peso);
+  opts.sort((x, y) => (priority === "level" ? y.level_rank - x.level_rank : 0) || y.averted_per_peso - x.averted_per_peso);
   return opts;
 }
 
 /**
  * allocate(): fractional knapsack on cases averted per peso. Funds the best (unit, action) first, up to each
  * action's max coverage, until the budget runs out. Returns the funded lines (low / central / high averted). With
- * `levels` (unit_id -> alert level), each area only gets the actions its level calls for.
+ * `levels` (unit_id -> alert level), each area only gets the actions its level calls for, worst level first unless
+ * priority is "value".
  */
-export function allocate(forecast, budget, actions = DEFAULT_ACTIONS, levels = null) {
+export function allocate(forecast, budget, actions = DEFAULT_ACTIONS, levels = null, priority = "level") {
   const plan = [];
   let left = Number(budget);
-  for (const o of allocOptions(forecast, actions, levels)) {
-    if (left <= 0 || !(o.averted_per_peso > 0)) break;
+  for (const o of allocOptions(forecast, actions, levels, priority)) {
+    if (left <= 0) break;
+    if (!(o.averted_per_peso > 0)) continue;
     const spend = Math.min(left, o.max_cost);
     const share = spend / o.cost_per_person / o.population;
     const [lo, mid, hi] = o.effects;
@@ -310,10 +314,10 @@ export function allocate(forecast, budget, actions = DEFAULT_ACTIONS, levels = n
  * budget_curve(): total cases averted (low / central / high) at each budget where the plan starts funding the next
  * (unit, action), from 0 to everything funded. Straight lines between points; curveAt() reads any budget.
  */
-export function budgetCurve(forecast, actions = DEFAULT_ACTIONS, levels = null) {
+export function budgetCurve(forecast, actions = DEFAULT_ACTIONS, levels = null, priority = "level") {
   const pts = [{ spend: 0, averted_low: 0, averted_mid: 0, averted_high: 0 }];
-  for (const o of allocOptions(forecast, actions, levels)) {
-    if (!(o.averted_per_peso > 0)) break;
+  for (const o of allocOptions(forecast, actions, levels, priority)) {
+    if (!(o.averted_per_peso > 0)) continue;
     const last = pts[pts.length - 1], share = o.max_cost / o.cost_per_person / o.population;
     const [lo, mid, hi] = o.effects;
     pts.push({ spend: last.spend + o.max_cost, averted_low: last.averted_low + o.cases_low * share * lo,

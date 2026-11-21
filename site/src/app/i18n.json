@@ -506,7 +506,7 @@
      "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."
     ]
    ],
-   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. The budget below follows these levels: clean-up is funded in every area, fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
+   "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue responses. The budget below follows these levels: by default it funds the worst level first, it allows fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
    "costed": [
     0,
     4
@@ -521,7 +521,15 @@
     "Also due at this level"
    ],
    "plan_unfunded": "Not funded at this budget",
-   "plan_nothing": "Nothing else yet"
+   "plan_nothing": "Nothing else yet",
+   "priority": "Spend first on",
+   "priority_opts": [
+    "The worst alert level",
+    "The most cases averted per peso"
+   ],
+   "fog_level": "No fogging money: no area is at watch or higher.",
+   "fog_ratio": "No fogging money: at these costs and effects, clean-up prevents about {x}× more cases per peso in the same area, so the budget runs out before fogging's turn.",
+   "fog_zero": "No fogging money: its middle effect is set to zero."
   },
   "fil": {
    "head": "Kailan kikilos",
@@ -573,7 +581,7 @@
      "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."
     ]
    ],
-   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: may pondo ang paglilinis sa bawat lugar, ang fogging sa mga lugar lamang na nasa Bantayan o mas mataas, at sa loob ng mga lugar na iyon, ang mga cluster lamang ang dapat i-spray.",
+   "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: karaniwang inuuna nito ang pinakamataas na antas, pinapayagan lamang nito ang fogging sa mga lugar na nasa Bantayan o mas mataas, at sa loob ng mga lugar na iyon, ang mga cluster lamang ang dapat i-spray.",
    "costed": [
     0,
     4
@@ -588,7 +596,15 @@
     "Dapat ding gawin sa antas na ito"
    ],
    "plan_unfunded": "Walang pondo sa budget na ito",
-   "plan_nothing": "Wala pang iba"
+   "plan_nothing": "Wala pang iba",
+   "priority": "Unang gastusan ang",
+   "priority_opts": [
+    "Pinakamataas na antas ng alerto",
+    "Pinakamaraming kasong maiiwasan bawat piso"
+   ],
+   "fog_level": "Walang pondo sa fogging: walang lugar na nasa Bantayan o mas mataas.",
+   "fog_ratio": "Walang pondo sa fogging: sa mga gastos at epektong ito, mga {x}× na mas maraming kaso bawat piso ang naiiwasan ng paglilinis sa parehong lugar, kaya nauubos ang budget bago umabot sa fogging.",
+   "fog_zero": "Walang pondo sa fogging: zero ang gitnang epekto nito."
   }
  },
  "FEATURES": {
