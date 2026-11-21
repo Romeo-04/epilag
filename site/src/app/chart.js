@@ -180,4 +180,59 @@ export function barChart(el, { categories, groups, mode = "group", horizontal = 
   });
 }
 
+/**
+ * Curve chart for a number against money (the action plan's cases averted against budget). x[], y[], lo[], hi[]
+ * share one numeric x; the band is lo-hi, the line is y, and `mark` ({ x, label }) puts a ringed dot on the line.
+ * xFmt / fmt format the axes and tooltip; tipTitle(x) heads the tooltip.
+ */
+export function curveChart(el, { x, y, lo, hi, color, mark, xFmt = short, fmt = short, tipTitle = xFmt, labels = {}, height = 280 }) {
+  el.classList.add("chart");
+  const plot = document.createElement("div");
+  el.innerHTML = "";
+  el.append(plot);
+  el.insertAdjacentHTML("beforeend", `<ul class="chart-legend"><li><i style="--c:${color}"></i>${esc(labels.line || "")}</li><li><i style="--c:${color}" class="band"></i>${esc(labels.band || "")}</li></ul>`);
+  const x1 = Math.max(...x, 1), yTicks = niceTicks(0, Math.max(...hi, 1) * 1.05), y1 = yTicks[yTicks.length - 1];
+  const xTicks = niceTicks(0, x1, 5).filter((v) => v <= x1 * 1.0001);
+  let X, Y;
+  return responsive(plot, (w) => {
+    const iw = w - PAD.l - PAD.r, ih = height - PAD.t - PAD.b;
+    X = (v) => PAD.l + (v / x1) * iw;
+    Y = (v) => PAD.t + ih - (v / y1) * ih;
+    let s = `<svg xmlns="${NS}" width="${w}" height="${height}" viewBox="0 0 ${w} ${height}" class="chart-svg">`;
+    s += yTicks.map((v) => `<line x1="${PAD.l}" x2="${w - PAD.r}" y1="${Y(v)}" y2="${Y(v)}" class="grid"/><text x="${PAD.l - 8}" y="${Y(v) + 4}" text-anchor="end">${fmt(v)}</text>`).join("");
+    s += xTicks.map((v) => `<text x="${X(v)}" y="${height - PAD.b + 18}" text-anchor="middle">${xFmt(v)}</text>`).join("");
+    const top = x.map((v, i) => `${X(v)},${Y(hi[i])}`), bot = x.map((v, i) => `${X(v)},${Y(lo[i])}`).reverse();
+    s += `<polygon points="${[...top, ...bot].join(" ")}" fill="${color}" opacity="0.16"/>`;
+    s += `<polyline points="${x.map((v, i) => `${X(v)},${Y(y[i])}`).join(" ")}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+    if (mark) {
+      const my = interp(x, y, mark.x), right = X(mark.x) > PAD.l + iw * 0.7;
+      s += `<line x1="${X(mark.x)}" x2="${X(mark.x)}" y1="${Y(my)}" y2="${height - PAD.b}" stroke="var(--ink)" stroke-dasharray="2 3"/>`;
+      s += `<circle cx="${X(mark.x)}" cy="${Y(my)}" r="5" fill="var(--ink)" stroke="#fff" stroke-width="2"/>`;
+      if (mark.label) s += `<text x="${X(mark.x) + (right ? -9 : 9)}" y="${Y(my) - 9}" text-anchor="${right ? "end" : "start"}" class="val">${esc(mark.label)}</text>`;
+    }
+    s += `<line class="cross" x1="0" x2="0" y1="${PAD.t}" y2="${height - PAD.b}" visibility="hidden"/></svg>`;
+    return s;
+  }, (svg) => {
+    const tip = tooltip(plot), cross = svg.querySelector(".cross");
+    svg.addEventListener("pointermove", (e) => {
+      const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
+      let i = 0;
+      x.forEach((v, k) => { if (Math.abs(X(v) - px) < Math.abs(X(x[i]) - px)) i = k; });
+      cross.setAttribute("x1", X(x[i])); cross.setAttribute("x2", X(x[i])); cross.setAttribute("visibility", "visible");
+      tip.innerHTML = `<b>${esc(tipTitle(x[i]))}</b><div><i style="background:${color}"></i>${esc(labels.line || "")}: <b>${fmt(y[i])}</b> (${fmt(lo[i])}–${fmt(hi[i])})</div>`;
+      tip.hidden = false;
+      tip.style.left = `${Math.min(X(x[i]) + 12, r.width - 230)}px`;
+      tip.style.top = `${PAD.t + 6}px`;
+    });
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+  });
+}
+
+/** y at x on a polyline with increasing xs. */
+function interp(xs, ys, v) {
+  const i = xs.findIndex((a) => a >= v);
+  if (i <= 0) return i === 0 ? ys[0] : ys[ys.length - 1];
+  return ys[i - 1] + ((ys[i] - ys[i - 1]) * (v - xs[i - 1])) / (xs[i] - xs[i - 1]);
+}
+
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);

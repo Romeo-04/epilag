@@ -55,7 +55,7 @@ T = {
         "up": "pushes the forecast up", "down": "pulls the forecast down",
         "budget": "Budget (PHP)", "cost": "Cost per person covered (PHP, example value)",
         "effect": "Effect on cases: low / high", "plan": "Funded actions",
-        "averted": "Cases averted in 8 weeks", "averted_range": "low–high",
+        "averted": "Cases averted, weeks 3–8 ahead", "averted_range": "low–high",
         "qc_head": "Quezon City barangays", "qc_muted": "where to look first",
         "qc_note": ("Weekly forecasts are city-wide. Barangay data is yearly only, so the city forecast "
                     "is shared out by each barangay's share of cases in 2022-2025."),
@@ -91,7 +91,8 @@ T = {
                          "gain at 4-8 weeks in some years and none in others, so EpiLag works with data LGUs already have."),
         "tables": "Full results (tables)",
         "plan_head": "Action plan", "plan_muted": "where each peso works hardest",
-        "plan_sub": ("Ranks where each peso prevents the most forecast cases over the next 8 weeks. "
+        "plan_sub": ("Ranks where each peso prevents the most forecast cases in weeks 3–8 ahead "
+                     "(people who fall ill in the next 2 weeks are mostly already infected). "
                      "Costs are example values: replace them with your LGU's own costs."),
         "per_case": "Pesos per case averted", "people": "People reached", "spend_chart": "Spend by area",
         "plan_gives": ("EpiLag-PH supplies the forecast and the ranking; you supply the costs. "
@@ -129,7 +130,7 @@ T = {
         "up": "nagpapataas ng forecast", "down": "nagpapababa ng forecast",
         "budget": "Budget (PHP)", "cost": "Gastos bawat taong maaabot (PHP, halimbawa lamang)",
         "effect": "Epekto sa kaso: mababa / mataas", "plan": "Mga gawaing popondohan",
-        "averted": "Kasong maiiwasan sa 8 linggo", "averted_range": "mababa–mataas",
+        "averted": "Kasong maiiwasan, ika-3 hanggang ika-8 linggo", "averted_range": "mababa–mataas",
         "qc_head": "Mga barangay ng Quezon City", "qc_muted": "saan unang titingin",
         "qc_note": ("Ang lingguhang forecast ay para sa buong lungsod. Taunan lang ang datos ng barangay, kaya "
                     "hinati ang forecast ayon sa bahagi ng bawat barangay sa mga kaso noong 2022-2025."),
@@ -166,7 +167,8 @@ T = {
                          "dagdag ng lagay ng panahon, kaya gumagana ang EpiLag sa datos na mayroon na ang LGU."),
         "tables": "Buong resulta (talahanayan)",
         "plan_head": "Plano ng aksyon", "plan_muted": "kung saan pinakamabisa ang bawat piso",
-        "plan_sub": ("Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa susunod na 8 linggo. "
+        "plan_sub": ("Inuuna kung saan pinakamaraming kaso ang naiiwasan ng bawat piso sa ika-3 hanggang ika-8 linggo "
+                     "(karamihan ng magkakasakit sa susunod na 2 linggo ay may impeksiyon na). "
                      "Halimbawa lamang ang mga gastos: palitan ng sariling gastos ng LGU."),
         "per_case": "Piso bawat kasong naiwasan", "people": "Taong maaabot", "spend_chart": "Gastos bawat lugar",
         "plan_gives": ("Ang EpiLag-PH ang nagbibigay ng forecast at pagkakasunod-sunod; ikaw ang naglalagay ng gastos. "
@@ -311,7 +313,22 @@ TRIGGERS = {
              "Stock NS1 rapid tests and IV fluids and open dengue fast lanes within 2–4 weeks."),
         ],
         "note": "Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 "
-                "dengue responses. In the budget below, fogging money is meant for cluster areas only.",
+                "dengue responses. The budget below follows these levels: by default it funds the worst level first, it allows "
+                "fogging only in areas at watch or higher, and inside those areas only the clusters should be sprayed.",
+        # rows funded from the budget (search and destroy as the clean-up drive, cluster spraying as fogging)
+        "costed": (0, 4),
+        "plan_head": "Plan by area",
+        "plan_sub": "Each area's alert level decides its actions. Clean-up and fogging come out of the budget. The other actions "
+                    "its level calls for are listed without a cost or cases averted: there is no good estimate of either here.",
+        "plan_cols": ("Area", "Level", "Funded from the budget", "Cases averted", "Also due at this level"),
+        "plan_unfunded": "Not funded at this budget",
+        "plan_nothing": "Nothing else yet",
+        "priority": "Spend first on",
+        "priority_opts": ("The worst alert level", "The most cases averted per peso"),
+        "fog_level": "No fogging money: no area is at watch or higher.",
+        "fog_ratio": "No fogging money: at these costs and effects, clean-up prevents about {x}× more cases per peso in "
+                     "the same area, so the budget runs out before fogging's turn.",
+        "fog_zero": "No fogging money: its middle effect is set to zero.",
     },
     "fil": {
         "head": "Kailan kikilos",
@@ -340,7 +357,23 @@ TRIGGERS = {
              "Mag-imbak ng NS1 rapid test at IV fluids at magbukas ng dengue fast lane sa loob ng 2–4 na linggo."),
         ],
         "note": "Pinagmulan: 4S at 4 o'clock habit ng DOH, ang depinisyon ng clustering ng DOH, at ang tugon ng Quezon City sa dengue "
-                "noong 2022 at 2025. Sa budget sa ibaba, para lamang sa mga cluster ang pondo sa fogging.",
+                "noong 2022 at 2025. Sinusunod ng budget sa ibaba ang mga antas na ito: karaniwang inuuna nito ang pinakamataas na "
+                "antas, pinapayagan lamang nito ang fogging sa mga lugar na nasa Bantayan o mas mataas, at sa loob ng mga lugar na "
+                "iyon, ang mga cluster lamang ang dapat i-spray.",
+        "costed": (0, 4),
+        "plan_head": "Plano bawat lugar",
+        "plan_sub": "Ang antas ng alerto ng bawat lugar ang nagpapasya ng mga aksyon nito. Galing sa budget ang paglilinis at "
+                    "fogging. Nakalista ang iba pang aksyon na hinihingi ng antas nito nang walang gastos o kasong maiiwasan: "
+                    "wala pang maayos na tantiya ng alinman dito.",
+        "plan_cols": ("Lugar", "Antas", "May pondo mula sa budget", "Kasong maiiwasan", "Dapat ding gawin sa antas na ito"),
+        "plan_unfunded": "Walang pondo sa budget na ito",
+        "plan_nothing": "Wala pang iba",
+        "priority": "Unang gastusan ang",
+        "priority_opts": ("Pinakamataas na antas ng alerto", "Pinakamaraming kasong maiiwasan bawat piso"),
+        "fog_level": "Walang pondo sa fogging: walang lugar na nasa Bantayan o mas mataas.",
+        "fog_ratio": "Walang pondo sa fogging: sa mga gastos at epektong ito, mga {x}× na mas maraming kaso bawat piso ang "
+                     "naiiwasan ng paglilinis sa parehong lugar, kaya nauubos ang budget bago umabot sa fogging.",
+        "fog_zero": "Walang pondo sa fogging: zero ang gitnang epekto nito.",
     },
 }
 
@@ -1063,6 +1096,40 @@ def where_now(trig: dict, level: str, shown: int = 3) -> str:
     return trig["now_some"].format(n=len(names), names=", ".join(names[:shown]) + more)
 
 
+def area_plan(plan: pd.DataFrame, trig: dict) -> pd.DataFrame:
+    """One row per area that is funded or above normal, worst level first: what the budget funds there, the cases it
+    averts, and the other actions its level calls for (the uncosted rows of the "When to act" table)."""
+    spend = plan.pivot_table(index="unit_id", columns="action", values="spend", aggfunc="sum")
+    averted = plan.groupby("unit_id")[["averted_low", "averted_mid", "averted_high"]].sum()
+    rows = fc_h[fc_h.unit_id.isin(spend.index) | (fc_h.level != LEVELS[0])].assign(
+        rank=lambda d: d.level.map(LEVELS.index), total=lambda d: d.unit_id.map(spend.sum(axis=1)).fillna(0))
+    out = []
+    for r in rows.sort_values(["rank", "total", "q50_per100k"], ascending=False).itertuples():
+        funded = [f"{a} ₱{fmt(spend.at[r.unit_id, a])}" for a in spend.columns
+                  if r.unit_id in spend.index and spend.at[r.unit_id, a] > 0]
+        av = averted.loc[r.unit_id] if r.unit_id in averted.index else None
+        due = [a for i, (lv, a, _) in enumerate(trig["rows"])
+               if i not in trig["costed"] and LEVELS.index(lv) <= LEVELS.index(r.level)]
+        out.append(dict(zip(trig["plan_cols"], (
+            r.unit_name, LEVEL_NAME[lang][r.level], " · ".join(funded) or trig["plan_unfunded"],
+            f"{fmt(av.averted_mid)} ({fmt(av.averted_low)}–{fmt(av.averted_high)})" if av is not None else "–",
+            "; ".join(due) or trig["plan_nothing"]))))
+    return pd.DataFrame(out, columns=list(trig["plan_cols"]))
+
+
+def fog_note(plan: pd.DataFrame, actions, levels: dict, trig: dict) -> str:
+    """Why the plan funds no fogging, or "" when it funds some."""
+    clean, fog = actions
+    if (plan.action == fog.name).any():
+        return ""
+    if not any(LEVELS.index(lv) >= LEVELS.index(fog.min_level) for lv in levels.values()):
+        return trig["fog_level"]
+    if fog.effect_central <= 0:
+        return trig["fog_zero"]
+    x = (clean.effect_central / clean.cost_per_person) / (fog.effect_central / fog.cost_per_person)
+    return trig["fog_ratio"].format(x=f"{x:.0f}" if x >= 10 else f"{x:.1f}")
+
+
 def page_budget():
     hero(t["plan_head"], t["plan_muted"], t["plan_sub"])
     left, right = st.columns([1, 1.5], gap="medium")
@@ -1077,10 +1144,14 @@ def page_budget():
         eff_b = st.slider(t["effect"], 0.0, 0.8, (0.0, 0.10), key="eb")
     actions = (
         Action("Clean-up drive + container covers", cost_a, eff_a[0], sum(eff_a) / 2, eff_a[1], 0.30),
-        Action("Targeted fogging", cost_b, eff_b[0], sum(eff_b) / 2, eff_b[1], 0.10),
+        Action("Targeted fogging", cost_b, eff_b[0], sum(eff_b) / 2, eff_b[1], 0.10, "watch"),
     )
-    plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions)
     trig = TRIGGERS[lang]
+    with left, st.container(key="card_priority"):
+        worst_first = st.radio(trig["priority"], trig["priority_opts"], key="priority") == trig["priority_opts"][0]
+    # each area only gets the actions its current alert level calls for (the "When to act" table)
+    levels = dict(zip(fc_h.unit_id, fc_h.level))
+    plan = allocate(fc[fc.horizon.isin([2, 4, 6, 8])], budget, actions, levels, "level" if worst_first else "value")
     with st.container(key="card_triggers"):
         card_title("check", trig["head"], trig["sub"])
         head = "".join(f"<span>{c}</span>" for c in trig["cols"])
@@ -1110,6 +1181,12 @@ def page_budget():
             card_title("map", t["spend_chart"], t["plan_gives"])
             st.plotly_chart(style(fig, 380, barmode="stack", barcornerradius=6, xaxis_tickprefix="₱"),
                             width="stretch", config={"displayModeBar": False})
+    with st.container(key="card_area_plan"):
+        card_title("check", trig["plan_head"], trig["plan_sub"])
+        st.dataframe(area_plan(plan, trig), hide_index=True, width="stretch")
+        note = fog_note(plan, actions, levels, trig)
+        if note:
+            st.caption(note)
     out = pd.DataFrame({
         t["area"]: plan.unit_name, "Action": plan.action, "Spend (PHP)": plan.spend.round(0).astype(int),
         "People covered": plan.people_covered.round(0).astype(int),
