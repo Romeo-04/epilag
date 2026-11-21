@@ -75,3 +75,28 @@ def test_budget_curve_flattens():
     curve = budget_curve(forecast([("A", 1000, 10.0), ("B", 1000, 50.0), ("C", 4000, 20.0)]), ONE_ACTION)
     slope = curve.averted_mid.diff().iloc[1:].to_numpy() / curve.spend.diff().iloc[1:].to_numpy()
     assert (np.diff(slope) <= 1e-12).all()
+
+
+LEVELLED = ONE_ACTION + (Action("fogging", 25.0, 0.0, 0.05, 0.1, 0.1, min_level="watch"),)
+
+
+def test_levels_decide_which_actions_an_area_gets():
+    # B has the most cases, but is only above usual, so it gets clean-up and no fogging; C is at watch and gets both.
+    fc = forecast([("A", 1000, 10.0), ("B", 1000, 50.0), ("C", 1000, 20.0)])
+    plan = allocate(fc, 1e9, LEVELLED, levels={"A": "normal", "B": "above usual", "C": "watch"})
+    assert sorted(zip(plan.unit_id, plan.action)) == [("A", "clean-up"), ("B", "clean-up"), ("C", "clean-up"), ("C", "fogging")]
+
+
+def test_unlisted_area_counts_as_normal_and_no_levels_means_no_gate():
+    fc = forecast([("A", 1000, 10.0)])
+    assert set(allocate(fc, 1e9, LEVELLED, levels={}).action) == {"clean-up"}
+    assert set(allocate(fc, 1e9, LEVELLED).action) == {"clean-up", "fogging"}
+
+
+def test_budget_curve_follows_the_levels():
+    fc = forecast([("A", 1000, 10.0), ("B", 1000, 50.0), ("C", 4000, 20.0)])
+    levels = {"A": "watch", "B": "normal", "C": "outbreak warning"}
+    curve = budget_curve(fc, LEVELLED, levels)
+    for budget in (0, 3000, 9000, 1e9):
+        plan = allocate(fc, budget, LEVELLED, levels)
+        assert plan.averted_mid.sum() == pytest.approx(np.interp(budget, curve.spend, curve.averted_mid))

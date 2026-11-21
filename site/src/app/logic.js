@@ -260,18 +260,21 @@ export function expectedCases8wk(forecast, [from, to] = [1, 8]) {
 /** src/allocate.py DEFAULT_ACTIONS */
 export const DEFAULT_ACTIONS = [
   { name: "Clean-up drive + container covers", cost_per_person: 15, effect_low: 0.1, effect_central: 0.3, effect_high: 0.5, max_coverage: 0.3 },
-  { name: "Targeted fogging", cost_per_person: 25, effect_low: 0, effect_central: 0.05, effect_high: 0.1, max_coverage: 0.1 },
+  { name: "Targeted fogging", cost_per_person: 25, effect_low: 0, effect_central: 0.05, effect_high: 0.1, max_coverage: 0.1, min_level: "watch" },
 ];
 
 /** src/allocate.py PREVENTABLE_WEEKS: weeks 1-2 ahead are mostly people already infected. */
 export const PREVENTABLE_WEEKS = [3, 8];
 
-/** src/allocate.py _options(): every (unit, action) with its cost cap and cases averted per peso, best first. */
-function allocOptions(forecast, actions) {
+/** src/allocate.py _options(): every (unit, action) with its cost cap and cases averted per peso, best first. With
+ * `levels` (unit_id -> alert level; an area not in it counts as normal), only the actions each area's level has reached. */
+function allocOptions(forecast, actions, levels) {
   const units = expectedCases8wk(forecast, PREVENTABLE_WEEKS);
   const opts = [];
   for (const a of actions) {
+    const from = LEVELS.indexOf(a.min_level || LEVELS[0]);
     for (const u of units) {
+      if (levels && LEVELS.indexOf(levels[u.unit_id] || LEVELS[0]) < from) continue;
       const max_people = u.population * a.max_coverage;
       opts.push({ ...u, action: a.name, max_cost: max_people * a.cost_per_person, cost_per_person: a.cost_per_person,
         averted_per_peso: (u.cases_mid / u.population) * a.effect_central / a.cost_per_person,
@@ -284,12 +287,13 @@ function allocOptions(forecast, actions) {
 
 /**
  * allocate(): fractional knapsack on cases averted per peso. Funds the best (unit, action) first, up to each
- * action's max coverage, until the budget runs out. Returns the funded lines (low / central / high averted).
+ * action's max coverage, until the budget runs out. Returns the funded lines (low / central / high averted). With
+ * `levels` (unit_id -> alert level), each area only gets the actions its level calls for.
  */
-export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
+export function allocate(forecast, budget, actions = DEFAULT_ACTIONS, levels = null) {
   const plan = [];
   let left = Number(budget);
-  for (const o of allocOptions(forecast, actions)) {
+  for (const o of allocOptions(forecast, actions, levels)) {
     if (left <= 0 || !(o.averted_per_peso > 0)) break;
     const spend = Math.min(left, o.max_cost);
     const share = spend / o.cost_per_person / o.population;
@@ -306,9 +310,9 @@ export function allocate(forecast, budget, actions = DEFAULT_ACTIONS) {
  * budget_curve(): total cases averted (low / central / high) at each budget where the plan starts funding the next
  * (unit, action), from 0 to everything funded. Straight lines between points; curveAt() reads any budget.
  */
-export function budgetCurve(forecast, actions = DEFAULT_ACTIONS) {
+export function budgetCurve(forecast, actions = DEFAULT_ACTIONS, levels = null) {
   const pts = [{ spend: 0, averted_low: 0, averted_mid: 0, averted_high: 0 }];
-  for (const o of allocOptions(forecast, actions)) {
+  for (const o of allocOptions(forecast, actions, levels)) {
     if (!(o.averted_per_peso > 0)) break;
     const last = pts[pts.length - 1], share = o.max_cost / o.cost_per_person / o.population;
     const [lo, mid, hi] = o.effects;
