@@ -62,8 +62,8 @@ says so: each barangay gets the city's weekly cases times its share of the city'
 the real city forecast made that week, shared out the same way. There is no city rain series, so that mission has no
 rain.
 
-You play each season twice: round 1 with case reports only, then round 2 with 4-week forecasts from a model you
-choose: EpiLag-PH's submitted model, one of the research's three other methods (negative binomial, random forest,
+You play each season twice: round 1 starts straight away with case reports only. After it, you choose a forecaster
+and replay the same season in round 2 with its 4-week forecasts: EpiLag-PH's submitted model, one of the research's three other methods (negative binomial, random forest,
 SARIMAX), or the average of the four. The debrief shows how a computer player on each model's alerts would have done, and
 you can replay round 2 with another model. The average is approximate: it is computed from the four models' rounded
 forecasts (`scripts/drill_models.py`).
@@ -76,8 +76,9 @@ forecasts (`scripts/drill_models.py`).
    in the regions). Each turn is 2 weeks.
 2. **Read the receipt.** Before you start, a receipt lists the season's cases (and, for the regions, its rain), area by area.
 3. **Round 1: react.** You see only case reports, just as most health offices do today. Deploy teams to provinces, then end the turn.
-4. **Round 2: forecast.** Same region, same budget, now with EpiLag-PH alerts and forecast ranges on the map.
-5. **Get scored on real data.** Each team prevents a share of the cases reported 2–9 weeks after it is deployed. After
+4. **Choose a forecaster.** EpiLag-PH or one of the other models, each trained only on earlier years.
+5. **Round 2: forecast.** Same region, same budget, now with that model's alerts and forecast ranges on the map.
+6. **Get scored on real data.** Each team prevents a share of the cases reported 2–9 weeks after it is deployed. After
    each round you get a mission report and a grade based on the real cases. At the end, your two rounds are
    compared with two computer players: one that reacts to reports and one that follows EpiLag-PH.
 
@@ -100,21 +101,26 @@ flowchart LR
 2. **Alert.** Each forecast is compared with that area's normal level for the same week in earlier years.
    *Watch* means an outbreak is possible. *Outbreak warning* means one is likely.
 3. **Act.** Every alert comes with what to do, when to do it, and what EpiLag-PH contributes to each step.
-   The checklist can be downloaded as a one-page action brief.
+   Each action has a trigger from DOH and Quezon City practice (for example, spraying only where the DOH clustering
+   rule is met). The checklist can be downloaded as a one-page action brief.
 4. **Allocate.** Given a budget, EpiLag-PH ranks where clean-up drives and fogging avert the most forecast cases
    per peso, with cautious low/central/high estimates.
 
 ## Who it is for
 | User | What they get |
 | --- | --- |
-| **Provincial, city and municipal health offices** | Alert map, area checklists, action brief, budget plan, and an explanation of why each area is flagged |
+| **Provincial, city and municipal health offices** | Alert map, area checklists, a *When to act* table of triggers, action brief, budget plan, and an explanation of why each area is flagged |
 | **Barangays and residents** | A *For residents* page with this week's outlook, the DOH 4S steps, warning signs, a message ready to share in a group chat, and a one-SMS version for phones without data |
 | **Trainees, students and the public** | [Dengue Drill](https://romeo-04.github.io/epilag/drill/), a game where you run the response yourself, from Quezon City's barangays in 2024–25 to the 2019 regions |
 | **Researchers, newsrooms and other apps** | Every forecast and each area's alert track record as [CSV and JSON](https://romeo-04.github.io/epilag/data/), with column definitions, plus [RSS](https://romeo-04.github.io/epilag/data/alerts.xml) and [calendar](https://romeo-04.github.io/epilag/data/alerts.ics) alert feeds |
 
 ## What you can do
 **Overview: see this week's priorities.** The app opens on a dashboard: how many areas need action now, a 3D map of
-the forecast, the priority list, and this week's action brief. The priority list sorts by cases or by *reliability*
+the forecast, the priority list, *Rising toward an outbreak*, and this week's action brief. *Rising toward an
+outbreak* places each forecast on its own area's scale: 0% is usual for that week of the year, 100% is the area's
+outbreak line (mean + 2 SD). This cancels out population, how endemic an area is, season and reporting
+completeness, so a big city is not ranked first just for being big. Each row shows the move from the latest week to
+the forecast on a small meter. The priority list sorts by cases or by *reliability*
 (areas on alert first, then by how often their past alerts were right). The sidebar groups the tools into *Monitor*,
 *Act* and *Evidence*; explanations sit behind "About this" buttons, in English and Filipino.
 
@@ -126,7 +132,9 @@ as a historical replay limited to that region's provinces.
 ![Overview dashboard](docs/screenshots/home.png)
 
 **Forecast map: where to act first.** Columns rise with the alert level; hover for the numbers, click to open an area.
-In replay mode it shows what happened next.
+Click a level count (normal, above usual, watch, outbreak warning) to open a panel listing the areas at that level,
+closest to their own outbreak line first; click one to fly the map there. A line under the counts says what they
+count (for example 17 regions and Quezon City, 8 weeks ahead). In replay mode the map shows what happened next.
 
 ![Forecast map, replay of 2 June 2019](docs/screenshots/map_replay_2019.png)
 
@@ -144,7 +152,23 @@ factors behind the forecast (recent cases, season, rain, heat, humidity).
 
 ![Area page with forecast, checklist and explanation](docs/screenshots/unit_replay_2019.png)
 
-**Budget: spend where it counts.** Enter a budget and get a ranked plan you can export as CSV.
+**Action plan: when to act and where to spend.** A *When to act* card lists each action, the alert level it starts
+at, what triggers it, and where the current forecast says to start it now (the areas at that level or higher,
+worst first, or *Not yet*):
+
+| Starts at | Action | When |
+| --- | --- | --- |
+| Normal | Search and destroy | Every week at 4 p.m. in every barangay, even in quiet weeks |
+| Above usual | 4S reminder to households | When cases trend above the usual level |
+| Watch | Larviciding | Water that cannot be drained or covered (canals, ponds, tanks) in the top barangays |
+| Watch | Test kits, IV fluids and spraying teams | Check stocks and get teams ready to start within days |
+| Watch | Cluster spraying (fogging) | Only in a barangay with 3+ cases in 4 consecutive weeks (DOH clustering), or cases rising 2 weeks in a row |
+| Outbreak warning | Task force and public advisory | As soon as the middle forecast passes the epidemic threshold |
+| Outbreak warning | Hospital fast lanes | NS1 rapid tests, IV fluids and dengue fast lanes within 2–4 weeks |
+
+Sources: DOH 4S strategy and 4 o'clock habit, the DOH clustering definition, and Quezon City's 2022 and 2025 dengue
+responses. The same triggers appear in each area's checklist, in English and Filipino. Below the card, enter a budget
+and get a ranked plan you can export as CSV; fogging money is meant for cluster areas only.
 
 ![Budget plan for the 2019 replay](docs/screenshots/budget_replay_2019.png)
 
