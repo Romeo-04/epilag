@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>EpiLag-PH Research Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,600&family=Silkscreen:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#071711;--forest:#08754F;--deep:#055C3E;--sage:#789373;--paper:#FBFAF4;--amber:#F5A51C;--sky:#BFE2EC;
+--muted:#3E4E45;--line:#E4E4D9;--soft:#E3F0E7;--night:#0A2A1D;--night2:#0E3726;--nline:#1E5A40;--ntext:#E9F3EC;--nmuted:#9DBDAC;
+--normal:#0C7A55;--above:#F7C928;--watch:#F58220;--warn:#F04B2A}
+*{box-sizing:border-box;margin:0;padding:0}
+@page{size:1900px 2688px;margin:0}
+html,body{background:var(--paper)}
+body{width:1900px;height:2688px;position:relative;overflow:hidden;font-family:"Inter Tight",Helvetica,Arial,sans-serif;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact;
+ background:var(--paper) radial-gradient(#D9DCCF 2px,transparent 2.5px) 0 0/28px 28px}
+.px{font-family:"Silkscreen",monospace;font-weight:400;letter-spacing:.02em}
+b{font-weight:800;color:var(--ink)}
+.g{color:var(--forest);font-weight:700}
+.o{color:#C25E00;font-weight:700}
+.spr{display:block;image-rendering:pixelated}
+.abs{position:absolute}
+
+/* pixel frame: square corners, ink border, hard offset shadow */
+.frame{background:#fff;border:4px solid var(--ink);box-shadow:10px 10px 0 var(--deep)}
+.frame.dk{background:var(--night);color:var(--ntext);box-shadow:10px 10px 0 var(--amber)}
+
+/* ---------- header logo bar */
+.logos{position:absolute;left:70px;right:70px;top:34px;height:150px;display:flex;align-items:center;justify-content:space-between}
+.pj{display:flex;align-items:center;gap:24px}
+.pj img{width:140px;height:140px;object-fit:cover;border:4px solid var(--ink);box-shadow:7px 7px 0 var(--deep);image-rendering:auto}
+.pj .t1{font:900 70px/0.9 "Inter Tight";letter-spacing:-.03em;color:var(--deep)}
+.pj .t2{font-size:23px;font-weight:700;color:var(--forest);margin-top:6px;letter-spacing:.01em}
+.pj .t3{font:400 16px "Silkscreen";color:#C25E00;margin-top:6px;letter-spacing:.04em}
+.el{display:flex;align-items:center;gap:20px}
+.el svg{width:116px;height:116px}
+.el .w{font:900 76px/1 "Inter Tight";letter-spacing:-.04em}
+.el .w span{color:var(--forest)}
+.el .s{font:400 17px "Silkscreen";color:var(--muted);margin-top:4px}
+.team{text-align:center}
+.team .badge{display:inline-flex;align-items:center;gap:14px;background:var(--ink);color:#fff;padding:14px 22px;box-shadow:7px 7px 0 var(--amber)}
+.team .badge .px{font-size:26px;color:var(--amber)}
+.team .badge b{color:#fff;font-size:30px;font-weight:900;letter-spacing:-.01em}
+.team .sub{font:400 15px "Silkscreen";color:var(--muted);margin-top:14px}
+.sdg{display:flex;gap:12px}
+.sdg div{width:118px;height:118px;color:#fff;padding:10px 11px;display:flex;flex-direction:column;justify-content:space-between}
+.sdg .n{font:900 44px/0.9 "Inter Tight"}
+.sdg .l{font:800 12.5px/1.12 "Inter Tight";text-transform:uppercase}
+.rule{position:absolute;left:70px;right:70px;top:208px;height:8px;background:repeating-linear-gradient(90deg,var(--deep) 0 24px,transparent 24px 32px)}
+
+/* ---------- title */
+.title{position:absolute;left:70px;top:240px;width:1170px}
+.title h1{font-size:52px;line-height:1.07;font-weight:900;letter-spacing:-.025em}
+.title h1 em{font-style:normal;color:var(--forest)}
+.title .by{font-size:24px;font-weight:800;margin-top:14px;line-height:1.35}
+.title .af{font-size:20px;font-weight:600;color:var(--muted)}
+.chips{position:absolute;right:70px;top:244px;width:250px;display:flex;flex-direction:column;gap:10px}
+.chips div{border:3px solid var(--ink);background:#fff;padding:10px 14px;font-size:17px;font-weight:700;line-height:1.2}
+.chips div span{display:block;font:400 13px "Silkscreen";color:var(--forest)}
+
+/* ---------- numbered section headers (pill + pixel badge) */
+.sh{position:absolute;display:flex;align-items:center;height:84px}
+.sh .no{width:104px;height:104px;background:var(--paper);border:5px solid var(--ink);display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:6px 6px 0 var(--deep);position:relative}
+.sh .no span{position:absolute;top:-20px;left:-20px;width:44px;height:44px;background:var(--amber);border:4px solid var(--ink);font:700 24px/36px "Silkscreen";text-align:center}
+.sh .bar{background:var(--deep);color:#fff;height:72px;display:flex;align-items:center;padding:0 40px 0 50px;margin-left:-22px;font:900 40px "Inter Tight";letter-spacing:.06em;text-transform:uppercase;
+ clip-path:polygon(0 0,calc(100% - 16px) 0,calc(100% - 16px) 8px,calc(100% - 8px) 8px,calc(100% - 8px) 16px,100% 16px,100% calc(100% - 16px),calc(100% - 8px) calc(100% - 16px),calc(100% - 8px) calc(100% - 8px),calc(100% - 16px) calc(100% - 8px),calc(100% - 16px) 100%,0 100%)}
+.sh.r{flex-direction:row-reverse}.sh.r .bar{margin-left:0;margin-right:-22px;padding:0 50px 0 40px;
+ clip-path:polygon(16px 0,100% 0,100% 100%,16px 100%,16px calc(100% - 8px),8px calc(100% - 8px),8px calc(100% - 16px),0 calc(100% - 16px),0 16px,8px 16px,8px 8px,16px 8px)}
+.sh .no .spr{width:64px;height:auto}
+
+/* section labels inside cards */
+.lab{font:700 21px "Silkscreen";color:var(--deep);letter-spacing:.03em;text-transform:uppercase}
+.lab.c{text-align:center}
+p,.t{font-size:19.5px;line-height:1.42;color:var(--muted)}
+.j p{text-align:left}
+
+/* ---------- 1 introduction */
+#intro{left:70px;top:578px;width:1170px;height:440px;padding:70px 34px 26px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:0}
+.cols3>div{padding:0 26px}
+.cols3>div+div{border-left:3px dashed #BFC7B9}
+.cols3 .lab{margin-bottom:12px}
+.didyou{background:var(--deep);color:#EAF6EF;padding:16px 22px;font-size:18.5px;line-height:1.38;font-weight:600;border:4px solid var(--ink)}
+.didyou b{color:var(--amber)}
+.didyou .px{color:var(--amber);font-size:16px;display:block;margin-bottom:4px}
+
+/* device */
+.laptop{position:absolute;left:1300px;top:244px;width:530px}
+.laptop .scr{border:14px solid var(--ink);border-bottom-width:18px;background:var(--ink);box-shadow:10px 10px 0 var(--deep)}
+.laptop .scr img{display:block;width:100%;height:296px;object-fit:cover;object-position:top left}
+.laptop .base{height:20px;background:#2A3A32;margin:0 -28px;border:4px solid var(--ink);border-top:0}
+.collab{position:absolute;left:1290px;top:640px;width:540px;padding:20px 24px}
+.collab .row{display:flex;gap:14px;margin-top:12px}
+.collab .row div{flex:1;border:3px solid var(--ink);padding:10px 12px;font-size:16px;line-height:1.3;color:var(--muted);background:var(--paper)}
+.collab .row b{display:block;font-size:18px}
+
+/* ---------- 2 methods */
+#methods{left:70px;top:1092px;width:1760px;height:400px;padding:28px 36px}
+.ipo{display:grid;grid-template-columns:1.25fr 34px 1.1fr 34px 1.05fr 34px 1.05fr 34px 1.2fr;align-items:start;width:1130px}
+.ipo .st{text-align:center}
+.ipo .st .lab{font-size:18px;min-height:46px}
+.ipo .ics{display:flex;justify-content:center;gap:6px;margin:6px 0 8px;min-height:96px;align-items:flex-end}
+.ipo .ics .ic{width:84px;height:84px}
+.ipo .st .t{font-size:16px;line-height:1.32}
+.ipo .st .t b{display:block;font-size:18px;color:var(--ink)}
+.arr{align-self:center;margin-top:-10px;height:30px;background:var(--ink);clip-path:polygon(0 35%,55% 35%,55% 0,100% 50%,55% 100%,55% 65%,0 65%)}
+.vsep{position:absolute;left:1210px;top:30px;bottom:30px;border-left:3px dashed #BFC7B9}
+.ladder{position:absolute;left:1240px;top:34px;width:470px}
+.ladder .lv{display:grid;grid-template-columns:210px 1fr;align-items:center;margin-top:9px;border:3px solid var(--ink)}
+.ladder .lv div:first-child{padding:9px 12px;font-weight:800;font-size:19px}
+.ladder .lv div:last-child{padding:6px 12px;font-size:15.5px;line-height:1.28;color:var(--muted);background:#fff}
+.tagline{position:absolute;left:36px;bottom:16px;font:400 14.5px "Silkscreen";color:var(--deep)}
+.cap{position:absolute;font:900 30px "Inter Tight";color:#fff;-webkit-text-stroke:0;text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),0 -3px 0 var(--ink),3px 3px 0 var(--ink),-3px -3px 0 var(--ink),3px -3px 0 var(--ink),-3px 3px 0 var(--ink),6px 6px 0 var(--ink)}
+.note{position:absolute;background:var(--deep);color:#E4F3EA;border:4px solid var(--ink);padding:12px 18px;font-size:16.5px;line-height:1.35;font-weight:600}
+
+/* ---------- 3 results */
+#chartc{left:70px;top:1640px;width:1310px;height:440px;padding:20px 26px 12px}
+.chart{display:block;width:100%;margin-top:4px}
+.chart .tk{font:400 15px "Silkscreen";fill:#5B685F}
+.chart .mk{font:800 21px "Inter Tight";paint-order:stroke;stroke:#fff;stroke-width:7px;stroke-linejoin:round}
+.legend{display:flex;gap:22px;font-size:15.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:16px;height:16px;vertical-align:-2px;margin-right:7px}
+.legend .ln{width:30px;height:0;border-top:4px dashed var(--ink);vertical-align:4px}
+.legend .fl{width:30px;height:0;border-top:5px solid var(--forest);vertical-align:4px}
+#mapc{left:1420px;top:1540px;width:410px;height:540px;padding:18px 20px;background:#DDEFF4}
+#mapc .vox{position:absolute;left:14px;top:56px;width:196px;height:auto}
+.mlg{position:absolute;right:16px;top:96px;width:168px;display:flex;flex-direction:column;gap:8px}
+.mlg div{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;background:#fff;border:3px solid var(--ink);padding:5px 8px}
+.mlg i{width:18px;height:18px;border:2px solid var(--ink);flex:none}
+.mlg span{margin-left:auto;font:700 17px "Silkscreen"}
+.mcap{position:absolute;left:214px;right:16px;top:300px;font-size:15px;line-height:1.35;color:var(--muted)}
+.stats{left:70px;top:2110px;width:1760px;display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:18px 10px 16px}
+.stat{padding:0 24px;border-left:3px dashed var(--nline)}
+.stat:first-child{border-left:none}
+.stat .big{font:900 60px/0.95 "Inter Tight";letter-spacing:-.04em;color:var(--amber)}
+.stat .big small{font-size:34px}
+.stat .d{font-size:17px;line-height:1.36;color:#D3E6DA;margin-top:10px}
+.stat .d b{color:#fff}
+.stat .s{font:400 12.5px/1.4 "Silkscreen";color:var(--nmuted);margin-top:8px}
+
+/* ---------- 4 discussion / 5 conclusion / 6 future */
+.foot{position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--ink);color:#CFE3D6;display:flex;align-items:center;justify-content:space-between;padding:0 70px;font-size:16px}
+.foot .px{color:var(--amber);font-size:15px}
+
+.bot{position:absolute;top:2368px;height:250px}
+#disc{left:70px;width:830px;padding:56px 20px 14px;display:grid;grid-template-columns:1fr 1fr 1fr}
+#disc>div{padding:0 14px}
+#disc>div+div{border-left:3px dashed #BFC7B9}
+#disc .lab{font-size:16px;margin-bottom:6px;line-height:1.15}
+#disc p{font-size:15.5px;line-height:1.36}
+#concl{left:940px;width:430px;padding:58px 22px 14px}
+.quote{font:900 24px/1.1 "Inter Tight";text-transform:uppercase}
+.quote em{font-style:normal;color:var(--forest)}
+#fut{left:1410px;width:420px;padding:56px 18px 14px;display:grid;grid-template-columns:1fr 136px;gap:14px}
+.road{list-style:none}
+.road li{position:relative;padding:0 0 6px 26px;font-size:15px;line-height:1.25;color:var(--muted)}
+.road li:before{content:"";position:absolute;left:0;top:3px;width:13px;height:13px;background:var(--forest);border:2px solid var(--ink)}
+.road li:first-child:before{background:var(--amber)}
+.road li:not(:last-child):after{content:"";position:absolute;left:7px;top:19px;height:calc(100% - 16px);border-left:3px dotted var(--ink)}
+.qr{border:4px solid var(--ink);padding:9px;background:#fff;align-self:start}
+.qr svg{width:100%;height:auto;display:block}
+.qr span{display:block;font:400 11px "Silkscreen";text-align:center;margin-top:6px}
+.sh.sm{height:70px}.sh.sm .no{width:84px;height:84px}.sh.sm .no .spr{width:52px}.sh.sm .bar{height:60px;font-size:32px;padding:0 28px 0 40px}
+</style></head><body>
+
+<!-- decorative textures -->
+<div class="abs" style="left:0;right:0;top:2420px;height:220px;background:url(../../docs/textures/town.svg) repeat-x 0 100%/384px 128px;opacity:.55;image-rendering:pixelated"></div>
+<div class="abs" style="left:0;right:0;top:960px;height:600px;background:url(../../docs/textures/contour.svg) repeat/240px 240px;opacity:.35"></div>
+
+<!-- logo bar -->
+<header class="logos">
+ <div class="pj"><img src="assets/pjdsc_logo.png" alt="PJDSC logo"><div><div class="t1">PJDSC 2026</div><div class="t2">Philippine Junior Data Science Challenge</div><div class="t3">Trace the Pattern, Target the Cure</div></div></div>
+ <div class="el">{{FAVICON}}<div><div class="w">Epi<span>Lag</span>-PH</div><div class="s">See dengue coming</div></div></div>
+ <div class="team"><div class="badge"><span class="px">Team</span><b>DiagNodes</b></div><div class="sub">Advancing public health<br>through data science</div></div>
+ <div class="sdg"><div style="background:#4C9F38"><span class="n">3</span><span class="l">Good health and well-being</span></div><div style="background:#3F7E44"><span class="n">13</span><span class="l">Climate action</span></div></div>
+</header>
+<div class="rule"></div>
+
+<section class="title">
+ <h1>EpiLag-PH: Forecasting Dengue Outbreaks <em>2–8 Weeks Ahead</em> in the Philippines Using LightGBM Quantile Models and Weather Lags</h1>
+ <div class="by">Tolentino, J., Dacalan, P., &amp; Gaytano, K.</div>
+ <div class="af">Team DiagNodes · Philippine Junior Data Science Challenge (PJDSC) 2026 · Philippines</div>
+</section>
+
+<!-- ===== 1 INTRODUCTION ===== -->
+<div class="laptop"><div class="scr"><img src="../../docs/screenshots/home.png" alt=""></div><div class="base"></div></div>
+<div class="abs" style="left:1180px;top:430px;transform:rotate(-8deg);z-index:3">{{MOSQ}}</div>
+
+<section id="intro" class="abs frame">
+ <div class="cols3">
+  <div><div class="lab c">Problem</div><p>Dengue response in the Philippines usually starts <b>after hospital admissions are already high</b>. Cases are counted after people get sick, weeks after the rain that bred the mosquitoes, so clean-up drives and fogging often arrive <span class="o">after the peak</span>.</p></div>
+  <div><div class="lab c">Gap</div><p>Surveillance reports describe <b>what already happened</b>. A local health office rarely gets a forward-looking signal that says <span class="g">which area is heading for an outbreak</span>, how sure that is, and what to do with a limited budget.</p></div>
+  <div><div class="lab c">Solution · EpiLag-PH</div><p><b>EpiLag-PH</b> forecasts weekly dengue cases <span class="g">2–8 weeks ahead</span> for 86 provinces, 17 regions and Quezon City, with a low–middle–high range. Each forecast becomes an <b>alert level</b>, a dated <b>action checklist</b>, a <b>budget plan</b> that ranks where each peso prevents the most cases, and a <b>residents' outlook</b> in Filipino or English. It runs free in the browser.</p></div>
+ </div>
+ <div style="display:flex;gap:24px;margin-top:22px;align-items:stretch">
+  <div class="didyou" style="flex:1"><span class="px">Did you know?</span>About <b>442,000</b> dengue cases were reported in the Philippines in 2019 (DOH via HDX). Reported cases undercount infections, by about <b>4.7×</b> in a Cebu City study.</div>
+  <div class="didyou" style="flex:1;background:var(--paper);color:var(--muted)"><span class="px" style="color:#C25E00">The lag is the opportunity</span>Rain fills breeding sites weeks before mosquitoes multiply and people fall sick. <b>That delay is time a health office can use.</b></div>
+ </div>
+</section>
+<div class="sh" style="left:50px;top:540px"><div class="no"><span>1</span>{{P_cloud}}</div><div class="bar">Introduction</div></div>
+
+<section class="collab abs frame dk">
+ <div class="lab" style="color:var(--amber)">Built for</div>
+ <div class="row">
+  <div><b>Health offices</b>map, checklist, budget</div>
+  <div><b>Barangays</b>outlook, one-SMS text</div>
+  <div><b>Trainees</b>Dengue Drill game</div>
+ </div>
+</section>
+<div class="abs" style="left:1600px;top:836px">{{FROG}}</div>
+
+<!-- ===== 2 METHODS ===== -->
+<section id="methods" class="abs frame">
+ <div class="ipo" style="margin-top:44px">
+  <div class="st"><div class="lab">Data sources<br>2016–2025</div><div class="ics">{{P_hospital}}{{P_cloud}}</div><div class="t"><b>Weekly dengue counts</b>DOH EB via HDX · UPRI-NOAH. Rain, heat, humidity: ERA5 via Open-Meteo</div></div>
+  <div class="arr"></div>
+  <div class="st"><div class="lab">Processing</div><div class="ics">{{P_container}}</div><div class="t"><b>Clean &amp; align</b>Counts-only check, weekly grid, case and weather lags of 1–12 weeks</div></div>
+  <div class="arr"></div>
+  <div class="st"><div class="lab">Modeling</div><div class="ics">{{P_sun}}</div><div class="t"><b>LightGBM quantile</b>One model per horizon (2–8 wks), 10/50/90th percentiles, conformal calibration</div></div>
+  <div class="arr"></div>
+  <div class="st"><div class="lab">Alerting</div><div class="ics">{{P_ambulance}}</div><div class="t"><b>Seasonal thresholds</b>Each forecast vs. the area's mean and mean + 2 SD for that week in earlier years</div></div>
+  <div class="arr"></div>
+  <div class="st"><div class="lab">Output</div><div class="ics">{{P_residents}}</div><div class="t"><b>EpiLag-PH app</b>Forecast map, action brief, budget plan, SHAP reasons, residents' outlook, Dengue Drill</div></div>
+ </div>
+ <div class="vsep"></div>
+ <div class="ladder">
+  <div class="lab">Alert levels</div>
+  <div class="lv"><div style="background:var(--normal);color:#fff">Normal</div><div>Middle forecast at the usual level</div></div>
+  <div class="lv"><div style="background:var(--above)">Above usual</div><div>Middle forecast above the seasonal mean</div></div>
+  <div class="lv"><div style="background:var(--watch)">Watch</div><div>High forecast above the epidemic line: outbreak possible</div></div>
+  <div class="lv"><div style="background:var(--warn)">Outbreak warning</div><div>Middle forecast above the epidemic line: likely</div></div>
+ </div>
+ <div class="tagline">Out of sample: each test year is forecast only from earlier years · A retrained model goes live only if it beats the baselines · full retrain 25 s on a laptop CPU</div>
+</section>
+<div class="sh r" style="right:50px;top:1052px"><div class="no"><span>2</span>{{P_school}}</div><div class="bar">Methods</div></div>
+<div class="cap" style="left:110px;top:1112px">Input → Process → Output</div>
+
+
+<!-- ===== 3 RESULTS ===== -->
+<div class="sh" style="left:50px;top:1540px"><div class="no"><span>3</span>{{P_people}}</div><div class="bar">Results</div></div>
+<div class="note" style="left:470px;top:1530px;width:900px"><span class="px" style="color:var(--amber);font-size:15px">Did you know?</span> Quezon City's 2024–25 season stayed above its epidemic line for <b style="color:var(--amber)">27 weeks</b> and peaked at <b style="color:var(--amber)">622 cases</b> in one week.</div>
+
+<section id="chartc" class="abs frame">
+ <div class="lab">A. Quezon City 2024–25: flagged 5 weeks early</div>
+ <div class="legend"><span><i style="background:#F04B2A"></i>above epidemic line</span><span><i style="background:#B9C4BC"></i>other weeks</span><span><i class="ln"></i>epidemic line (mean + 2 SD)</span><span><i class="fl"></i>4-week-ahead forecast</span></div>
+ {{CHART}}
+ <p style="font-size:15px;line-height:1.3;margin-top:2px">Weekly reported cases, UPRI-NOAH. It called the outbreak, not its height: for the peak week the forecast was 237 (likely 164–338).</p>
+</section>
+
+<section id="mapc" class="abs frame">
+ <div class="lab" style="font-size:18px">B. 2019 replay · 4 wks ahead</div>
+ {{MAP}}
+ <div class="mlg">
+  <div><i style="background:var(--warn)"></i>Warning<span>20</span></div>
+  <div><i style="background:var(--watch)"></i>Watch<span>27</span></div>
+  <div><i style="background:var(--above)"></i>Above<span>7</span></div>
+  <div><i style="background:var(--normal)"></i>Normal<span>32</span></div>
+ </div>
+ <div class="mcap">Forecast issued 2 June 2019 for the week ending 30 June, using data before 2019 only. <b>30 of the 32</b> provinces that later crossed the epidemic line were on watch or warning.</div>
+</section>
+
+<section class="stats abs frame dk">
+ <div class="stat"><div class="big">5 wks</div><div class="d">early warning for <b>Quezon City</b> before it crossed the epidemic line</div><div class="s">first watch 15 Sep 2024</div></div>
+ <div class="stat"><div class="big">30<small>/32</small></div><div class="d">provinces that crossed the threshold were <b>flagged 4 weeks ahead</b></div><div class="s">2019 replay · regions+QC 11/11</div></div>
+ <div class="stat"><div class="big">87%</div><div class="d">of 211 outbreak starts caught 4 weeks ahead at <b>watch</b></div><div class="s">provinces 2019 · regions+QC 79–100%</div></div>
+ <div class="stat"><div class="big">+25%</div><div class="d">more cases averted with the same <b>₱5 million</b>: 2,243 vs 1,792</div><div class="s">Dengue Drill 2019 · 17 regions</div></div>
+ <div class="stat"><div class="big">32–70%</div><div class="d">lower error than <b>"same week last year"</b>, 4 weeks ahead</div><div class="s">regions+QC · 2019, 2023–25</div></div>
+</section>
+
+<!-- ===== 4-6 ===== -->
+<section id="disc" class="abs frame bot">
+ <div><div class="lab">Where skill comes from</div><p>Most skill comes from <b>recent cases and the season</b>. Adding rain, heat and humidity changed error by about <b>−12% to +11%</b>, by year and horizon.</p></div>
+ <div><div class="lab">The cost of early</div><p><span class="o">Watch</span> catches most starts but raises false alarms: <b>46%</b> for provinces (2019), <b>42–63%</b> for regions and QC. <span class="g">Warning</span> is stricter.</p></div>
+ <div><div class="lab">Honest limits</div><p>Province data end Jan 2021 (replay only). Reported cases undercount; budget effects are ranges. It <b>supports, not replaces</b>, epidemiologists.</p></div>
+</section>
+<div class="sh sm" style="left:52px;top:2318px"><div class="no"><span>4</span>{{P_clinicBag}}</div><div class="bar">Discussion</div></div>
+
+<section id="concl" class="abs frame bot">
+ <div class="quote">Rain starts the clock.<br><em>We read what comes next.</em></div>
+ <p style="margin-top:10px;font-size:15.5px;line-height:1.38">With open data and <b>₱0</b> running cost, EpiLag-PH gave Quezon City a <b>five-week head start</b> in 2024–25 and, in a simulated 2019 season, averted <b>a quarter more cases</b> with the same budget.</p>
+</section>
+<div class="sh sm" style="left:922px;top:2318px"><div class="no"><span>5</span>{{P_tree}}</div><div class="bar">Conclusion</div></div>
+
+<section id="fut" class="abs frame bot">
+ <ul class="road">
+  <li><b>Pilot:</b> Batasan Hills, QC, 2027–28, with a pass mark</li>
+  <li>District 2, then all of Quezon City</li>
+  <li>NCR</li>
+  <li>DOH Epidemiology Bureau</li>
+ </ul>
+ <div class="qr">{{QR}}<span>Open the app</span></div>
+</section>
+<div class="sh sm" style="left:1392px;top:2318px"><div class="no"><span>6</span>{{P_house}}</div><div class="bar">Future work</div></div>
+
+
+<div class="foot"><span><span class="px">Data</span> DOH Epidemiology Bureau via HDX · UPRI-NOAH Dengue–Rainfall Dataset (Zenodo 19448695) · ERA5 via Open-Meteo · OCHA COD-AB / COD-PS</span><span>© 2026 Tolentino, J., Dacalan, P., &amp; Gaytano, K. · romeo-04.github.io/epilag</span></div>
+</body></html>
